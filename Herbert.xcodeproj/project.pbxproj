@@ -222,7 +222,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
 				"CURRENT_PROJECT_VERSION" = "1";
-				"MARKETING_VERSION" = "1.0.0";
+				"MARKETING_VERSION" = "0.1.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -260,7 +260,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
 				"CURRENT_PROJECT_VERSION" = "1";
-				"MARKETING_VERSION" = "1.0.0";
+				"MARKETING_VERSION" = "0.1.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
