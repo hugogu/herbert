@@ -1,7 +1,7 @@
 # App screenshots
 
 These PNGs are unmodified captures of the actual native SwiftUI Mac app, taken with
-XCTest on October 7, 2026. Full windows are 2480 × 1700 Retina pixels. Board-only images
+XCTest on October 7–8, 2026. Full windows are 2480 × 1700 Retina pixels. Board-only images
 come directly from the `game-board` accessibility element's screenshot, not a separate
 renderer, mockup, or image generator.
 
@@ -15,12 +15,23 @@ renderer, mockup, or image generator.
 The Flower editor shows a valid starter program; it is not presented as a solution.
 The Classic capture follows four instructions (including blocked moves), with a blue
 trail for successful movement. Modern remains the default. Progress
-starts empty in a dedicated UI-test save file. Screenshots show the current Simplified
-Chinese UI. These are Mac screenshots, not evidence of iPhone/iPad runtime validation.
+starts empty in a dedicated UI-test save file. The root PNGs show Simplified Chinese
+(October 7); `en/` contains the same nine captures with English UI (October 8), used by
+the English README. Original problem titles and author names are preserved.
+These are Mac screenshots, not evidence of iPhone/iPad runtime validation.
 
-Refresh with `scripts/capture_screenshots.sh` on an interactive Mac desktop. The test exports nine images and is
-opt-in and skipped during ordinary UI test runs. Review the images before committing;
+Refresh on an interactive Mac desktop:
+
+```sh
+scripts/capture_screenshots.sh en       # English README; also the default
+scripts/capture_screenshots.sh zh-Hans  # Chinese README
+```
+
+The test explicitly sets and checks the app language. It exports nine images per run,
+is opt-in, and is skipped during ordinary UI test runs. Review the images before committing;
 window size, system text rendering, and OS versions can change the output.
+If XCTest reports an image creation error on a secondary display, move Herbert to the
+main display through its Window menu, quit it to save the placement, then rerun the script.
 
 Original puzzle layouts retain their authors' rights and are excluded from our MIT grant.
 See [NOTICE.md](../../NOTICE.md).

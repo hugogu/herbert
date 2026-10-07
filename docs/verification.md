@@ -1,6 +1,15 @@
 # 验证记录
 
-日期：2026-10-07（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
+日期：2026-10-07–08（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
+
+## 英文 README 截图更新（10 月 8 日）
+
+- 截图流程显式设置并断言界面语言；默认英文，传入 `zh-Hans` 可生成中文截图。
+- `scripts/capture_screenshots.sh en` 通过，导出 9 张实际 App 截图，已逐张检查英文文案、棋盘与轨迹显示。
+- 英文 README 的图片及完整界面链接均指向独立的 `docs/screenshots/en/`；中文 README 保留中文截图。
+- README 的全部截图引用均已检查文件存在；`scripts/check.sh` 的 23 项 Swift、5 项 Python 检查及严格格式检查再次通过。
+- `.build/english-readme-ui.xcresult`：完整 6 项原生 Mac UI 测试全部通过，包含英文截图流程。
+- SwiftPM 语言资源目录大小写兼容修复已通过 GitHub CI（`07fbdcd`），包括测试、项目生成一致性及 Mac/iOS 编译。
 
 ## 本轮多语言与棋盘更新
 

@@ -109,7 +109,7 @@ python3 scripts/import_problems.py
 欢迎错误报告、翻译改进、无障碍改进和 iPhone/iPad 真机测试。请阅读
 [贡献指南](CONTRIBUTING.md)、[社区行为准则](CODE_OF_CONDUCT.md) 和 [安全策略](SECURITY.md)。
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
-运行 `scripts/capture_screenshots.sh` 可重新生成 README 的真实界面截图。
+运行 `scripts/capture_screenshots.sh zh-Hans` 可重新生成 README 的真实界面截图。
 
 当前尚未接入云同步，没有 App Store 或公证 Mac 安装包；iPhone/iPad 运行时验证仍待完成。
 完整记录见 [验证说明](docs/verification.md)。

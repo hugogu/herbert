@@ -14,3 +14,6 @@
 - Native element screenshots can include other windows that cover the app even when window screenshots look correct. Activate the app immediately before each capture and inspect every exported image, especially board-only captures.
 
 - Native Mac Canvas can expose its descriptive state only through accessibility `label`; use that for board assertions. Rebuild in a fresh DerivedData directory if newly added Swift package localization files are absent from the embedded resource bundle.
+- Match screenshot UI language to its README. The capture script defaults to English (`docs/screenshots/en/`); pass `zh-Hans` for the Chinese assets.
+- macOS can restore the app without an open window. Native UI tests should open New Window with Command-N if no window appears before checking the library.
+- XCTest screenshots can fail to create images on a secondary display. Move the app to the main display through the native Window menu and quit it to persist its placement before retrying.

@@ -21,9 +21,9 @@ This independent port includes **1,769 original problems**, with their IDs, auth
 and byte limits preserved. Application code is MIT licensed; the original puzzle archive
 has a separate, unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
-![Herbert running natively on macOS: Flower with the board, H editor, and execution controls](docs/screenshots/flower.png)
+![Herbert running natively on macOS: Flower with the board, H editor, and execution controls](docs/screenshots/en/flower.png)
 
-*Actual native macOS app, showing #0037 “Flower” by nai. The editor contains a starter
+*Actual native macOS app with the English UI, showing #0037 “Flower” by nai. The editor contains a starter
 program, not a solution to this puzzle. The app automatically matches English, Simplified Chinese, or Japanese to your preferred language; other languages fall back to English.*
 
 *Language and board options are available on `main` and will be included in the next release.*
@@ -35,9 +35,9 @@ rewards recognizing a pattern before writing a program. Search these IDs in the 
 
 <table>
   <tr>
-    <td align="center" width="33%"><a href="docs/screenshots/flower.png"><img src="docs/screenshots/flower-board.png" alt="Flower puzzle: four petals inside a square field of walls" width="280"></a></td>
-    <td align="center" width="33%"><a href="docs/screenshots/shuriken.png"><img src="docs/screenshots/shuriken-board.png" alt="Shuriken puzzle: a four-armed rotational pattern" width="280"></a></td>
-    <td align="center" width="33%"><a href="docs/screenshots/butterfly.png"><img src="docs/screenshots/butterfly-board.png" alt="Butterfly puzzle: mirrored wings made from targets and walls" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" alt="Flower puzzle: four petals inside a square field of walls" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/en/shuriken.png"><img src="docs/screenshots/en/shuriken-board.png" alt="Shuriken puzzle: a four-armed rotational pattern" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/en/butterfly.png"><img src="docs/screenshots/en/butterfly-board.png" alt="Butterfly puzzle: mirrored wings made from targets and walls" width="280"></a></td>
   </tr>
   <tr>
     <td align="center"><b>#0037 · Flower</b><br>nai · ≤ 20 bytes</td>
@@ -52,8 +52,8 @@ rewards recognizing a pattern before writing a program. Search these IDs in the 
 
 <table>
   <tr>
-    <td align="center"><a href="docs/screenshots/flower.png"><img src="docs/screenshots/flower-board.png" width="380" alt="Modern Flower board with mint robot and amber targets"></a></td>
-    <td align="center"><a href="docs/screenshots/flower-classic.png"><img src="docs/screenshots/flower-classic-board.png" width="380" alt="Classic Flower board with black walls, white targets, red robot and blue trail"></a></td>
+    <td align="center"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" width="380" alt="Modern Flower board with mint robot and amber targets"></a></td>
+    <td align="center"><a href="docs/screenshots/en/flower-classic.png"><img src="docs/screenshots/en/flower-classic-board.png" width="380" alt="Classic Flower board with black walls, white targets, red robot and blue trail"></a></td>
   </tr>
   <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
 </table>
@@ -65,7 +65,7 @@ Use the sliders button above the board to change style, grid dots, and trail vis
 <details>
 <summary>Explore the problem library</summary>
 
-![Herbert library with search, progress, filters, and live board thumbnails](docs/screenshots/library.png)
+![Herbert library with search, progress, filters, and live board thumbnails](docs/screenshots/en/library.png)
 
 </details>
 

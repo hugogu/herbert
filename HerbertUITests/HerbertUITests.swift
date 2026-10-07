@@ -9,6 +9,11 @@ final class HerbertUITests: XCTestCase {
             ["--ui-testing", "-AppleLanguages", "(\(language))"] + (reset ? ["--reset-progress"] : [])
         app.launch()
         app.activate()
+        #if os(macOS)
+            if !app.windows.firstMatch.waitForExistence(timeout: 3) {
+                app.typeKey("n", modifierFlags: .command)
+            }
+        #endif
         XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
         return app
     }
@@ -118,7 +123,10 @@ final class HerbertUITests: XCTestCase {
         try XCTSkipUnless(
             ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
             "Run scripts/capture_screenshots.sh to refresh the documentation images.")
-        let app = launch()
+        let language = ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
+        XCTAssertTrue(["en", "zh-Hans"].contains(language), "Unsupported screenshot language")
+        let app = launch(language: language)
+        XCTAssertTrue(app.staticTexts[language == "en" ? "Explore problems" : "探索关卡"].exists)
         capture(app, name: "library")
         for (id, name) in [(37, "flower"), (27, "shuriken"), (361, "butterfly")] {
             let search = app.textFields["problem-search"]
@@ -159,7 +167,7 @@ final class HerbertUITests: XCTestCase {
                 selectBoardStyle("modern", in: app)
                 app.buttons["close-board-options"].activateControl()
             }
-            app.buttons["返回"].activateControl()
+            app.buttons[language == "en" ? "Back" : "返回"].activateControl()
             XCTAssertTrue(search.waitForExistence(timeout: 5))
             app.buttons["clear-search"].activateControl()
         }

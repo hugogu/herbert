@@ -47,12 +47,15 @@ python3 scripts/generate_project.py
 ## Refresh screenshots
 
 ```sh
-scripts/capture_screenshots.sh
+scripts/capture_screenshots.sh en
+scripts/capture_screenshots.sh zh-Hans
 ```
 
 The opt-in XCTest captures the library, three full puzzle screens, and their actual board
-elements. It exports unmodified PNG attachments into `docs/screenshots/`. Review each
-image before committing it. See [screenshot provenance](docs/screenshots/README.md).
+elements. It explicitly sets the app language and exports nine unmodified PNG attachments
+per run: English to `docs/screenshots/en/`, Chinese to `docs/screenshots/`. English is the
+default when no argument is supplied. Keep each README's images in its own language.
+Review each image before committing it. See [screenshot provenance](docs/screenshots/README.md).
 
 ## Problem data and H compatibility
 
