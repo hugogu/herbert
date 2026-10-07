@@ -8,15 +8,17 @@ renderer, mockup, or image generator.
 | Image | Original problem | Author | Byte limit |
 | --- | --- | --- | --- |
 | `library.png` | Problem library | Various; credited in app | — |
-| `flower.png`, `flower-board.png` | 0037 · Flower | nai | 20 |
+| `flower.png`, `flower-board.png`, `flower-classic.png`, `flower-classic-board.png` | 0037 · Flower | nai | 20 |
 | `shuriken.png`, `shuriken-board.png` | 0027 · Shuriken | snuke | 39 |
 | `butterfly.png`, `butterfly-board.png` | 0361 · Butterfly | nadsuki | 27 |
 
-The Flower editor shows a starter program; it is not presented as a solution. Progress
+The Flower editor shows a valid starter program; it is not presented as a solution.
+The Classic capture follows four instructions (including blocked moves), with a blue
+trail for successful movement. Modern remains the default. Progress
 starts empty in a dedicated UI-test save file. Screenshots show the current Simplified
 Chinese UI. These are Mac screenshots, not evidence of iPhone/iPad runtime validation.
 
-Refresh with `scripts/capture_screenshots.sh` on an interactive Mac desktop. The test is
+Refresh with `scripts/capture_screenshots.sh` on an interactive Mac desktop. The test exports nine images and is
 opt-in and skipped during ordinary UI test runs. Review the images before committing;
 window size, system text rendering, and OS versions can change the output.
 

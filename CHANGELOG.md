@@ -3,6 +3,17 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## Unreleased
+
+### Added
+
+- Automatic English, Simplified Chinese, and Japanese localization, including guide,
+  accessibility descriptions, and interpreter/storage errors; English fallback.
+- Movement trails that retain every walked edge at all speeds, with bounded memory.
+- Classic board inspired by the original rules-page screenshot, alongside Modern (default).
+- Persistent board settings for style, movement trail, and per-cell grid dots.
+- Translation coverage/format checks and native UI tests for languages and preferences.
+
 ## [0.1.0] - 2026-10-07
 
 ### Added

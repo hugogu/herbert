@@ -41,3 +41,20 @@
 7. 在账号绑定和首轮上传前，展示具体数据范围；添加远端实现、模拟 HTTP 集成测试与网络中断/重试测试后再启用同步。
 
 如此升级时，棋盘、解释器和大部分 UI 无需更改；本地 v1 数据可通过一次明确迁移继续使用。
+
+## Board appearance and localization
+
+`GameSession.trail` records undirected edges only after a successful move. Turning and
+blocked moves add nothing; traps reset target states but preserve the trail. Preparing
+a new run clears it. A 25×25 board has at most 1,200 distinct edges, so recursive walks
+and Turbo batches cannot grow history without bound. Display toggles never affect execution.
+
+Board style, grid dots, and trail visibility use local UserDefaults, separate from puzzle
+progress and JSON backups. UI tests use an isolated preferences suite and progress file.
+Progress still goes through `ProgressRepository`; future cloud sync requires an authenticated
+Worker rather than client D1 credentials.
+
+One set of `Localizable.strings` resources is bundled in both the native app and HerbertCore.
+Foundation/SwiftUI match the system or per-app preferred language (en, zh-Hans, ja), with en
+as development-language fallback. `HerbertStrings` formats core diagnostics and dynamic
+labels; ordinary SwiftUI labels use native localization keys.

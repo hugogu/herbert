@@ -24,7 +24,9 @@ has a separate, unconfirmed licensing status explained in [NOTICE.md](NOTICE.md)
 ![Herbert running natively on macOS: Flower with the board, H editor, and execution controls](docs/screenshots/flower.png)
 
 *Actual native macOS app, showing #0037 “Flower” by nai. The editor contains a starter
-program, not a solution to this puzzle. The current app interface is Simplified Chinese.*
+program, not a solution to this puzzle. The app automatically matches English, Simplified Chinese, or Japanese to your preferred language; other languages fall back to English.*
+
+*Language and board options are available on `main` and will be included in the next release.*
 
 ## Patterns worth exploring
 
@@ -46,6 +48,20 @@ rewards recognizing a pattern before writing a program. Search these IDs in the 
 
 *These are board screenshots from the running app. Click a board to see its full game screen.*
 
+## Modern or Classic
+
+<table>
+  <tr>
+    <td align="center"><a href="docs/screenshots/flower.png"><img src="docs/screenshots/flower-board.png" width="380" alt="Modern Flower board with mint robot and amber targets"></a></td>
+    <td align="center"><a href="docs/screenshots/flower-classic.png"><img src="docs/screenshots/flower-classic-board.png" width="380" alt="Classic Flower board with black walls, white targets, red robot and blue trail"></a></td>
+  </tr>
+  <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
+</table>
+
+*Both are actual app captures of #0037. Classic follows the original rules-page board
+appearance. Its screenshot follows four instructions; only successful moves leave a trail.
+Use the sliders button above the board to change style, grid dots, and trail visibility.*
+
 <details>
 <summary>Explore the problem library</summary>
 
@@ -60,7 +76,14 @@ rewards recognizing a pattern before writing a program. Search these IDs in the 
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
 - **Watch your idea unfold.** Run, pause, reset, or single-step. Change speed, zoom the board,
-  and switch between the full 25 × 25 grid and its occupied region.
+  and switch between the full 25 × 25 grid and its occupied region. See the robot’s complete
+  movement trail, including at Turbo speed.
+- **Make the board yours.** Open the sliders button above the board to choose Modern
+  (default) or Classic, show/hide grid dots for counting cells, and toggle the movement
+  trail. Preferences stay on this device. Resetting or editing code clears the trail;
+  hiding it keeps recording.
+- **Play in your language.** English, Simplified Chinese, and Japanese cover navigation,
+  the guide, accessibility, and interpreter errors. Original puzzle titles/authors are preserved.
 - **Use a layout that fits.** Stacked board and editor on phones; side-by-side play on iPad
   and Mac. Native text editing, cursor-aware command buttons, and `⌘ Return` on Mac.
 - **Keep your progress.** Drafts, favorites, and shortest solutions save locally. Export JSON
@@ -155,7 +178,7 @@ to start. For feature ideas, open an issue before a large implementation.
 ### Next steps
 
 - Test and refine phone keyboard, rotation, touch, and accessibility behavior on devices.
-- Add English UI localization while preserving original puzzle titles and author credits.
+- Refine English/Japanese translations while preserving original puzzle titles and author credits.
 - Expand H compatibility fixtures and make execution easier to inspect.
 - Resolve original problem redistribution permissions before an App Store release.
 - Add optional authenticated cloud sync while keeping offline play first.

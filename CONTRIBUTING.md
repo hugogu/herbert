@@ -82,9 +82,18 @@ Do not submit third-party content without its applicable permissions and attribu
 
 ## Places to start
 
-Look for `good first issue` and `help wanted`. English localization, better accessibility
+Look for `good first issue` and `help wanted`. Translation improvements, better accessibility
 labels, reproducible compatibility cases, and real iPhone/iPad test reports are useful.
 Ask in an issue before large architectural changes or new dependencies.
 
 Please follow our [code of conduct](CODE_OF_CONDUCT.md). Report vulnerabilities through
 the private channel described in [SECURITY.md](SECURITY.md).
+
+## Translations
+
+Edit `Sources/HerbertCore/Resources/{en,zh-Hans,ja}.lproj/Localizable.strings`. The app
+and core bundle use the same files so diagnostics and UI stay consistent. Keep keys
+and printf placeholders identical across languages. Use `LocalizedStringKey` for
+SwiftUI helper labels and `HerbertStrings.text` for dynamic strings and core errors.
+Run `scripts/check.sh`; native UI tests also exercise language matching via AppleLanguages.
+Original problem titles, authors, and H programs are not translated.

@@ -11,10 +11,18 @@
 | [![Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![Shuriken 棋盘](docs/screenshots/shuriken-board.png)](docs/screenshots/shuriken.png) | [![Butterfly 棋盘](docs/screenshots/butterfly-board.png)](docs/screenshots/butterfly.png) |
 | nai · ≤ 20 bytes | snuke · ≤ 39 bytes | nadsuki · ≤ 27 bytes |
 
-截图来自运行中的 App；点击棋盘查看完整界面。当前为 **0.1.0 预览版**，界面为简体中文。
+截图来自运行中的 App；点击棋盘查看完整界面。最近发布为 **0.1.0 预览版**；当前 main 开发版界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
 
 
 用最短的 H 语言程序，带 Herbert 点亮所有目标。原生 SwiftUI 游戏，共用一个与界面无关的游戏引擎，支持 **iPhone / iPad（iOS 17+）和原生 Mac（macOS 14+）**。
+
+## 棋盘风格
+
+| 现代风格（默认） | Classic 经典风格与轨迹 |
+| --- | --- |
+| [![现代 Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![经典 Flower 棋盘与蓝色运动轨迹](docs/screenshots/flower-classic-board.png)](docs/screenshots/flower-classic.png) |
+
+两张均为实际 App 截图。经典风格参考原站规则页中的棋盘；示例执行了四条指令，只有实际移动才会留下轨迹。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增功能目前位于 main，将纳入下一版本。
 
 ## 运行
 
@@ -51,9 +59,12 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
 - 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
 - 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
-- 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中文分步玩法手册。
+- 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中英日分步玩法手册。
 - 当前快照包含 **1,769 个可玩关卡**，来源列表全部 21 页，最后原版编号 2077；排除 0000 空占位项，缺失项为零。
 - 自动保存草稿、收藏、最短解与完成日期；本地 JSON 原子写入；损坏存档暂停自动写入，避免覆盖原文件；JSON 备份导入/导出，导入前重放并校验解法，合并时保留更短的有效解。
+- 中英日自动匹配：覆盖导航、玩法手册、无障碍描述和 H 语言错误提示；保留关卡原始名称和作者。
+- 棋盘右上角设置支持现代（默认）/ Classic 经典风格、显示网格点、显示运动轨迹；偏好保存在本机，切换关卡和重启后保留。
+- 轨迹记录当前运行走过的路径，单步和极速均完整记录；隐藏后继续记录，重新显示即可查看，重置棋盘或修改代码会清空。
 - 切到后台自动暂停执行并保存；Mac 支持 `⌘ Return` 运行/暂停。
 
 ## 结构
@@ -95,7 +106,7 @@ python3 scripts/import_problems.py
 
 ## 参与贡献
 
-欢迎错误报告、英文界面本地化、无障碍改进和 iPhone/iPad 真机测试。请阅读
+欢迎错误报告、翻译改进、无障碍改进和 iPhone/iPad 真机测试。请阅读
 [贡献指南](CONTRIBUTING.md)、[社区行为准则](CODE_OF_CONDUCT.md) 和 [安全策略](SECURITY.md)。
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
 运行 `scripts/capture_screenshots.sh` 可重新生成 README 的真实界面截图。

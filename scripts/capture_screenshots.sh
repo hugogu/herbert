@@ -19,7 +19,7 @@ import sys
 source = Path(sys.argv[1])
 output = Path('docs/screenshots')
 expected = {'library', 'flower', 'flower-board', 'shuriken', 'shuriken-board',
-            'butterfly', 'butterfly-board'}
+            'butterfly', 'butterfly-board', 'flower-classic', 'flower-classic-board'}
 images = {}
 for test in json.loads((source / 'manifest.json').read_text()):
     for item in test['attachments']:

@@ -93,11 +93,7 @@ final class HerbertUITests: XCTestCase {
         XCTAssertTrue(boardToggle("show-trail", in: app).waitForExistence(timeout: 5))
         boardToggle("show-trail", in: app).activateControl()
         boardToggle("show-grid-dots", in: app).activateControl()
-        #if os(macOS)
-            app.radioButtons["Classic"].activateControl()
-        #else
-            app.buttons["Classic"].activateControl()
-        #endif
+        selectBoardStyle("classic", in: app)
         app.buttons["close-board-options"].activateControl()
         for _ in 0..<3 { app.buttons["step-program"].activateControl() }
         XCTAssertTrue(board.label.contains("Classic; grid dots off; trail off; 0"), board.debugDescription)
@@ -136,7 +132,7 @@ final class HerbertUITests: XCTestCase {
             if id == 37 {
                 let code = app.textViews["code-editor"]
                 code.activateControl()
-                code.typeText("a(4)\na(X):sa(X-1)")
+                code.typeText("a(X):sa(X-1)\na(4)")
             }
             capture(app, name: name)
             let board = app.descendants(matching: .any)["game-board"].firstMatch
@@ -146,10 +142,36 @@ final class HerbertUITests: XCTestCase {
             image.name = "readme-\(name)-board"
             image.lifetime = .keepAlways
             add(image)
+            if id == 37 {
+                for _ in 0..<4 { app.buttons["step-program"].activateControl() }
+                app.buttons["board-options"].activateControl()
+                selectBoardStyle("classic", in: app)
+                app.buttons["close-board-options"].activateControl()
+                XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+                app.textViews["code-editor"].activateControl()
+                capture(app, name: "flower-classic")
+                app.activate()
+                let classic = XCTAttachment(screenshot: board.screenshot())
+                classic.name = "readme-flower-classic-board"
+                classic.lifetime = .keepAlways
+                add(classic)
+                app.buttons["board-options"].activateControl()
+                selectBoardStyle("modern", in: app)
+                app.buttons["close-board-options"].activateControl()
+            }
             app.buttons["返回"].activateControl()
             XCTAssertTrue(search.waitForExistence(timeout: 5))
             app.buttons["clear-search"].activateControl()
         }
+    }
+
+    @MainActor
+    private func selectBoardStyle(_ style: String, in app: XCUIApplication) {
+        #if os(macOS)
+            app.radioButtons["board-style-\(style)"].activateControl()
+        #else
+            app.buttons["board-style-\(style)"].activateControl()
+        #endif
     }
 
     @MainActor

@@ -12,3 +12,5 @@
 - README screenshots must be actual app captures. `scripts/capture_screenshots.sh` runs an opt-in native UI test and exports window/board attachments; ordinary UI runs skip that capture test. Keep original problem credits and the separate content licensing notice.
 - If SSH publishing stalls, pass the HTTPS repository URL directly to `git push` while retaining the saved SSH origin. `remote.<name>.url` accepts multiple values; a command-line `-c` addition can still leave a push using the configured SSH URL. Verify the published commit SHA afterward.
 - Native element screenshots can include other windows that cover the app even when window screenshots look correct. Activate the app immediately before each capture and inspect every exported image, especially board-only captures.
+
+- Native Mac Canvas can expose its descriptive state only through accessibility `label`; use that for board assertions. Rebuild in a fresh DerivedData directory if newly added Swift package localization files are absent from the embedded resource bundle.
