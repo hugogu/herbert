@@ -1,0 +1,456 @@
+// !$*UTF8*$!
+{
+	"archiveVersion" = "1";
+	"classes" = {
+	};
+	"objectVersion" = "56";
+	"objects" = {
+		"CF21FADD42EAB8F8303A3895" = {
+			"isa" = "XCLocalSwiftPackageReference";
+			"relativePath" = ".";
+		};
+		"8D6A224FA1D1DD751157EB0C" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"productName" = "HerbertCore";
+		};
+		"E6E5511D0DFB6484AC21E80B" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "8D6A224FA1D1DD751157EB0C";
+		};
+		"4E783A9E10D2A8ABA38CD11C" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"path" = "Herbert.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"6C7CCDEB3609F1FAA874E941" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.cfbundle";
+			"path" = "HerbertUITests.xctest";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"B60FBC0336B0FFD50E1E5311" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/AppStore.swift";
+			"sourceTree" = "<group>";
+		};
+		"CDB69BF99B0E2CB0D9016395" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B60FBC0336B0FFD50E1E5311";
+		};
+		"48E56B6FEE247C8D4E0C36DA" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/GameModel.swift";
+			"sourceTree" = "<group>";
+		};
+		"E6FB0CB7E8AD7FD795C784E0" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "48E56B6FEE247C8D4E0C36DA";
+		};
+		"7B435AAB6DA84537C680086A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/HerbertApp.swift";
+			"sourceTree" = "<group>";
+		};
+		"491AB81029EED24C2D8BC51E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "7B435AAB6DA84537C680086A";
+		};
+		"A5157DA272F54F07A4E4EA57" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/BoardView.swift";
+			"sourceTree" = "<group>";
+		};
+		"996BE9DB8BB0A4E6022A8FAD" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "A5157DA272F54F07A4E4EA57";
+		};
+		"FA9C1363D4CB54B1FB499CE0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/CodeEditor.swift";
+			"sourceTree" = "<group>";
+		};
+		"F235608970768B7FD15F4A62" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "FA9C1363D4CB54B1FB499CE0";
+		};
+		"204305BF28A15A903D4938C3" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/DesignSystem.swift";
+			"sourceTree" = "<group>";
+		};
+		"A0918985D1378F9EA59A1D99" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "204305BF28A15A903D4938C3";
+		};
+		"76880A3FAB8B762A5C250808" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/GameView.swift";
+			"sourceTree" = "<group>";
+		};
+		"690560337C2F751DBCA4E2EE" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "76880A3FAB8B762A5C250808";
+		};
+		"2D59DEE7EAC95253177ED8F4" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/GuideView.swift";
+			"sourceTree" = "<group>";
+		};
+		"517E258E7B787329FBD901E5" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "2D59DEE7EAC95253177ED8F4";
+		};
+		"0454799D33E685C1A5BB20D9" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/LibraryView.swift";
+			"sourceTree" = "<group>";
+		};
+		"A1EC6AA04B1CFEE901B9D271" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0454799D33E685C1A5BB20D9";
+		};
+		"6EE6BC43101FAA2386628011" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/ProgressViewScreen.swift";
+			"sourceTree" = "<group>";
+		};
+		"6A5FC34FD706FE234F4DAF7D" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "6EE6BC43101FAA2386628011";
+		};
+		"9B3B02D3B3E31C5D6F298C80" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Views/RootView.swift";
+			"sourceTree" = "<group>";
+		};
+		"21D2864354D8BF2B3BBE05B9" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "9B3B02D3B3E31C5D6F298C80";
+		};
+		"E0E4E6C01837A0B8DEECAE7E" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "folder.assetcatalog";
+			"path" = "Herbert/Assets.xcassets";
+			"sourceTree" = "<group>";
+		};
+		"31BF36017B0AFDB809786FD8" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "E0E4E6C01837A0B8DEECAE7E";
+		};
+		"A06544B86FE39DD4A42DF791" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.xml";
+			"path" = "Herbert/PrivacyInfo.xcprivacy";
+			"sourceTree" = "<group>";
+		};
+		"5967618EEE597D973EA8F8CD" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "A06544B86FE39DD4A42DF791";
+		};
+		"37BE3F777F39296409EA08AE" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "HerbertUITests/HerbertUITests.swift";
+			"sourceTree" = "<group>";
+		};
+		"9628EFAF44BC437921CED2C2" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "37BE3F777F39296409EA08AE";
+		};
+		"FBDC4F23F93125BBEEAE800C" = {
+			"isa" = "PBXGroup";
+			"children" = ("4E783A9E10D2A8ABA38CD11C", "6C7CCDEB3609F1FAA874E941");
+			"name" = "Products";
+			"sourceTree" = "<group>";
+		};
+		"3C3B0F03DC089F93B8457928" = {
+			"isa" = "PBXGroup";
+			"children" = ("B60FBC0336B0FFD50E1E5311", "48E56B6FEE247C8D4E0C36DA", "7B435AAB6DA84537C680086A", "A5157DA272F54F07A4E4EA57", "FA9C1363D4CB54B1FB499CE0", "204305BF28A15A903D4938C3", "76880A3FAB8B762A5C250808", "2D59DEE7EAC95253177ED8F4", "0454799D33E685C1A5BB20D9", "6EE6BC43101FAA2386628011", "9B3B02D3B3E31C5D6F298C80", "E0E4E6C01837A0B8DEECAE7E", "A06544B86FE39DD4A42DF791");
+			"name" = "Herbert";
+			"sourceTree" = "<group>";
+		};
+		"E717C295FF9827DFF805D88B" = {
+			"isa" = "PBXGroup";
+			"children" = ("37BE3F777F39296409EA08AE");
+			"name" = "HerbertUITests";
+			"sourceTree" = "<group>";
+		};
+		"42944EBC669F21BC22392EB5" = {
+			"isa" = "PBXGroup";
+			"children" = ("3C3B0F03DC089F93B8457928", "E717C295FF9827DFF805D88B", "FBDC4F23F93125BBEEAE800C");
+			"sourceTree" = "<group>";
+		};
+		"EEE53D504AFCC8D4B0AA715A" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "98F54143AB4E86B28C3AFEE0";
+			"proxyType" = "1";
+			"remoteGlobalIDString" = "7D1043473D55BFA90E8530D3";
+			"remoteInfo" = "Herbert";
+		};
+		"73996D0FF31A2C017A5EAC0F" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "7D1043473D55BFA90E8530D3";
+			"targetProxy" = "EEE53D504AFCC8D4B0AA715A";
+		};
+		"E9B2E96ABC5F6856F2BE79CF" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
+				"PRODUCT_NAME" = "Herbert";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"MARKETING_VERSION" = "1.0.0";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = "YES";
+				"INFOPLIST_KEY_UILaunchScreen_Generation" = "YES";
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = "YES";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"ENABLE_APP_SANDBOX" = "YES";
+				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+			};
+			"name" = "Debug";
+		};
+		"5A8C91857F674E16E2724F47" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
+				"PRODUCT_NAME" = "Herbert";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"MARKETING_VERSION" = "1.0.0";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = "YES";
+				"INFOPLIST_KEY_UILaunchScreen_Generation" = "YES";
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = "YES";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"ENABLE_APP_SANDBOX" = "YES";
+				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+		};
+		"F37922C48DA5978D02C9E50E" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("E9B2E96ABC5F6856F2BE79CF", "5A8C91857F674E16E2724F47");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"949D493B91791558E87BC5D7" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"BD92572B49AC16A86614498D" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("E6E5511D0DFB6484AC21E80B");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"8ECC8B5D05B79F879ACDF1A2" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("31BF36017B0AFDB809786FD8", "5967618EEE597D973EA8F8CD");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"7D1043473D55BFA90E8530D3" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "F37922C48DA5978D02C9E50E";
+			"buildPhases" = ("949D493B91791558E87BC5D7", "BD92572B49AC16A86614498D", "8ECC8B5D05B79F879ACDF1A2");
+			"buildRules" = ();
+			"dependencies" = ();
+			"name" = "Herbert";
+			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C");
+			"productName" = "Herbert";
+			"productReference" = "4E783A9E10D2A8ABA38CD11C";
+			"productType" = "com.apple.product-type.application";
+		};
+		"0F3D67935A4F199E058A017A" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertUITests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"TEST_TARGET_NAME" = "Herbert";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@loader_path/../Frameworks", "@executable_path/../Frameworks");
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+			};
+			"name" = "Debug";
+		};
+		"20B70E15FDC36C625E57F658" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertUITests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"TEST_TARGET_NAME" = "Herbert";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@loader_path/../Frameworks", "@executable_path/../Frameworks");
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+		};
+		"61AF5D6BEA2D148C6F2833BF" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("0F3D67935A4F199E058A017A", "20B70E15FDC36C625E57F658");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"77A03FEE20FE96AD9384861E" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("9628EFAF44BC437921CED2C2");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"E05DB79C430AA1B0BA487AFC" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ();
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"21A4721043EF7FE8B14BE5D9" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "61AF5D6BEA2D148C6F2833BF";
+			"buildPhases" = ("77A03FEE20FE96AD9384861E", "E05DB79C430AA1B0BA487AFC");
+			"buildRules" = ();
+			"dependencies" = ("73996D0FF31A2C017A5EAC0F");
+			"name" = "HerbertUITests";
+			"productName" = "HerbertUITests";
+			"productReference" = "6C7CCDEB3609F1FAA874E941";
+			"productType" = "com.apple.product-type.bundle.ui-testing";
+		};
+		"89E1FD6268CC0F221A2BE178" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_WARN_DOCUMENTATION_COMMENTS" = "YES";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
+			};
+			"name" = "Debug";
+		};
+		"E6DE6C99132752C914FEF632" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"CLANG_WARN_DOCUMENTATION_COMMENTS" = "YES";
+				"CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER" = "YES";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+		};
+		"862894B703A6DEDF96A9DD6C" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("89E1FD6268CC0F221A2BE178", "E6DE6C99132752C914FEF632");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"98F54143AB4E86B28C3AFEE0" = {
+			"isa" = "PBXProject";
+			"attributes" = {
+				"BuildIndependentTargetsInParallel" = "YES";
+				"LastUpgradeCheck" = "2700";
+				"TargetAttributes" = {
+					"7D1043473D55BFA90E8530D3" = {
+						"CreatedOnToolsVersion" = "27.0";
+					};
+					"21A4721043EF7FE8B14BE5D9" = {
+						"CreatedOnToolsVersion" = "27.0";
+						"TestTargetID" = "7D1043473D55BFA90E8530D3";
+					};
+				};
+			};
+			"buildConfigurationList" = "862894B703A6DEDF96A9DD6C";
+			"compatibilityVersion" = "Xcode 14.0";
+			"developmentRegion" = "zh-Hans";
+			"hasScannedForEncodings" = "0";
+			"knownRegions" = ("zh-Hans", "en", "Base");
+			"mainGroup" = "42944EBC669F21BC22392EB5";
+			"productRefGroup" = "FBDC4F23F93125BBEEAE800C";
+			"projectDirPath" = "";
+			"projectRoot" = "";
+			"packageReferences" = ("CF21FADD42EAB8F8303A3895");
+			"targets" = ("7D1043473D55BFA90E8530D3", "21A4721043EF7FE8B14BE5D9");
+		};
+	};
+	"rootObject" = "98F54143AB4E86B28C3AFEE0";
+}
