@@ -10,3 +10,4 @@
 - Under Swift 6 isolation checking, value-type `Animatable.animatableData` must be `nonisolated` when the drawing also conforms to SwiftUI `View`.
 - AppKit drawing needs an RGBA bitmap context; export icons through an opaque Core Graphics context to produce RGB PNGs without alpha. Fail generation explicitly if the drawing context cannot be created.
 - README screenshots must be actual app captures. `scripts/capture_screenshots.sh` runs an opt-in native UI test and exports window/board attachments; ordinary UI runs skip that capture test. Keep original problem credits and the separate content licensing notice.
+- If SSH publishing stalls, pass the HTTPS repository URL directly to `git push` while retaining the saved SSH origin. `remote.<name>.url` accepts multiple values; a command-line `-c` addition can still leave a push using the configured SSH URL. Verify the published commit SHA afterward.
