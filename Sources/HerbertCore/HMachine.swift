@@ -47,7 +47,7 @@ public struct HMachine {
                 return nil
             }
             expansionCount += 1
-            guard expansionCount <= expansionLimit else { throw HError("展开次数达到 100 万次，请调整递归。") }
+            guard expansionCount <= expansionLimit else { throw HError(HerbertStrings.text("展开次数达到 100 万次，请调整递归。")) }
             let frameIndex = frames.count - 1
             let frame = frames[frameIndex]
             let instruction = frame.instructions[frame.index]
@@ -56,11 +56,13 @@ public struct HMachine {
             case .command(let command): return command
             case .parameter(let name):
                 guard case .code(let code, _) = frame.environment[name] else {
-                    throw HError("数值参数 \(name) 不能直接作为指令执行。")
+                    throw HError(HerbertStrings.text("数值参数 %@ 不能直接作为指令执行。", String(name)))
                 }
                 try push(code, environment: [:])
             case .call(let name, var arguments):
-                guard let procedure = program.procedures[name] else { throw HError("过程 \(name) 未定义。") }
+                guard let procedure = program.procedures[name] else {
+                    throw HError(HerbertStrings.text("过程 %@ 未定义。", String(name)))
+                }
                 if procedure.parameters.isEmpty { arguments = [] }
                 let values = try arguments.map { try resolve($0, environment: frame.environment) }
                 if values.contains(where: {
@@ -72,7 +74,7 @@ public struct HMachine {
                 let environment = Dictionary(uniqueKeysWithValues: zip(procedure.parameters, values))
                 try push(procedure.body, environment: environment)
             }
-            guard frames.count <= 4096 else { throw HError("递归栈过深，请使用尾递归或缩短程序。") }
+            guard frames.count <= 4096 else { throw HError(HerbertStrings.text("递归栈过深，请使用尾递归或缩短程序。")) }
         }
         return nil
     }
@@ -89,7 +91,9 @@ public struct HMachine {
         discardExhaustedFrames()
         if !instructions.isEmpty {
             let frame = ExecutionFrame(instructions: instructions, environment: environment)
-            guard pendingMemory + frame.footprint <= memoryLimit else { throw HError("待执行程序超过内存展开上限。") }
+            guard pendingMemory + frame.footprint <= memoryLimit else {
+                throw HError(HerbertStrings.text("待执行程序超过内存展开上限。"))
+            }
             pendingMemory += frame.footprint
             frames.append(frame)
         }
@@ -104,14 +108,16 @@ public struct HMachine {
                 switch term.value {
                 case .constant(let value): number = value
                 case .parameter(let name):
-                    guard case .number(let value) = environment[name] else { throw HError("参数 \(name) 不是数值。") }
+                    guard case .number(let value) = environment[name] else {
+                        throw HError(HerbertStrings.text("参数 %@ 不是数值。", String(name)))
+                    }
                     number = value
                 }
                 let (result, overflow) = sum.addingReportingOverflow(term.sign * number)
-                guard !overflow else { throw HError("数值的绝对值不能超过 255。") }
+                guard !overflow else { throw HError(HerbertStrings.text("数值的绝对值不能超过 255。")) }
                 sum = result
             }
-            guard (-255...255).contains(sum) else { throw HError("数值的绝对值不能超过 255。") }
+            guard (-255...255).contains(sum) else { throw HError(HerbertStrings.text("数值的绝对值不能超过 255。")) }
             return .number(sum)
         case .code(let instructions):
             if instructions.count == 1, case .parameter(let name) = instructions[0], let value = environment[name] {
@@ -135,10 +141,10 @@ public struct HMachine {
                 result.append(instruction)
             case .parameter(let name):
                 guard case .code(let code, let weight) = environment[name] else {
-                    throw HError("数值参数 \(name) 不能拼接为命令。")
+                    throw HError(HerbertStrings.text("数值参数 %@ 不能拼接为命令。", String(name)))
                 }
                 size += weight
-                guard size <= memoryLimit else { throw HError("命令展开超过 100 万 byte。") }
+                guard size <= memoryLimit else { throw HError(HerbertStrings.text("命令展开超过 100 万 byte。")) }
                 result.append(contentsOf: code)
             case .call(let name, let arguments):
                 size += 1
@@ -149,7 +155,9 @@ public struct HMachine {
                         return .number(
                             try terms.map { term in
                                 if case .parameter(let p) = term.value {
-                                    guard case .number(let n) = environment[p] else { throw HError("参数 \(p) 不是数值。") }
+                                    guard case .number(let n) = environment[p] else {
+                                        throw HError(HerbertStrings.text("参数 %@ 不是数值。", String(p)))
+                                    }
                                     return NumericTerm(sign: term.sign, value: .constant(n))
                                 }
                                 return term
@@ -164,7 +172,7 @@ public struct HMachine {
                 }
                 result.append(.call(name, substituted))
             }
-            guard size <= memoryLimit else { throw HError("命令展开超过 100 万 byte。") }
+            guard size <= memoryLimit else { throw HError(HerbertStrings.text("命令展开超过 100 万 byte。")) }
         }
         return result
     }
@@ -172,7 +180,7 @@ public struct HMachine {
     private func validateNesting(_ instructions: [HInstruction]) throws {
         var pending: [([HInstruction], Int)] = [(instructions, 0)]
         while let (sequence, depth) = pending.popLast() {
-            guard depth <= 128 else { throw HError("展开后的命令参数嵌套超过 128 层。") }
+            guard depth <= 128 else { throw HError(HerbertStrings.text("展开后的命令参数嵌套超过 128 层。")) }
             for instruction in sequence {
                 if case .call(_, let arguments) = instruction {
                     for argument in arguments {

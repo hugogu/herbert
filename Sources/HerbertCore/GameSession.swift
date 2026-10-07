@@ -32,7 +32,7 @@ public struct GameSession {
     public mutating func prepare(source: String) throws {
         let program = try HProgram.compile(source)
         guard program.byteCount <= problem.byteLimit else {
-            throw HError("代码用了 \(program.byteCount) byte，本关最多 \(problem.byteLimit) byte。")
+            throw HError(HerbertStrings.text("代码用了 %ld byte，本关最多 %ld byte。", program.byteCount, problem.byteLimit))
         }
         position = board.start
         heading = .north
@@ -59,7 +59,7 @@ public struct GameSession {
                 }
                 return .waiting
             }
-            guard steps < stepLimit else { throw HError("已达到 100 万步上限。") }
+            guard steps < stepLimit else { throw HError(HerbertStrings.text("已达到 100 万步上限。")) }
             steps += 1
             lastCommand = command
             var event = StepEvent.turned

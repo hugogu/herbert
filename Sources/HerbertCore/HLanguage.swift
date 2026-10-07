@@ -10,7 +10,7 @@ public struct HError: Error, Equatable, LocalizedError, Sendable {
     }
 
     public var errorDescription: String? {
-        if let line { return "第 \(line) 行：\(message)" }
+        if let line { return HerbertStrings.text("第 %ld 行：%@", line, message) }
         return message
     }
 }
@@ -67,7 +67,7 @@ public struct HProgram: Sendable {
     }
 
     public static func compile(_ source: String) throws -> HProgram {
-        guard source.utf8.count <= 16_384 else { throw HError("代码过长，请缩短至 16 KB 以内。") }
+        guard source.utf8.count <= 16_384 else { throw HError(HerbertStrings.text("代码过长，请缩短至 16 KB 以内。")) }
         let lines = source.replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n").components(separatedBy: "\n")
         var procedures: [Character: HProcedure] = [:]
@@ -76,38 +76,40 @@ public struct HProgram: Sendable {
             let line = offset + 1
             let text = raw.filter { !$0.isWhitespace }
             if text.isEmpty { continue }
-            guard main == nil else { throw HError("执行行必须是最后一个非空行。", line: line) }
+            guard main == nil else { throw HError(HerbertStrings.text("执行行必须是最后一个非空行。"), line: line) }
             if let colon = text.firstIndex(of: ":") {
                 let signature = Array(text[..<colon])
                 guard let name = signature.first, name.isASCIILower, HCommand(rawValue: name) == nil else {
-                    throw HError("过程名须是 s、l、r 以外的单个小写字母。", line: line)
+                    throw HError(HerbertStrings.text("过程名须是 s、l、r 以外的单个小写字母。"), line: line)
                 }
-                guard procedures[name] == nil else { throw HError("过程 \(name) 重复定义。", line: line) }
+                guard procedures[name] == nil else {
+                    throw HError(HerbertStrings.text("过程 %@ 重复定义。", String(name)), line: line)
+                }
                 var parameters: [Character] = []
                 if signature.count > 1 {
                     guard signature.count >= 4, signature[1] == "(", signature.last == ")" else {
-                        throw HError("参数声明应写成 a(X,Y):。", line: line)
+                        throw HError(HerbertStrings.text("参数声明应写成 a(X,Y):。"), line: line)
                     }
                     let pieces = String(signature[2..<(signature.count - 1)]).split(
                         separator: ",", omittingEmptySubsequences: false)
                     for piece in pieces {
                         guard piece.count == 1, let p = piece.first, p.isASCIIUpper, !parameters.contains(p) else {
-                            throw HError("参数须是互不重复的单个大写字母。", line: line)
+                            throw HError(HerbertStrings.text("参数须是互不重复的单个大写字母。"), line: line)
                         }
                         parameters.append(p)
                     }
                 }
                 var parser = HParser(text: String(text[text.index(after: colon)...]), line: line)
                 let body = try parser.sequence()
-                guard parser.atEnd else { throw HError("过程体含有多余符号。", line: line) }
+                guard parser.atEnd else { throw HError(HerbertStrings.text("过程体含有多余符号。"), line: line) }
                 procedures[name] = HProcedure(parameters: parameters, body: body)
             } else {
                 var parser = HParser(text: text, line: line)
                 main = try parser.sequence()
-                guard parser.atEnd else { throw HError("执行行含有多余符号。", line: line) }
+                guard parser.atEnd else { throw HError(HerbertStrings.text("执行行含有多余符号。"), line: line) }
             }
         }
-        guard let main, !main.isEmpty else { throw HError("在最后一行输入要执行的指令，例如 ssss。") }
+        guard let main, !main.isEmpty else { throw HError(HerbertStrings.text("在最后一行输入要执行的指令，例如 ssss。")) }
         let program = HProgram(procedures: procedures, main: main, byteCount: countBytes(source))
         try program.validate(main, parameters: [])
         for procedure in procedures.values {
@@ -121,14 +123,18 @@ public struct HProgram: Sendable {
             switch instruction {
             case .command: break
             case .parameter(let name):
-                guard parameters.contains(name) else { throw HError("参数 \(name) 未声明。") }
+                guard parameters.contains(name) else { throw HError(HerbertStrings.text("参数 %@ 未声明。", String(name))) }
             case .call(let name, let arguments):
-                guard let procedure = procedures[name] else { throw HError("过程 \(name) 未定义。") }
+                guard let procedure = procedures[name] else {
+                    throw HError(HerbertStrings.text("过程 %@ 未定义。", String(name)))
+                }
                 let arity =
                     arguments.count == 1 && arguments.isSingleEmptyCode && procedure.parameters.isEmpty
                     ? 0 : arguments.count
                 guard arity == procedure.parameters.count else {
-                    throw HError("过程 \(name) 需要 \(procedure.parameters.count) 个参数，收到了 \(arity) 个。")
+                    throw HError(
+                        HerbertStrings.text(
+                            "过程 %@ 需要 %ld 个参数，收到了 %ld 个。", String(name), procedure.parameters.count, arity))
                 }
                 for argument in arguments {
                     switch argument {
@@ -136,7 +142,7 @@ public struct HProgram: Sendable {
                     case .number(let terms):
                         for term in terms {
                             if case .parameter(let p) = term.value, !parameters.contains(p) {
-                                throw HError("参数 \(p) 未声明。")
+                                throw HError(HerbertStrings.text("参数 %@ 未声明。", String(p)))
                             }
                         }
                     }
@@ -171,7 +177,7 @@ private struct HParser {
                 var arguments: [HArgument] = []
                 if current == "(" {
                     depth += 1
-                    guard depth <= 64 else { throw HError("参数嵌套过深。", line: line) }
+                    guard depth <= 64 else { throw HError(HerbertStrings.text("参数嵌套过深。"), line: line) }
                     index += 1
                     while true {
                         arguments.append(try argument())
@@ -179,7 +185,7 @@ private struct HParser {
                             index += 1
                             continue
                         }
-                        guard current == ")" else { throw HError("缺少右括号 )。", line: line) }
+                        guard current == ")" else { throw HError(HerbertStrings.text("缺少右括号 )。"), line: line) }
                         index += 1
                         depth -= 1
                         break
@@ -187,7 +193,7 @@ private struct HParser {
                 }
                 result.append(.call(character, arguments))
             } else {
-                throw HError("无法识别 \(character)，使用 s、l、r 或过程调用。", line: line)
+                throw HError(HerbertStrings.text("无法识别 %@，使用 s、l、r 或过程调用。", String(character)), line: line)
             }
         }
         return result
@@ -212,20 +218,20 @@ private struct HParser {
             index += 1
         }
         while true {
-            guard let character = current else { throw HError("数值表达式不完整。", line: line) }
+            guard let character = current else { throw HError(HerbertStrings.text("数值表达式不完整。"), line: line) }
             let value: NumericTerm.Value
             if character.isASCIIDigit {
                 let numberStart = index
                 while let c = current, c.isASCIIDigit { index += 1 }
                 guard let number = Int(String(characters[numberStart..<index])), number <= 255 else {
-                    throw HError("数值的绝对值不能超过 255。", line: line)
+                    throw HError(HerbertStrings.text("数值的绝对值不能超过 255。"), line: line)
                 }
                 value = .constant(number)
             } else if character.isASCIIUpper {
                 index += 1
                 value = .parameter(character)
             } else {
-                throw HError("数值参数只支持整数、参数以及 + 和 -。", line: line)
+                throw HError(HerbertStrings.text("数值参数只支持整数、参数以及 + 和 -。"), line: line)
             }
             terms.append(NumericTerm(sign: sign, value: value))
             if current == "+" || current == "-" {
@@ -236,7 +242,7 @@ private struct HParser {
             break
         }
         guard index > start, current == "," || current == ")" else {
-            throw HError("数值与命令不能混写在同一个参数中。", line: line)
+            throw HError(HerbertStrings.text("数值与命令不能混写在同一个参数中。"), line: line)
         }
         return .number(terms)
     }

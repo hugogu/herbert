@@ -54,8 +54,8 @@ public enum ProgressError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .unsupportedVersion(let version): "无法读取版本 \(version) 的存档，请更新应用。"
-        case .invalidBackup: "存档格式或解题记录无效，原有数据未改变。"
+        case .unsupportedVersion(let version): HerbertStrings.text("无法读取版本 %ld 的存档，请更新应用。", version)
+        case .invalidBackup: HerbertStrings.text("存档格式或解题记录无效，原有数据未改变。")
         }
     }
 }

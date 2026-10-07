@@ -61,8 +61,8 @@ public enum CatalogError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .invalidBoard(let id): "关卡 \(id) 的棋盘数据无效。"
-        case .missingResource: "找不到内置关卡资源。"
+        case .invalidBoard(let id): HerbertStrings.text("关卡 %ld 的棋盘数据无效。", id)
+        case .missingResource: HerbertStrings.text("找不到内置关卡资源。")
         }
     }
 }
