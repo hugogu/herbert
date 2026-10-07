@@ -1,0 +1,102 @@
+import XCTest
+
+@testable import HerbertCore
+
+final class GameAndPersistenceTests: XCTestCase {
+    private func problem(cells: [GridPoint: Character], limit: Int = 100) -> Problem {
+        var rows = Array(repeating: Array(repeating: Character("."), count: 25), count: 25)
+        for (point, cell) in cells { rows[point.y][point.x] = cell }
+        return Problem(id: 99, title: "Fixture", author: "Tests", byteLimit: limit, rows: rows.map { String($0) })
+    }
+
+    func testEveryImportedBoardIsValidAndIdentifiable() throws {
+        let catalog = try ProblemCatalog.bundled()
+        XCTAssertFalse(catalog.isEmpty)
+        XCTAssertEqual(Set(catalog.map(\.id)).count, catalog.count)
+        for item in catalog {
+            let board = try Board(problem: item)
+            XCTAssertEqual(board.width, 25)
+            XCTAssertFalse(board.targets.isEmpty)
+            XCTAssertTrue(item.sourceURL.hasSuffix("id=\(item.id)"))
+            XCTAssertEqual(item.sourceSHA256.count, 64)
+            if let best = item.originalBest { XCTAssertLessThanOrEqual(best, item.byteLimit) }
+        }
+    }
+
+    func testOriginalProblemOneSolvesAtFourBytesAndPersists() throws {
+        let original = try XCTUnwrap(ProblemCatalog.bundled().first { $0.id == 1 })
+        var session = try GameSession(problem: original)
+        try session.prepare(source: "ssss")
+        for _ in 0..<4 { session.step() }
+        XCTAssertEqual(session.status, .completed)
+        XCTAssertEqual(session.programBytes, 4)
+        XCTAssertEqual(session.steps, 4)
+        let record = ProblemProgress(
+            problemID: 1, draft: "ssss", bestSolution: "ssss", bestBytes: 4,
+            completedAt: Date(timeIntervalSince1970: 100), updatedAt: Date(timeIntervalSince1970: 100))
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("progress.json")
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let repository = LocalProgressRepository(fileURL: url)
+        try repository.save(ProgressSnapshot(records: [record], lastProblemID: 1))
+        XCTAssertEqual(try repository.load(), ProgressSnapshot(records: [record], lastProblemID: 1))
+    }
+
+    func testTrapResetsAllPreviouslyPressedTargets() throws {
+        let p = problem(cells: [
+            GridPoint(x: 1, y: 3): "u", GridPoint(x: 1, y: 2): "o",
+            GridPoint(x: 1, y: 1): "x", GridPoint(x: 2, y: 1): "o",
+        ])
+        var session = try GameSession(problem: p)
+        try session.prepare(source: "ssrs")
+        XCTAssertEqual(session.step(), .target)
+        XCTAssertEqual(session.visitedTargets.count, 1)
+        XCTAssertEqual(session.step(), .trap)
+        XCTAssertEqual(session.visitedTargets.count, 0)
+        session.step()
+        session.step()
+        XCTAssertNotEqual(session.status, .completed)
+    }
+
+    func testWallAndBoundaryBlockMovementWithoutStoppingProgram() throws {
+        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "*", GridPoint(x: 0, y: 1): "o"])
+        var session = try GameSession(problem: p)
+        try session.prepare(source: "srsrs")
+        XCTAssertEqual(session.step(), .blocked)
+        session.step()
+        XCTAssertEqual(session.step(), .blocked)
+        session.step()
+        XCTAssertEqual(session.step(), .completed)
+    }
+
+    func testLengthAndExecutionLimits() throws {
+        let original = try XCTUnwrap(ProblemCatalog.bundled().first { $0.id == 1 })
+        var session = try GameSession(problem: original, stepLimit: 2)
+        XCTAssertThrowsError(try session.prepare(source: "sssss"))
+        try session.prepare(source: "ssss")
+        session.step()
+        session.step()
+        session.step()
+        guard case .failed = session.status else { return XCTFail("Step limit must stop execution") }
+    }
+
+    func testBackupValidationAndCorruptFileRemainUnchanged() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            .appendingPathComponent("progress.json")
+        defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        let repository = LocalProgressRepository(fileURL: url)
+        XCTAssertEqual(try repository.load().records, [])
+        try repository.save(ProgressSnapshot(records: [ProblemProgress(problemID: 1, draft: "s")]))
+        var future = ProgressSnapshot()
+        future.schemaVersion = 2
+        XCTAssertThrowsError(try repository.save(future))
+        XCTAssertEqual(try repository.load().records.first?.draft, "s")
+        XCTAssertThrowsError(try LocalProgressRepository.decode(Data("{bad json}".utf8)))
+        let duplicate = ProgressSnapshot(records: [ProblemProgress(problemID: 1), ProblemProgress(problemID: 1)])
+        XCTAssertThrowsError(try repository.save(duplicate))
+        let fake = ProgressSnapshot(records: [
+            ProblemProgress(problemID: 1, bestSolution: "ss", bestBytes: 1, completedAt: .now)
+        ])
+        XCTAssertThrowsError(try repository.save(fake))
+    }
+}

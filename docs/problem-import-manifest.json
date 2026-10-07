@@ -1,0 +1,20 @@
+{
+  "source": "http://herbert.tealang.info/problems.php",
+  "fetchedAt": "2026-10-07T13:06:41.851032+00:00",
+  "listingCount": 1769,
+  "importedCount": 1769,
+  "pages": 21,
+  "excludedPlaceholderIDs": [
+    0
+  ],
+  "missingIDs": [],
+  "errors": [],
+  "symbols": [
+    "*",
+    ".",
+    "o",
+    "u",
+    "x"
+  ],
+  "license": "Original website does not specify a redistribution license. Original authors retain their rights."
+}
