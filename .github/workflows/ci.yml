@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Tests and native builds
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Lint and unit/integration tests
+        run: scripts/check.sh
+      - name: Verify generated Xcode project
+        run: |
+          python3 scripts/generate_project.py
+          git diff --exit-code -- Herbert.xcodeproj
+      - name: Build native Mac
+        run: >-
+          xcodebuild -project Herbert.xcodeproj -scheme Herbert -configuration Release
+          -destination 'generic/platform=macOS' -derivedDataPath .build/ci-mac
+          CODE_SIGNING_ALLOWED=NO build
+      - name: Build iPhone and iPad
+        run: >-
+          xcodebuild -project Herbert.xcodeproj -scheme Herbert
+          -destination 'generic/platform=iOS' -derivedDataPath .build/ci-ios
+          CODE_SIGNING_ALLOWED=NO build
