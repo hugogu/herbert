@@ -9,12 +9,25 @@ public enum StepEvent: Equatable, Sendable {
     case moved, turned, blocked, target, trap, completed, waiting, ended
 }
 
+/// Undirected edges keep repeated walks visible without growing with execution time.
+public struct TrailSegment: Hashable, Sendable {
+    public let from: GridPoint
+    public let to: GridPoint
+
+    init(from: GridPoint, to: GridPoint) {
+        let forward = from.y < to.y || (from.y == to.y && from.x < to.x)
+        self.from = forward ? from : to
+        self.to = forward ? to : from
+    }
+}
+
 public struct GameSession {
     public let problem: Problem
     public let board: Board
     public private(set) var position: GridPoint
     public private(set) var heading: Heading = .north
     public private(set) var visitedTargets: Set<GridPoint> = []
+    public private(set) var trail: Set<TrailSegment> = []
     public private(set) var steps = 0
     public private(set) var status: GameStatus = .ready
     public private(set) var lastCommand: HCommand?
@@ -37,6 +50,7 @@ public struct GameSession {
         position = board.start
         heading = .north
         visitedTargets = []
+        trail = []
         steps = 0
         lastCommand = nil
         programBytes = program.byteCount
@@ -70,6 +84,7 @@ public struct GameSession {
                 let vector = heading.vector
                 let next = GridPoint(x: position.x + vector.x, y: position.y + vector.y)
                 if board.canEnter(next) {
+                    trail.insert(TrailSegment(from: position, to: next))
                     position = next
                     event = .moved
                     if board.traps.contains(next) {

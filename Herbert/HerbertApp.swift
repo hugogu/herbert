@@ -9,6 +9,7 @@ struct HerbertApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(store)
+                .defaultAppStorage(store.preferences)
                 .tint(Palette.mint)
                 .preferredColorScheme(.light)
                 .onChange(of: scenePhase) { _, phase in

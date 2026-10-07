@@ -79,6 +79,45 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testBoardSettingsPersistAndTrailCanBeHiddenWithoutLosingMoves() {
+        var app = launch(language: "en")
+        openFirst(app)
+        let code = app.textViews["code-editor"]
+        code.activateControl()
+        code.typeText("ssss")
+        app.buttons["step-program"].activateControl()
+        var board = app.descendants(matching: .any)["game-board"].firstMatch
+        XCTAssertTrue(board.label.contains("Modern; grid dots on; trail on; 1"), board.debugDescription)
+        capture(app, name: "modern-trail")
+        app.buttons["board-options"].activateControl()
+        XCTAssertTrue(boardToggle("show-trail", in: app).waitForExistence(timeout: 5))
+        boardToggle("show-trail", in: app).activateControl()
+        boardToggle("show-grid-dots", in: app).activateControl()
+        #if os(macOS)
+            app.radioButtons["Classic"].activateControl()
+        #else
+            app.buttons["Classic"].activateControl()
+        #endif
+        app.buttons["close-board-options"].activateControl()
+        for _ in 0..<3 { app.buttons["step-program"].activateControl() }
+        XCTAssertTrue(board.label.contains("Classic; grid dots off; trail off; 0"), board.debugDescription)
+        app.buttons["board-options"].activateControl()
+        boardToggle("show-trail", in: app).activateControl()
+        capture(app, name: "board-settings")
+        app.buttons["close-board-options"].activateControl()
+        XCTAssertTrue(board.label.contains("Classic; grid dots off; trail on; 4"), board.debugDescription)
+        capture(app, name: "classic-trail")
+        app.buttons["reset-program"].activateControl()
+        XCTAssertTrue(board.label.contains("trail on; 0"), board.debugDescription)
+        app.terminate()
+        app = launch(reset: false, language: "en")
+        openFirst(app)
+        board = app.descendants(matching: .any)["game-board"].firstMatch
+        XCTAssertTrue(board.label.contains("Classic; grid dots off; trail on; 0"), board.debugDescription)
+        app.terminate()
+    }
+
+    @MainActor
     func testCaptureReadmeScreenshots() throws {
         try XCTSkipUnless(
             ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
@@ -111,6 +150,11 @@ final class HerbertUITests: XCTestCase {
             XCTAssertTrue(search.waitForExistence(timeout: 5))
             app.buttons["clear-search"].activateControl()
         }
+    }
+
+    @MainActor
+    private func boardToggle(_ id: String, in app: XCUIApplication) -> XCUIElement {
+        app.switches[id]
     }
 
     @MainActor

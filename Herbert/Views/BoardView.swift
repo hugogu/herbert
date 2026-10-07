@@ -8,11 +8,16 @@ struct BoardDrawing: View, Animatable {
     let visited: Set<GridPoint>
     var focused: Bool = true
     var miniature = false
+    var style: BoardStyle
+    var showGridDots: Bool
+    var trail: Set<TrailSegment>
+    var showTrail: Bool
     private var robotLocation: CGPoint
 
     init(
         board: Board, position: GridPoint, heading: Heading, visited: Set<GridPoint>, focused: Bool = true,
-        miniature: Bool = false
+        miniature: Bool = false, style: BoardStyle = .modern, showGridDots: Bool = true,
+        trail: Set<TrailSegment> = [], showTrail: Bool = true
     ) {
         self.board = board
         self.position = position
@@ -20,6 +25,10 @@ struct BoardDrawing: View, Animatable {
         self.visited = visited
         self.focused = focused
         self.miniature = miniature
+        self.style = style
+        self.showGridDots = showGridDots
+        self.trail = trail
+        self.showTrail = showTrail
         robotLocation = CGPoint(x: position.x, y: position.y)
     }
 
@@ -31,6 +40,7 @@ struct BoardDrawing: View, Animatable {
     private var bounds: (x: Int, y: Int, width: Int, height: Int) {
         guard focused else { return (0, 0, 25, 25) }
         let points = board.targets.union(board.traps).union(board.walls).union([board.start, position])
+            .union(trail.flatMap { [$0.from, $0.to] })
         let minX = max(0, (points.map(\.x).min() ?? 0) - 2)
         let minY = max(0, (points.map(\.y).min() ?? 0) - 2)
         let maxX = min(24, (points.map(\.x).max() ?? 24) + 2)
@@ -50,30 +60,45 @@ struct BoardDrawing: View, Animatable {
                     x: origin.x + (CGFloat(p.x - region.x) + 0.5) * cell,
                     y: origin.y + (CGFloat(p.y - region.y) + 0.5) * cell)
             }
-            for y in region.y..<(region.y + region.height) {
-                for x in region.x..<(region.x + region.width) {
-                    let point = GridPoint(x: x, y: y)
-                    let c = center(point)
-                    let dot = miniature ? 0.65 : max(0.8, cell * 0.027)
-                    context.fill(
-                        Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: dot * 2, height: dot * 2)),
-                        with: .color(Palette.line))
+            if showGridDots {
+                for y in region.y..<(region.y + region.height) {
+                    for x in region.x..<(region.x + region.width) {
+                        let point = GridPoint(x: x, y: y)
+                        let c = center(point)
+                        let dot = miniature ? 0.65 : max(0.8, cell * 0.027)
+                        context.fill(
+                            Path(ellipseIn: CGRect(x: c.x - dot, y: c.y - dot, width: dot * 2, height: dot * 2)),
+                            with: .color(style == .classic ? Color(white: 0.60) : Palette.muted.opacity(0.42)))
+                    }
                 }
+            }
+            if showTrail {
+                var path = Path()
+                for segment in trail {
+                    path.move(to: center(segment.from))
+                    path.addLine(to: center(segment.to))
+                }
+                context.stroke(
+                    path, with: .color(style == .classic ? .blue.opacity(0.50) : Palette.mint.opacity(0.40)),
+                    style: StrokeStyle(lineWidth: max(1.5, cell * 0.09), lineCap: .round, lineJoin: .round))
             }
             for point in board.walls {
                 let c = center(point)
                 let rect = CGRect(x: c.x - cell * 0.46, y: c.y - cell * 0.46, width: cell * 0.92, height: cell * 0.92)
                 context.fill(
-                    Path(roundedRect: rect, cornerRadius: cell * 0.15), with: .color(Palette.ink.opacity(0.85)))
+                    Path(roundedRect: rect, cornerRadius: style == .classic ? 0 : cell * 0.15),
+                    with: .color(style == .classic ? .black : Palette.ink.opacity(0.85)))
             }
             for point in board.traps {
                 let c = center(point)
                 let radius = cell * 0.23
                 let ring = Path(
                     ellipseIn: CGRect(x: c.x - radius, y: c.y - radius, width: radius * 2, height: radius * 2))
-                context.fill(ring, with: .color(Palette.muted.opacity(0.14)))
-                context.stroke(ring, with: .color(Palette.muted.opacity(0.45)), lineWidth: max(1, cell * 0.035))
-                if !miniature {
+                context.fill(ring, with: .color(style == .classic ? Color(white: 0.48) : Palette.muted.opacity(0.14)))
+                context.stroke(
+                    ring, with: .color(style == .classic ? Color(white: 0.35) : Palette.muted.opacity(0.45)),
+                    lineWidth: max(1, cell * 0.035))
+                if !miniature && style != .classic {
                     var cross = Path()
                     cross.move(to: CGPoint(x: c.x - radius * 0.35, y: c.y - radius * 0.35))
                     cross.addLine(to: CGPoint(x: c.x + radius * 0.35, y: c.y + radius * 0.35))
@@ -87,10 +112,14 @@ struct BoardDrawing: View, Animatable {
                 let radius = cell * 0.25
                 let ring = Path(
                     ellipseIn: CGRect(x: c.x - radius, y: c.y - radius, width: radius * 2, height: radius * 2))
-                let color = visited.contains(point) ? Palette.mint : Palette.amber
-                context.fill(ring, with: .color(color.opacity(0.18)))
+                let color: Color = style == .classic ? .black : (visited.contains(point) ? Palette.mint : Palette.amber)
+                context.fill(
+                    ring,
+                    with: .color(
+                        style == .classic
+                            ? (visited.contains(point) ? Color(white: 0.25) : .white) : color.opacity(0.18)))
                 context.stroke(ring, with: .color(color), lineWidth: max(1.5, cell * 0.065))
-                if visited.contains(point) {
+                if visited.contains(point) && style != .classic {
                     context.fill(
                         Path(
                             ellipseIn: CGRect(
@@ -105,31 +134,45 @@ struct BoardDrawing: View, Animatable {
             var robot = context
             robot.translateBy(x: c.x, y: c.y)
             robot.rotate(by: .degrees(Double(heading.rawValue) * 90))
-            let body = Path(
-                roundedRect: CGRect(x: -radius, y: -radius * 0.8, width: radius * 2, height: radius * 1.8),
-                cornerRadius: radius * 0.5)
-            robot.addFilter(.shadow(color: Palette.mint.opacity(0.22), radius: cell * 0.12, y: cell * 0.06))
-            robot.fill(body, with: .color(Palette.mint))
-            var arrow = Path()
-            arrow.move(to: CGPoint(x: -radius * 0.40, y: -radius * 0.08))
-            arrow.addLine(to: CGPoint(x: 0, y: -radius * 0.48))
-            arrow.addLine(to: CGPoint(x: radius * 0.40, y: -radius * 0.08))
-            robot.stroke(
-                arrow, with: .color(.white),
-                style: StrokeStyle(lineWidth: max(1, cell * 0.065), lineCap: .round, lineJoin: .round))
-            for x in [-0.35, 0.35] {
-                robot.fill(
-                    Path(
-                        ellipseIn: CGRect(
-                            x: radius * x - radius * 0.10, y: radius * 0.40,
-                            width: radius * 0.20, height: radius * 0.20)), with: .color(.white.opacity(0.8)))
+            if style == .classic {
+                var silhouette = Path()
+                silhouette.addRect(
+                    CGRect(x: -radius * 0.76, y: -radius * 0.15, width: radius * 1.52, height: radius * 1.05))
+                silhouette.addRect(
+                    CGRect(x: -radius * 0.30, y: -radius * 0.85, width: radius * 0.60, height: radius * 0.85))
+                robot.fill(silhouette, with: .color(Color(red: 0.82, green: 0.04, blue: 0.06)))
+            } else {
+                let body = Path(
+                    roundedRect: CGRect(x: -radius, y: -radius * 0.8, width: radius * 2, height: radius * 1.8),
+                    cornerRadius: radius * 0.5)
+                robot.addFilter(.shadow(color: Palette.mint.opacity(0.22), radius: cell * 0.12, y: cell * 0.06))
+                robot.fill(body, with: .color(Palette.mint))
+                var arrow = Path()
+                arrow.move(to: CGPoint(x: -radius * 0.40, y: -radius * 0.08))
+                arrow.addLine(to: CGPoint(x: 0, y: -radius * 0.48))
+                arrow.addLine(to: CGPoint(x: radius * 0.40, y: -radius * 0.08))
+                robot.stroke(
+                    arrow, with: .color(.white),
+                    style: StrokeStyle(lineWidth: max(1, cell * 0.065), lineCap: .round, lineJoin: .round))
+                for x in [-0.35, 0.35] {
+                    robot.fill(
+                        Path(
+                            ellipseIn: CGRect(
+                                x: radius * x - radius * 0.10, y: radius * 0.40,
+                                width: radius * 0.20, height: radius * 0.20)), with: .color(.white.opacity(0.8)))
+                }
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             L10n.text(
-                "棋盘，Herbert 位于第 %ld 行、第 %ld 列，朝%@。已点亮 %ld / %ld 个目标。", position.y + 1, position.x + 1, headingName,
-                visited.count, board.targets.count)
+                "棋盘，Herbert 位于第 %ld 行、第 %ld 列，朝%@。已点亮 %ld / %ld 个目标。",
+                position.y + 1, position.x + 1, headingName, visited.count, board.targets.count)
+                + " "
+                + L10n.text(
+                    "%@；网格点%@；轨迹%@；%ld 段路径", L10n.text(style == .classic ? "经典风格" : "现代风格"),
+                    L10n.text(showGridDots ? "开启" : "关闭"), L10n.text(showTrail ? "开启" : "关闭"),
+                    showTrail ? trail.count : 0)
         )
         .accessibilityIdentifier("game-board")
     }
@@ -139,6 +182,10 @@ struct BoardDrawing: View, Animatable {
 
 struct BoardView: View {
     @ObservedObject var model: GameModel
+    @AppStorage("board.style") private var style = BoardStyle.modern
+    @AppStorage("board.showTrail") private var showTrail = true
+    @AppStorage("board.showGridDots") private var showGridDots = true
+    @State private var showOptions = false
     @State private var focused = true
     @State private var zoom: CGFloat = 1
     @GestureState private var magnification: CGFloat = 1
@@ -166,11 +213,19 @@ struct BoardView: View {
                     Image(systemName: "arrow.counterclockwise").frame(width: 32, height: 32)
                 }
                 .buttonStyle(.plain).accessibilityLabel("复原棋盘缩放")
+                Button {
+                    showOptions = true
+                } label: {
+                    Image(systemName: "slider.horizontal.3").frame(width: 32, height: 32)
+                }
+                .buttonStyle(.plain).accessibilityLabel("棋盘设置").accessibilityIdentifier("board-options")
+                .popover(isPresented: $showOptions, arrowEdge: .top) { BoardOptionsView() }
             }
             GeometryReader { geometry in
                 BoardDrawing(
                     board: model.session.board, position: model.session.position, heading: model.session.heading,
-                    visited: model.session.visitedTargets, focused: focused
+                    visited: model.session.visitedTargets, focused: focused, style: style, showGridDots: showGridDots,
+                    trail: model.session.trail, showTrail: showTrail
                 )
                 .animation(
                     reduceMotion || model.speed >= 16 || model.session.status == .ready
@@ -200,11 +255,14 @@ struct BoardView: View {
                         }
                     })
             }
-            .background(Palette.paper.opacity(0.7), in: RoundedRectangle(cornerRadius: 16))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(style.background, in: RoundedRectangle(cornerRadius: style == .classic ? 0 : 16))
+            .overlay {
+                if style == .classic { Rectangle().stroke(Color(white: 0.35), lineWidth: 1).allowsHitTesting(false) }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: style == .classic ? 0 : 16))
             HStack(spacing: 16) {
-                legend("目标", symbol: "circle", color: Palette.amber)
-                legend("陷阱", symbol: "xmark.circle", color: Palette.muted)
+                legend("目标", symbol: "circle", color: style == .classic ? .black : Palette.amber)
+                legend("陷阱", symbol: style == .classic ? "circle.fill" : "xmark.circle", color: Palette.muted)
                 legend("墙", symbol: "square.fill", color: Palette.ink)
                 Spacer(minLength: 0)
                 Text("25 × 25").font(.system(size: 10, design: .monospaced)).foregroundStyle(Palette.muted)

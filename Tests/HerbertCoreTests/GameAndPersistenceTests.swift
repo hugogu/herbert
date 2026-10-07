@@ -80,6 +80,50 @@ final class GameAndPersistenceTests: XCTestCase {
         guard case .failed = session.status else { return XCTFail("Step limit must stop execution") }
     }
 
+    func testTrailIncludesEveryMoveAndSurvivesTrapAndPause() throws {
+        let p = problem(cells: [
+            GridPoint(x: 1, y: 3): "u", GridPoint(x: 1, y: 2): "o",
+            GridPoint(x: 1, y: 1): "x", GridPoint(x: 2, y: 1): "o",
+        ])
+        var session = try GameSession(problem: p)
+        try session.prepare(source: "ssrs")
+        session.setRunning(true)
+        session.step()
+        session.step()
+        XCTAssertEqual(session.trail.count, 2)
+        XCTAssertTrue(session.visitedTargets.isEmpty)
+        session.setRunning(false)
+        XCTAssertEqual(session.trail.count, 2)
+        session.step()
+        XCTAssertEqual(session.trail.count, 2, "Turning must not add a segment")
+        session.step()
+        XCTAssertEqual(session.trail.count, 3)
+        XCTAssertTrue(session.trail.contains(TrailSegment(from: .init(x: 1, y: 3), to: .init(x: 1, y: 2))))
+        try session.prepare(source: "s")
+        XCTAssertTrue(session.trail.isEmpty)
+        XCTAssertTrue(try GameSession(problem: p).trail.isEmpty)
+    }
+
+    func testBlockedMovesAddNoTrailAndBatchRetainsAllMoves() throws {
+        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "*", GridPoint(x: 0, y: 4): "o"])
+        var session = try GameSession(problem: p)
+        try session.prepare(source: "srsrssss")
+        for _ in 0..<8 { session.step() }
+        XCTAssertEqual(session.status, .completed)
+        XCTAssertEqual(session.trail.count, 4)
+        XCTAssertEqual(session.trail.flatMap { [$0.from, $0.to] }.max(by: { $0.y < $1.y })?.y, 4)
+    }
+
+    func testRepeatedWalksKeepTrailBounded() throws {
+        let p = problem(cells: [GridPoint(x: 2, y: 2): "u", GridPoint(x: 24, y: 24): "o"])
+        var session = try GameSession(problem: p)
+        try session.prepare(source: "a:srrsrra\na")
+        for _ in 0..<60_000 { session.step() }
+        XCTAssertEqual(session.steps, 60_000)
+        XCTAssertEqual(session.trail.count, 1)
+        XCTAssertEqual(session.position, session.board.start)
+    }
+
     func testBackupValidationAndCorruptFileRemainUnchanged() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             .appendingPathComponent("progress.json")

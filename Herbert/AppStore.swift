@@ -8,11 +8,21 @@ final class AppStore: ObservableObject {
     @Published private(set) var snapshot = ProgressSnapshot()
     @Published var storageMessage: String?
     @Published var catalogMessage: String?
+    let preferences: UserDefaults
     private var repository: (any ProgressRepository)?
     private var canSave = true
     private var saveTask: Task<Void, Never>?
 
     init() {
+        if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
+            let suite = "info.hugogu.Herbert.UITests"
+            preferences = UserDefaults(suiteName: suite)!
+            if ProcessInfo.processInfo.arguments.contains("--reset-progress") {
+                preferences.removePersistentDomain(forName: suite)
+            }
+        } else {
+            preferences = .standard
+        }
         do { problems = try ProblemCatalog.bundled() } catch { catalogMessage = error.localizedDescription }
         do {
             let local: LocalProgressRepository
