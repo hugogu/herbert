@@ -13,11 +13,11 @@
 | Mac Release 构建 | 标准 Mac 架构构建：通过；二进制包括 arm64 / x86_64 |
 | Mac UI：运行与重启 | 输入 ssss，原题 0001 通关，重启后草稿恢复：通过 |
 | Mac UI：错误与重置 | 未定义过程在页面内提示，重置后恢复待运行状态：通过 |
-| Mac UI：快捷键与单步 | 快捷指令键插入 ssss，四次单步后通关：补验通过 |
+| Mac UI：快捷键与单步 | 快捷指令键插入 ssss，四次单步后通关：通过 |
 
-原生 UI 全量测试的一轮运行受另一全屏应用遮挡，快捷键用例丢失两次点击而失败；其余两项通过。没有修改产品代码规避该环境问题，随后以 `-only-testing:HerbertUITests/HerbertUITests/testCommandKeysInsertAtCaretAndSingleStepCompletes` 单独重跑，用例通过。因此三个界面用例均有最终通过记录，但全量末次运行记录本身包含该环境失败。
+开源发布前重新执行完整原生 UI 测试：三个功能用例全部通过，截图用例按设计跳过；零失败。另以 `HERBERT_CAPTURE_SCREENSHOTS=1` 单独运行截图用例，通过并导出 7 张实际界面/棋盘 PNG。早先因另一全屏应用遮挡导致的点击失败已由本次完整通过记录取代。
 
-测试产物位于 `.build/xcode/Logs/Test/`，最终补验结果为 `Test-Herbert-2026.10.07_21-19-01-+0800.xcresult`。UI 测试使用独立的测试存档，不覆盖正常用户存档。另通过原生辅助功能界面和截图检查了游戏棋盘、编辑器、语法错误提示和重置后的状态。
+本轮结果：`.build/opensource-ui-tests.xcresult`（完整 UI 测试）和 `.build/readme-screenshots.xcresult`（截图）；截图已人工检查，来源与重现方法见 [截图说明](screenshots/README.md)。UI 测试使用独立存档，不覆盖正常用户存档。`scripts/check.sh` 再次通过 18 项 Swift 单元/集成测试、3 项 Python 导入器测试和严格格式检查；版本调整为 0.1.0 后再次完成 iOS 无签名编译。
 
 Xcode 的 App Intents 元数据工具输出了 “Metadata extraction skipped, no AppIntents.framework dependency found” 提示；本应用没有实现 App Intents。该提示不影响构建结果，Swift 编译及严格格式检查没有代码警告。
 
@@ -26,6 +26,6 @@ Xcode 的 App Intents 元数据工具输出了 “Metadata extraction skipped, n
 - 本机没有安装 iOS Simulator runtime，没有执行 iPhone/iPad 模拟器运行、触觉实测或真机触摸/横竖屏验证。iOS 构建成功不等于这些运行时验证已完成。
 - Mac 的 x86_64 架构完成编译和链接，实际界面自动化在 Apple Silicon 上执行，没有 Intel 真机运行测试。
 - 未配置 Apple Developer Team、TestFlight、App Store 发布、Developer ID 分发签名或 notarization。Mac ZIP 是本地 ad-hoc 签名构建；iOS 请打开 Xcode 工程选择自己的签名团队后在真机运行。
-- 未连接 Cloudflare，不包含在线排名/账号。公开分发原站题库前应确认再分发授权。
+- 未连接 Cloudflare，不包含在线排名/账号。原站题库再分发授权尚未确认，不适用本项目 MIT 许可；见 [NOTICE.md](../NOTICE.md)。
 
 本地交付文件：`outputs/Herbert-macOS.zip`；构建源工程：`Herbert.xcodeproj`。

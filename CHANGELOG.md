@@ -1,0 +1,26 @@
+# Changelog
+
+This project follows semantic versioning. Versions below 1.0 are previews and may change
+save or API formats through documented migrations.
+
+## [0.1.0] - 2026-10-07
+
+### Added
+
+- Native SwiftUI game for iPhone, iPad, and Mac, with adaptive board/editor layouts.
+- Independent H parser and virtual machine, original byte counting, and bounded execution.
+- Offline snapshot of 1,769 original problems with authors, IDs, limits, and provenance.
+- Run/pause, single-step, speed controls, zoom, search, favorites, and a Chinese guide.
+- Local draft/solution saves, atomic JSON persistence, and validated backup import/export.
+- Unit/integration tests, native Mac UI tests, and reproducible app screenshots.
+- MIT licensing for original code, bilingual documentation, community templates, and CI.
+
+### Known limits
+
+- Original puzzle archive rights are separate from the code license; redistribution
+  permission has not been confirmed. See [NOTICE.md](NOTICE.md).
+- iOS compilation is verified; phone/tablet runtime validation remains open.
+- The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
+  release, or notarized Mac binary.
+
+[0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0

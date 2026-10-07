@@ -1,80 +1,173 @@
-# Herbert
+<p align="center">
+  <img src="Herbert/Assets.xcassets/AppIcon.appiconset/mac-128@2x.png" width="96" alt="Herbert robot icon">
+</p>
 
-用最短的 H 语言程序，带 Herbert 点亮所有目标。原生 SwiftUI 游戏，共用一个与界面无关的游戏引擎，支持 **iPhone / iPad（iOS 17+）和原生 Mac（macOS 14+）**。
+<h1 align="center">Herbert</h1>
+<p align="center">A little robot. A big idea. Find the shortest program through a world of patterns.</p>
+<p align="center">
+  <a href="https://github.com/hugogu/herbert/actions/workflows/ci.yml"><img src="https://github.com/hugogu/herbert/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code_license-MIT-167D6B" alt="Code license: MIT"></a>
+  <img src="https://img.shields.io/badge/Swift-6.0-F05138" alt="Swift 6.0">
+  <img src="https://img.shields.io/badge/platforms-iOS_17%2B_%7C_macOS_14%2B-31454B" alt="iOS 17+ and macOS 14+">
+</p>
+<p align="center"><b>English</b> · <a href="README.zh-CN.md">简体中文</a> · <a href="CONTRIBUTING.md">Contribute</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-## 运行
+Herbert is an offline programming puzzle game for **iPhone, iPad, and Mac**, built with
+SwiftUI. Guide the robot to every target using H, a tiny language whose short programs
+can express surprisingly intricate paths. Learn three commands, discover recursion,
+and keep making your solution smaller.
 
-需要 Xcode 16 或更新版本，无第三方依赖。
+This independent port includes **1,769 original problems**, with their IDs, authors,
+and byte limits preserved. Application code is MIT licensed; the original puzzle archive
+has a separate, unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
+
+![Herbert running natively on macOS: Flower with the board, H editor, and execution controls](docs/screenshots/flower.png)
+
+*Actual native macOS app, showing #0037 “Flower” by nai. The editor contains a starter
+program, not a solution to this puzzle. The current app interface is Simplified Chinese.*
+
+## Patterns worth exploring
+
+From a four-step introduction to intricate geometric puzzles, the original collection
+rewards recognizing a pattern before writing a program. Search these IDs in the app:
+
+<table>
+  <tr>
+    <td align="center" width="33%"><a href="docs/screenshots/flower.png"><img src="docs/screenshots/flower-board.png" alt="Flower puzzle: four petals inside a square field of walls" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/shuriken.png"><img src="docs/screenshots/shuriken-board.png" alt="Shuriken puzzle: a four-armed rotational pattern" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/butterfly.png"><img src="docs/screenshots/butterfly-board.png" alt="Butterfly puzzle: mirrored wings made from targets and walls" width="280"></a></td>
+  </tr>
+  <tr>
+    <td align="center"><b>#0037 · Flower</b><br>nai · ≤ 20 bytes</td>
+    <td align="center"><b>#0027 · Shuriken</b><br>snuke · ≤ 39 bytes</td>
+    <td align="center"><b>#0361 · Butterfly</b><br>nadsuki · ≤ 27 bytes</td>
+  </tr>
+</table>
+
+*These are board screenshots from the running app. Click a board to see its full game screen.*
+
+<details>
+<summary>Explore the problem library</summary>
+
+![Herbert library with search, progress, filters, and live board thumbnails](docs/screenshots/library.png)
+
+</details>
+
+## What you can do
+
+- **Play anywhere offline.** All 1,769 problems are bundled. Search by ID, title, or author;
+  bookmark favorites and return to your last problem.
+- **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
+  command parameters, and recursive programs. Original byte-counting rules are preserved.
+- **Watch your idea unfold.** Run, pause, reset, or single-step. Change speed, zoom the board,
+  and switch between the full 25 × 25 grid and its occupied region.
+- **Use a layout that fits.** Stacked board and editor on phones; side-by-side play on iPad
+  and Mac. Native text editing, cursor-aware command buttons, and `⌘ Return` on Mac.
+- **Keep your progress.** Drafts, favorites, and shortest solutions save locally. Export JSON
+  backups and merge them back after their solutions have been replayed and validated.
+- **Keep your privacy.** No accounts, analytics SDKs, ads, or app network requests.
+
+## Try your first program
+
+Open problem **0001** and enter:
+
+```text
+ssss
+```
+
+Each `s` moves forward one square; `l` turns left and `r` turns right. Light every amber
+ring within the problem's byte limit. Walls block movement. Traps erase lit targets.
+
+The challenge is program size, not the number of steps. Each letter and each numeric
+literal counts as one byte: `12` is one byte, and punctuation and whitespace are free.
+The in-app guide introduces procedures and recursion; [rule notes](docs/rules.md) explain
+the full language and compatibility limits. Programs execute in the custom H interpreter,
+with bounded execution; they do not execute Swift or shell commands.
+
+## Build and run
+
+You need **macOS and Xcode 16+ with Swift 6**. The checked-in Xcode project uses a local
+Swift package and has **no third-party package dependencies**. Xcode 27.0 is the locally
+verified toolchain; CI uses the default Xcode on the macOS 26 runner.
 
 ```sh
+git clone git@github.com:hugogu/herbert.git
+cd herbert
 open Herbert.xcodeproj
 ```
 
-选择 `Herbert` scheme 和目标设备，点击 Run。连接 iPhone/iPad 真机时，在 Signing & Capabilities 中选择自己的 Development Team。项目没有预设签名账号。
+Choose the **Herbert** scheme and your Mac, iPhone, or iPad destination, then Run.
+For a physical iOS device, select your own Development Team in Signing & Capabilities.
+No developer account is configured in the repository.
 
 ```sh
-# 引擎、关卡、持久化与备份集成测试
-swift test
-
-# 格式检查和测试
+# Formatting, importer unit tests, and core unit/integration tests
 scripts/check.sh
 
-# 原生 Mac
-xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=macOS,arch=arm64' CODE_SIGN_IDENTITY=- build
+# Build the native Mac app
+xcodebuild -project Herbert.xcodeproj -scheme Herbert \
+  -destination 'platform=macOS' CODE_SIGN_IDENTITY=- build
 
-# iPhone / iPad 编译，不需要开发者签名
-xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+# Compile for iPhone and iPad without signing
+xcodebuild -project Herbert.xcodeproj -scheme Herbert \
+  -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
 
-# Mac 界面自动化（会启动测试专用游戏实例）
-xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=macOS,arch=arm64' CODE_SIGN_IDENTITY=- test
+# Run native Mac UI tests (uses a separate test save file)
+xcodebuild -project Herbert.xcodeproj -scheme Herbert \
+  -destination 'platform=macOS' CODE_SIGN_IDENTITY=- test
 ```
 
-## 已实现
+**Status: early preview.** Core tests, native Mac UI flows, and iOS compilation have been
+verified. iPhone/iPad runtime and real-device testing remain open; there is no App Store
+or notarized binary release yet. See [verification details](docs/verification.md).
 
-- 原版 H 语言：`s/l/r`、单字母过程、递归、最多 26 个参数、可为空的命令参数、数值参数、加减法、非正参数跳过调用、±255 数值限制。
-- 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录。
-- 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
-- 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
-- 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
-- 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
-- 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中文分步玩法手册。
-- 当前快照包含 **1,769 个可玩关卡**，来源列表全部 21 页，最后原版编号 2077；排除 0000 空占位项，缺失项为零。
-- 自动保存草稿、收藏、最短解与完成日期；本地 JSON 原子写入；损坏存档暂停自动写入，避免覆盖原文件；JSON 备份导入/导出，导入前重放并校验解法，合并时保留更短的有效解。
-- 切到后台自动暂停执行并保存；Mac 支持 `⌘ Return` 运行/暂停。
+## How it is built
 
-## 结构
+| Location | Responsibility |
+| --- | --- |
+| `Herbert/` | SwiftUI screens, native editors, animation, app state |
+| `Sources/HerbertCore/` | UI-independent H parser, VM, board, session, progress storage |
+| `Tests/HerbertCoreTests/` | Language unit tests and game/save/backup integration tests |
+| `HerbertUITests/` | Native UI tests and reproducible screenshot captures |
+| `scripts/` | Project/icon generation, validated catalog import, local checks |
+| `docs/` | Rules, provenance, architecture, screenshots, verification |
 
-```text
-Herbert/                         SwiftUI 应用与平台文本编辑器
-Sources/HerbertCore/              H 解析器、虚拟机、棋盘、会话与存档
-Sources/HerbertCore/Resources/    原站题库快照
-Tests/HerbertCoreTests/           单元测试、原题通关与存档/备份集成测试
-HerbertUITests/                  原生界面自动化
-scripts/                        可重复的题库导入、图标和工程生成、检查脚本
-docs/                           数据导入清单、规则核对说明、架构与验证记录
-```
+`HerbertCore` can be built and tested independently with `swift test`.
+After adding or removing app Swift files, run `python3 scripts/generate_project.py`.
+Generated project files are checked in; contributors do not need XcodeGen.
 
-`Package.swift` 提供独立的 `HerbertCore` Swift package；Xcode 工程通过本地 package 引用它。`scripts/generate_project.py` 可重建已提交的工程，不需要 XcodeGen。增加或移除应用 Swift 文件后，运行此脚本即可更新工程。图标由 `scripts/generate_icon.swift` 绘制，资源已经内置。
+Progress goes through `ProgressRepository` into an atomic, versioned JSON file in the
+system-provided Application Support directory. Cloud sync is planned, not implemented:
+**App → authenticated Cloudflare Worker → D1**. Database credentials will stay out of
+clients. Read the [architecture notes](docs/architecture.md) for merge and migration rules.
 
-## 本地存档与未来 Cloudflare
+## Contributing
 
-数据存于应用 Application Support 下的 `Herbert/progress.json`（沙盒中的实际位置由系统决定）。格式带 `schemaVersion`，同一格式也用于备份；未接入云端、账号或分析 SDK。
+Bug reports, documentation improvements, localization, accessibility work, and device
+testing are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and places
+to start. For feature ideas, open an issue before a large implementation.
 
-所有持久化通过 `ProgressRepository`。未来可在其上增加同步协调器，使用 **App → 已认证的 Cloudflare Worker → D1**。客户端不持有 Cloudflare API Token，不直接访问数据库。合并规则和数据迁移建议见 [架构说明](docs/architecture.md)。
+- [Report a bug](https://github.com/hugogu/herbert/issues/new?template=bug_report.yml)
+- [Suggest an improvement](https://github.com/hugogu/herbert/issues/new?template=feature_request.yml)
+- [Browse good first issues](https://github.com/hugogu/herbert/labels/good%20first%20issue)
+- [Code of conduct](CODE_OF_CONDUCT.md) · [Security policy](SECURITY.md)
 
-## 原版来源与移植边界
+### Next steps
 
-- [原站规则](http://herbert.tealang.info/rule.php)
-- [原站 Problems](http://herbert.tealang.info/problems.php)
-- 原站由 quolc 创建，社区关卡归各作者所有；本项目独立编写游戏代码，没有打包或执行原站 Flash 客户端。
-- 原站未声明可再分发题库的许可证；题库用于本地移植验证，公开发布/App Store 分发之前需要确认原站及关卡作者的授权范围。自己的代码和原站关卡应分开确定许可。
-- 原站在线排名、账号、投稿与服务器评分未移植；应用展示个人最短代码记录。原站最短记录是导入时的快照，不进行在线比较。
-- 按原版限制运行最多 100 万个机器人指令；为保证手机可取消执行，额外限制 100 万次解释器展开、4096 层非尾递归栈、16 KiB 源代码、64 层参数语法嵌套和 128 层运行时参数嵌套。命令参数与待执行栈使用 100 万单位的展开预算，尾递归不增长调用栈。这些保护可能比原站更早停止极端程序。
+- Test and refine phone keyboard, rotation, touch, and accessibility behavior on devices.
+- Add English UI localization while preserving original puzzle titles and author credits.
+- Expand H compatibility fixtures and make execution easier to inspect.
+- Resolve original problem redistribution permissions before an App Store release.
+- Add optional authenticated cloud sync while keeping offline play first.
 
-重新导入题库（会访问原站，默认最多四个并发连接，成功响应缓存，失败可重试）：
+## Credits and license
 
-```sh
-python3 scripts/import_problems.py
-```
+Inspired by [Herbert Online Judge](http://herbert.tealang.info/), created by **quolc**, and
+its problem authors. Original [rules](http://herbert.tealang.info/rule.php) and
+[problem collection](http://herbert.tealang.info/problems.php) are linked for attribution.
+The original Flash client, online accounts, submissions, and leaderboard are not included;
+original best scores are an import-time snapshot, not live rankings.
 
-导入程序从公开列表发现全部页，排除原站 `0000 / Null` 占位项，逐一核对棋盘长度、符号、起点、目标和 byte 限制；有失败时会保存已取得的题目，并在清单列出缺失 ID，以非零状态退出。再次运行使用缓存，仅补取失败请求。原站仅提供旧 HTTP 接口，JSON 内置题库是离线资源，App 本身无需网络权限。
+Our source code, original icon, and documentation use the **[MIT License](LICENSE)**.
+Original third-party puzzle data and the layouts visible in screenshots are **not
+relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.

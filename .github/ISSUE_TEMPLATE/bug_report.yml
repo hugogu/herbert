@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible game, editor, or save problem.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Explain what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the original problem ID and a minimal H program when relevant.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: App version/commit, device, OS, and Xcode version if building locally
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or diagnostics
+      description: Remove personal progress and sensitive information. Report vulnerabilities privately.
