@@ -9,7 +9,11 @@ public enum HerbertStrings {
     static func text(_ key: String, language: String, arguments: [CVarArg] = []) -> String {
         let selected =
             Bundle.preferredLocalizations(from: ["en", "zh-Hans", "ja"], forPreferences: [language]).first ?? "en"
-        let bundle = Bundle(path: Bundle.module.path(forResource: selected, ofType: "lproj")!)!
+        // Older SwiftPM versions lowercase language resource directory names.
+        let path =
+            Bundle.module.path(forResource: selected.lowercased(), ofType: "lproj")
+            ?? Bundle.module.path(forResource: selected, ofType: "lproj")
+        let bundle = path.flatMap(Bundle.init(path:)) ?? Bundle.module
         return String(format: bundle.localizedString(forKey: key, value: nil, table: nil), arguments: arguments)
     }
 }

@@ -6,6 +6,7 @@ final class LocalizationTests: XCTestCase {
     func testPreferredLanguageMatchingAndEnglishFallback() {
         XCTAssertEqual(HerbertStrings.text("运行", language: "en-GB"), "Run")
         XCTAssertEqual(HerbertStrings.text("运行", language: "zh-CN"), "运行")
+        XCTAssertEqual(HerbertStrings.text("运行", language: "zh-hans"), "运行")
         XCTAssertEqual(HerbertStrings.text("运行", language: "ja-JP"), "実行")
         XCTAssertEqual(HerbertStrings.text("运行", language: "fr-FR"), "Run")
     }
