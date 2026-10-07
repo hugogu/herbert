@@ -54,6 +54,48 @@ final class HerbertUITests: XCTestCase {
         for _ in 0..<4 { app.buttons["step-program"].activate() }
         XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
     }
+
+    @MainActor
+    func testCaptureReadmeScreenshots() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
+            "Run scripts/capture_screenshots.sh to refresh the documentation images.")
+        let app = launch()
+        capture(app, name: "library")
+        for (id, name) in [(37, "flower"), (27, "shuriken"), (361, "butterfly")] {
+            let search = app.textFields["problem-search"]
+            XCTAssertTrue(search.waitForExistence(timeout: 5))
+            search.activate()
+            search.typeText(String(format: "%04d", id))
+            let problem = app.buttons["problem-\(id)"]
+            XCTAssertTrue(problem.waitForExistence(timeout: 5))
+            problem.activate()
+            XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+            if id == 37 {
+                let code = app.textViews["code-editor"]
+                code.activate()
+                code.typeText("a(4)\na(X):sa(X-1)")
+            }
+            capture(app, name: name)
+            let board = app.descendants(matching: .any)["game-board"].firstMatch
+            XCTAssertTrue(board.exists)
+            let image = XCTAttachment(screenshot: board.screenshot())
+            image.name = "readme-\(name)-board"
+            image.lifetime = .keepAlways
+            add(image)
+            app.buttons["返回"].activate()
+            XCTAssertTrue(search.waitForExistence(timeout: 5))
+            app.buttons["清除搜索"].activate()
+        }
+    }
+
+    @MainActor
+    private func capture(_ app: XCUIApplication, name: String) {
+        let image = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+        image.name = "readme-\(name)"
+        image.lifetime = .keepAlways
+        add(image)
+    }
 }
 
 extension XCUIElement {
