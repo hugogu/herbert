@@ -2,10 +2,13 @@ import XCTest
 
 final class HerbertUITests: XCTestCase {
     @MainActor
-    private func launch(reset: Bool = true) -> XCUIApplication {
+    private func launch(reset: Bool = true, language: String = "zh-Hans") -> XCUIApplication {
+        continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing"] + (reset ? ["--reset-progress"] : [])
+        app.launchArguments =
+            ["--ui-testing", "-AppleLanguages", "(\(language))"] + (reset ? ["--reset-progress"] : [])
         app.launch()
+        app.activate()
         XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
         return app
     }
@@ -56,6 +59,26 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testAutomaticEnglishAndJapaneseLocalization() {
+        for (language, title, error, guideTitle) in [
+            ("en", "Explore problems", "Procedure z is not defined.", "Game guide"),
+            ("ja", "問題を探す", "手続き z が定義されていません。", "遊び方ガイド"),
+        ] {
+            let app = launch(language: language)
+            XCTAssertTrue(app.staticTexts[title].exists)
+            openFirst(app)
+            app.textViews["code-editor"].activateControl()
+            app.textViews["code-editor"].typeText("z")
+            app.buttons["run-program"].activateControl()
+            XCTAssertEqual(app.staticTexts["game-status"].displayedText, error)
+            app.buttons[language == "en" ? "Game rules" : "ゲームのルール"].activateControl()
+            XCTAssertTrue(app.staticTexts[guideTitle].waitForExistence(timeout: 5))
+            capture(app, name: "localization-\(language)")
+            app.terminate()
+        }
+    }
+
+    @MainActor
     func testCaptureReadmeScreenshots() throws {
         try XCTSkipUnless(
             ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
@@ -86,7 +109,7 @@ final class HerbertUITests: XCTestCase {
             add(image)
             app.buttons["返回"].activateControl()
             XCTAssertTrue(search.waitForExistence(timeout: 5))
-            app.buttons["清除搜索"].activateControl()
+            app.buttons["clear-search"].activateControl()
         }
     }
 
@@ -104,6 +127,7 @@ extension XCUIElement {
     fileprivate var displayedText: String { (value as? String) ?? label }
     fileprivate func activateControl() {
         #if os(macOS)
+            XCUIApplication().activate()
             click()
         #else
             tap()

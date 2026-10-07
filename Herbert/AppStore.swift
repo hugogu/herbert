@@ -30,7 +30,7 @@ final class AppStore: ObservableObject {
             snapshot = try local.load()
         } catch {
             canSave = false
-            storageMessage = "存档读取失败，已暂停自动保存以保护原文件。\n\(error.localizedDescription)"
+            storageMessage = L10n.text("存档读取失败，已暂停自动保存以保护原文件。\n%@", error.localizedDescription)
         }
     }
 
@@ -92,7 +92,7 @@ final class AppStore: ObservableObject {
         do {
             try repository.save(snapshot)
             storageMessage = nil
-        } catch { storageMessage = "保存失败：\(error.localizedDescription)。请导出备份后重试。" }
+        } catch { storageMessage = L10n.text("保存失败：%@。请导出备份后重试。", error.localizedDescription) }
     }
 
     func importBackup(_ data: Data) async throws {

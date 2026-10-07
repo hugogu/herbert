@@ -127,12 +127,14 @@ struct BoardDrawing: View, Animatable {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
-            "棋盘，Herbert 位于第 \(position.y + 1) 行、第 \(position.x + 1) 列，朝\(headingName)。已点亮 \(visited.count) / \(board.targets.count) 个目标。"
+            L10n.text(
+                "棋盘，Herbert 位于第 %ld 行、第 %ld 列，朝%@。已点亮 %ld / %ld 个目标。", position.y + 1, position.x + 1, headingName,
+                visited.count, board.targets.count)
         )
         .accessibilityIdentifier("game-board")
     }
 
-    private var headingName: String { ["上", "右", "下", "左"][heading.rawValue] }
+    private var headingName: String { L10n.text(["上", "右", "下", "左"][heading.rawValue]) }
 }
 
 struct BoardView: View {
@@ -154,7 +156,7 @@ struct BoardView: View {
                     zoom = 1
                     pan = .zero
                 } label: {
-                    Label(focused ? "全棋盘" : "聚焦", systemImage: "viewfinder")
+                    Label(LocalizedStringKey(focused ? "全棋盘" : "聚焦"), systemImage: "viewfinder")
                         .font(.system(size: 11, weight: .medium)).frame(minHeight: 32)
                 }.buttonStyle(.plain).foregroundStyle(Palette.mint)
                 Button {
@@ -211,6 +213,6 @@ struct BoardView: View {
     }
 
     private func legend(_ text: String, symbol: String, color: Color) -> some View {
-        Label(text, systemImage: symbol).font(.system(size: 10)).foregroundStyle(color)
+        Label(LocalizedStringKey(text), systemImage: symbol).font(.system(size: 10)).foregroundStyle(color)
     }
 }

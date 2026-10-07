@@ -52,7 +52,7 @@ struct ProgressViewScreen: View {
                 HStack {
                     Text("已完成的关卡").font(.system(size: 20, weight: .bold))
                     Spacer()
-                    Pill(text: "\(store.completedCount) SOLVED")
+                    Pill(text: L10n.text("%ld SOLVED", store.completedCount))
                 }
                 let completed = store.snapshot.records.filter { $0.bestBytes != nil }.sorted {
                     ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
@@ -92,8 +92,8 @@ struct ProgressViewScreen: View {
                 isPresented: $exporting, document: document, contentType: .json, defaultFilename: "herbert-backup"
             ) { result in
                 switch result {
-                case .success: message = "备份已导出。"
-                case .failure(let error): message = "导出失败：\(error.localizedDescription)"
+                case .success: message = L10n.text("备份已导出。")
+                case .failure(let error): message = L10n.text("导出失败：%@", error.localizedDescription)
                 }
             }
             .fileImporter(isPresented: $importing, allowedContentTypes: [.json]) { result in
@@ -108,18 +108,18 @@ struct ProgressViewScreen: View {
                     Task {
                         do {
                             try await store.importBackup(data)
-                            message = "备份已合并，最短解已校验。"
-                        } catch { message = "导入失败：\(error.localizedDescription)" }
+                            message = L10n.text("备份已合并，最短解已校验。")
+                        } catch { message = L10n.text("导入失败：%@", error.localizedDescription) }
                         busy = false
                     }
-                } catch { message = "导入失败：\(error.localizedDescription)" }
+                } catch { message = L10n.text("导入失败：%@", error.localizedDescription) }
             }
     }
 
     private func counter(_ title: String, value: Int) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(String(value)).font(.system(size: 30, weight: .medium, design: .monospaced))
-            Text(title).font(.system(size: 12)).foregroundStyle(Palette.muted)
+            Text(LocalizedStringKey(title)).font(.system(size: 12)).foregroundStyle(Palette.muted)
         }.frame(maxWidth: .infinity, alignment: .leading).panel(padding: 16)
     }
 }

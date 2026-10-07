@@ -59,6 +59,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "7B435AAB6DA84537C680086A";
 		};
+		"0B7734E919484B7352CF4C20" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Localization.swift";
+			"sourceTree" = "<group>";
+		};
+		"40D97162C688072663B9A59E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0B7734E919484B7352CF4C20";
+		};
 		"A5157DA272F54F07A4E4EA57" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -159,6 +169,37 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "A06544B86FE39DD4A42DF791";
 		};
+		"D2FD80A2B51C8E08AD6216DE" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.strings";
+			"name" = "en";
+			"path" = "Sources/HerbertCore/Resources/en.lproj/Localizable.strings";
+			"sourceTree" = "<group>";
+		};
+		"888B2C1FDF288A8E05F9AE75" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.strings";
+			"name" = "zh-Hans";
+			"path" = "Sources/HerbertCore/Resources/zh-Hans.lproj/Localizable.strings";
+			"sourceTree" = "<group>";
+		};
+		"D907D99DB1F89D435ADA629A" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.plist.strings";
+			"name" = "ja";
+			"path" = "Sources/HerbertCore/Resources/ja.lproj/Localizable.strings";
+			"sourceTree" = "<group>";
+		};
+		"31C20E73FA29248CC7BF440A" = {
+			"isa" = "PBXVariantGroup";
+			"children" = ("D2FD80A2B51C8E08AD6216DE", "888B2C1FDF288A8E05F9AE75", "D907D99DB1F89D435ADA629A");
+			"name" = "Localizable.strings";
+			"sourceTree" = "<group>";
+		};
+		"43BF684E275A04DD49E83368" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "31C20E73FA29248CC7BF440A";
+		};
 		"37BE3F777F39296409EA08AE" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -177,7 +218,7 @@
 		};
 		"3C3B0F03DC089F93B8457928" = {
 			"isa" = "PBXGroup";
-			"children" = ("B60FBC0336B0FFD50E1E5311", "48E56B6FEE247C8D4E0C36DA", "7B435AAB6DA84537C680086A", "A5157DA272F54F07A4E4EA57", "FA9C1363D4CB54B1FB499CE0", "204305BF28A15A903D4938C3", "76880A3FAB8B762A5C250808", "2D59DEE7EAC95253177ED8F4", "0454799D33E685C1A5BB20D9", "6EE6BC43101FAA2386628011", "9B3B02D3B3E31C5D6F298C80", "E0E4E6C01837A0B8DEECAE7E", "A06544B86FE39DD4A42DF791");
+			"children" = ("B60FBC0336B0FFD50E1E5311", "48E56B6FEE247C8D4E0C36DA", "7B435AAB6DA84537C680086A", "0B7734E919484B7352CF4C20", "A5157DA272F54F07A4E4EA57", "FA9C1363D4CB54B1FB499CE0", "204305BF28A15A903D4938C3", "76880A3FAB8B762A5C250808", "2D59DEE7EAC95253177ED8F4", "0454799D33E685C1A5BB20D9", "6EE6BC43101FAA2386628011", "9B3B02D3B3E31C5D6F298C80", "E0E4E6C01837A0B8DEECAE7E", "A06544B86FE39DD4A42DF791", "31C20E73FA29248CC7BF440A");
 			"name" = "Herbert";
 			"sourceTree" = "<group>";
 		};
@@ -288,7 +329,7 @@
 		"949D493B91791558E87BC5D7" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
+			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"BD92572B49AC16A86614498D" = {
@@ -300,7 +341,7 @@
 		"8ECC8B5D05B79F879ACDF1A2" = {
 			"isa" = "PBXResourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("31BF36017B0AFDB809786FD8", "5967618EEE597D973EA8F8CD");
+			"files" = ("31BF36017B0AFDB809786FD8", "5967618EEE597D973EA8F8CD", "43BF684E275A04DD49E83368");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"7D1043473D55BFA90E8530D3" = {
@@ -441,9 +482,9 @@
 			};
 			"buildConfigurationList" = "862894B703A6DEDF96A9DD6C";
 			"compatibilityVersion" = "Xcode 14.0";
-			"developmentRegion" = "zh-Hans";
+			"developmentRegion" = "en";
 			"hasScannedForEncodings" = "0";
-			"knownRegions" = ("zh-Hans", "en", "Base");
+			"knownRegions" = ("en", "zh-Hans", "ja", "Base");
 			"mainGroup" = "42944EBC669F21BC22392EB5";
 			"productRefGroup" = "FBDC4F23F93125BBEEAE800C";
 			"projectDirPath" = "";

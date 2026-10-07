@@ -64,7 +64,7 @@ struct GuideView: View {
         VStack(spacing: 11) {
             Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(Palette.mint)
             Text(key).font(.system(size: 28, weight: .bold, design: .monospaced))
-            Text(title).font(.system(size: 11)).foregroundStyle(Palette.muted)
+            Text(LocalizedStringKey(title)).font(.system(size: 11)).foregroundStyle(Palette.muted)
         }.frame(maxWidth: .infinity).padding(.vertical, 20).background(.white, in: RoundedRectangle(cornerRadius: 16))
     }
 
@@ -72,9 +72,9 @@ struct GuideView: View {
         VStack(alignment: .leading, spacing: 13) {
             HStack(spacing: 10) {
                 Text(number).font(.system(size: 12, weight: .bold, design: .monospaced)).foregroundStyle(Palette.mint)
-                Text(title).font(.system(size: 17, weight: .semibold))
+                Text(LocalizedStringKey(title)).font(.system(size: 17, weight: .semibold))
             }
-            Text(body).font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+            Text(LocalizedStringKey(body)).font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
             Text(code).font(.system(size: 19, weight: .medium, design: .monospaced)).foregroundStyle(Palette.mint)
                 .textSelection(.enabled).padding(16).frame(maxWidth: .infinity, alignment: .leading)
                 .background(Palette.mintLight.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))

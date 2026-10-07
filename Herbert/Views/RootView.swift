@@ -53,7 +53,8 @@ struct RootView: View {
                     }
                 }.padding(.horizontal, 20).padding(.top, 30)
                 List(AppSection.allCases, selection: $selection) { section in
-                    Label(section.rawValue, systemImage: section.symbol).padding(.vertical, 9).tag(section)
+                    Label(LocalizedStringKey(section.rawValue), systemImage: section.symbol).padding(.vertical, 9).tag(
+                        section)
                 }.listStyle(.sidebar).scrollContentBackground(.hidden)
                 VStack(alignment: .leading, spacing: 10) {
                     Eyebrow(text: "YOUR EXPLORATION")

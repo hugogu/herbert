@@ -16,7 +16,7 @@ struct Eyebrow: View {
     var text: String
     var color: Color = Palette.muted
     var body: some View {
-        Text(text).font(.system(size: 10, weight: .bold, design: .monospaced))
+        Text(LocalizedStringKey(text)).font(.system(size: 10, weight: .bold, design: .monospaced))
             .tracking(2).foregroundStyle(color)
     }
 }
@@ -25,7 +25,7 @@ struct Pill: View {
     var text: String
     var color: Color = Palette.mint
     var body: some View {
-        Text(text).font(.system(size: 11, weight: .semibold, design: .monospaced))
+        Text(LocalizedStringKey(text)).font(.system(size: 11, weight: .semibold, design: .monospaced))
             .padding(.horizontal, 9).padding(.vertical, 5)
             .foregroundStyle(color).background(color.opacity(0.09), in: Capsule())
     }

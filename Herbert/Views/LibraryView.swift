@@ -46,7 +46,7 @@ struct LibraryView: View {
                             Button {
                                 filter = item
                             } label: {
-                                Text(item.rawValue).font(.system(size: 13, weight: .medium))
+                                Text(LocalizedStringKey(item.rawValue)).font(.system(size: 13, weight: .medium))
                                     .padding(.horizontal, 15).frame(minHeight: 40)
                                     .background(filter == item ? Palette.ink : Color.white, in: Capsule())
                                     .foregroundStyle(filter == item ? .white : Palette.muted)
@@ -66,7 +66,7 @@ struct LibraryView: View {
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                             }
-                            .buttonStyle(.plain).accessibilityLabel("清除搜索")
+                            .buttonStyle(.plain).accessibilityLabel("清除搜索").accessibilityIdentifier("clear-search")
                         }
                     }.padding(14).background(.white, in: RoundedRectangle(cornerRadius: 13))
                         .overlay(RoundedRectangle(cornerRadius: 13).stroke(Palette.line, lineWidth: 1))
@@ -124,7 +124,7 @@ struct LibraryView: View {
                     Eyebrow(
                         text: store.snapshot.lastProblemID == nil ? "YOUR FIRST EXPEDITION" : "PICK UP YOUR THOUGHTS",
                         color: Palette.mintLight)
-                    Text(store.snapshot.lastProblemID == nil ? "从第一步开始" : "继续你的探索")
+                    Text(LocalizedStringKey(store.snapshot.lastProblemID == nil ? "从第一步开始" : "继续你的探索"))
                         .font(.system(size: 23, weight: .semibold)).foregroundStyle(.white)
                     Text("\(problem.number)  ·  \(problem.title)")
                         .font(.system(size: 11, design: .monospaced)).foregroundStyle(.white.opacity(0.65)).lineLimit(1)
@@ -179,7 +179,9 @@ private struct ProblemCard: View {
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line.opacity(0.8), lineWidth: 1))
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(
-                "关卡 \(problem.number)，\(problem.title)，最多 \(problem.byteLimit) byte\(progress.bestBytes == nil ? "" : "，已完成")"
+                L10n.text(
+                    "关卡 %@，%@，最多 %ld byte%@", problem.number, problem.title, problem.byteLimit,
+                    progress.bestBytes == nil ? "" : L10n.text("，已完成"))
             )
     }
 }

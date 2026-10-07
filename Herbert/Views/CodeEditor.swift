@@ -54,7 +54,7 @@ final class EditorController: ObservableObject {
             view.keyboardType = .asciiCapable
             view.textContainerInset = UIEdgeInsets(top: 14, left: 8, bottom: 14, right: 8)
             view.accessibilityIdentifier = "code-editor"
-            view.accessibilityLabel = "H 代码"
+            view.accessibilityLabel = L10n.text("H 代码")
             controller.textView = view
             return view
         }
@@ -98,7 +98,7 @@ final class EditorController: ObservableObject {
             view.isContinuousSpellCheckingEnabled = false
             view.textContainerInset = NSSize(width: 8, height: 14)
             view.setAccessibilityIdentifier("code-editor")
-            view.setAccessibilityLabel("H 代码")
+            view.setAccessibilityLabel(L10n.text("H 代码"))
             scroll.drawsBackground = false
             scroll.hasVerticalScroller = true
             controller.textView = view

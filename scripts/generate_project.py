@@ -50,6 +50,14 @@ for relative, file_type in [('Herbert/Assets.xcassets', 'folder.assetcatalog'), 
     ref = obj(relative, 'PBXFileReference', lastKnownFileType=file_type, path=relative, sourceTree='<group>')
     app_files.append(ref)
     resources.append(obj(relative + ':build', 'PBXBuildFile', fileRef=ref))
+localized_files = []
+for language in ['en', 'zh-Hans', 'ja']:
+    relative = f'Sources/HerbertCore/Resources/{language}.lproj/Localizable.strings'
+    localized_files.append(obj(relative, 'PBXFileReference', lastKnownFileType='text.plist.strings',
+                               name=language, path=relative, sourceTree='<group>'))
+translations = obj('translations', 'PBXVariantGroup', children=localized_files, name='Localizable.strings', sourceTree='<group>')
+app_files.append(translations)
+resources.append(obj('translations:build', 'PBXBuildFile', fileRef=translations))
 test_files, test_sources = [], []
 for path in sorted((ROOT / 'HerbertUITests').glob('*.swift')):
     relative = str(path.relative_to(ROOT))
@@ -111,7 +119,7 @@ obj('uitests', 'PBXNativeTarget', buildConfigurationList=configs('tests', test_s
 obj('project', 'PBXProject', attributes={'BuildIndependentTargetsInParallel': 'YES', 'LastUpgradeCheck': '2700',
     'TargetAttributes': {app_id: {'CreatedOnToolsVersion': '27.0'}, test_id: {'CreatedOnToolsVersion': '27.0', 'TestTargetID': app_id}}},
     buildConfigurationList=configs('project', {'CLANG_WARN_DOCUMENTATION_COMMENTS': 'YES', 'CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER': 'YES'}),
-    compatibilityVersion='Xcode 14.0', developmentRegion='zh-Hans', hasScannedForEncodings='0', knownRegions=['zh-Hans', 'en', 'Base'],
+    compatibilityVersion='Xcode 14.0', developmentRegion='en', hasScannedForEncodings='0', knownRegions=['en', 'zh-Hans', 'ja', 'Base'],
     mainGroup=root_group, productRefGroup=products, projectDirPath='', projectRoot='', packageReferences=[package], targets=[app_id, test_id])
 text = '// !$*UTF8*$!\n' + render({'archiveVersion': '1', 'classes': {}, 'objectVersion': '56', 'objects': objects, 'rootObject': project_id}) + '\n'
 (PROJECT / 'project.pbxproj').write_text(text)

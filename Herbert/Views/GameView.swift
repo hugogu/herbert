@@ -102,7 +102,7 @@ struct GameView: View {
 
     private var heading: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: "PROBLEM \(model.problem.number)  /  ORIGINAL COLLECTION")
+            Eyebrow(text: L10n.text("PROBLEM %@  /  ORIGINAL COLLECTION", model.problem.number))
             Text(model.problem.title).font(.system(size: 25, weight: .bold, design: .rounded))
             Text("由 \(model.problem.author) 创作 · 点亮所有目标，试着把代码再缩短一点。")
                 .font(.system(size: 12)).foregroundStyle(Palette.muted)
@@ -124,7 +124,7 @@ struct GameView: View {
 
     private func stat(_ title: String, value: String, danger: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title).font(.system(size: 10)).foregroundStyle(Palette.muted)
+            Text(LocalizedStringKey(title)).font(.system(size: 10)).foregroundStyle(Palette.muted)
             Text(value).font(.system(size: 17, weight: .semibold, design: .monospaced))
                 .foregroundStyle(danger ? Palette.danger : Palette.ink).contentTransition(.numericText()).lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -156,7 +156,7 @@ struct GameView: View {
                 commandKey("r", label: "右转", insertion: "r")
                 Menu {
                     ForEach(["a", "X", "(", ")", ",", ":", "+", "-", "1", "2", "3", "4", "\n"], id: \.self) { text in
-                        Button(text == "\n" ? "换行" : text) { editor.insert(text) }
+                        Button(LocalizedStringKey(text == "\n" ? "换行" : text)) { editor.insert(text) }
                     }
                     Divider()
                     Button("过程模板 a(X):…") { editor.insert("a(X):sa(X-1)\na(4)") }
@@ -200,11 +200,11 @@ struct GameView: View {
         } label: {
             HStack(spacing: 6) {
                 Text(key).font(.system(size: 17, weight: .bold, design: .monospaced))
-                Text(label).font(.system(size: 10))
+                Text(LocalizedStringKey(label)).font(.system(size: 10))
             }.frame(maxWidth: .infinity).frame(height: 44)
                 .foregroundStyle(Palette.mint).background(
                     Palette.mintLight.opacity(0.6), in: RoundedRectangle(cornerRadius: 10))
-        }.buttonStyle(.plain).accessibilityLabel("插入 \(key) \(label)")
+        }.buttonStyle(.plain).accessibilityLabel(L10n.text("插入 %@ %@", key, L10n.text(label)))
             .accessibilityIdentifier("insert-\(key)")
     }
 
@@ -220,11 +220,11 @@ struct GameView: View {
 
     private var statusText: String {
         switch model.session.status {
-        case .ready: "观察棋盘，编写程序，然后运行。"
-        case .running: model.lastEvent == .trap ? "踩到陷阱，所有目标已重置。" : "Herbert 正在执行你的程序…"
-        case .paused: model.lastEvent == .trap ? "踩到陷阱，所有目标已重置。" : "已暂停，可以单步观察下一条指令。"
-        case .completed: "已完成！你的思路点亮了所有目标。"
-        case .ended: "程序已结束，还有目标未点亮。调整代码再试试。"
+        case .ready: L10n.text("观察棋盘，编写程序，然后运行。")
+        case .running: model.lastEvent == .trap ? L10n.text("踩到陷阱，所有目标已重置。") : L10n.text("Herbert 正在执行你的程序…")
+        case .paused: model.lastEvent == .trap ? L10n.text("踩到陷阱，所有目标已重置。") : L10n.text("已暂停，可以单步观察下一条指令。")
+        case .completed: L10n.text("已完成！你的思路点亮了所有目标。")
+        case .ended: L10n.text("程序已结束，还有目标未点亮。调整代码再试试。")
         case .failed(let message): message
         }
     }
@@ -237,7 +237,7 @@ struct GameView: View {
                     model.toggleRun()
                 } label: {
                     Label(
-                        model.isRunning ? "暂停" : model.isCompleted ? "再运行" : "运行",
+                        LocalizedStringKey(model.isRunning ? "暂停" : model.isCompleted ? "再运行" : "运行"),
                         systemImage: model.isRunning ? "pause.fill" : "play.fill")
                 }
                 .buttonStyle(PrimaryButtonStyle()).keyboardShortcut(.return, modifiers: .command)
@@ -267,7 +267,7 @@ struct GameView: View {
                     Button {
                         model.speed = speed
                     } label: {
-                        Text(speed == 64 ? "极速" : "\(Int(speed))×")
+                        Text(speed == 64 ? L10n.text("极速") : "\(Int(speed))×")
                             .font(.system(size: 10, weight: .semibold, design: .monospaced)).frame(
                                 width: 42, height: 26
                             )
