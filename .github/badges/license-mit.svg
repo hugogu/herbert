@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="113" height="20" role="img" aria-label="Code license: MIT">
+  <title>Code license: MIT</title>
+  <defs><clipPath id="badge"><rect width="113" height="20" rx="3"/></clipPath></defs>
+  <g clip-path="url(#badge)"><path fill="#31454b" d="M0 0h78v20H0z"/><path fill="#167d6b" d="M78 0h35v20H78z"/></g>
+  <g fill="#fff" font-family="Verdana,DejaVu Sans,sans-serif" font-size="11" text-anchor="middle">
+    <text x="39" y="14">code license</text><text x="95" y="14">MIT</text>
+  </g>
+</svg>

@@ -29,3 +29,7 @@ Xcode 的 App Intents 元数据工具输出了 “Metadata extraction skipped, n
 - 未连接 Cloudflare，不包含在线排名/账号。原站题库再分发授权尚未确认，不适用本项目 MIT 许可；见 [NOTICE.md](../NOTICE.md)。
 
 本地交付文件：`outputs/Herbert-macOS.zip`；构建源工程：`Herbert.xcodeproj`。
+
+## 开源仓库验证
+
+GitHub [CI 运行 37634662467](https://github.com/hugogu/herbert/actions/runs/37634662467) 在提交 `41c089d` 上通过全部步骤：严格格式检查、Python/Swift 测试、生成工程一致性检查、Mac Release 和 iPhone/iPad 无签名构建。在线 README 已检查实际图片载入与三列关卡画廊。审阅中发现 Flower 棋盘局部截图受到其他窗口遮挡，因此截图测试在每次捕获前显式激活 App，并重新生成及检查图片。MIT 徽章改为仓库内 SVG，避免外部图片服务载入失败。

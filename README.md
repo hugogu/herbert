@@ -6,7 +6,7 @@
 <p align="center">A little robot. A big idea. Find the shortest program through a world of patterns.</p>
 <p align="center">
   <a href="https://github.com/hugogu/herbert/actions/workflows/ci.yml"><img src="https://github.com/hugogu/herbert/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/code_license-MIT-167D6B" alt="Code license: MIT"></a>
+  <a href="LICENSE"><img src=".github/badges/license-mit.svg" alt="Code license: MIT"></a>
   <img src="https://img.shields.io/badge/Swift-6.0-F05138" alt="Swift 6.0">
   <img src="https://img.shields.io/badge/platforms-iOS_17%2B_%7C_macOS_14%2B-31454B" alt="iOS 17+ and macOS 14+">
 </p>
