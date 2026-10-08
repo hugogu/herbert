@@ -90,7 +90,7 @@ common = {'SDKROOT': 'auto', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator ma
           'CODE_SIGN_STYLE': 'Automatic', 'SWIFT_STRICT_CONCURRENCY': 'complete',
           'ENABLE_USER_SCRIPT_SANDBOXING': 'YES'}
 app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'PRODUCT_NAME': 'Herbert',
-                'CURRENT_PROJECT_VERSION': '3', 'MARKETING_VERSION': '0.3.0',
+                'CURRENT_PROJECT_VERSION': '4', 'MARKETING_VERSION': '0.3.1',
                 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
                 'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert',
                 'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.puzzle-games',

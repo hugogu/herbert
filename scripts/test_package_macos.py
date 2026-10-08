@@ -18,8 +18,8 @@ class MacPackageTests(unittest.TestCase):
         self.metadata = {
             'CFBundleIdentifier': 'info.hugogu.Herbert', 'CFBundlePackageType': 'APPL',
             'CFBundleSupportedPlatforms': ['MacOSX'], 'CFBundleExecutable': 'Herbert',
-            'LSMinimumSystemVersion': '14.0', 'CFBundleShortVersionString': '0.3.0',
-            'CFBundleVersion': '3',
+            'LSMinimumSystemVersion': '14.0', 'CFBundleShortVersionString': '0.3.1',
+            'CFBundleVersion': '4',
         }
         self.info.write_bytes(plistlib.dumps(self.metadata))
 
@@ -72,7 +72,7 @@ class MacPackageTests(unittest.TestCase):
     def test_accepts_sandboxed_network_client_without_debugger_access(self, run, resources):
         run.side_effect = [b'arm64 x86_64', b'', plistlib.dumps({
             'com.apple.security.app-sandbox': True, 'com.apple.security.network.client': True})]
-        self.assertEqual(check_app(self.app)['CFBundleShortVersionString'], '0.3.0')
+        self.assertEqual(check_app(self.app)['CFBundleShortVersionString'], '0.3.1')
         resources.assert_called_once_with(self.app)
 
     @patch('package_macos.run', return_value=b'arm64')
