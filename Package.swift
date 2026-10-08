@@ -8,10 +8,13 @@ let package = Package(
     products: [
         .library(name: "HerbertCore", targets: ["HerbertCore"]),
         .library(name: "HerbertCommunity", targets: ["HerbertCommunity"]),
+        .library(name: "HerbertBattlefield", targets: ["HerbertBattlefield"]),
     ],
     targets: [
         .target(name: "HerbertCore", resources: [.process("Resources")]),
         .target(name: "HerbertCommunity", dependencies: ["HerbertCore"], resources: [.process("Resources")]),
+        .target(name: "HerbertBattlefield", dependencies: ["HerbertCore"]),
+        .testTarget(name: "HerbertBattlefieldTests", dependencies: ["HerbertBattlefield"]),
         .testTarget(
             name: "HerbertCoreTests", dependencies: ["HerbertCore", "HerbertCommunity"],
             resources: [.process("Fixtures")]),
