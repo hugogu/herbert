@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed unless a built app contains only the 30 original puzzle resources."""
+"""Fail closed unless a built app contains only the 50 original puzzle resources."""
 import argparse
 import json
 from pathlib import Path
@@ -10,7 +10,7 @@ def check_bundle(app):
         raise ValueError('Pass a built .app directory, not the source tree.')
     originals = []
     for path in app.rglob('*'):
-        if 'HerbertCommunity' in path.name or path.name in {'problems.json', 'original-solutions.json'}:
+        if 'HerbertCommunity' in path.name or path.name == 'problems.json' or path.name.endswith('-solutions.json'):
             raise ValueError(f'Non-store resource in app: {path.relative_to(app)}')
         if path.suffix == '.json':
             data = json.loads(path.read_text())
@@ -21,8 +21,8 @@ def check_bundle(app):
     if len(originals) != 1:
         raise ValueError('Expected exactly one original-problems.json in the app.')
     catalog = originals[0]
-    if [item.get('id') for item in catalog] != list(range(10001, 10031)):
-        raise ValueError('Expected the stable IDs 10001–10030 only.')
+    if [item.get('id') for item in catalog] != list(range(10001, 10051)):
+        raise ValueError('Expected the stable IDs 10001–10050 only.')
     if any(not item.get('lesson') or item.get('sourceURL') for item in catalog):
         raise ValueError('Every puzzle must be an original curriculum lesson.')
     canonical = Path(__file__).resolve().parents[1] / 'Sources/HerbertCore/Resources/original-problems.json'
@@ -38,7 +38,7 @@ def main():
         check_bundle(args.app)
     except (ValueError, OSError) as error:
         parser.exit(1, f'App Store resource check failed: {error}\n')
-    print('App Store resource check passed: 30 originals, no community archive or reference solutions.')
+    print('App Store resource check passed: 50 originals, no community archive or reference solutions.')
 
 
 if __name__ == '__main__':

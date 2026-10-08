@@ -1,122 +1,602 @@
 [
   {
     "id": 10001,
-    "source": "s"
+    "source": "s",
+    "steps": 1,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      12
+    ],
+    "endHeading": 0
   },
   {
     "id": 10002,
-    "source": "ssss"
+    "source": "ssss",
+    "steps": 4,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      13
+    ],
+    "endHeading": 0
   },
   {
     "id": 10003,
-    "source": "sssrsss"
+    "source": "sssrsss",
+    "steps": 7,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      13
+    ],
+    "endHeading": 1
   },
   {
     "id": 10004,
-    "source": "ssslssss"
+    "source": "ssslssss",
+    "steps": 8,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      14
+    ],
+    "endHeading": 3
   },
   {
     "id": 10005,
-    "source": "ssrrssss"
+    "source": "ssrrssss",
+    "steps": 8,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      14
+    ],
+    "endHeading": 2
   },
   {
     "id": 10006,
-    "source": "rsslsslss"
+    "source": "rsslsslss",
+    "steps": 9,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      12
+    ],
+    "endHeading": 3
   },
   {
     "id": 10007,
-    "source": "sssrssslsssrsss"
+    "source": "sssrssslsssrsss",
+    "steps": 15,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      14
+    ],
+    "endHeading": 1
   },
   {
     "id": 10008,
-    "source": "ssrsslsssslss"
+    "source": "ssrsslsssslss",
+    "steps": 13,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      11
+    ],
+    "endHeading": 3
   },
   {
     "id": 10009,
-    "source": "ssssrssssrssrssss"
+    "source": "ssssrssssrssrssss",
+    "steps": 17,
+    "blocked": 0,
+    "traps": 1,
+    "endPosition": [
+      10,
+      14
+    ],
+    "endHeading": 3
   },
   {
     "id": 10010,
-    "source": "ssssssrssssssrssssssrssssssr"
+    "source": "ssssssrssssssrssssssrssssssr",
+    "steps": 26,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      9,
+      18
+    ],
+    "endHeading": 3
   },
   {
     "id": 10011,
-    "source": "a:sss\naaaaaa"
+    "source": "a:sss\naaaaaa",
+    "steps": 18,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      3
+    ],
+    "endHeading": 0
   },
   {
     "id": 10012,
-    "source": "a:ssssr\naaaa"
+    "source": "a:ssssr\naaaa",
+    "steps": 18,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      17
+    ],
+    "endHeading": 3
   },
   {
     "id": 10013,
-    "source": "a:ssrssl\naaaaa"
+    "source": "a:ssrssl\naaaaa",
+    "steps": 29,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      17,
+      11
+    ],
+    "endHeading": 1
   },
   {
     "id": 10014,
-    "source": "a:sssrrsssr\naaaa"
+    "source": "a:sssrrsssr\naaaa",
+    "steps": 30,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      15,
+      12
+    ],
+    "endHeading": 1
   },
   {
     "id": 10015,
-    "source": "a:ssrssl\nb:aaa\nbbb"
+    "source": "a:ssrssl\nb:aaa\nbbb",
+    "steps": 53,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      21,
+      3
+    ],
+    "endHeading": 1
   },
   {
     "id": 10016,
-    "source": "a:srsla\na"
+    "source": "a:srsla\na",
+    "steps": 31,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      13
+    ],
+    "endHeading": 1
   },
   {
     "id": 10017,
-    "source": "a(X):sa(X-1)\na(7)ra(4)"
+    "source": "a(X):sa(X-1)\na(7)ra(4)",
+    "steps": 12,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      13
+    ],
+    "endHeading": 1
   },
   {
     "id": 10018,
-    "source": "a(X):sa(X-1)\nb:a(8)ra(4)r\nbb"
+    "source": "a(X):sa(X-1)\nb:a(8)ra(4)r\nbb",
+    "steps": 26,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      10,
+      21
+    ],
+    "endHeading": 3
   },
   {
     "id": 10019,
-    "source": "b(X):sb(X-1)\na(X):b(X)ra(X+1)\na(1)"
+    "source": "b(X):sb(X-1)\na(X):b(X)ra(X+1)\na(1)",
+    "steps": 53,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      8,
+      7
+    ],
+    "endHeading": 0
   },
   {
     "id": 10020,
-    "source": "b(X):sb(X-1)\na(X):b(X)rb(X)la(X-1)\na(6)"
+    "source": "b(X):sb(X-1)\na(X):b(X)rb(X)la(X-1)\na(6)",
+    "steps": 53,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      23,
+      2
+    ],
+    "endHeading": 1
   },
   {
     "id": 10021,
-    "source": "a(X):XXXX\na(sssr)"
+    "source": "a(X):XXXX\na(sssr)",
+    "steps": 14,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      17
+    ],
+    "endHeading": 3
   },
   {
     "id": 10022,
-    "source": "a(X,Y):Ya(X-1,Y)\na(6,ssrssl)"
+    "source": "a(X,Y):Ya(X-1,Y)\na(6,ssrssl)",
+    "steps": 35,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      18,
+      9
+    ],
+    "endHeading": 1
   },
   {
     "id": 10023,
-    "source": "a(X,Y):Xa(Y,X)\nra(ssssssrssr,sssssslssl)"
+    "source": "a(X,Y):Xa(Y,X)\nra(ssssssrssr,sssssslssl)",
+    "steps": 57,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      8,
+      16
+    ],
+    "endHeading": 3
   },
   {
     "id": 10024,
-    "source": "a(X):Xla(Xss)\na(ss)"
+    "source": "a(X):Xla(Xss)\na(ss)",
+    "steps": 98,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      20,
+      2
+    ],
+    "endHeading": 0
   },
   {
     "id": 10025,
-    "source": "a(X):XrrXla(Xs)\na(s)"
+    "source": "a(X):XrrXla(Xs)\na(s)",
+    "steps": 85,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      4,
+      12
+    ],
+    "endHeading": 3
   },
   {
     "id": 10026,
-    "source": "a(X,Y):Ya(X-1,Y)\nb:a(10,s)\nbrrbla(8,s)lb"
+    "source": "a(X,Y):Ya(X-1,Y)\nb:a(10,s)\nbrrbla(8,s)lb",
+    "steps": 42,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      11
+    ],
+    "endHeading": 0
   },
   {
     "id": 10027,
-    "source": "b(X):sb(X-1)\na(X,Y):b(8)Yb(2)Ya(X-1,rrY)\nra(5,r)"
+    "source": "b(X):sb(X-1)\na(X,Y):b(8)Yb(2)Ya(X-1,rrY)\nra(5,r)",
+    "steps": 81,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      14
+    ],
+    "endHeading": 1
   },
   {
     "id": 10028,
-    "source": "b(X):sb(X-1)\na(X):b(X)rrb(X)lsla(X+1)\na(1)"
+    "source": "b(X):sb(X-1)\na(X):b(X)rrb(X)lsla(X+1)\na(1)",
+    "steps": 121,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      12
+    ],
+    "endHeading": 0
   },
   {
     "id": 10029,
-    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nb(3)b(6)b(9)b(12)"
+    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nb(3)b(6)b(9)b(12)",
+    "steps": 125,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      21
+    ],
+    "endHeading": 3
   },
   {
     "id": 10030,
-    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\ndddd"
+    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\ndddd",
+    "steps": 238,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      10
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10031,
+    "source": "b(N):sb(N-1)\na(N,T):b(24)Tb(3)Ta(N-1,rrT)\nra(6,r)",
+    "steps": 224,
+    "blocked": 60,
+    "traps": 0,
+    "endPosition": [
+      3,
+      21
+    ],
+    "endHeading": 2
+  },
+  {
+    "id": 10032,
+    "source": "b(N):sb(N-1)\na(N):b(24)rrb(24)lb(4)la(N-1)\na(6)",
+    "steps": 289,
+    "blocked": 126,
+    "traps": 0,
+    "endPosition": [
+      22,
+      13
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10033,
+    "source": "b(N):sb(N-1)\na(H,W):b(H)rb(W)rb(H-2)rb(W-2)ra(H-4,W-4)\na(18,14)",
+    "steps": 158,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      13
+    ],
+    "endHeading": 2
+  },
+  {
+    "id": 10034,
+    "source": "b(N):sb(N-1)\na(K,N,T):Tb(N)rrb(N)Tb(4)a(K-1,N+2,rrT)\na(5,2,r)",
+    "steps": 140,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      12,
+      2
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10035,
+    "source": "b(N):sb(N-1)\na:b(9)rb(3)lb(2)rrb(2)rb(3)lb(9)r\naaaa",
+    "steps": 121,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      23,
+      15
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10036,
+    "source": "b(N):sb(N-1)\na(N,X,Y):b(3)Xb(N)Ya(N-2,Y,X)\na(10,r,l)",
+    "steps": 54,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      6
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10037,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\na(X,Y):b(X)rb(Y)la(X-1,Y+1)lb(Y)lb(X)rr\nq(a(4,1)r)",
+    "steps": 222,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      2,
+      2
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10038,
+    "source": "b(N):sb(N-1)\na(N):b(N)ra(N-2)lrrb(N)rr\nc:a(10)r\ncccc",
+    "steps": 307,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      6,
+      8
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10039,
+    "source": "b(N):sb(N-1)\na(N):b(N)la(N-2)rra(N-2)rb(N)rr\na(7)",
+    "steps": 133,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      19
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10040,
+    "source": "b(N):sb(N-1)\na(W,H):b(W)rb(H)rb(W)rb(H)rrc(H-2,W-2)\nc(W,H):b(W)lb(H)lb(W)lb(H)lla(H-2,W-2)\na(8,10)",
+    "steps": 110,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      10
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10041,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nd(N):q(b(N)r)\ne:d(2)rb(4)l\na(N):q(e)lb(16)rb(5)a(N-1)\na(4)",
+    "steps": 356,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      19,
+      7
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10042,
+    "source": "b(N):sb(N-1)\na(K,X,Y,T):b(X)Tb(Y)Ta(K-1,Y,X-2,rrT)\nra(4,8,4,r)",
+    "steps": 62,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      19
+    ],
+    "endHeading": 2
+  },
+  {
+    "id": 10043,
+    "source": "b(N):sb(N-1)\na(N,X,Y):Xa(N-1,Y,X)b(2)Ya(N-1,X,Y)b(2)a(N-1,X,Y)Yb(2)a(N-1,Y,X)X\na(3,r,l)",
+    "steps": 207,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      5,
+      5
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10044,
+    "source": "a(N,X):a(N-1,XrXlXlXrX)c(2-N,X)\nc(N,X):XrXrXrXr\na(3,ss)",
+    "steps": 298,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      4,
+      21
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10045,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nc(N,S):b(S)lb(S)ra(N-1,S-3)rb(S)rb(S)r\na(N,S):q(c(N,S))\na(3,7)",
+    "steps": 1010,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      22,
+      10
+    ],
+    "endHeading": 2
+  },
+  {
+    "id": 10046,
+    "source": "a(N):a(N-1)rc(N-1)ssr\nc(N):lssa(N-1)lc(N-1)\nssa(6)",
+    "steps": 253,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      3,
+      9
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10047,
+    "source": "a(N):a(N-1)rc(N-1)sr\nc(N):lsa(N-1)lc(N-1)\nd(N):lsf(N-1)ld(N-1)\nf(N):f(N-1)rd(N-1)sr\ne:sa(5)rrd(5)srrr\neeee",
+    "steps": 672,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      16,
+      16
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10048,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\na(N,D,T):b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(4,7,r)r)",
+    "steps": 996,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      8,
+      18
+    ],
+    "endHeading": 2
+  },
+  {
+    "id": 10049,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\nc(N,W):d(W)rb(W+1)lc(N-1,W)lb(W+1)r\na(N,W):c(N,W)b(W+2)a(N-1,W-1)rrb(W+2)rr\nq(a(3,3)r)",
+    "steps": 691,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      3,
+      10
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10050,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\na(N,D,T):d(D)b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(3,6,r)r)",
+    "steps": 904,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      7,
+      16
+    ],
+    "endHeading": 1
   }
 ]

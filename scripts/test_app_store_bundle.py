@@ -42,6 +42,10 @@ class StoreBundleTests(unittest.TestCase):
             check_bundle(self.app)
 
     def test_rejects_test_only_solution_leak(self):
-        (self.resources / 'original-solutions.json').write_text('[]')
-        with self.assertRaises(ValueError):
-            check_bundle(self.app)
+        for name in ['original-solutions.json', 'community-study-solutions.json']:
+            with self.subTest(name=name):
+                path = self.resources / name
+                path.write_text('[]')
+                with self.assertRaises(ValueError):
+                    check_bundle(self.app)
+                path.unlink()

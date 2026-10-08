@@ -192,12 +192,12 @@ final class HerbertUITests: XCTestCase {
     func testCurriculumHintsAndCatalogEdition() {
         let app = launch(language: "en")
         #if APP_STORE
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
             XCTAssertFalse(app.buttons["filter-community"].exists)
         #else
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,799 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,819 PROBLEMS")
             app.buttons["filter-originals"].activateControl()
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
             app.buttons["filter-community"].activateControl()
             XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,769 PROBLEMS")
             app.buttons["filter-all"].activateControl()
@@ -224,6 +224,37 @@ final class HerbertUITests: XCTestCase {
         app.buttons["next-problem"].activateControl()
         XCTAssertTrue(app.staticTexts["Four lanterns"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["lesson-hint-1"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testAdvancedWallCountingAndRecursiveCompositionComplete() {
+        let app = launch(language: "en")
+        for (id, source) in [
+            (10031, "b(N):sb(N-1)\na(N,T):b(24)Tb(3)Ta(N-1,rrT)\nra(6,r)"),
+            (
+                10050,
+                "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\n"
+                    + "a(N,D,T):d(D)b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(3,6,r)r)"
+            ),
+        ] {
+            openProblem(id, in: app)
+            app.textViews["code-editor"].activateControl()
+            app.textViews["code-editor"].typeText(source)
+            #if os(macOS)
+                app.scrollViews.containing(.textView, identifier: "code-editor").firstMatch.scroll(
+                    byDeltaX: 0, deltaY: -800)
+            #else
+                app.scrollViews.containing(.textView, identifier: "code-editor").firstMatch.swipeUp()
+            #endif
+            app.buttons["Turbo"].activateControl()
+            app.buttons["run-program"].activateControl()
+            XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 10), "L\(id - 10000)")
+            let board = app.descendants(matching: .any)["game-board"].firstMatch
+            XCTAssertTrue(board.label.contains("trail on"), board.label)
+            app.buttons["Back"].activateControl()
+            app.buttons["clear-search"].activateControl()
+        }
         app.terminate()
     }
 
@@ -257,7 +288,7 @@ final class HerbertUITests: XCTestCase {
             XCTAssertGreaterThanOrEqual(window.frame.height, 1000)
         #endif
         capture(app, name: "course-library")
-        for (id, name) in [(10019, "spiral"), (10029, "windows"), (10030, "garden")] {
+        for (id, name) in [(10038, "rosette"), (10044, "seal"), (10049, "mosaic"), (10050, "cathedral")] {
             openProblem(id, in: app)
             capture(app, name: "course-\(name)")
             app.activate()
@@ -269,19 +300,23 @@ final class HerbertUITests: XCTestCase {
             image.name = "readme-course-\(name)-board"
             image.lifetime = .keepAlways
             add(image)
-            if id == 10030 {
+            if id == 10049 {
                 app.textViews["code-editor"].activateControl()
-                app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(4)")
-                for _ in 0..<4 { app.buttons["step-program"].activateControl() }
+                app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(3)")
+                for _ in 0..<3 { app.buttons["step-program"].activateControl() }
                 app.buttons["board-options"].activateControl()
                 selectBoardStyle("classic", in: app)
                 app.buttons["close-board-options"].activateControl()
                 XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
-                capture(app, name: "course-garden-classic")
+                capture(app, name: "course-mosaic-classic")
                 let classic = XCTAttachment(screenshot: board.screenshot())
-                classic.name = "readme-course-garden-classic-board"
+                classic.name = "readme-course-mosaic-classic-board"
                 classic.lifetime = .keepAlways
                 add(classic)
+                app.buttons["board-options"].activateControl()
+                selectBoardStyle("modern", in: app)
+                app.buttons["close-board-options"].activateControl()
+                XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
             }
             app.buttons[language == "en" ? "Back" : "返回"].activateControl()
             app.buttons["clear-search"].activateControl()

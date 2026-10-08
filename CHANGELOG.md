@@ -7,10 +7,14 @@ save or API formats through documented migrations.
 
 ### Added
 
-- 30 independently designed MIT lessons in six stages, with three-language goals and
+- 50 independently designed MIT lessons in ten stages, including 20 advanced walled
+  challenges with parameter swaps, recursive returns, mutual recursion and composition. Three-language goals and
   progressive hints; every reference program is verified with the real H engine.
-- `HerbertAppStore`, bundling only original lessons. Default `Herbert` contains 1,799
+- `HerbertAppStore`, bundling only original lessons. Default `Herbert` contains 1,819
   problems, with the 1,769-problem community archive in an optional module.
+- Community #0001–#0020 study, eight verified solutions, independent geometric oracles,
+  and regressions against two discovered fixed-loop shortcuts. New localized app captures
+  showcase the advanced course.
 - Final iOS/Mac store-bundle resource audits, original course documentation and device checks.
 - Ignored local signing configuration shared by both schemes.
 - Automatic English, Simplified Chinese, and Japanese localization, including guide,

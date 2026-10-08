@@ -12,6 +12,7 @@ root = File.expand_path('..', __dir__)
 fixtures = JSON.parse(File.read(File.join(root, 'Tests/HerbertCoreTests/Fixtures/hoj-compatibility.json')))
 problems = JSON.parse(File.read(File.join(root, 'Sources/HerbertCore/Resources/original-problems.json')))
 solutions = JSON.parse(File.read(File.join(root, 'Tests/HerbertCoreTests/Fixtures/original-solutions.json')))
+study = JSON.parse(File.read(File.join(root, 'Tests/HerbertCoreTests/Fixtures/community-study-solutions.json')))
 
 Dir.chdir(File.join(reference, 'judge')) do
   require './judge'
@@ -46,5 +47,13 @@ Dir.chdir(File.join(reference, 'judge')) do
     result = HJudge.new(field, solution.fetch('source')).judge
     abort "Failed L#{problem['id'] - 10_000}: #{result.status}" unless result.status == 'Passed System Test'
   end
+  community = JSON.parse(File.read(File.join(root, 'Sources/HerbertCommunity/Resources/problems.json')))
+  study.each do |solution|
+    problem = community.find { |p| p['id'] == solution.fetch('id') }
+    abort 'Study solution exceeds original byte budget' if CountSrc(solution.fetch('source')) > problem.fetch('byteLimit')
+    field = problem.fetch('rows').join("\n") + "\n" + problem.fetch('byteLimit').to_s
+    result = HJudge.new(field, solution.fetch('source')).judge
+    abort "Failed community #{problem['id']}: #{result.status}" unless result.status == 'Passed System Test'
+  end
 end
-puts "PASS: #{fixtures.length} command/byte fixtures and #{problems.length} original lessons, and community #0001 wall collision at #{commit}"
+puts "PASS: #{fixtures.length} command/byte fixtures, #{problems.length} originals, #{study.length} community study solutions, and community #0001 wall collision at #{commit}"

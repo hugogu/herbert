@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "source": "ssss"
+  },
+  {
+    "id": 2,
+    "source": "a:sa\na"
+  },
+  {
+    "id": 3,
+    "source": "a(X):XXXa(Xs)\na(srs)"
+  },
+  {
+    "id": 4,
+    "source": "a(X):XXa(Xs)\na(r)"
+  },
+  {
+    "id": 5,
+    "source": "a(X):XllXra(Xss)\na()"
+  },
+  {
+    "id": 6,
+    "source": "a(X):XXa(Xs)\na(sl)"
+  },
+  {
+    "id": 9,
+    "source": "a(X,Y):XXa(XY,Y)\na(l,srsl)"
+  },
+  {
+    "id": 14,
+    "source": "a(X):Xra(Xs)\na()"
+  }
+]

@@ -2,8 +2,8 @@
 
 ## 选择正确版本
 
-- `Herbert`：默认开源版，先显示原创 L01–L30，再显示社区题；总数 1,799。
-- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；只有 L01–L30，总数 30。
+- `Herbert`：默认开源版，先显示原创 L01–L50，再显示社区题；总数 1,819。
+- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；只有 L01–L50，总数 50。
 
 社区资源在 `Sources/HerbertCommunity/`，App Store target 仅链接 `HerbertCore`。
 `APP_STORE` 编译条件还会移除社区筛选和原站 Problems 链接。参考解位于测试 target，两个应用均不打包答案。
@@ -14,7 +14,7 @@
 1. 打开 `Herbert.xcodeproj`，选择 **HerbertAppStore** scheme。
 2. 连接设备并选择运行目标。启用系统要求的开发者模式和信任设置。
 3. 给 app 和 UI test target 选择自己的签名团队。推荐在被 Git 忽略的 `Config/Local.xcconfig` 中写 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`；生成工程时不会覆盖此文件。不要提交个人签名配置、证书或密钥。
-4. Run 安装。新安装时应显示 **30 PROBLEMS**，继续卡片为 L01。
+4. Run 安装。新安装时应显示 **50 PROBLEMS**，继续卡片为 L01。
 
 两种 scheme 沿用同一个 Bundle ID；同一设备上互相安装会替换应用，不会同时存在。
 先导出已有进度备份。已有社区记录会留在本地文件中，但原创版不显示、不计数、不导出这些记录。
@@ -24,13 +24,16 @@
 
 请分别记录 iPhone 和 iPad 的型号、系统版本、应用版本/build、Git commit 和界面语言。
 
-- [ ] 总数为 30，搜索 `0037` 无社区结果；搜索 `L30` 或 `10030` 可找到发条花园。
+- [ ] 总数为 50，搜索 `0037` 无社区结果；搜索 `L50` 或 `10050` 可找到星穹圣殿。
 - [ ] L01：输入 `s` 并运行，应通关；下一关进入 L02，提示重新收起。
 - [ ] L02：输入 `ssss`，单步四次通关；最后一次显示 4 个目标全亮。
 - [ ] L06：输入 `s` 单步，墙阻挡前进但程序不报错；重置后用 `rsslsslss` 通关。
 - [ ] L08：输入 `ssss` 单步四次，第四步踩陷阱，之前点亮的目标清零；重置后用 `ssrsslsssslss` 通关。
 - [ ] L09：用 `ssssrssssrssrssss` 运行，踩陷阱后通过重新点亮目标完成。
 - [ ] L19、L29、L30：从测试用 [参考解](../Tests/HerbertCoreTests/Fixtures/original-solutions.json) 复制程序，普通速度与极速均能通关，轨迹无断段。
+- [ ] L31、L32：参考解故意多走到墙边，机器人停留后继续运行并通关。
+- [ ] L44：输入 `sss`，第三次前进踩到陷阱、目标清零；参考解不踩陷阱且可通关。
+- [ ] L38、L43、L49、L50：参考解在普通/极速下均通关；较长的多参数、嵌套程序可以编辑、粘贴和暂停。
 - [ ] 两条提示逐条展开；最短解、提示不覆盖编辑区或底部运行栏。
 - [ ] 运行中切后台会暂停；重新进入可以继续。编辑或重置会清空轨迹。
 - [ ] 草稿、收藏、已完成、棋盘风格/网格点/轨迹偏好在退出重启后保留。
@@ -50,7 +53,7 @@ xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Rel
 python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Release-iphoneos/HerbertAppStore.app
 ```
 
-资源检查必须通过：恰好一份 30 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
+资源检查必须通过：恰好一份 50 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
 它只证明题库打包边界，不代替真机验证、隐私政策或商店资料检查。
 
 完成设备测试后，选择 **HerbertAppStore → Product → Archive**。
@@ -61,4 +64,6 @@ python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Releas
 
 设计源是 `scripts/generate_original_problems.py`，运行后生成原创 JSON、三语课程文案、课程文档和测试参考解。
 修改后运行 `scripts/check.sh`，真实引擎会验证全部参考解在各自 byte 限制内完成。
-稳定 ID 10001–10030 用于存档，L01–L30 用于显示；不要用重排题号改变已有题目的含义。
+稳定 ID 10001–10050 用于存档，L01–L50 用于显示；不要用重排题号改变已有题目的含义。
+L01–L30 的布局与预算保持不变；L31–L50 的独立几何路线位于 `scripts/advanced_course.py`。
+难度与短循环探测说明见 [进阶设计分析](advanced-course-design.zh-CN.md)。
