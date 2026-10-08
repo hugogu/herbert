@@ -40,6 +40,8 @@ store_test_id = uid('app-store-uitests')
 package = obj('local-package', 'XCLocalSwiftPackageReference', relativePath='.')
 product = obj('core-product', 'XCSwiftPackageProductDependency', productName='HerbertCore')
 framework = obj('core-link', 'PBXBuildFile', productRef=product)
+battlefield_product = obj('battlefield-product', 'XCSwiftPackageProductDependency', productName='HerbertBattlefield')
+battlefield_framework = obj('battlefield-link', 'PBXBuildFile', productRef=battlefield_product)
 community_product = obj('community-product', 'XCSwiftPackageProductDependency', productName='HerbertCommunity')
 community_framework = obj('community-link', 'PBXBuildFile', productRef=community_product)
 app_product = obj('app-product', 'PBXFileReference', explicitFileType='wrapper.application', path='Herbert.app', sourceTree='BUILT_PRODUCTS_DIR')
@@ -88,7 +90,7 @@ common = {'SDKROOT': 'auto', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator ma
           'CODE_SIGN_STYLE': 'Automatic', 'SWIFT_STRICT_CONCURRENCY': 'complete',
           'ENABLE_USER_SCRIPT_SANDBOXING': 'YES'}
 app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'PRODUCT_NAME': 'Herbert',
-                'CURRENT_PROJECT_VERSION': '2', 'MARKETING_VERSION': '0.2.0',
+                'CURRENT_PROJECT_VERSION': '3', 'MARKETING_VERSION': '0.3.0',
                 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
                 'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert',
                 'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.puzzle-games',
@@ -98,6 +100,7 @@ app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'P
                 'INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone': 'UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight',
                 'INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad': 'UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight',
                 'ENABLE_APP_SANDBOX': 'YES', 'ENABLE_USER_SELECTED_FILES': 'readwrite',
+                'ENABLE_OUTGOING_NETWORK_CONNECTIONS': 'YES',
                 'COMBINE_HIDPI_IMAGES': 'YES', 'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@executable_path/../Frameworks', '@executable_path/Frameworks']}
 test_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.HerbertUITests', 'PRODUCT_NAME': '$(TARGET_NAME)',
                  'TEST_TARGET_NAME': 'Herbert', 'LD_RUNPATH_SEARCH_PATHS': ['$(inherited)', '@loader_path/../Frameworks', '@executable_path/../Frameworks']}
@@ -120,15 +123,15 @@ def configs(name, settings):
 proxy = obj('app-proxy', 'PBXContainerItemProxy', containerPortal=project_id, proxyType='1', remoteGlobalIDString=app_id, remoteInfo='Herbert')
 dependency = obj('app-dependency', 'PBXTargetDependency', target=app_id, targetProxy=proxy)
 obj('app', 'PBXNativeTarget', buildConfigurationList=configs('app', app_settings),
-    buildPhases=[phase('app-sources', 'PBXSourcesBuildPhase', app_sources), phase('app-frameworks', 'PBXFrameworksBuildPhase', [framework, community_framework]), phase('app-resources', 'PBXResourcesBuildPhase', resources)],
-    buildRules=[], dependencies=[], name='Herbert', packageProductDependencies=[product, community_product], productName='Herbert', productReference=app_product, productType='com.apple.product-type.application')
+    buildPhases=[phase('app-sources', 'PBXSourcesBuildPhase', app_sources), phase('app-frameworks', 'PBXFrameworksBuildPhase', [framework, community_framework, battlefield_framework]), phase('app-resources', 'PBXResourcesBuildPhase', resources)],
+    buildRules=[], dependencies=[], name='Herbert', packageProductDependencies=[product, community_product, battlefield_product], productName='Herbert', productReference=app_product, productType='com.apple.product-type.application')
 obj('uitests', 'PBXNativeTarget', buildConfigurationList=configs('tests', test_settings),
     buildPhases=[phase('test-sources', 'PBXSourcesBuildPhase', test_sources), phase('test-frameworks', 'PBXFrameworksBuildPhase', [])],
     buildRules=[], dependencies=[dependency], name='HerbertUITests', productName='HerbertUITests', productReference=test_product, productType='com.apple.product-type.bundle.ui-testing')
 store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore', 'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
-    buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
-    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')
+    buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
+    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')
 store_proxy = obj('store-proxy', 'PBXContainerItemProxy', containerPortal=project_id, proxyType='1', remoteGlobalIDString=store_id, remoteInfo='HerbertAppStore')
 store_dependency = obj('store-dependency', 'PBXTargetDependency', target=store_id, targetProxy=store_proxy)
 store_test_settings = {**test_settings, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.HerbertAppStoreUITests',

@@ -33,3 +33,7 @@ class LocalizationTests(unittest.TestCase):
                 if not re.search('[\u4e00-\u9fff]', raw) or r'\(' in raw:
                     continue
                 self.assertTrue(json.loads('"' + raw + '"') in keys, (file.name, raw))
+
+    def test_localized_formatting_is_applied_once(self):
+        for file in (ROOT / 'Herbert').rglob('*.swift'):
+            self.assertNotRegex(file.read_text(), r'String\(\s*format:\s*L10n\.text\(', str(file))

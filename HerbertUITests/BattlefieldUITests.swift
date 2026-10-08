@@ -1,0 +1,213 @@
+import XCTest
+
+final class BattlefieldUITests: XCTestCase {
+    @MainActor
+    private func launch(reset: Bool = true) -> XCUIApplication {
+        continueAfterFailure = false
+        let app = XCUIApplication()
+        app.launchArguments =
+            ["--ui-testing", "--battlefield-fixture", "-AppleLanguages", "(en)"]
+            + (reset ? ["--reset-progress"] : [])
+        app.launch()
+        app.activate()
+        #if os(macOS)
+            if !app.windows.firstMatch.waitForExistence(timeout: 3) { app.typeKey("n", modifierFlags: .command) }
+            if let display = ProcessInfo.processInfo.environment["HERBERT_TEST_DISPLAY"] {
+                app.menuBars.menuBarItems["Window"].click()
+                let move = app.menuBars.menuItems.matching(NSPredicate(format: "title ENDSWITH %@", display)).firstMatch
+                if move.exists {
+                    let frame = move.frame
+                    let window = app.windows.firstMatch
+                    let origin = window.frame.origin
+                    window.coordinate(withNormalizedOffset: .zero).withOffset(
+                        CGVector(dx: frame.midX - origin.x, dy: frame.midY - origin.y)
+                    ).click()
+                } else {
+                    app.typeKey(.escape, modifierFlags: [])
+                }
+            }
+        #endif
+        XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
+        return app
+    }
+
+    @MainActor
+    private func openSection(_ name: String, in app: XCUIApplication) {
+        app.descendants(matching: .any)["section-\(name)"].firstMatch.battlefieldTap()
+    }
+
+    @MainActor
+    private func reveal(_ id: String, in app: XCUIApplication) -> XCUIElement {
+        let element = app.descendants(matching: .any)[id].firstMatch
+        XCTAssertTrue(element.waitForExistence(timeout: 5))
+        for _ in 0..<8 where !element.isHittable {
+            #if os(macOS)
+                app.scrollViews.containing(.any, identifier: id).firstMatch.scroll(byDeltaX: 0, deltaY: -400)
+            #else
+                app.swipeUp()
+            #endif
+        }
+        return element
+    }
+
+    @MainActor
+    private func choose(_ title: String, in app: XCUIApplication) {
+        #if os(macOS)
+            app.radioButtons[title].battlefieldTap()
+        #else
+            app.buttons[title].tap()
+        #endif
+    }
+
+    @MainActor
+    func testAddProviderDiscoversModelsAndCanBeRemoved() {
+        let app = launch()
+        openSection("AI 配置", in: app)
+        app.buttons["addAIProvider"].battlefieldTap()
+        XCTAssertTrue(app.secureTextFields["providerAPIKey"].waitForExistence(timeout: 5))
+        let name = app.textFields["providerName"]
+        name.battlefieldTap()
+        #if os(macOS)
+            name.typeKey("a", modifierFlags: .command)
+        #endif
+        name.typeText("Test Provider")
+        app.secureTextFields["providerAPIKey"].battlefieldTap()
+        app.secureTextFields["providerAPIKey"].typeText("fixture-not-a-real-key")
+        app.buttons["saveAIProvider"].battlefieldTap()
+        let provider = app.buttons["provider-Test Provider"]
+        XCTAssertTrue(provider.waitForExistence(timeout: 10))
+        provider.battlefieldTap()
+        XCTAssertTrue(app.buttons["parameters-fixture-1"].waitForExistence(timeout: 5))
+        app.buttons["Remove provider"].battlefieldTap()
+        app.sheets.buttons["Remove provider"].battlefieldTap()
+        XCTAssertTrue(app.buttons["addAIProvider"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["provider-Test Provider"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testProviderParametersPersistAndModelsRefresh() {
+        var app = launch()
+        openSection("AI 配置", in: app)
+        XCTAssertTrue(app.buttons["addAIProvider"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["provider-Fixture Provider 1"].label.contains("Models: 1 · Default entrants: 1"))
+        capture(app, "ai-providers")
+        app.buttons["provider-Fixture Provider 1"].battlefieldTap()
+        XCTAssertTrue(app.buttons["refreshAIModels"].waitForExistence(timeout: 5))
+        app.buttons["refreshAIModels"].battlefieldTap()
+        XCTAssertTrue(app.buttons["parameters-fixture-2"].waitForExistence(timeout: 5))
+        app.buttons["parameters-fixture-1"].battlefieldTap()
+        let limit = app.textFields["modelOutputLimit"]
+        XCTAssertTrue(limit.waitForExistence(timeout: 5))
+        limit.battlefieldTap()
+        #if os(macOS)
+            limit.typeKey("a", modifierFlags: .command)
+        #endif
+        limit.typeText("2048")
+        app.buttons["saveModelParameters"].battlefieldTap()
+        XCTAssertTrue(app.buttons["parameters-fixture-1"].waitForExistence(timeout: 5))
+        app.terminate()
+        app = launch(reset: false)
+        openSection("AI 配置", in: app)
+        app.buttons["provider-Fixture Provider 1"].battlefieldTap()
+        app.buttons["parameters-fixture-1"].battlefieldTap()
+        XCTAssertTrue(app.textFields["modelOutputLimit"].waitForExistence(timeout: 5))
+        let value = app.textFields["modelOutputLimit"].value as? String ?? ""
+        XCTAssertEqual(value.replacingOccurrences(of: ",", with: ""), "2048")
+        app.buttons["Close"].battlefieldTap()
+        capture(app, "ai-models")
+        app.terminate()
+    }
+
+    @MainActor
+    func testParallelMatchRetryNativeJudgingHistoryAndShareImage() {
+        var app = launch()
+        openSection("AI Battlefield", in: app)
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("50 puzzles selected"))
+        choose("Best Effort", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15), app.debugDescription)
+        for model in ["fixture-1", "fixture-2"] {
+            let score = app.staticTexts["score-\(model)"]
+            XCTAssertEqual(score.value as? String ?? score.label, "100")
+        }
+        XCTAssertTrue(app.staticTexts["AI: 2 · Puzzles: 1"].exists)
+        capture(app, "ai-battlefield")
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(app.staticTexts.matching(identifier: "Rejected").firstMatch.exists)
+        #if os(macOS)
+            app.sheets.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -450)
+        #else
+            app.sheets.firstMatch.swipeUp()
+        #endif
+        XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(app.staticTexts.matching(identifier: "Accepted").firstMatch.exists)
+        capture(app, "ai-answer")
+        app.buttons["Close"].battlefieldTap()
+        // Scroll to the dashboard header before opening the export preview.
+        #if os(macOS)
+            app.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: 1000)
+        #else
+            app.swipeDown()
+        #endif
+        app.buttons["shareBattlefield"].battlefieldTap()
+        XCTAssertTrue(app.buttons["shareBattlefieldPNG"].waitForExistence(timeout: 10))
+        capture(app, "ai-share")
+        app.buttons["Close"].battlefieldTap()
+        app.terminate()
+        app = launch(reset: false)
+        openSection("AI Battlefield", in: app)
+        choose("Match history", in: app)
+        let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        history.battlefieldTap()
+        XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "100")
+        app.terminate()
+    }
+
+    @MainActor
+    func testStopMatchSavesCancelledAnswers() {
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        choose("Best Effort", in: app)
+        reveal("startBattlefield", in: app).battlefieldTap()
+        let stop = app.buttons["stopBattlefield"]
+        XCTAssertTrue(stop.waitForExistence(timeout: 5))
+        stop.battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Stopped by user"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["stopBattlefield"].exists)
+        choose("Match history", in: app)
+        XCTAssertTrue(
+            app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
+                .waitForExistence(timeout: 5), app.debugDescription)
+        app.terminate()
+    }
+
+    @MainActor
+    private func capture(_ app: XCUIApplication, _ name: String) {
+        guard ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1" else { return }
+        app.activate()
+        let image = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+        image.name = "readme-\(name)"
+        image.lifetime = .keepAlways
+        add(image)
+    }
+}
+
+extension XCUIElement {
+    @MainActor
+    fileprivate func battlefieldTap() {
+        #if os(macOS)
+            XCUIApplication().activate()
+            click()
+        #else
+            tap()
+        #endif
+    }
+}

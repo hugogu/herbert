@@ -4,12 +4,16 @@ private enum AppSection: String, CaseIterable, Identifiable {
     case library = "关卡"
     case guide = "手册"
     case progress = "记录"
+    case aiProviders = "AI 配置"
+    case battlefield = "AI Battlefield"
     var id: String { rawValue }
     var symbol: String {
         switch self {
         case .library: "square.grid.2x2"
         case .guide: "book.closed"
         case .progress: "chart.bar.xaxis"
+        case .aiProviders: "network"
+        case .battlefield: "flag.checkered"
         }
     }
 }
@@ -38,6 +42,8 @@ struct RootView: View {
                 NavigationStack { LibraryView() }.tabItem { Label("关卡", systemImage: "square.grid.2x2") }
                 NavigationStack { GuideView() }.tabItem { Label("手册", systemImage: "book.closed") }
                 NavigationStack { ProgressViewScreen() }.tabItem { Label("记录", systemImage: "chart.bar.xaxis") }
+                NavigationStack { AIProvidersView() }.tabItem { Label("AI 配置", systemImage: "network") }
+                NavigationStack { BattlefieldView() }.tabItem { Label("AI Battlefield", systemImage: "flag.checkered") }
             }
         }
     #endif
@@ -54,7 +60,9 @@ struct RootView: View {
                 }.padding(.horizontal, 20).padding(.top, 30)
                 List(AppSection.allCases, selection: $selection) { section in
                     Label(LocalizedStringKey(section.rawValue), systemImage: section.symbol).padding(.vertical, 9).tag(
-                        section)
+                        section
+                    )
+                    .accessibilityIdentifier("section-\(section.id)")
                 }.listStyle(.sidebar).scrollContentBackground(.hidden)
                 VStack(alignment: .leading, spacing: 10) {
                     Eyebrow(text: "YOUR EXPLORATION")
@@ -72,6 +80,8 @@ struct RootView: View {
                 case .library: LibraryView()
                 case .guide: GuideView()
                 case .progress: ProgressViewScreen()
+                case .aiProviders: AIProvidersView()
+                case .battlefield: BattlefieldView()
                 }
             }
         }

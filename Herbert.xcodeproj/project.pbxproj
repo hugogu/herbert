@@ -17,6 +17,14 @@
 			"isa" = "PBXBuildFile";
 			"productRef" = "8D6A224FA1D1DD751157EB0C";
 		};
+		"617F7CF4A10F2B543B6575ED" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"productName" = "HerbertBattlefield";
+		};
+		"F2296053213CC55E6F12E7F3" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "617F7CF4A10F2B543B6575ED";
+		};
 		"699E58090A4AF0A5EB63F1AE" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"productName" = "HerbertCommunity";
@@ -58,6 +66,76 @@
 		"CDB69BF99B0E2CB0D9016395" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "B60FBC0336B0FFD50E1E5311";
+		};
+		"8554867AB184C5B151803DCC" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/AIProvidersView.swift";
+			"sourceTree" = "<group>";
+		};
+		"B6A1F878FF9E5DA48CB18BF7" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "8554867AB184C5B151803DCC";
+		};
+		"9C1E8A6948F0A7AFD30B4DF0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/APIKeyStore.swift";
+			"sourceTree" = "<group>";
+		};
+		"F93EFC1FA3547AFB2AC52EB9" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "9C1E8A6948F0A7AFD30B4DF0";
+		};
+		"B15230A48C0FF6361F07836F" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/BattlefieldDashboard.swift";
+			"sourceTree" = "<group>";
+		};
+		"EC304CD2FB30C5D754BAF471" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B15230A48C0FF6361F07836F";
+		};
+		"68518340A9DD291B6B4EBA9B" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/BattlefieldModel.swift";
+			"sourceTree" = "<group>";
+		};
+		"B248AE041FC98167041A5E26" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "68518340A9DD291B6B4EBA9B";
+		};
+		"2DCA05191D78E9394F851682" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/BattlefieldPresentation.swift";
+			"sourceTree" = "<group>";
+		};
+		"F968B7D1CF764528EB751947" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "2DCA05191D78E9394F851682";
+		};
+		"8CFDD1F81EABD49124DA958B" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/BattlefieldShareView.swift";
+			"sourceTree" = "<group>";
+		};
+		"B7A26F6D563FE09249F459AA" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "8CFDD1F81EABD49124DA958B";
+		};
+		"93F1617BAC8914C12005EBC3" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Herbert/Battlefield/BattlefieldView.swift";
+			"sourceTree" = "<group>";
+		};
+		"94BE2522C50775F3B96AD48A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "93F1617BAC8914C12005EBC3";
 		};
 		"48E56B6FEE247C8D4E0C36DA" = {
 			"isa" = "PBXFileReference";
@@ -230,6 +308,16 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "31C20E73FA29248CC7BF440A";
 		};
+		"55EE312FA0611F9BD1ECD2A2" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "HerbertUITests/BattlefieldUITests.swift";
+			"sourceTree" = "<group>";
+		};
+		"AEBB707695B053C2BC44850A" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "55EE312FA0611F9BD1ECD2A2";
+		};
 		"37BE3F777F39296409EA08AE" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
@@ -254,13 +342,13 @@
 		};
 		"3C3B0F03DC089F93B8457928" = {
 			"isa" = "PBXGroup";
-			"children" = ("B60FBC0336B0FFD50E1E5311", "48E56B6FEE247C8D4E0C36DA", "7B435AAB6DA84537C680086A", "0B7734E919484B7352CF4C20", "E1C5890C8C589BCF5A562CC5", "A5157DA272F54F07A4E4EA57", "FA9C1363D4CB54B1FB499CE0", "204305BF28A15A903D4938C3", "76880A3FAB8B762A5C250808", "2D59DEE7EAC95253177ED8F4", "0454799D33E685C1A5BB20D9", "6EE6BC43101FAA2386628011", "9B3B02D3B3E31C5D6F298C80", "E0E4E6C01837A0B8DEECAE7E", "A06544B86FE39DD4A42DF791", "31C20E73FA29248CC7BF440A");
+			"children" = ("B60FBC0336B0FFD50E1E5311", "8554867AB184C5B151803DCC", "9C1E8A6948F0A7AFD30B4DF0", "B15230A48C0FF6361F07836F", "68518340A9DD291B6B4EBA9B", "2DCA05191D78E9394F851682", "8CFDD1F81EABD49124DA958B", "93F1617BAC8914C12005EBC3", "48E56B6FEE247C8D4E0C36DA", "7B435AAB6DA84537C680086A", "0B7734E919484B7352CF4C20", "E1C5890C8C589BCF5A562CC5", "A5157DA272F54F07A4E4EA57", "FA9C1363D4CB54B1FB499CE0", "204305BF28A15A903D4938C3", "76880A3FAB8B762A5C250808", "2D59DEE7EAC95253177ED8F4", "0454799D33E685C1A5BB20D9", "6EE6BC43101FAA2386628011", "9B3B02D3B3E31C5D6F298C80", "E0E4E6C01837A0B8DEECAE7E", "A06544B86FE39DD4A42DF791", "31C20E73FA29248CC7BF440A");
 			"name" = "Herbert";
 			"sourceTree" = "<group>";
 		};
 		"E717C295FF9827DFF805D88B" = {
 			"isa" = "PBXGroup";
-			"children" = ("37BE3F777F39296409EA08AE");
+			"children" = ("55EE312FA0611F9BD1ECD2A2", "37BE3F777F39296409EA08AE");
 			"name" = "HerbertUITests";
 			"sourceTree" = "<group>";
 		};
@@ -298,8 +386,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
-				"CURRENT_PROJECT_VERSION" = "2";
-				"MARKETING_VERSION" = "0.2.0";
+				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "0.3.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -310,6 +398,7 @@
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				"ENABLE_APP_SANDBOX" = "YES";
 				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"ENABLE_OUTGOING_NETWORK_CONNECTIONS" = "YES";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
@@ -337,8 +426,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
-				"CURRENT_PROJECT_VERSION" = "2";
-				"MARKETING_VERSION" = "0.2.0";
+				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "0.3.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -349,6 +438,7 @@
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				"ENABLE_APP_SANDBOX" = "YES";
 				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"ENABLE_OUTGOING_NETWORK_CONNECTIONS" = "YES";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
@@ -367,13 +457,13 @@
 		"949D493B91791558E87BC5D7" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "E24077BC87EFBA7E0F5B178C", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
+			"files" = ("CDB69BF99B0E2CB0D9016395", "B6A1F878FF9E5DA48CB18BF7", "F93EFC1FA3547AFB2AC52EB9", "EC304CD2FB30C5D754BAF471", "B248AE041FC98167041A5E26", "F968B7D1CF764528EB751947", "B7A26F6D563FE09249F459AA", "94BE2522C50775F3B96AD48A", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "E24077BC87EFBA7E0F5B178C", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"BD92572B49AC16A86614498D" = {
 			"isa" = "PBXFrameworksBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("E6E5511D0DFB6484AC21E80B", "C796A18C8CFBEA62B24C98BC");
+			"files" = ("E6E5511D0DFB6484AC21E80B", "C796A18C8CFBEA62B24C98BC", "F2296053213CC55E6F12E7F3");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"8ECC8B5D05B79F879ACDF1A2" = {
@@ -389,7 +479,7 @@
 			"buildRules" = ();
 			"dependencies" = ();
 			"name" = "Herbert";
-			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C", "699E58090A4AF0A5EB63F1AE");
+			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C", "699E58090A4AF0A5EB63F1AE", "617F7CF4A10F2B543B6575ED");
 			"productName" = "Herbert";
 			"productReference" = "4E783A9E10D2A8ABA38CD11C";
 			"productType" = "com.apple.product-type.application";
@@ -456,7 +546,7 @@
 		"77A03FEE20FE96AD9384861E" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("9628EFAF44BC437921CED2C2");
+			"files" = ("AEBB707695B053C2BC44850A", "9628EFAF44BC437921CED2C2");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"E05DB79C430AA1B0BA487AFC" = {
@@ -493,8 +583,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "HerbertAppStore";
-				"CURRENT_PROJECT_VERSION" = "2";
-				"MARKETING_VERSION" = "0.2.0";
+				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "0.3.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -505,6 +595,7 @@
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				"ENABLE_APP_SANDBOX" = "YES";
 				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"ENABLE_OUTGOING_NETWORK_CONNECTIONS" = "YES";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG APP_STORE $(inherited)";
@@ -532,8 +623,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "HerbertAppStore";
-				"CURRENT_PROJECT_VERSION" = "2";
-				"MARKETING_VERSION" = "0.2.0";
+				"CURRENT_PROJECT_VERSION" = "3";
+				"MARKETING_VERSION" = "0.3.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -544,6 +635,7 @@
 				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				"ENABLE_APP_SANDBOX" = "YES";
 				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"ENABLE_OUTGOING_NETWORK_CONNECTIONS" = "YES";
 				"COMBINE_HIDPI_IMAGES" = "YES";
 				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "APP_STORE $(inherited)";
@@ -563,13 +655,13 @@
 		"EE80C9BC8157AF69F92583A7" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "E24077BC87EFBA7E0F5B178C", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
+			"files" = ("CDB69BF99B0E2CB0D9016395", "B6A1F878FF9E5DA48CB18BF7", "F93EFC1FA3547AFB2AC52EB9", "EC304CD2FB30C5D754BAF471", "B248AE041FC98167041A5E26", "F968B7D1CF764528EB751947", "B7A26F6D563FE09249F459AA", "94BE2522C50775F3B96AD48A", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "E24077BC87EFBA7E0F5B178C", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"E1276387DA080260E201B4DC" = {
 			"isa" = "PBXFrameworksBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("E6E5511D0DFB6484AC21E80B");
+			"files" = ("E6E5511D0DFB6484AC21E80B", "F2296053213CC55E6F12E7F3");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"531FB274AB63328867ECDCE5" = {
@@ -585,7 +677,7 @@
 			"buildRules" = ();
 			"dependencies" = ();
 			"name" = "HerbertAppStore";
-			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C");
+			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C", "617F7CF4A10F2B543B6575ED");
 			"productName" = "HerbertAppStore";
 			"productReference" = "BB851EA8BCEAC42177E9221F";
 			"productType" = "com.apple.product-type.application";
@@ -665,7 +757,7 @@
 		"AA3EA2FECE4B637E61589A28" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("9628EFAF44BC437921CED2C2");
+			"files" = ("AEBB707695B053C2BC44850A", "9628EFAF44BC437921CED2C2");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"590E14AAA2541840462CD01C" = {
