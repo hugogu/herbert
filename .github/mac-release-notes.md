@@ -6,12 +6,15 @@ This open-source preview includes **50 original lessons + 1,769 archived communi
 problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
 movement trails, grid dots, and local progress with JSON backup import/export.
 
-**New in 0.3.0 — AI Battlefield:** configure multiple OpenRouter, SiliconFlow or OpenAI
-compatible providers, discover models and choose parameters. Run parallel matches with
-shared prompts, native H judging and configurable retries. Choose time-limited,
-token-limited or Best Effort mode; watch live scores, per-puzzle states, input/output
-tokens and cache rates. Stop active calls, review local history and share a PNG result card.
-
+**Updated in 0.3.1 — Herbert Benchmark:** AI Providers now lives inside Battlefield,
+leaving four main tabs. Mac setup uses two columns; shared rules render as Markdown.
+Progress is a compact, width-adaptive table whose model columns rank by target-coverage
+and code-length scores, then token consumption. Headers show tokens/cache rates and
+corner error indicators. Inspect every submission and try it on the game board with
+Back to match; personal drafts and shortest solutions are preserved. Best Effort ends
+when the first AI finishes its entire puzzle schedule and cancels the remaining calls.
+Old match histories keep their original scoring. README includes refreshed English app
+captures and the Herbert Benchmark methodology.
 AI is optional and requires your own API key/credits. Keys stay in Keychain; settings
 and history stay local. Streaming estimates and cancellation cannot guarantee final
 provider billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/main/docs/ai-battlefield.md)
@@ -40,7 +43,7 @@ The App Store scheme contains only the originals; this DMG is the open-source ed
 中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
 与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
 Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 50 道原创题和 1,769 道社区题。
-0.3.0 新增独立 AI 配置与 Battlefield：多模型并行、三种比赛模式、原生验题、失败重试、实时排名与 Token/缓存统计、本地历史及图片分享。AI 使用自己的 API 额度，密钥保存在钥匙串中。
+0.3.1 将 AI 配置合入 Battlefield，手机端保留四个主 Tab。比赛进度按目标覆盖和代码长度评分、按 Token 打破同分；表头整合用量，答案可跳到棋盘试运行并返回。Best Effort 首个 AI 完成整套题目即结束全场。新增 Herbert Benchmark 说明及英文截图；旧历史保留原计分。AI 使用自己的 API 额度，密钥保存在钥匙串中。
 
 See the [changelog](https://github.com/hugogu/herbert/blob/main/CHANGELOG.md) for changes
 and the [README](https://github.com/hugogu/herbert#readme) for screenshots and controls.

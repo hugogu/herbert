@@ -5,6 +5,29 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.1] - 2026-10-08
+
+### Changed
+
+- Merge AI Providers into Battlefield's title-bar navigation, leaving four main tabs.
+  Mac setup places entrants and puzzles side by side; shared Markdown rules render with
+  headings, readable paragraphs and H code examples.
+- Make puzzle progress the live ranking: score-sorted model columns with token/cache
+  headers, corner error indicators, compact two-line answers and unrestricted panel width.
+- Quantify scores from final target coverage and H code length, keeping the best attempt
+  per puzzle and breaking ties by total tokens then completion time. Versioned histories
+  preserve the 0.3.0 scoring and ordering.
+- End Best Effort when the first entrant completes the entire selected puzzle schedule,
+  including exhausted retries; cancel outstanding calls and save all judged results.
+
+### Added
+
+- Open every submitted program in the actual game board for an editable trial and return
+  to current or historical results. Trials preserve personal drafts, shortest solutions
+  and competition scores.
+- Herbert Benchmark documentation, scoring examples and refreshed English app captures,
+  plus regressions for partial scores, trap resets, history compatibility and race cancellation.
+
 ## [0.3.0] - 2026-10-08
 
 ### Added
@@ -80,5 +103,6 @@ save or API formats through documented migrations.
   release, or notarized Mac binary.
 
 [0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
+[0.3.1]: https://github.com/hugogu/herbert/releases/tag/v0.3.1
 [0.3.0]: https://github.com/hugogu/herbert/releases/tag/v0.3.0
 [0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0

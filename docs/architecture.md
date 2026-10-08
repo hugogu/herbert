@@ -68,3 +68,8 @@ One set of `Localizable.strings` resources is bundled in both the native app and
 Foundation/SwiftUI match the system or per-app preferred language (en, zh-Hans, ja), with en
 as development-language fallback. `HerbertStrings` formats core diagnostics and dynamic
 labels; ordinary SwiftUI labels use native localization keys.
+
+0.3.1 比赛结果增加可选 `scoring` 策略标识；缺失时按 0.3.0 的通过题数、byte 与时间排序，
+新增比赛使用覆盖率/代码长度分数及 Token 同分排序。原有 JSON 无需重写，历史索引可读取整数或小数分数。
+试运行共用 `GameModel` 与棋盘，但以临时源代码初始化并禁用个人草稿、通关、访问记录的写入。
+Best Effort 在首个参赛者完成题目序列后由引擎统一结束、取消其余调用并冻结成绩。

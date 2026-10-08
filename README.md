@@ -28,7 +28,7 @@ unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
 ## Download for Mac
 
-**[Download the 0.3.0 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.0/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.1 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.1/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,819 problems.
 
@@ -66,33 +66,60 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**New in 0.3.0:** compare your own AI models on real Herbert puzzles. Two independent
-tabs keep provider configuration separate from competitions.
+**Updated in 0.3.1:** compare your own AI models on Herbert puzzles. The app has four
+main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 
-- **AI Providers:** connect multiple OpenRouter, SiliconFlow or OpenAI compatible
-  providers, discover models through `/models`, and choose default entrants and per-model
-  parameters. Configuration stays local; API keys stay in Keychain.
-- **AI Battlefield:** select models and puzzles (the 50 originals by default), then
-  compete in time-limited, token-limited or Best Effort mode. Models work in parallel
-  with identical rules and board prompts.
-- **Native judging:** the app runs each H answer, awards 100 points per solved puzzle,
-  and returns feedback on failure. Each puzzle allows three attempts by default.
-- **Live results:** scores determine the ranking; inspect every puzzle's state,
-  input/output tokens, cache rate and full retry history. Stop cancels active calls.
-- **Keep and share:** review saved matches and generate a PNG result card locally.
+- Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
+  models through `/models`, and set default entrants and model parameters. Keys stay in Keychain.
+- Choose models and puzzles, then run time-limited, token-limited or Best Effort matches.
+  Models work in parallel with identical Markdown rules and board prompts.
+- The Mac setup places entrants and puzzles side by side. Progress uses compact two-line
+  answers and score-sorted model columns; widen the window to see more models.
+- Model headers show scores, input/output/total tokens and cache rates. Select an answer
+  to inspect every submission, native feedback and retry, then **Try on board** with the
+  submitted code prefilled. **Back to match** returns to the results. Trials preserve
+  personal drafts, shortest solutions and match scores.
+- Stop cancels active calls. Matches are saved locally and can be shared as PNG cards.
+  **Best Effort ends the entire match when the first AI finishes its selected puzzle set**,
+  including exhausted retries, and cancels the other entrants.
 
 AI is optional and uses **your own API credits**. Streaming usage can be estimated or
 partial; token budgets cannot guarantee a provider's final bill. iPhone/iPad matches end
-when the app enters the background. [Setup, scoring and accounting](docs/ai-battlefield.md)
-· [Privacy](PRIVACY.md).
+when the app enters the background. [Setup and accounting](docs/ai-battlefield.md) · [Privacy](PRIVACY.md).
 
-![English Mac AI Battlefield with native scores, token accounting and puzzle progress](docs/screenshots/en/battlefield/ai-battlefield.png)
+## Herbert Benchmark
 
-*Actual English app UI with deterministic test entrants, demonstrating a rejected answer
-and a successful retry. These scores are test data, not a commercial model benchmark.*
+Use the **50 original puzzles, L01–L50**, as an AI programming benchmark: movement and
+walls, numeric and instruction parameters, recursion, multiple procedures and their
+composition. Every answer runs in the same bounded native H engine used for human play.
+The platform measures actual board outcomes and code length, with no model acting as judge.
+
+**Score per attempt = target coverage × (80 + 20 × code savings)**, where coverage is
+final lit targets / total targets, and code savings is `1 − H bytes / puzzle byte limit`.
+Round to two decimals, keep the best attempt per puzzle, and sum the scores. Compile-invalid
+and over-limit programs earn zero; incomplete runs can earn partial points. Traps reset
+coverage. A shorter accepted program earns more points. Robot steps do not affect score.
+Rank by **score descending → total input + output tokens ascending → completion time**.
+Cached input and all retries count toward token consumption. Older 0.3.0 histories retain
+their original 100-per-solved-puzzle scoring and tie-breaks.
+
+For repeatable comparisons, use the same puzzle set, attempt limit, output caps and shared
+prompt, and record sampling/reasoning parameters. Equal **per-model token budgets** suit
+resource comparisons; **Best Effort is a race** and can leave slower entrants unfinished.
+History snapshots preserve rules, boards, parameters, answers and the scoring policy;
+provider model versions can still change. This composite score is our benchmark policy,
+inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
+
+![English Mac Herbert Benchmark: score-ranked model columns with token usage and compact answers](docs/screenshots/en/battlefield/ai-battlefield.png)
+
+*Actual English app captures with deterministic test entrants, demonstrating rejection
+and a successful retry. These scores illustrate the app; they are not commercial model results.*
+[New match](docs/screenshots/en/battlefield/ai-new-match.png) ·
+[Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
+[Board trial](docs/screenshots/en/battlefield/ai-trial.png) ·
 [PNG share preview](docs/screenshots/en/battlefield/ai-share.png)
 
 ## Community patterns

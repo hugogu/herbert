@@ -1,6 +1,6 @@
 # Privacy
 
-Effective for Herbert **0.3.0**. Herbert's developer does not operate an account,
+Effective for Herbert **0.3.1**. Herbert's developer does not operate an account,
 analytics, advertising or cloud storage service for this app.
 
 ## Offline game
@@ -34,7 +34,7 @@ Herbert implements no cloud synchronization.
 
 Removing a provider in AI Providers deletes its configuration and Keychain entry.
 Existing match histories remain for review. Match histories are retained locally until
-app data is removed; 0.3.0 does not offer individual history deletion. Operating-system
+app data is removed; 0.3.1 does not offer individual history deletion. Operating-system
 app/container removal and backup retention vary by platform. Avoid assuming that deleting
 the app removes Keychain entries; remove providers in the app first if desired.
 

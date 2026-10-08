@@ -1,11 +1,12 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, with two separate navigation tabs:
-**AI Providers** and **AI Battlefield**. The ordinary puzzle game remains fully offline.
+Available in both editions from **0.3.0**, refined in **0.3.1**. The app has four main
+tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
+**Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
 ## Connect models
 
-1. In **AI Providers**, add OpenRouter, SiliconFlow, or an OpenAI compatible provider.
+1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, or an OpenAI compatible provider.
 2. Enter its HTTPS base URL and your own API key. Saving automatically requests
    `GET /models`; SiliconFlow adds `sub_type=chat` to discover chat models.
 3. Select any default entrants. Configure each model's output cap, optional temperature
@@ -43,7 +44,7 @@ Optional additional instructions are identical for every entrant.
 | --- | --- |
 | Time limited | A monotonic deadline cancels all requests and local judging. Default: 600 seconds. |
 | Token limited | Input + output tokens across all attempts reach the budget, or the next prompt cannot fit. Default: 100,000, shared across the match. An equal independent budget per model is also available. |
-| Best Effort | No match time or aggregate token limit. Finishes after all puzzles have exhausted their attempts or been solved. |
+| Best Effort | No match time or aggregate token limit. The first entrant to solve or exhaust attempts on every selected puzzle ends the entire match; all other requests are cancelled. |
 
 Every mode can finish naturally or be stopped by the user. Individual HTTP requests
 have a 600-second timeout; model discovery has a 30-second timeout. Authentication,
@@ -56,26 +57,59 @@ On Mac, switching to another app does not stop it. A force quit or crash is reco
 ## Judge and rank
 
 The platform extracts one H program and runs it through the **same HerbertCore parser,
-byte counter, VM and board rules used for human play**. Programs that exceed the puzzle's
-byte limit, fail to compile, hit execution limits, or leave targets unlit earn no points.
-H code cannot invoke tools, access the network or read files.
+byte counter, VM and board rules used for human play**. H code cannot invoke tools,
+access the network or read files. The 50 original puzzles form **Herbert Benchmark**.
 
-- **100 points** per solved puzzle; **0** otherwise. This is a Battlefield scoring rule,
-  separate from the original site's historical scoring system.
-- Rank by total points, then fewer total bytes in accepted programs, then earlier
-  completion time. Equal remaining ties use a stable entrant identifier.
-- Default **3 attempts per puzzle**, configurable from 1 to 10. A rejected answer receives
-  native feedback, byte usage, execution state and remaining attempts. The next attempt
-  includes this puzzle's conversation; each new puzzle starts a fresh conversation.
-- Completion stops as soon as every target is lit, including before trailing code.
-  Wall collisions continue execution; traps clear lit targets. Original runtime bounds apply.
+The versioned `coverageAndLengthV1` policy awards:
 
-The dashboard updates ranks, input/output/confirmed token counts, cache rates and each
-puzzle's status during the match. Select a status to inspect all attempts, programs,
-responses, judging feedback and model settings. Histories retain puzzle snapshots and
-the full shared prompt, so later catalog or settings changes do not change old results.
-Remote model versions and provider routing can still change; snapshots do not make a
-third-party model deterministic.
+```text
+coverage = final lit targets / total targets
+code savings = 1 - H program bytes / puzzle byte limit
+attempt score = round(coverage * (80 + 20 * code savings), 2)
+puzzle score = highest evaluated attempt score
+match score = sum of puzzle scores
+```
+
+Compile-invalid, empty and over-limit programs earn zero. Incomplete programs, including
+runs stopped by native execution bounds, can earn partial points from their final target
+state. Traps clear coverage; visits erased by a trap do not count. Each puzzle is worth
+at most 100 points. For example, with 2 targets and a 10-byte limit, a 1-byte program
+lighting one target earns **49**; a 3-byte solution lighting both earns **94**; a 4-byte
+solution earns **92**. A later failed retry or cancellation preserves an earlier judged
+score. Ungraded, interrupted attempts cannot earn points.
+
+- Rank by **score descending**, then **total input + output tokens ascending**, then
+  earlier completion time. Count all retries and cached input. Live estimates can change
+  the ordering as usage is reconciled. Equal remaining ties use a stable entrant ID.
+- Default **3 attempts per puzzle**, configurable from 1 to 10. Rejections receive native
+  feedback, current attempt score, byte usage, execution state and remaining attempts.
+  Each new puzzle starts a fresh conversation.
+- Completion stops immediately when every target is lit, including before trailing code.
+  Wall collisions continue execution. Robot steps do not affect scores.
+- Old histories without a scoring version retain **100 per solved puzzle**, then accepted
+  bytes and completion time. Their scores and standings are not silently recalculated.
+
+The original [HOJ rules](http://herbert.tealang.info/rule.php) rank shorter programs ahead
+of longer ones, then earlier submissions; the [public fragments](https://github.com/quolc/hoj)
+do not publish a composite points formula. The above formula is our independent benchmark
+policy, not a claim of identical original-site scoring.
+
+The progress table itself is the live ranking: model columns move with the standings.
+Headers show score, solved count, input/output/total tokens and cache rate, with errors in
+a corner indicator. Two-line cells show status, attempt, points and a program preview.
+Select a cell to inspect every submitted answer and its feedback. **Try on board** opens
+the actual puzzle snapshot with the answer prefilled; **Back to match** returns to the
+results, including from history. Trials can be edited and replayed without modifying
+personal drafts, shortest solutions or stored competition results. The table fills the
+available window width, with horizontal scrolling for additional models.
+
+For comparable measurements, keep puzzle sets, attempts, output caps and shared prompts
+fixed; record sampling/reasoning parameters. Per-model token budgets suit equal resource
+comparisons. **Best Effort is a race**: the first completed entrant ends the match, so
+slower entrants may not finish. Provider failures stop only that entrant and do not win
+the race. Histories retain boards, the full shared prompt, model parameters and scoring
+policy. Remote model versions and provider routing can still change; snapshots do not
+make a third-party model deterministic.
 
 ## Understand token accounting
 

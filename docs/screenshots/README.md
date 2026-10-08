@@ -51,13 +51,18 @@ continuous contours. Earlier L19/L29/L30 captures remain as historical illustrat
 These independently designed original layouts and their captures use MIT.
 They are not iPhone/iPad App Store screenshots.
 
-## AI Battlefield · 0.3.0
+## Herbert Benchmark · 0.3.1
 
 `en/battlefield/` contains actual English Mac windows captured by `BattlefieldUITests`:
-provider configuration, discovered models, a completed match, native answer feedback,
-and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
-models. They deliberately return an invalid program before the valid `s` for L01, so
-the test verifies parallel requests, retry feedback, native judging, ranking and history.
+provider configuration, discovered models, compact match setup, rendered Markdown rules,
+a completed match with ranked model headers and two-line answers, native answer feedback,
+an answer prefilled for board trial with Back to match, and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
+models. They deliberately return an invalid program before retrying: both solve L01, while
+Model 1 also solves L02/L06 and Model 2 earns partial or zero points. The benchmark
+capture includes these three puzzles; the detailed trial flow uses L01. Thus
+the test verifies parallel requests, retry feedback, native judging, ranking, answer trials/back navigation
+and history. The captured match uses Time limited mode so both fixture entrants finish;
+Best Effort race cancellation is covered separately.
 These images illustrate the application and do not benchmark a commercial model.
 No real API key or personal provider configuration appears in these captures.
 

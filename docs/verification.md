@@ -2,6 +2,19 @@
 
 日期：2026-10-07–08（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## Herbert Benchmark · 0.3.1（10 月 8 日）
+
+- AI 配置合入 Battlefield 标题栏，主导航保留四个 Tab；Mac 新比赛的参赛模型与题目并排。逐题进度同时承担排名，使用无宽度上限的模型列、两行答案、尝试次数在分数前、表头用量与右上角错误提示；共享规则按 Markdown 显示。
+- 新增版本化目标覆盖/代码长度计分，每题取最佳已判定尝试；同分依次比较所有输入和输出 Token、完成时间。旧历史保留旧计分。Best Effort 首个模型完成整套题目即终止全场，取消其他请求并保留已判定结果。试运行使用题目快照与提交答案，返回当前/历史比赛，不写个人游戏进度。
+- `scripts/check.sh`：69 项 Swift 测试（40 项引擎/存档、29 项 Battlefield 单元与 HTTP 集成）、15 项 Python 检查及严格格式检查通过。新增部分分、短程序、陷阱清空、最佳尝试、缓存及重试 Token 排名、浮点持久化、旧历史迁移、失败反馈和 Best Effort 成功/耗尽机会后的取消检查。没有调用付费模型。
+- `.build/battlefield-031-captures.xcresult`：6 项默认版 Battlefield 原生 Mac UI 用例通过，覆盖服务商、参数持久化、紧凑新比赛、Markdown、并行重试、原生计分、当前/历史答案试运行与返回、PNG 分享、用户终止。首次布局检查发现 Mac 未使用并排布局，改用实际可用宽度判断后通过。
+- `.build/battlefield-031-store-ui.xcresult`：原创版完整 Mac UI 回归通过，13 项功能用例通过、3 项截图用例按设计跳过；同时覆盖原有游戏、连续墙、三语、轨迹/网格、草稿和进阶课程。
+- `.build/battlefield-031-readme-final.xcresult`：4 项英文截图流程通过。三题确定性客户端基准得到 240 / 103.75 分，并检查模型排序和答案行高度不超过 64 点。截图仅演示功能，不代表商业模型成绩。检查试运行截图后精简了该页面的课程讲解；`.build/battlefield-031-trial-final.xcresult` 独立复跑通过，确认默认 Mac 窗口的运行按钮可直接点击，并重新导出试运行截图。
+- 原创版与社区版中英文画廊流程均通过，共导出 40 张实际 App 窗口/棋盘 PNG；另选 8 张英文 AI 窗口 PNG，逐张检查语言、数量、棋盘和遮挡。图片未经修改；英文 README 全部使用英文 UI。
+- 社区版与原创版的 iOS/Mac Release 构建全部通过，Mac 预览为 arm64/x86_64。原创版两份实际 `.app` 均通过资源隔离审计：恰好 50 题，无社区目录、社区 bundle 或参考答案。课程、资源及工程重复生成一致；保留本地原有 scheme 修改。
+- 本地 0.3.1（4）通用 Mac DMG 已压缩、校验并只读挂载审计，检查签名、沙盒、出站网络权限、双架构、1,819 题和无测试答案。GitHub 发布另由 tag 对应的 CI 从源代码重新构建、审计并发布。
+- 没有真实服务商 API 请求、iPhone/iPad 运行时验证、TestFlight/App Store 上传或 Apple 公证；Mac 预览采用 ad-hoc 签名。真机检查见 [App Store 清单](app-store.md)。
+
 ## AI Battlefield · 0.3.0（10 月 8 日）
 
 - 新增独立 `HerbertBattlefield` 模块与两个导航 Tab；配置和完整比赛快照本地保存，运行时密钥不参与 Codable，App 使用钥匙串。两个发行版都链接 AI 模块，社区模块的打包边界保留。

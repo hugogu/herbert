@@ -10,7 +10,7 @@
 
 ## 下载 Mac 版
 
-**[下载 0.3.0 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.0/Herbert-macOS-universal.dmg)**
+**[下载 0.3.1 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.1/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,819 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
@@ -47,25 +47,43 @@
 
 两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
 
-## AI Battlefield · 0.3.0
+## AI Battlefield · 0.3.1
 
-两个独立 Tab：**AI 配置**和 **AI Battlefield**。普通游戏继续支持完全离线。
+手机端保留四个主 Tab。**AI 配置 → 新比赛 → 当前比赛 → 比赛历史**合并在 AI Battlefield 标题栏中。
+普通游戏继续支持完全离线。
 
-- 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过标准 `/models` 接口自动发现模型，选择默认参赛模型及各自参数。
-- 默认选中原创 L01–L50，支持自选题目与模型。限时、限 Token 总预算和 Best Effort 三种模式；预算默认全场共享，也可设置每个 AI 独立预算。
-- 多个 AI 使用相同规则和题目提示词并行解答；平台用原生 H 引擎运行答案，错误反馈给 AI，每题默认 3 次机会，可调整为 1–10 次。
-- 通过每题得 100 分，按总分实时排名；同分比较通过程序的总 byte 数，再比较完成时间。逐题查看状态、答案、反馈和重试记录。
-- 实时显示输入/输出 Token、已确认用量及输入缓存率；到达限制或手动终止时取消调用并保存。历史可回顾，可生成 PNG 图片分享。
-- 配置和历史保存在本机，API Key 单独保存在系统钥匙串；两个发行版均包含 Battlefield。
+- 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过 `/models` 自动发现模型，选择默认参赛模型及参数；密钥保存在系统钥匙串。
+- 默认选中原创 L01–L50，可自选题目与模型。限时、限 Token 和 Best Effort 三种模式；Token 预算可全场共享或每个 AI 独立。
+- Mac 新比赛的模型和题目并排显示；统一规则按 Markdown 排版。AI 使用相同规则和棋盘提示词并行解答，每题默认 3 次机会，可设为 1–10 次。
+- 逐题进度用紧凑两行展示状态、尝试次数、分数和程序摘要；模型列动态按成绩排序，表头显示输入/输出/总 Token 与缓存率，拉宽窗口可显示更多 AI。
+- 点击答案查看完整提交、反馈和重试记录；**在棋盘中试运行**会预填答案，可编辑、运行并**返回比赛**，不修改个人草稿、最短解或比赛成绩。
+- **Best Effort 在首个 AI 完成所有所选题目的尝试后结束全场**，包括用完重试机会，并取消其他 AI 的调用。各模式均可手动终止；本地历史可回顾，可生成 PNG 分享图片。
 
-AI 使用你自己的 API 额度，可能产生费用。流式用量会标明估算或不完整数据；本地 Token 限制无法保证服务商最终账单。
-iPhone/iPad 进入后台会结束比赛并保存。详情见[配置、判分与用量说明](docs/ai-battlefield.md)和[隐私说明](PRIVACY.md)。
+AI 使用自己的 API 额度，可能产生费用。流式用量会标明估算或不完整数据；本地 Token 限制无法保证服务商最终账单。
+iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说明](docs/ai-battlefield.md)和[隐私说明](PRIVACY.md)。
 
-![AI Battlefield 英文实际界面：排名、Token 和逐题状态](docs/screenshots/en/battlefield/ai-battlefield.png)
+## Herbert Benchmark · AI 编程评测
 
-*实际英文 Mac App 截图；参赛模型为确定性的测试客户端，演示先答错再重试通过，不代表商业模型的能力或真实费用。*
+使用 **50 道原创题 L01–L50**，从移动、墙体约束，到数值/指令参数、递归、多子程序及其组合，
+考察模型的程序构造能力。所有回答交给与人类游戏共用的原生 H 引擎，按真实执行结果验题。
+
+**每次得分 = 目标覆盖率 ×（80 + 20 × 代码压缩率）**。覆盖率为最终点亮目标数 / 总目标数，
+代码压缩率为 `1 − H byte 数 / 本题 byte 限制`。每次保留两位小数，每题取最佳尝试，再累加总分。
+编译错误或超出长度限制为零分；未完成的有效运行也有部分分，陷阱会清空目标覆盖。
+同样通过时，代码越短分数越高；步数不参与评分。按**总分降序 → 输入和输出 Token 总量升序 → 完成时间**排名，
+缓存输入和所有重试均计入用量。0.3.0 旧历史保留原来的通过题数计分及排序方式。
+
+比较时保持题目、重试次数、输出上限和提示词一致，并记录采样与推理参数。
+**每个 AI 独立 Token 预算**适合比较资源效率；**Best Effort 是竞速模式**，较慢 AI 可能未完成整套题目。
+历史保存规则、棋盘、模型参数、答案与计分版本，但服务商的模型版本仍可能变化。
+这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
+
+![Herbert Benchmark 英文实际界面：按分数排序的模型列、Token 表头与紧凑答案行](docs/screenshots/en/battlefield/ai-battlefield.png)
+
+*实际英文 Mac App 截图；确定性测试客户端演示答错后重试，不代表商业模型的能力或真实费用。*
+[新比赛](docs/screenshots/en/battlefield/ai-new-match.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
 [服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
-[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
+[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
 
 ## 运行
 
