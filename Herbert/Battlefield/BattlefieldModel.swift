@@ -37,7 +37,8 @@ final class BattlefieldModel: ObservableObject {
             if testing {
                 selectedKeys = TestAPIKeyStore()
                 if ProcessInfo.processInfo.arguments.contains("--battlefield-fixture") {
-                    selectedClient = BattlefieldFixtureClient()
+                    selectedClient = BattlefieldFixtureClient(
+                        diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"))
                 }
             }
         #endif
@@ -302,6 +303,8 @@ func battlefieldError(_ error: Error) -> String {
 
 #if DEBUG
     actor BattlefieldFixtureClient: AIClient {
+        let diagnostics: Bool
+        init(diagnostics: Bool = false) { self.diagnostics = diagnostics }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
             return [
@@ -312,9 +315,27 @@ func battlefieldError(_ error: Error) -> String {
             _ request: AICompletionRequest,
             progress: @escaping @Sendable (AIProgress) async -> Void
         ) async throws -> AIReply {
-            try await Task.sleep(for: .milliseconds(400))
-            let firstAttempt = request.messages.count == 2
             let problem = request.messages.first { $0.role == "user" }?.content ?? ""
+            let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
+            if diagnostics {
+                if request.participant.entrant.preset.model.id == "fixture-2" {
+                    try await Task.sleep(for: .seconds(2))
+                    throw AIHTTPError(
+                        status: 400,
+                        providerResponse:
+                            "{\"error\":{\"message\":\"assistant content is empty at index 2\",\"type\":\"invalid_request_error\"}}"
+                    )
+                }
+                if firstAttempt {
+                    try await Task.sleep(for: .seconds(8))
+                    let reasoning = AIReasoning(content: "Inspecting the coordinates before producing the H program.")
+                    let usage = TokenUsage(input: 1021, output: 4096, reasoning: 4096, estimated: false)
+                    await progress(AIProgress(text: "", usage: usage, reasoning: reasoning))
+                    try await Task.sleep(for: .seconds(2))
+                    return AIReply(text: "", usage: usage, finishReason: "length", reasoning: reasoning)
+                }
+            }
+            try await Task.sleep(for: .milliseconds(400))
             let examples = [(10002, "ssss"), (10003, "sssrsss"), (10006, "rsslsslss")]
             let program =
                 request.participant.entrant.preset.model.id == "fixture-1"

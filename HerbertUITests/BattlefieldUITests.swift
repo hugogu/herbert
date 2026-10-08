@@ -2,12 +2,13 @@ import XCTest
 
 final class BattlefieldUITests: XCTestCase {
     @MainActor
-    private func launch(reset: Bool = true) -> XCUIApplication {
+    private func launch(reset: Bool = true, diagnostics: Bool = false) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments =
             ["--ui-testing", "--battlefield-fixture", "-AppleLanguages", "(en)"]
             + (reset ? ["--reset-progress"] : [])
+            + (diagnostics ? ["--battlefield-diagnostics"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -147,6 +148,35 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Board and movement"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["## Board and movement"].exists)
         capture(app, "ai-rules")
+        app.buttons["Close"].battlefieldTap()
+        app.terminate()
+    }
+
+    @MainActor
+    func testLiveAnswerDialogShowsReasoningAndProviderErrorDetails() {
+        let app = launch(diagnostics: true)
+        openSection("AI Battlefield", in: app)
+        choose("Time limited", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
+        let reasoning = app.staticTexts["answer-reasoning-1"]
+        XCTAssertTrue(reasoning.waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertEqual(
+            reasoning.value as? String ?? reasoning.label, "Inspecting the coordinates before producing the H program.")
+        XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(app.buttons["tryBattlefieldAnswer-1"].exists)
+        capture(app, "ai-reasoning")
+        app.buttons["Close"].battlefieldTap()
+        reveal("answer-fixture-2-10001", in: app).battlefieldTap()
+        let error = app.staticTexts["answer-provider-error-1"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue((error.value as? String ?? error.label).contains("assistant content is empty at index 2"))
+        capture(app, "ai-provider-error")
         app.buttons["Close"].battlefieldTap()
         app.terminate()
     }

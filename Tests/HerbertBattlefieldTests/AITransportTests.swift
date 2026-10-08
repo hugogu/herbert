@@ -160,6 +160,150 @@ final class AITransportTests: XCTestCase {
             XCTAssertEqual(stub.requests.count, 1)
         }
     }
+    func testReasoningStreamIsPreservedAndReplayedUsingOriginalField() async throws {
+        let provider = provider()
+        let stub = HTTPStub(
+            body: """
+                data: {"choices":[{"delta":{"reasoning_content":"Check the wall. "}}]}
+
+                data: {"choices":[{"delta":{"reasoning_content":"Turn right.","content":"z"},"finish_reason":"stop"}]}
+
+                data: [DONE]
+
+
+                """, contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let collector = ProgressCollector()
+        let reasoning = AIReasoning(content: "Earlier reasoning")
+        let reply = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "kimi-for-coding"))),
+                    apiKey: "test-only-secret"),
+                messages: [
+                    AIMessage(role: "assistant", content: "z", reasoning: reasoning),
+                    AIMessage(role: "user", content: "retry"),
+                ], maxOutputTokens: 4096
+            )
+        ) { await collector.append($0) }
+        XCTAssertEqual(reply.text, "z")
+        XCTAssertEqual(reply.reasoning?.content, "Check the wall. Turn right.")
+        XCTAssertEqual(reply.reasoning?.field, .content)
+        let progress = await collector.items
+        XCTAssertEqual(progress.last?.reasoning, reply.reasoning)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(stub.bodies.first)) as? [String: Any])
+        let messages = try XCTUnwrap(json["messages"] as? [[String: Any]])
+        XCTAssertEqual(messages[0]["reasoning_content"] as? String, "Earlier reasoning")
+        XCTAssertNil(messages[1]["reasoning_content"])
+    }
+
+    func testFailedStreamFlushesPartialFinalAndReasoningText() async throws {
+        let provider = provider()
+        let stub = HTTPStub(
+            body: """
+                data: {"choices":[{"delta":{"content":"partial answer","reasoning_content":"partial reasoning"}}]}
+
+                data: {"error":{"message":"generation failed"}}
+
+
+                """, contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let collector = ProgressCollector()
+        do {
+            _ = try await client().complete(
+                AICompletionRequest(
+                    participant: CompetitionParticipant(
+                        entrant: Entrant(
+                            provider: provider,
+                            preset: ModelPreset(model: AIModel(id: "m"))), apiKey: "key"),
+                    messages: [AIMessage(role: "user", content: "puzzle")], maxOutputTokens: 4096
+                )
+            ) { await collector.append($0) }
+            XCTFail("Expected stream error")
+        } catch let error as AIHTTPError {
+            XCTAssertTrue(error.providerResponse?.contains("generation failed") == true)
+        }
+        let progress = await collector.items
+        XCTAssertEqual(progress.last?.text, "partial answer")
+        XCTAssertEqual(progress.last?.reasoning?.content, "partial reasoning")
+        XCTAssertEqual(progress.last?.isFinal, false)
+    }
+
+    func testReasoningOnlyJSONAndEmptyReasoningRemainDistinctFromMissing() throws {
+        let only = try OpenAICompatibleClient.decodeReply(
+            Data(
+                #"{"choices":[{"message":{"content":"","reasoning_content":"Still planning"},"finish_reason":"length"}]}"#
+                    .utf8), messages: [])
+        XCTAssertEqual(only.text, "")
+        XCTAssertEqual(only.reasoning?.content, "Still planning")
+        XCTAssertEqual(only.finishReason, "length")
+        let empty = try OpenAICompatibleClient.decodeReply(
+            Data(#"{"choices":[{"message":{"content":"s","reasoning_content":""}}]}"#.utf8), messages: [])
+        XCTAssertNotNil(empty.reasoning)
+        let alias = try OpenAICompatibleClient.decodeReply(
+            Data(#"{"choices":[{"message":{"content":"s","reasoning":"Plan"}}]}"#.utf8), messages: [])
+        XCTAssertEqual(alias.reasoning?.field, .reasoning)
+    }
+
+    func testHTTP400RetainsUsefulDiagnosticsAndRedactsCredentials() async throws {
+        let provider = provider()
+        let stub = HTTPStub(
+            body:
+                #"{"error":{"message":"assistant content is empty at index 2","type":"invalid_request_error","param":"messages"},"api_key":"test-only-secret","nested":{"authorization":"Bearer another-secret"},"request_id":"request-123"}"#,
+            status: 400)
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        do {
+            _ = try await client().complete(
+                AICompletionRequest(
+                    participant: CompetitionParticipant(
+                        entrant: Entrant(
+                            provider: provider, preset: ModelPreset(model: AIModel(id: "kimi-for-coding"))),
+                        apiKey: "test-only-secret"),
+                    messages: [AIMessage(role: "user", content: "puzzle")], maxOutputTokens: 4096
+                )
+            ) { _ in }
+            XCTFail("Expected 400")
+        } catch let error as AIHTTPError {
+            XCTAssertEqual(error.status, 400)
+            let details = try XCTUnwrap(error.providerResponse)
+            XCTAssertTrue(details.contains("assistant content is empty"))
+            XCTAssertTrue(details.contains("invalid_request_error"))
+            XCTAssertTrue(details.contains("request-123"))
+            XCTAssertFalse(details.contains("test-only-secret"))
+            XCTAssertFalse(details.contains("another-secret"))
+        }
+    }
+
+    func testProviderErrorBodyIsBoundedAndOpenErrorStreamCanBeCancelled() async throws {
+        let provider = provider()
+        let stub = HTTPStub(body: String(repeating: "x", count: 100_000), status: 400, staysOpen: true)
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        do {
+            _ = try await client().models(provider: provider, apiKey: "test-only-secret")
+            XCTFail("Expected error")
+        } catch let error as AIHTTPError {
+            XCTAssertLessThan(try XCTUnwrap(error.providerResponse).utf8.count, 66_000)
+            XCTAssertTrue(error.providerResponse?.contains("truncated") == true)
+        }
+        XCTAssertTrue(stub.stopped)
+    }
+
+    func testInBandAndUnexpectedJSONErrorsPreserveProviderDetails() throws {
+        var accumulator = ChatStreamAccumulator(messages: [], apiKey: "test-only-secret")
+        XCTAssertThrowsError(try accumulator.consume(#"{"error":{"message":"bad reasoning field test-only-secret"}}"#))
+        { error in
+            let diagnostic = (error as? AIHTTPError)?.providerResponse ?? ""
+            XCTAssertTrue(diagnostic.contains("bad reasoning field"))
+            XCTAssertFalse(diagnostic.contains("test-only-secret"))
+        }
+        XCTAssertThrowsError(
+            try OpenAICompatibleClient.decodeReply(
+                Data(#"{"error":{"message":"unsupported model"}}"#.utf8), messages: [])
+        ) { error in
+            XCTAssertTrue((error as? AIHTTPError)?.providerResponse?.contains("unsupported model") == true)
+        }
+    }
+
 }
 
 private actor ProgressCollector {

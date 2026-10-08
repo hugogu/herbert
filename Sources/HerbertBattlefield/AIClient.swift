@@ -15,10 +15,12 @@ public struct AIProgress: Sendable {
     public let text: String
     public let usage: TokenUsage
     public let isFinal: Bool
-    public init(text: String, usage: TokenUsage, isFinal: Bool = false) {
+    public let reasoning: AIReasoning?
+    public init(text: String, usage: TokenUsage, isFinal: Bool = false, reasoning: AIReasoning? = nil) {
         self.text = text
         self.usage = usage
         self.isFinal = isFinal
+        self.reasoning = reasoning
     }
 }
 
@@ -26,10 +28,12 @@ public struct AIReply: Sendable {
     public let text: String
     public let usage: TokenUsage
     public let finishReason: String?
-    public init(text: String, usage: TokenUsage, finishReason: String? = "stop") {
+    public let reasoning: AIReasoning?
+    public init(text: String, usage: TokenUsage, finishReason: String? = "stop", reasoning: AIReasoning? = nil) {
         self.text = text
         self.usage = usage
         self.finishReason = finishReason
+        self.reasoning = reasoning
     }
 }
 
@@ -43,7 +47,12 @@ public protocol AIClient: Sendable {
 
 public struct AIHTTPError: Error, LocalizedError, Sendable {
     public let status: Int
-    public var errorDescription: String? { "AI HTTP \(status)" }
+    public let providerResponse: String?
+    public init(status: Int, providerResponse: String? = nil) {
+        self.status = status
+        self.providerResponse = providerResponse
+    }
+    public var errorDescription: String? { status == 200 ? "AI response error" : "AI HTTP \(status)" }
 }
 
 private final class NoRedirects: NSObject, URLSessionTaskDelegate, Sendable {
@@ -80,10 +89,25 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         return request
     }
 
-    private func validate(_ response: URLResponse) throws {
+    private func validate(
+        _ response: URLResponse, bytes: URLSession.AsyncBytes, apiKey: String
+    ) async throws {
         guard let http = response as? HTTPURLResponse else { throw BattlefieldError.invalidResponse }
         if (300..<400).contains(http.statusCode) { throw BattlefieldError.redirected }
-        guard (200..<300).contains(http.statusCode) else { throw AIHTTPError(status: http.statusCode) }
+        guard !(200..<300).contains(http.statusCode) else { return }
+        var data = Data()
+        var truncated = false
+        for try await byte in bytes {
+            try Task.checkCancellation()
+            if data.count == ProviderDiagnostics.byteLimit {
+                truncated = true
+                break
+            }
+            data.append(byte)
+        }
+        throw AIHTTPError(
+            status: http.statusCode,
+            providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey, truncated: truncated))
     }
 
     public func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
@@ -96,8 +120,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         request.timeoutInterval = 30
         let (bytes, response) = try await session.bytes(for: request)
         defer { bytes.task.cancel() }
-        try validate(response)
         return try await withTaskCancellationHandler {
+            try await validate(response, bytes: bytes, apiKey: apiKey)
             var data = Data()
             for try await byte in bytes {
                 try Task.checkCancellation()
@@ -165,7 +189,11 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         let parameters = try entrant.preset.parameters.validated()
         var body = try JSONSerialization.jsonObject(with: Data(parameters.extraJSON.utf8)) as! [String: Any]
         body["model"] = entrant.preset.model.id
-        body["messages"] = request.messages.map { ["role": $0.role, "content": $0.content] }
+        body["messages"] = request.messages.map { message in
+            var value = ["role": message.role, "content": message.content]
+            if let reasoning = message.reasoning { value[reasoning.field.rawValue] = reasoning.content }
+            return value
+        }
         body["stream"] = true
         body[entrant.outputTokenParameter.rawValue] = request.maxOutputTokens
         if entrant.kind == .compatible { body["stream_options"] = ["include_usage": true] }
@@ -189,8 +217,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         http.httpBody = try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys])
         let (bytes, response) = try await session.bytes(for: http)
         defer { bytes.task.cancel() }
-        try validate(response)
         return try await withTaskCancellationHandler {
+            try await validate(response, bytes: bytes, apiKey: request.participant.apiKey)
             if (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Type")?.contains("text/event-stream")
                 != true
             {
@@ -200,49 +228,72 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                     data.append(byte)
                     guard data.count <= 4 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
                 }
-                return try Self.decodeReply(data, messages: request.messages)
+                return try Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
             }
-            var accumulator = ChatStreamAccumulator(messages: request.messages)
+            var accumulator = ChatStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
             var parser = ServerSentEventParser()
             var received = 0
             var lastUpdate = ContinuousClock.now
-            for try await byte in bytes {
-                try Task.checkCancellation()
-                received += 1
-                guard received <= 4 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
-                if let event = try parser.consume(byte) {
-                    try accumulator.consume(event)
-                    if ContinuousClock.now - lastUpdate >= .milliseconds(150) || accumulator.reportedUsage != nil {
-                        await progress(
-                            AIProgress(
-                                text: accumulator.text, usage: accumulator.usage,
-                                isFinal: accumulator.finishReason != nil && accumulator.reportedUsage != nil))
-                        lastUpdate = .now
+            do {
+                for try await byte in bytes {
+                    try Task.checkCancellation()
+                    received += 1
+                    guard received <= 4 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
+                    if let event = try parser.consume(byte) {
+                        try accumulator.consume(event)
+                        if ContinuousClock.now - lastUpdate >= .milliseconds(150) || accumulator.reportedUsage != nil {
+                            await progress(
+                                AIProgress(
+                                    text: accumulator.text, usage: accumulator.usage,
+                                    isFinal: accumulator.finishReason != nil && accumulator.reportedUsage != nil,
+                                    reasoning: accumulator.reasoning))
+                            lastUpdate = .now
+                        }
+                        if accumulator.done { break }
                     }
-                    if accumulator.done { break }
                 }
+                if let event = try parser.finish() { try accumulator.consume(event) }
+                try Task.checkCancellation()
+                guard accumulator.done || accumulator.finishReason != nil else {
+                    throw BattlefieldError.invalidResponse
+                }
+            } catch {
+                // Flush text received since the last throttled update before recording a failure.
+                await progress(
+                    AIProgress(text: accumulator.text, usage: accumulator.usage, reasoning: accumulator.reasoning))
+                throw error
             }
-            if let event = try parser.finish() { try accumulator.consume(event) }
-            try Task.checkCancellation()
-            guard accumulator.done || accumulator.finishReason != nil else { throw BattlefieldError.invalidResponse }
-            await progress(AIProgress(text: accumulator.text, usage: accumulator.usage, isFinal: true))
-            return AIReply(text: accumulator.text, usage: accumulator.usage, finishReason: accumulator.finishReason)
+            await progress(
+                AIProgress(
+                    text: accumulator.text, usage: accumulator.usage, isFinal: true, reasoning: accumulator.reasoning))
+            return AIReply(
+                text: accumulator.text, usage: accumulator.usage, finishReason: accumulator.finishReason,
+                reasoning: accumulator.reasoning)
         } onCancel: {
             bytes.task.cancel()
         }
     }
 
-    public static func decodeReply(_ data: Data, messages: [AIMessage]) throws -> AIReply {
-        guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+    public static func decodeReply(_ data: Data, messages: [AIMessage], apiKey: String = "") throws -> AIReply {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
             let choices = object["choices"] as? [[String: Any]], let first = choices.first,
             let message = first["message"] as? [String: Any]
-        else { throw BattlefieldError.invalidResponse }
+        else {
+            throw AIHTTPError(status: 200, providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey))
+        }
         let text = message["content"] as? String ?? ""
-        let reasoning = message["reasoning_content"] as? String ?? message["reasoning"] as? String ?? ""
-        let fallback = TokenUsage.estimate(messages: messages, outputBytes: text.utf8.count + reasoning.utf8.count)
+        let reasoning = Self.decodeReasoning(message)
+        let fallback = TokenUsage.estimate(
+            messages: messages, outputBytes: text.utf8.count + (reasoning?.content.utf8.count ?? 0))
         let usage = (object["usage"] as? [String: Any]).map { decodeUsage($0, fallback: fallback) } ?? fallback
-        return AIReply(text: text, usage: usage, finishReason: first["finish_reason"] as? String)
+        return AIReply(text: text, usage: usage, finishReason: first["finish_reason"] as? String, reasoning: reasoning)
     }
+    static func decodeReasoning(_ object: [String: Any]) -> AIReasoning? {
+        if let content = object["reasoning_content"] as? String { return AIReasoning(content: content) }
+        if let content = object["reasoning"] as? String { return AIReasoning(content: content, field: .reasoning) }
+        return nil
+    }
+
 }
 
 // AsyncBytes.lines can omit empty lines on Apple platforms. SSE needs those exact
@@ -293,7 +344,9 @@ struct ServerSentEventParser {
 struct ChatStreamAccumulator {
     let messages: [AIMessage]
     var text = ""
-    var reasoningBytes = 0
+    var apiKey = ""
+    var reasoning: AIReasoning?
+    var reasoningBytes: Int { reasoning?.content.utf8.count ?? 0 }
     var reportedUsage: TokenUsage?
     var finishReason: String?
     var done = false
@@ -306,14 +359,19 @@ struct ChatStreamAccumulator {
             done = true
             return
         }
-        guard let object = try JSONSerialization.jsonObject(with: Data(payload.utf8)) as? [String: Any],
+        guard let object = try? JSONSerialization.jsonObject(with: Data(payload.utf8)) as? [String: Any],
             object["error"] == nil
-        else { throw BattlefieldError.invalidResponse }
+        else {
+            throw AIHTTPError(
+                status: 200, providerResponse: ProviderDiagnostics.response(Data(payload.utf8), apiKey: apiKey))
+        }
         if let choices = object["choices"] as? [[String: Any]], let first = choices.first {
             if let delta = first["delta"] as? [String: Any] {
                 text += delta["content"] as? String ?? ""
-                reasoningBytes +=
-                    (delta["reasoning_content"] as? String ?? delta["reasoning"] as? String ?? "").utf8.count
+                if let part = OpenAICompatibleClient.decodeReasoning(delta) {
+                    if reasoning == nil { reasoning = AIReasoning(content: "", field: part.field) }
+                    reasoning?.content += part.content
+                }
             }
             if let reason = first["finish_reason"] as? String { finishReason = reason }
         }

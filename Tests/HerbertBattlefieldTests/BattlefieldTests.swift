@@ -27,7 +27,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertFalse(try BattlefieldJudge.evaluate("ss", problem: first).accepted)
         XCTAssertThrowsError(try BattlefieldJudge.extractProgram("```h\ns\n```\n```h\ns\n```"))
         XCTAssertThrowsError(try BattlefieldJudge.extractProgram("```python\nprint('s')\n```"))
-        let corridor = try ProblemCatalog.bundled()[5]
+        let corridor = try XCTUnwrap(ProblemCatalog.bundled().first { $0.id == 10006 })
         let blocked = try BattlefieldJudge.evaluate("s", problem: corridor)
         XCTAssertFalse(blocked.accepted)
         XCTAssertEqual(blocked.steps, 1)
@@ -215,13 +215,13 @@ final class BattlefieldTests: XCTestCase {
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
         config.mode = .tokenLimited
-        config.tokenLimit = 2000
+        config.tokenLimit = 8000
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants(1)) {
             _ in
         }
         XCTAssertEqual(result.status, .tokenLimit)
         XCTAssertEqual(result.score(for: result.entrants[0]), 80)
-        XCTAssertEqual(result.totalTokens, 2000)
+        XCTAssertEqual(result.totalTokens, 8000)
         XCTAssertEqual(result.entrants[0].answers[1].status, .cancelled)
     }
 
@@ -231,13 +231,13 @@ final class BattlefieldTests: XCTestCase {
         var config = CompetitionConfiguration()
         config.mode = .tokenLimited
         config.tokenBudgetScope = .perModel
-        config.tokenLimit = 2000
+        config.tokenLimit = 8000
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants()) {
             _ in
         }
         XCTAssertEqual(result.status, .tokenLimit)
         XCTAssertEqual(result.entrants.map { result.score(for: $0) }, [80, 80])
-        XCTAssertEqual(result.totalTokens, 4000)
+        XCTAssertEqual(result.totalTokens, 16000)
     }
 
     func testBudgetTooSmallDoesNotSendRequests() async throws {
@@ -342,7 +342,7 @@ actor ScriptedAI: AIClient {
         }
         let wrong = behavior == .wrong || behavior == .raceWrong || (behavior == .retry && request.messages.count == 2)
         let text = wrong ? "z" : "```h\ns\n```"
-        let usage = TokenUsage(input: behavior == .exactBudget ? 1999 : 20, output: 1, cached: 10, estimated: false)
+        let usage = TokenUsage(input: behavior == .exactBudget ? 7999 : 20, output: 1, cached: 10, estimated: false)
         await progress(AIProgress(text: text, usage: usage, isFinal: true))
         return AIReply(text: text, usage: usage)
     }

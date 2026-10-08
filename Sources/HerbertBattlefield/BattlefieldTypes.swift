@@ -63,7 +63,7 @@ public struct ModelParameters: Codable, Hashable, Sendable {
         else { throw BattlefieldError.invalidParameters }
         let allowed: Set<String> = [
             "seed", "top_k", "min_p", "frequency_penalty", "presence_penalty",
-            "reasoning_effort", "reasoning", "enable_thinking", "thinking_budget",
+            "reasoning_effort", "reasoning", "thinking", "enable_thinking", "thinking_budget",
         ]
         guard Set(object.keys).isSubset(of: allowed) else { throw BattlefieldError.invalidParameters }
         return self
@@ -207,7 +207,9 @@ public struct TokenUsage: Codable, Equatable, Sendable {
 
     public static func estimate(messages: [AIMessage], outputBytes: Int = 0) -> TokenUsage {
         TokenUsage(
-            input: messages.reduce(0) { $0 + ($1.content.utf8.count + 3) / 4 + 16 },
+            input: messages.reduce(0) {
+                $0 + ($1.content.utf8.count + ($1.reasoning?.content.utf8.count ?? 0) + 3) / 4 + 16
+            },
             output: (outputBytes + 3) / 4)
     }
 }
@@ -221,6 +223,8 @@ public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
     public let startedAt: Date
     public var finishedAt: Date?
     public var response = ""
+    public var reasoning: AIReasoning?
+    public var providerResponse: String?
     public var program: String?
     public var evaluation: JudgeEvaluation?
     public var usage = TokenUsage()

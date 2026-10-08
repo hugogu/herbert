@@ -1,18 +1,50 @@
 import Foundation
 import HerbertCore
 
+public struct AIReasoning: Codable, Equatable, Sendable {
+    public enum Field: String, Codable, Sendable {
+        case content = "reasoning_content"
+        case reasoning
+    }
+    public var content: String
+    public let field: Field
+    public init(content: String, field: Field = .content) {
+        self.content = content
+        self.field = field
+    }
+}
+
 public struct AIMessage: Codable, Equatable, Sendable {
     public let role: String
     public let content: String
-    public init(role: String, content: String) {
+    public let reasoning: AIReasoning?
+    public init(role: String, content: String, reasoning: AIReasoning? = nil) {
         self.role = role
         self.content = content
+        self.reasoning = reasoning
     }
 }
 
 public enum BattlefieldPrompt {
-    public static let version = "herbert-h-v2"
-    public static let rules = """
+    public static let version = "herbert-h-v3"
+    public static let rules =
+        baseRules
+        + examples.enumerated().map { index, example in
+            """
+
+            ## Worked example \(index + 1): \(example.problem.title)
+
+            \(problem(example.problem))
+
+            ```h
+            \(example.program)
+            ```
+
+            \(example.explanation)
+            """
+        }.joined(separator: "\n")
+
+    private static let baseRules = """
         # Herbert H programming challenge
 
         Solve the puzzle using **H**. Return exactly one fenced `h` code block containing
@@ -42,10 +74,16 @@ public enum BattlefieldPrompt {
         a(4)
         ```
 
+        For an instruction repeater, `a(N,P):Pa(N-1,P)` followed on the final line by
+        `a(3,sr)` runs `srsrsr`. The uppercase P executes the supplied instructions;
+        it is not a procedure name. `s4` does NOT mean four steps. Write `ssss` or
+        use a counted procedure. Never attach a number to a primitive command.
+
         Arguments can be numbers **or instruction sequences**, including nested calls and
         empty instruction arguments. Numeric arguments support `+` and `-`; literals and
         evaluated values must stay in `[-255,255]`. If **any numeric argument is ≤ 0**,
-        that entire procedure call is skipped and the caller continues. Instruction parameters
+        that entire procedure call is skipped BEFORE its body runs, and the caller continues.
+        This is the only numeric termination condition; there are no explicit branches. Instruction parameters
         substitute the supplied sequence; they can be concatenated and passed into other calls.
 
         ## Code length and execution limits
@@ -76,17 +114,49 @@ public enum BattlefieldPrompt {
 
         You receive native judge feedback after a failed attempt. Do not use Swift, Python,
         JavaScript, loops, if-statements, prose, or code execution tools: submit only H.
-        Prompt version: **herbert-h-v2**. All entrants receive the same rules and puzzles.
+        The output token allowance includes reasoning tokens. Leave room for the final H program.
+        The worked examples below are public teaching boards, outside the scored catalog.
+        Prompt version: **herbert-h-v3**. All entrants receive the same rules and puzzles.
         """
 
-    public static func problem(_ problem: Problem) -> String {
-        """
-        Puzzle \(problem.number) (ID \(problem.id)), byte limit: \(problem.byteLimit).
-        Board rows in increasing y; each row has 25 cells:
-        \(problem.rows.joined(separator: "\n"))
-        Light every o using an H program of at most \(problem.byteLimit) bytes.
-        """
+    public static func retryMessages(_ messages: [AIMessage], reply: AIReply, feedback: String) -> [AIMessage] {
+        var messages = messages
+        if !reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            messages.append(AIMessage(role: "assistant", content: reply.text, reasoning: reply.reasoning))
+            messages.append(AIMessage(role: "user", content: feedback))
+        } else if let last = messages.last, last.role == "user" {
+            // A reasoning-only, length-limited turn has no assistant answer to replay.
+            messages[messages.count - 1] = AIMessage(
+                role: "user", content: last.content + "\n\nJudge feedback: " + feedback)
+        } else {
+            messages.append(AIMessage(role: "user", content: feedback))
+        }
+        return messages
     }
+
+    public static func problem(_ problem: Problem) -> String {
+        let board = try? Board(problem: problem)
+        let targets =
+            board?.targets.sorted { $0.y == $1.y ? $0.x < $1.x : $0.y < $1.y }
+            .map { "(\($0.x),\($0.y))" }.joined(separator: ", ") ?? ""
+        let rows = problem.rows.enumerated().map { String(format: "%02d: %@", $0.offset, $0.element) }
+            .joined(separator: "\n")
+        return """
+            Puzzle \(problem.number) (ID \(problem.id)), byte limit: \(problem.byteLimit).
+            Start: (\(board?.start.x ?? 0),\(board?.start.y ?? 0)), facing north (up).
+            Targets (x,y): \(targets)
+            Walls: \(board?.walls.count ?? 0); traps: \(board?.traps.count ?? 0).
+            Board: y increases downward; x increases rightward. Rulers and row labels are NOT cells.
+            ```text
+                0000000000111111111122222
+                0123456789012345678901234
+            \(rows)
+            ```
+            Light every o using an H program of at most \(problem.byteLimit) bytes.
+            Return one complete fenced h block, with definitions first and an execution line last.
+            """
+    }
+
 }
 
 public struct JudgeEvaluation: Codable, Equatable, Sendable {
@@ -103,7 +173,10 @@ public enum BattlefieldJudge {
         let text = response.trimmingCharacters(in: .whitespacesAndNewlines)
         guard text.utf8.count <= 65_536 else { throw BattlefieldError.responseTooLarge }
         let pieces = text.components(separatedBy: "```")
-        if pieces.count == 1 { return text }
+        if pieces.count == 1 {
+            guard !text.isEmpty else { throw BattlefieldError.invalidResponse }
+            return text
+        }
         guard pieces.count == 3, let newline = pieces[1].firstIndex(of: "\n") else {
             throw BattlefieldError.invalidResponse
         }
@@ -111,7 +184,9 @@ public enum BattlefieldJudge {
         guard ["", "h", "text", "plaintext"].contains(language) else {
             throw BattlefieldError.invalidResponse
         }
-        return pieces[1][pieces[1].index(after: newline)...].trimmingCharacters(in: .whitespacesAndNewlines)
+        let program = pieces[1][pieces[1].index(after: newline)...].trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !program.isEmpty else { throw BattlefieldError.invalidResponse }
+        return program
     }
 
     public static func evaluate(_ program: String, problem: Problem) throws -> JudgeEvaluation {

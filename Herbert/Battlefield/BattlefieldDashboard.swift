@@ -3,6 +3,7 @@ import HerbertCore
 import SwiftUI
 
 private struct BattlefieldAnswerSelection: Identifiable {
+    let resultID: UUID
     let entrant: EntrantResult
     let answer: ProblemAnswer
     let problem: Problem
@@ -36,7 +37,7 @@ struct BattlefieldDashboard: View {
             GameDestination(problem: trial.problem, store: store, trialSource: trial.source)
         }
         .sheet(item: $selectedAnswer) { selection in
-            BattlefieldAnswerView(selection: selection) { program in
+            BattlefieldAnswerView(snapshot: selection) { program in
                 selectedAnswer = nil
                 trial = BattlefieldTrial(problem: selection.problem, source: program)
             }
@@ -205,7 +206,7 @@ struct BattlefieldDashboard: View {
         let score = battlefieldScore(result.scoringPolicy.score(answer, problem: problem))
         return Button {
             selectedAnswer = BattlefieldAnswerSelection(
-                entrant: entrant, answer: answer, problem: problem, scoring: result.scoringPolicy)
+                resultID: result.id, entrant: entrant, answer: answer, problem: problem, scoring: result.scoringPolicy)
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
@@ -250,8 +251,18 @@ struct BattlefieldDashboard: View {
 }
 
 private struct BattlefieldAnswerView: View {
-    let selection: BattlefieldAnswerSelection
+    @EnvironmentObject private var battlefield: BattlefieldModel
+    @State private var collapsedAttempts: Set<Int> = []
+    let snapshot: BattlefieldAnswerSelection
     let onTry: (String) -> Void
+    private var selection: BattlefieldAnswerSelection {
+        guard let live = battlefield.liveResult, live.id == snapshot.resultID,
+            let entrant = live.entrants.first(where: { $0.id == snapshot.entrant.id }),
+            let answer = entrant.answers.first(where: { $0.id == snapshot.answer.id })
+        else { return snapshot }
+        return BattlefieldAnswerSelection(
+            resultID: live.id, entrant: entrant, answer: answer, problem: snapshot.problem, scoring: live.scoringPolicy)
+    }
     var body: some View {
         BattlefieldSheet(
             title: battlefieldProblemID(selection.problem.id) + " · " + selection.entrant.entrant.preset.model.name
@@ -277,6 +288,9 @@ private struct BattlefieldAnswerView: View {
                                 Text("max output: \(cap) · finish: \(attempt.finishReason ?? "—")").font(
                                     .caption.monospaced())
                             }
+                            if attempt.finishReason == "length" {
+                                BattlefieldNotice(text: L10n.text("已达到输出上限，推理也占用此额度。可提高模型输出上限，或调整服务商支持的推理参数。"))
+                            }
                             if let evaluation = attempt.evaluation {
                                 Label(
                                     evaluation.accepted ? L10n.text("通过") : L10n.text("未通过"),
@@ -296,7 +310,7 @@ private struct BattlefieldAnswerView: View {
                                 Text(evaluation.feedback).font(.system(.callout, design: .monospaced))
                             }
                             if let error = attempt.error { Text(error).foregroundStyle(Palette.danger) }
-                            if let program = attempt.program {
+                            if let program = attempt.program, !program.isEmpty {
                                 Text("程序").font(.subheadline.bold())
                                 Text(program).font(.system(.body, design: .monospaced)).frame(
                                     maxWidth: .infinity, alignment: .leading
@@ -309,8 +323,33 @@ private struct BattlefieldAnswerView: View {
                                 }.buttonStyle(.borderedProminent)
                                     .accessibilityIdentifier("tryBattlefieldAnswer-\(attempt.id)")
                             }
-                            DisclosureGroup("完整回答") {
-                                Text(attempt.response).font(.system(.callout, design: .monospaced)).padding(.top, 8)
+                            DisclosureGroup(
+                                "完整回答",
+                                isExpanded: Binding(
+                                    get: { !collapsedAttempts.contains(attempt.id) },
+                                    set: {
+                                        if $0 {
+                                            collapsedAttempts.remove(attempt.id)
+                                        } else {
+                                            collapsedAttempts.insert(attempt.id)
+                                        }
+                                    }
+                                )
+                            ) {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    if let reasoning = attempt.reasoning {
+                                        Text("模型推理").font(.subheadline.bold())
+                                        Text(reasoning.content.isEmpty ? L10n.text("服务商返回了空的推理内容。") : reasoning.content)
+                                            .accessibilityIdentifier("answer-reasoning-\(attempt.id)")
+                                    }
+                                    Text("最终回答").font(.subheadline.bold())
+                                    Text(attempt.response.isEmpty ? L10n.text("尚未收到最终回答。") : attempt.response)
+                                        .accessibilityIdentifier("answer-response-\(attempt.id)")
+                                    if let diagnostic = attempt.providerResponse {
+                                        Text("服务商错误详情").font(.subheadline.bold())
+                                        Text(diagnostic).accessibilityIdentifier("answer-provider-error-\(attempt.id)")
+                                    }
+                                }.font(.system(.callout, design: .monospaced)).padding(.top, 8)
                             }
                         }.panel()
                     }

@@ -141,7 +141,8 @@ public actor BattlefieldEngine {
         }
         let previous = result!.entrants[entrant].answers[problem].attempts[attempt].usage
         result!.entrants[entrant].answers[problem].attempts[attempt].usage = progress.usage
-        result!.entrants[entrant].answers[problem].attempts[attempt].response = String(progress.text.prefix(65_536))
+        result!.entrants[entrant].answers[problem].attempts[attempt].response = progress.text
+        result!.entrants[entrant].answers[problem].attempts[attempt].reasoning = progress.reasoning
         if let reservation = outputReservations[result!.entrants[entrant].id] {
             outputReservations[result!.entrants[entrant].id] = max(
                 0, reservation - max(0, progress.usage.output - previous.output))
@@ -193,7 +194,8 @@ public actor BattlefieldEngine {
                     guard await active(), result?.entrants[e].exhaustedBudget == false else { break }
                     result!.entrants[e].answers[p].attempts[a].usage = reply.usage
                     result!.entrants[e].answers[p].attempts[a].finishReason = reply.finishReason
-                    result!.entrants[e].answers[p].attempts[a].response = String(reply.text.prefix(65_536))
+                    result!.entrants[e].answers[p].attempts[a].response = reply.text
+                    result!.entrants[e].answers[p].attempts[a].reasoning = reply.reasoning
                     result!.entrants[e].answers[p].attempts[a].finishedAt = .now
                     let used =
                         result!.configuration.tokenBudgetScope == .shared
@@ -226,7 +228,9 @@ public actor BattlefieldEngine {
                             accepted: false, bytes: 0, steps: 0, litTargets: 0,
                             targetCount: try Board(problem: problem).targets.count,
                             feedback:
-                                "Invalid response format. Return exactly one fenced H program, no prose, at most 16 KiB."
+                                reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                ? "No final H program was returned. The output allowance (\(cap) tokens) includes reasoning. Finish reason: \(reply.finishReason ?? "unknown"). Return a concise complete fenced H program."
+                                : "Invalid response format. Return exactly one fenced H program, no prose, at most 16 KiB."
                         )
                     }
                     guard await active() else { break }
@@ -251,13 +255,10 @@ public actor BattlefieldEngine {
                         break
                     }
                     if evaluation.accepted { break }
-                    messages.append(AIMessage(role: "assistant", content: String(reply.text.prefix(65_536))))
-                    messages.append(
-                        AIMessage(
-                            role: "user",
-                            content: evaluation.feedback
-                                + " Battlefield points: \(BattlefieldScoring.coverageAndLengthV1.score(evaluation, byteLimit: problem.byteLimit)). Attempts remaining: \(maxAttempts - a - 1)."
-                        )
+                    messages = BattlefieldPrompt.retryMessages(
+                        messages, reply: reply,
+                        feedback: evaluation.feedback
+                            + " Battlefield points: \(BattlefieldScoring.coverageAndLengthV1.score(evaluation, byteLimit: problem.byteLimit)). Attempts remaining: \(maxAttempts - a - 1)."
                     )
                 } catch {
                     outputReservations[participant.entrant.id] = nil
@@ -267,13 +268,17 @@ public actor BattlefieldEngine {
                     if Task.isCancelled || error is CancellationError {
                         result!.entrants[e].answers[p].status = .cancelled
                     } else {
-                        // Never persist an arbitrary provider error body, URL query, or credential.
+                        // Only persist bounded, credential-redacted provider diagnostics.
                         let message =
                             (error as? AIHTTPError)?.localizedDescription
                             ?? (error as? BattlefieldError)?.rawValue ?? "AI request failed"
                         result!.entrants[e].answers[p].attempts[a].error = message
                         result!.entrants[e].answers[p].status = .error
-                        result!.entrants[e].error = message
+                        let diagnostic = (error as? AIHTTPError)?.providerResponse.map {
+                            ProviderDiagnostics.response(Data($0.utf8), apiKey: participant.apiKey)
+                        }
+                        result!.entrants[e].answers[p].attempts[a].providerResponse = diagnostic
+                        result!.entrants[e].error = message + (diagnostic.map { "\n" + String($0.prefix(512)) } ?? "")
                     }
                     result!.entrants[e].finishedAt = .now
                     for remaining in result!.entrants[e].answers.indices where remaining != p {
