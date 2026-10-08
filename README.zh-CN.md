@@ -8,6 +8,13 @@
 默认开源版另含 1,769 道社区题，共 **1,819 题**；`HerbertAppStore` 仅打包原创的 50 题。
 [完整原创课程](docs/original-course.zh-CN.md) · [解题分析与进阶设计](docs/advanced-course-design.zh-CN.md) · [App Store 与真机测试](docs/app-store.md)
 
+## 下载 Mac 版
+
+**[下载 0.2.0 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.2.0/Herbert-macOS-universal.dmg)**
+— 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,819 道题。
+
+此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
+
 ![原创版原生 Mac App：穹顶镶嵌](docs/screenshots/course/course-mosaic.png)
 
 *实际原生 Mac App 的中文截图。L49「穹顶镶嵌」组合收缩层、窗格与四向旋转；每层子过程都要恢复自己的位置和朝向，整体图案才接得起来。*
@@ -28,7 +35,7 @@
 | [![Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![Shuriken 棋盘](docs/screenshots/shuriken-board.png)](docs/screenshots/shuriken.png) | [![Butterfly 棋盘](docs/screenshots/butterfly-board.png)](docs/screenshots/butterfly.png) |
 | nai · ≤ 20 bytes | snuke · ≤ 39 bytes | nadsuki · ≤ 27 bytes |
 
-截图来自运行中的 App；点击棋盘查看完整界面。最近发布为 **0.1.0 预览版**；当前 main 开发版界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
+截图来自运行中的 App；点击棋盘查看完整界面。**0.2.0 预览版**界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
 
 用最短的 H 语言程序，带 Herbert 点亮所有目标。原生 SwiftUI 游戏，共用一个与界面无关的游戏引擎，支持 **iPhone / iPad（iOS 17+）和原生 Mac（macOS 14+）**。
 
@@ -38,7 +45,7 @@
 | --- | --- |
 | [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) |
 
-两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增课程位于 main，将纳入下一版本。
+两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。0.2.0 已包含新增的进阶课程。
 
 ## 运行
 
@@ -138,5 +145,5 @@ python3 scripts/import_problems.py
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
 运行 `scripts/capture_screenshots.sh zh-Hans store` 生成原创课程截图；省略 `store` 则生成社区关卡截图。
 
-当前尚未接入云同步，没有 App Store 或公证 Mac 安装包；iPhone/iPad 运行时验证仍待完成。
+当前尚未接入云同步或发布 App Store 版；Mac DMG 为未公证的预览版，iPhone/iPad 运行时验证仍待完成。
 完整记录见 [验证说明](docs/verification.md)。

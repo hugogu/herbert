@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.2.0] - 2026-10-08
+
 ### Added
 
 - Universal macOS DMG packaging with mounted-image audits, SHA-256 checksums,
@@ -54,4 +56,5 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
 [0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0

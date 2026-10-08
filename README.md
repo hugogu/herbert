@@ -26,6 +26,17 @@ their IDs, authors and byte limits. The **App Store edition contains only the 50
 Code and original lessons use MIT; the archived community content has a separate,
 unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
+## Download for Mac
+
+**[Download the 0.2.0 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.2.0/Herbert-macOS-universal.dmg)**
+— macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
+no Xcode is needed. Includes all 1,819 problems.
+
+This preview is ad-hoc signed and **not Apple notarized**. macOS may block its first
+launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
+**System Settings → Privacy & Security → Open Anyway** if you trust the download.
+See [checksums, installation and build details](docs/macos-distribution.md).
+
 [Explore the original curriculum](docs/original-course.md) · [Design and community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md)
 
 ![Herbert original course in the English Mac app: Vaulted mosaic](docs/screenshots/en/course/course-mosaic.png)
@@ -51,7 +62,7 @@ full game screen:
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The new course is on `main` for the next release.*
+The new course is included in the 0.2.0 Mac preview.*
 
 ## Community patterns
 
