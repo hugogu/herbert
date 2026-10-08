@@ -35,9 +35,9 @@
 
 | 现代风格（默认） | Classic 经典风格与轨迹 |
 | --- | --- |
-| [![现代 Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![经典 Flower 棋盘与蓝色运动轨迹](docs/screenshots/flower-classic-board.png)](docs/screenshots/flower-classic.png) |
+| [![现代发条花园棋盘](docs/screenshots/course/course-garden-board.png)](docs/screenshots/course/course-garden.png) | [![经典发条花园棋盘与蓝色运动轨迹](docs/screenshots/course/course-garden-classic-board.png)](docs/screenshots/course/course-garden-classic.png) |
 
-两张均为实际 App 截图。经典风格参考原站规则页中的棋盘；示例执行了四条指令，只有实际移动才会留下轨迹。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增功能目前位于 main，将纳入下一版本。
+两张均为原创 L30 的实际 App 截图，相邻墙格连接成完整围墙。经典风格参考原站规则页中的棋盘；示例执行了四条指令，只有实际移动才会留下轨迹。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增功能目前位于 main，将纳入下一版本。
 
 ## 运行
 
@@ -78,7 +78,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 ## 已实现
 
 - 原版 H 语言：`s/l/r`、单字母过程、递归、最多 26 个参数、可为空的命令参数、数值参数、加减法、非正参数跳过调用、±255 数值限制。
-- 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录。
+- 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录；对照原解释器的发现与差异见 [兼容性审计](docs/hoj-compatibility.zh-CN.md)。
 - 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
 - 六章各五题的原创课程：独立设计的布局、稳定 ID 10001–10030、显示编号 L01–L30、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。

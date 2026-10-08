@@ -17,8 +17,16 @@ save or API formats through documented migrations.
   accessibility descriptions, and interpreter/storage errors; English fallback.
 - Movement trails that retain every walked edge at all speeds, with bounded memory.
 - Classic board inspired by the original rules-page screenshot, alongside Modern (default).
+- Continuous wall outlines in Modern and Classic, preserving holes and diagonal separation.
 - Persistent board settings for style, movement trail, and per-cell grid dots.
 - Translation coverage/format checks and native UI tests for languages and preferences.
+
+### Fixed
+
+- Correct community board decoding: `x` is a wall and `*` is a trap. Original lessons
+  use the same encoding without changing their designed layouts.
+- Pinned HOJ compatibility audit, 17 differential language fixtures, and collision,
+  trap recovery, immediate completion and scoring regression tests.
 
 ## [0.1.0] - 2026-10-07
 

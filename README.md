@@ -54,9 +54,9 @@ These examples are excluded from the App Store edition. Search their IDs in `Her
 
 <table>
   <tr>
-    <td align="center" width="33%"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" alt="Flower puzzle: four petals inside a square field of walls" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" alt="Flower puzzle: four petals inside a square field of traps" width="280"></a></td>
     <td align="center" width="33%"><a href="docs/screenshots/en/shuriken.png"><img src="docs/screenshots/en/shuriken-board.png" alt="Shuriken puzzle: a four-armed rotational pattern" width="280"></a></td>
-    <td align="center" width="33%"><a href="docs/screenshots/en/butterfly.png"><img src="docs/screenshots/en/butterfly-board.png" alt="Butterfly puzzle: mirrored wings made from targets and walls" width="280"></a></td>
+    <td align="center" width="33%"><a href="docs/screenshots/en/butterfly.png"><img src="docs/screenshots/en/butterfly-board.png" alt="Butterfly puzzle: mirrored wings made from targets and traps" width="280"></a></td>
   </tr>
   <tr>
     <td align="center"><b>#0037 · Flower</b><br>nai · ≤ 20 bytes</td>
@@ -71,15 +71,15 @@ These examples are excluded from the App Store edition. Search their IDs in `Her
 
 <table>
   <tr>
-    <td align="center"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" width="380" alt="Modern Flower board with mint robot and amber targets"></a></td>
-    <td align="center"><a href="docs/screenshots/en/flower-classic.png"><img src="docs/screenshots/en/flower-classic-board.png" width="380" alt="Classic Flower board with black walls, white targets, red robot and blue trail"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-garden.png"><img src="docs/screenshots/en/course/course-garden-board.png" width="380" alt="Modern Clockwork garden board with mint robot and amber targets"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-garden-classic.png"><img src="docs/screenshots/en/course/course-garden-classic-board.png" width="380" alt="Classic Clockwork garden board with black walls, white targets, red robot and blue trail"></a></td>
   </tr>
   <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
 </table>
 
-*Both are actual app captures of #0037. Classic follows the original rules-page board
+*Both are actual app captures of original lesson L30. Classic follows the original rules-page board
 appearance. Its screenshot follows four instructions; only successful moves leave a trail.
-Use the sliders button above the board to change style, grid dots, and trail visibility.*
+Adjacent walls share a continuous outline in both styles. Use the sliders button above the board to change style, grid dots, and trail visibility.*
 
 <details>
 <summary>Explore the original course library</summary>
@@ -97,6 +97,7 @@ Use the sliders button above the board to change style, grid dots, and trail vis
   bookmark favorites and return to your last problem.
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
+  See the [HOJ compatibility audit](docs/hoj-compatibility.md) for tested behavior and limits.
 - **Watch your idea unfold.** Run, pause, reset, or single-step. Change speed, zoom the board,
   and switch between the full 25 × 25 grid and its occupied region. See the robot’s complete
   movement trail, including at Turbo speed.

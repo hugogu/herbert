@@ -20,3 +20,6 @@
 - `HerbertCore` bundles only the 30 MIT-original lessons; community JSON belongs in optional `HerbertCommunity`. `HerbertAppStore` must never link that module. Audit the final .app with `scripts/check_app_store_bundle.py`, including archives, rather than relying on UI filtering.
 - Original lessons use stable IDs 10001–10030 and display L01–L30. Generate lessons/translations/test references with `scripts/generate_original_problems.py`; reference solutions must stay outside application resources. Preserve community IDs and existing saves.
 - Personal signing belongs in ignored `Config/Local.xcconfig`, included by `Config/Signing.xcconfig`; project regeneration must not commit or erase a developer's local team selection.
+
+- Community board symbols are `x` = wall and `*` = trap; do not infer them from their appearance. The pinned HOJ interpreter/sample judge audit is in `docs/hoj-compatibility.md`. Keep normalized command/byte fixtures aligned using the optional `scripts/check_hoj_reference.rb` without vendoring the reference source.
+- Modern walls are translucent; pixel checks at cell joins should compare against a point away from the underlying grid dot. Trace wall contours with opposite winding for holes and separate diagonal components.
