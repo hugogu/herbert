@@ -2,6 +2,19 @@
 
 日期：2026-10-07–08（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 原创课程与发行版本（10 月 8 日）
+
+- 30 道独立设计的原创关卡，六章各五题，稳定 ID 10001–10030；名称、学习目标与两级提示支持中英日。
+- `scripts/check.sh`：26 项 Swift 单元/集成测试、8 项 Python 检查和严格格式检查通过。全部 30 个参考程序均由真实 H 编译器/引擎重放，在 byte 限制内完成；检查陷阱次数、无阻挡参考路径、三语文案、存档身份及题库 ID 不冲突。
+- 社区 JSON 移入可选 `HerbertCommunity` 模块，与移动前逐字节相同；默认开源版为 1,799 题，原创版为 30 题。
+- `HerbertAppStore` 的 iOS / Mac Release 构建通过；两份实际 `.app` 均通过资源审计：仅 30 道原创题，不含社区 bundle、社区 JSON 或测试参考答案。
+- 默认 `Herbert` 的 iOS / Mac 构建通过；工程与课程生成器对 10 份产物的重复生成结果一致。
+- `.build/curriculum-store-functional.xcresult`：原创版完整 Mac UI 测试通过，六项功能用例通过、两个截图用例按设计跳过。覆盖课程目标/提示逐条展开、L01 通关及下一关提示重置、草稿恢复、错误重置、三语与棋盘偏好/轨迹。
+- `.build/curriculum-community-functional.xcresult`：开源版同样六项功能用例全部通过、两个截图用例跳过；额外验证 1,799 / 30 / 1,769 的目录筛选。
+- `scripts/capture_screenshots.sh en store` 和 `zh-Hans store` 均通过：共 14 张实际原创版 Mac 截图，已检查语言、完整棋盘、运行栏及无其他窗口遮挡；英文 README 仅使用英文界面。
+- 个人签名配置保留在被忽略的 `Config/Local.xcconfig`；共享工程不包含个人 Team ID。
+- 本轮仍未进行 iPhone/iPad 运行时验证；[真机清单](app-store.md)供设备持有人执行。没有上传 TestFlight 或 App Store。
+
 ## 英文 README 截图更新（10 月 8 日）
 
 - 截图流程显式设置并断言界面语言；默认英文，传入 `zh-Hans` 可生成中文截图。
@@ -46,7 +59,7 @@ Xcode 的 App Intents 元数据工具输出了 “Metadata extraction skipped, n
 
 - 本机没有安装 iOS Simulator runtime，没有执行 iPhone/iPad 模拟器运行、触觉实测或真机触摸/横竖屏验证。iOS 构建成功不等于这些运行时验证已完成。
 - Mac 的 x86_64 架构完成编译和链接，实际界面自动化在 Apple Silicon 上执行，没有 Intel 真机运行测试。
-- 未配置 Apple Developer Team、TestFlight、App Store 发布、Developer ID 分发签名或 notarization。Mac ZIP 是本地 ad-hoc 签名构建；iOS 请打开 Xcode 工程选择自己的签名团队后在真机运行。
+- 仓库不预设 Apple Developer Team；未进行 TestFlight、App Store 发布、Developer ID 分发签名或 notarization。Mac ZIP 是本地 ad-hoc 签名构建；iOS 请打开 Xcode 工程选择自己的签名团队后在真机运行。
 - 未连接 Cloudflare，不包含在线排名/账号。原站题库再分发授权尚未确认，不适用本项目 MIT 许可；见 [NOTICE.md](../NOTICE.md)。
 
 本地交付文件：`outputs/Herbert-macOS.zip`；构建源工程：`Herbert.xcodeproj`。

@@ -2,9 +2,25 @@
 
 [English](README.md) · **简体中文** · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
 
-![原生 Mac App：Flower 关卡、H 语言编辑器与运行控制](docs/screenshots/flower.png)
+先从 **30 道原创课程关卡 L01–L30** 开始，依次学习移动、避障、过程、递归、指令参数与组合。
+每题都有中英日学习目标和逐条展开的两级提示，全部参考解已由真实 H 引擎验证。
+默认开源版包含原创课程和 1,769 道社区题，共 **1,799 题**；`HerbertAppStore` 版本仅打包原创的 30 题。
+[完整原创课程](docs/original-course.zh-CN.md) · [App Store 版本与真机测试说明](docs/app-store.md)
 
-*实际原生 Mac App 截图，关卡 0037「Flower」由 nai 创作。编辑器中的代码是入门示例，并非这道题的解法。*
+![原创版原生 Mac App：发条花园](docs/screenshots/course/course-garden.png)
+
+*实际原生 Mac App 的中文截图，L30「发条花园」组合计数重复、逐渐缩小的正方形与四向旋转。*
+
+| L19 · 生长的螺旋 | L29 · 层叠的窗 | L30 · 发条花园 |
+| --- | --- | --- |
+| [![生长的螺旋棋盘](docs/screenshots/course/course-spiral-board.png)](docs/screenshots/course/course-spiral.png) | [![层叠的窗棋盘](docs/screenshots/course/course-windows-board.png)](docs/screenshots/course/course-windows.png) | [![发条花园棋盘](docs/screenshots/course/course-garden-board.png)](docs/screenshots/course/course-garden.png) |
+| 数值递归 · ≤ 16 bytes | 嵌套指令参数 · ≤ 24 bytes | 组合解题 · ≤ 31 bytes |
+
+原创题目与这些截图均使用 MIT。课程按概念逐步增加难度，字节限制是已验证可达到的学习预算，不宣称最优解。
+
+## 社区题库示例
+
+以下关卡来自默认开源版，App Store 版不包含这些社区题目。
 
 | 0037 · Flower | 0027 · Shuriken | 0361 · Butterfly |
 | --- | --- | --- |
@@ -12,7 +28,6 @@
 | nai · ≤ 20 bytes | snuke · ≤ 39 bytes | nadsuki · ≤ 27 bytes |
 
 截图来自运行中的 App；点击棋盘查看完整界面。最近发布为 **0.1.0 预览版**；当前 main 开发版界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
-
 
 用最短的 H 语言程序，带 Herbert 点亮所有目标。原生 SwiftUI 游戏，共用一个与界面无关的游戏引擎，支持 **iPhone / iPad（iOS 17+）和原生 Mac（macOS 14+）**。
 
@@ -33,6 +48,15 @@ open Herbert.xcodeproj
 ```
 
 选择 `Herbert` scheme 和目标设备，点击 Run。连接 iPhone/iPad 真机时，在 Signing & Capabilities 中选择自己的 Development Team。项目没有预设签名账号。
+
+| Scheme | 题库 | 用途 |
+| --- | --- | --- |
+| `Herbert`（默认） | 30 道原创题 + 1,769 道社区题 | 开源版 |
+| `HerbertAppStore` | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
+
+社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
+CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。
+个人签名团队可写在被 Git 忽略的 `Config/Local.xcconfig` 中：`DEVELOPMENT_TEAM = YOUR_TEAM_ID`。
 
 ```sh
 # 引擎、关卡、持久化与备份集成测试
@@ -57,6 +81,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录。
 - 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
+- 六章各五题的原创课程：独立设计的布局、稳定 ID 10001–10030、显示编号 L01–L30、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
 - 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
 - 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
 - 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中英日分步玩法手册。
@@ -72,7 +97,8 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 ```text
 Herbert/                         SwiftUI 应用与平台文本编辑器
 Sources/HerbertCore/              H 解析器、虚拟机、棋盘、会话与存档
-Sources/HerbertCore/Resources/    原站题库快照
+Sources/HerbertCore/Resources/    原创题库与语言资源
+Sources/HerbertCommunity/         可选社区题库，不进 App Store 包
 Tests/HerbertCoreTests/           单元测试、原题通关与存档/备份集成测试
 HerbertUITests/                  原生界面自动化
 scripts/                        可重复的题库导入、图标和工程生成、检查脚本
@@ -92,7 +118,7 @@ docs/                           数据导入清单、规则核对说明、架构
 - [原站规则](http://herbert.tealang.info/rule.php)
 - [原站 Problems](http://herbert.tealang.info/problems.php)
 - 原站由 quolc 创建，社区关卡归各作者所有；本项目独立编写游戏代码，没有打包或执行原站 Flash 客户端。
-- 应用独立编写的代码、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；原版题库及截图中的关卡布局不在本项目的 MIT 授权范围内，原作者保留权利。详情见 [第三方内容说明](NOTICE.md)。
+- 应用独立编写的代码、30 道原创题、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；社区题库及其截图布局不在本项目的 MIT 授权范围内。App Store scheme 不包含社区题库。详情见 [第三方内容说明](NOTICE.md)。
 - 原站在线排名、账号、投稿与服务器评分未移植；应用展示个人最短代码记录。原站最短记录是导入时的快照，不进行在线比较。
 - 按原版限制运行最多 100 万个机器人指令；为保证手机可取消执行，额外限制 100 万次解释器展开、4096 层非尾递归栈、16 KiB 源代码、64 层参数语法嵌套和 128 层运行时参数嵌套。命令参数与待执行栈使用 100 万单位的展开预算，尾递归不增长调用栈。这些保护可能比原站更早停止极端程序。
 
@@ -109,7 +135,7 @@ python3 scripts/import_problems.py
 欢迎错误报告、翻译改进、无障碍改进和 iPhone/iPad 真机测试。请阅读
 [贡献指南](CONTRIBUTING.md)、[社区行为准则](CODE_OF_CONDUCT.md) 和 [安全策略](SECURITY.md)。
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
-运行 `scripts/capture_screenshots.sh zh-Hans` 可重新生成 README 的真实界面截图。
+运行 `scripts/capture_screenshots.sh zh-Hans store` 生成原创课程截图；省略 `store` 则生成社区关卡截图。
 
 当前尚未接入云同步，没有 App Store 或公证 Mac 安装包；iPhone/iPad 运行时验证仍待完成。
 完整记录见 [验证说明](docs/verification.md)。

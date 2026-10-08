@@ -17,21 +17,40 @@ SwiftUI. Guide the robot to every target using H, a tiny language whose short pr
 can express surprisingly intricate paths. Learn three commands, discover recursion,
 and keep making your solution smaller.
 
-This independent port includes **1,769 original problems**, with their IDs, authors,
-and byte limits preserved. Application code is MIT licensed; the original puzzle archive
-has a separate, unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
+Start with **30 original lessons** that introduce movement, obstacles, procedures,
+recursion and instruction parameters in six stages. Every lesson has localized goals
+and two optional hints, with a reference program verified by the real H engine.
+The default open-source edition also includes **1,769 community problems**, preserving
+their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
+Code and original lessons use MIT; the archived community content has a separate,
+unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
-![Herbert running natively on macOS: Flower with the board, H editor, and execution controls](docs/screenshots/en/flower.png)
+[Explore the original curriculum](docs/original-course.md) · [App Store build and device testing](docs/app-store.md)
 
-*Actual native macOS app with the English UI, showing #0037 “Flower” by nai. The editor contains a starter
-program, not a solution to this puzzle. The app automatically matches English, Simplified Chinese, or Japanese to your preferred language; other languages fall back to English.*
+![Herbert original course in the English Mac app: Clockwork garden](docs/screenshots/en/course/course-garden.png)
 
-*Language and board options are available on `main` and will be included in the next release.*
+*Actual native macOS App Store edition with English UI. L30 “Clockwork garden” combines
+counted repetition, shrinking squares and rotation. The app follows English, Simplified
+Chinese, or Japanese language preferences; other languages fall back to English.*
 
-## Patterns worth exploring
+## From one step to a garden
 
-From a four-step introduction to intricate geometric puzzles, the original collection
-rewards recognizing a pattern before writing a program. Search these IDs in the app:
+The six-stage [original course](docs/original-course.md) grows from a single `s` to
+procedures, recursion and instructions as arguments. These are three later lessons;
+click a board to see its full game screen:
+
+| L19 · Growing spiral | L29 · Nested windows | L30 · Clockwork garden |
+| --- | --- | --- |
+| [![Growing spiral board](docs/screenshots/en/course/course-spiral-board.png)](docs/screenshots/en/course/course-spiral.png) | [![Nested windows board](docs/screenshots/en/course/course-windows-board.png)](docs/screenshots/en/course/course-windows.png) | [![Clockwork garden board](docs/screenshots/en/course/course-garden-board.png)](docs/screenshots/en/course/course-garden.png) |
+| Numeric recursion · ≤ 16 bytes | Nested instruction arguments · ≤ 24 bytes | Composition · ≤ 31 bytes |
+
+*These original puzzles and their screenshots are MIT licensed. Language and board
+options, and the original course, are on `main` for the next release.*
+
+## Community patterns
+
+The default open-source edition also includes the archived community collection.
+These examples are excluded from the App Store edition. Search their IDs in `Herbert`:
 
 <table>
   <tr>
@@ -63,15 +82,18 @@ appearance. Its screenshot follows four instructions; only successful moves leav
 Use the sliders button above the board to change style, grid dots, and trail visibility.*
 
 <details>
-<summary>Explore the problem library</summary>
+<summary>Explore the original course library</summary>
 
-![Herbert library with search, progress, filters, and live board thumbnails](docs/screenshots/en/library.png)
+![Original-only Herbert library with search, progress, filters, and live board thumbnails](docs/screenshots/en/course/course-library.png)
 
 </details>
 
 ## What you can do
 
-- **Play anywhere offline.** All 1,769 problems are bundled. Search by ID, title, or author;
+- **Learn one idea at a time.** Follow L01–L30 from one step to the Clockwork garden;
+  reveal hints individually when you need them. Titles, goals and hints support all three languages.
+- **Play anywhere offline.** The default edition bundles 1,799 problems; the App Store
+  edition bundles 30 originals. Search by ID, title, or author;
   bookmark favorites and return to your last problem.
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
@@ -83,7 +105,7 @@ Use the sliders button above the board to change style, grid dots, and trail vis
   trail. Preferences stay on this device. Resetting or editing code clears the trail;
   hiding it keeps recording.
 - **Play in your language.** English, Simplified Chinese, and Japanese cover navigation,
-  the guide, accessibility, and interpreter errors. Original puzzle titles/authors are preserved.
+  the guide, accessibility, and interpreter errors. Community puzzle titles/authors are preserved.
 - **Use a layout that fits.** Stacked board and editor on phones; side-by-side play on iPad
   and Mac. Native text editing, cursor-aware command buttons, and `⌘ Return` on Mac.
 - **Keep your progress.** Drafts, favorites, and shortest solutions save locally. Export JSON
@@ -92,10 +114,10 @@ Use the sliders button above the board to change style, grid dots, and trail vis
 
 ## Try your first program
 
-Open problem **0001** and enter:
+Open lesson **L01 · First light** and enter:
 
 ```text
-ssss
+s
 ```
 
 Each `s` moves forward one square; `l` turns left and `r` turns right. Light every amber
@@ -122,6 +144,16 @@ open Herbert.xcodeproj
 Choose the **Herbert** scheme and your Mac, iPhone, or iPad destination, then Run.
 For a physical iOS device, select your own Development Team in Signing & Capabilities.
 No developer account is configured in the repository.
+
+| Scheme | Included content | Intended use |
+| --- | --- | --- |
+| `Herbert` (default) | 30 original lessons + 1,769 archived community puzzles | Open-source edition |
+| `HerbertAppStore` | 30 original lessons only | TestFlight / App Store candidate |
+
+The community archive is a separate optional Swift package target, not a runtime-hidden
+file in the store app. CI audits built iOS and Mac store apps for content isolation.
+Personal signing settings can go in ignored `Config/Local.xcconfig` as `DEVELOPMENT_TEAM = YOUR_TEAM_ID`.
+See [device and archive instructions](docs/app-store.md) before uploading.
 
 ```sh
 # Formatting, importer unit tests, and core unit/integration tests
@@ -150,6 +182,7 @@ or notarized binary release yet. See [verification details](docs/verification.md
 | --- | --- |
 | `Herbert/` | SwiftUI screens, native editors, animation, app state |
 | `Sources/HerbertCore/` | UI-independent H parser, VM, board, session, progress storage |
+| `Sources/HerbertCommunity/` | Optional community archive, excluded from App Store targets |
 | `Tests/HerbertCoreTests/` | Language unit tests and game/save/backup integration tests |
 | `HerbertUITests/` | Native UI tests and reproducible screenshot captures |
 | `scripts/` | Project/icon generation, validated catalog import, local checks |
@@ -180,7 +213,7 @@ to start. For feature ideas, open an issue before a large implementation.
 - Test and refine phone keyboard, rotation, touch, and accessibility behavior on devices.
 - Refine English/Japanese translations while preserving original puzzle titles and author credits.
 - Expand H compatibility fixtures and make execution easier to inspect.
-- Resolve original problem redistribution permissions before an App Store release.
+- Finish device testing and App Store privacy/metadata preparation using the original-only scheme.
 - Add optional authenticated cloud sync while keeping offline play first.
 
 ## Credits and license
@@ -191,6 +224,6 @@ its problem authors. Original [rules](http://herbert.tealang.info/rule.php) and
 The original Flash client, online accounts, submissions, and leaderboard are not included;
 original best scores are an import-time snapshot, not live rankings.
 
-Our source code, original icon, and documentation use the **[MIT License](LICENSE)**.
-Original third-party puzzle data and the layouts visible in screenshots are **not
-relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.
+Our source code, 30 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
+Third-party community puzzle data and community layouts visible in screenshots are
+**not relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.
