@@ -1,0 +1,104 @@
+[
+  {
+    "name": "primitives",
+    "source": "slrs",
+    "commands": "slrs",
+    "bytes": 4
+  },
+  {
+    "name": "procedures",
+    "source": "a:ssss\nb:srsl\nab",
+    "commands": "sssssrsl",
+    "bytes": 12
+  },
+  {
+    "name": "forward-call",
+    "source": "a:b\nb:s\na",
+    "commands": "s",
+    "bytes": 5
+  },
+  {
+    "name": "numeric-recursion",
+    "source": "a(X):sa(X-1)\na(4)",
+    "commands": "ssss",
+    "bytes": 8
+  },
+  {
+    "name": "mixed-parameters",
+    "source": "a(X,Y):Ya(X-1,Y)\na(4,s)",
+    "commands": "ssss",
+    "bytes": 11
+  },
+  {
+    "name": "zero-first",
+    "source": "a(X,Y):Ya(X-1,Y)\na(0,s)r",
+    "commands": "r",
+    "bytes": 12
+  },
+  {
+    "name": "zero-second",
+    "source": "a(X,Y):sa(X-1,Y-1)\na(2,0)r",
+    "commands": "r",
+    "bytes": 13
+  },
+  {
+    "name": "negative-result",
+    "source": "a(X):sa(X-1)\na(1-2)r",
+    "commands": "r",
+    "bytes": 10
+  },
+  {
+    "name": "empty-command",
+    "source": "a(X):Xr\na()",
+    "commands": "r",
+    "bytes": 5
+  },
+  {
+    "name": "growing-command",
+    "source": "a(X):Xra(Xs)\na(l)",
+    "commands": "lrlsrlssrlsssr",
+    "bytes": 9
+  },
+  {
+    "name": "captured-number",
+    "source": "a(X):b(X)\nb(Y):sb(Y-1)\na(3)",
+    "commands": "sss",
+    "bytes": 12
+  },
+  {
+    "name": "captured-command",
+    "source": "a(X,Y):Xra(sX,Y-1)\na(s,3)",
+    "commands": "srssrsssr",
+    "bytes": 13
+  },
+  {
+    "name": "nested-call",
+    "source": "a(X,Y):X\nb(Z):sb(Z-1)\na(b(3),1)",
+    "commands": "sss",
+    "bytes": 14
+  },
+  {
+    "name": "lazy-call",
+    "source": "a(X):b(a(X-1))s\nb(Y):Y\na(3)",
+    "commands": "sss",
+    "bytes": 12
+  },
+  {
+    "name": "subtraction",
+    "source": "a(X):sa(X-1)\na(5-2)",
+    "commands": "sss",
+    "bytes": 9
+  },
+  {
+    "name": "addition",
+    "source": "a(X):sa(X-1)\na(1+2)",
+    "commands": "sss",
+    "bytes": 9
+  },
+  {
+    "name": "tail-recursion",
+    "source": "a:sa\na",
+    "commands": "ssssssssssssssssssssssssssssssss",
+    "bytes": 4
+  }
+]

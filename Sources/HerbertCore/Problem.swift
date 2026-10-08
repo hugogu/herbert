@@ -100,8 +100,8 @@ public struct Board: Sendable {
                 switch cell {
                 case "u": starts.append(point)
                 case "o": targets.insert(point)
-                case "x": traps.insert(point)
-                case "*": walls.insert(point)
+                case "*": traps.insert(point)
+                case "x": walls.insert(point)
                 case ".": break
                 default: throw CatalogError.invalidBoard(problem.id)
                 }

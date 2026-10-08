@@ -228,7 +228,7 @@ def generate():
         assert targets and not (set(path) & set(walls))
         assert targets <= set(path) and not (targets & set(walls))
         rows = [['.'] * 25 for _ in range(25)]
-        for cells, symbol in [(walls, '*'), (traps, 'x'), (targets, 'o'), ([start], 'u')]:
+        for cells, symbol in [(walls, 'x'), (traps, '*'), (targets, 'o'), ([start], 'u')]:
             for x, y in cells:
                 rows[y][x] = symbol
         chapter = (index-1)//5

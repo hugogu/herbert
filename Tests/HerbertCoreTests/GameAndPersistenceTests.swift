@@ -46,7 +46,7 @@ final class GameAndPersistenceTests: XCTestCase {
     func testTrapResetsAllPreviouslyPressedTargets() throws {
         let p = problem(cells: [
             GridPoint(x: 1, y: 3): "u", GridPoint(x: 1, y: 2): "o",
-            GridPoint(x: 1, y: 1): "x", GridPoint(x: 2, y: 1): "o",
+            GridPoint(x: 1, y: 1): "*", GridPoint(x: 2, y: 1): "o",
         ])
         var session = try GameSession(problem: p)
         try session.prepare(source: "ssrs")
@@ -60,7 +60,7 @@ final class GameAndPersistenceTests: XCTestCase {
     }
 
     func testWallAndBoundaryBlockMovementWithoutStoppingProgram() throws {
-        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "*", GridPoint(x: 0, y: 1): "o"])
+        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "x", GridPoint(x: 0, y: 1): "o"])
         var session = try GameSession(problem: p)
         try session.prepare(source: "srsrs")
         XCTAssertEqual(session.step(), .blocked)
@@ -84,7 +84,7 @@ final class GameAndPersistenceTests: XCTestCase {
     func testTrailIncludesEveryMoveAndSurvivesTrapAndPause() throws {
         let p = problem(cells: [
             GridPoint(x: 1, y: 3): "u", GridPoint(x: 1, y: 2): "o",
-            GridPoint(x: 1, y: 1): "x", GridPoint(x: 2, y: 1): "o",
+            GridPoint(x: 1, y: 1): "*", GridPoint(x: 2, y: 1): "o",
         ])
         var session = try GameSession(problem: p)
         try session.prepare(source: "ssrs")
@@ -106,7 +106,7 @@ final class GameAndPersistenceTests: XCTestCase {
     }
 
     func testBlockedMovesAddNoTrailAndBatchRetainsAllMoves() throws {
-        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "*", GridPoint(x: 0, y: 4): "o"])
+        let p = problem(cells: [GridPoint(x: 0, y: 0): "u", GridPoint(x: 1, y: 0): "x", GridPoint(x: 0, y: 4): "o"])
         var session = try GameSession(problem: p)
         try session.prepare(source: "srsrssss")
         for _ in 0..<8 { session.step() }
