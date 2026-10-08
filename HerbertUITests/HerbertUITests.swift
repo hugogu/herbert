@@ -1,3 +1,4 @@
+import ImageIO
 import XCTest
 
 final class HerbertUITests: XCTestCase {
@@ -138,6 +139,45 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testAdjacentWallCellsRenderWithoutSeamsInBothStyles() throws {
+        let app = launch(language: "en")
+        openProblem(10006, in: app)
+        for style in ["modern", "classic"] {
+            app.buttons["board-options"].activateControl()
+            selectBoardStyle(style, in: app)
+            app.buttons["close-board-options"].activateControl()
+            XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+            let board = app.descendants(matching: .any)["game-board"].firstMatch
+            let data = board.screenshot().pngRepresentation as CFData
+            let source = try XCTUnwrap(CGImageSourceCreateWithData(data, nil))
+            let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+            let context = try XCTUnwrap(
+                CGContext(
+                    data: nil, width: image.width, height: image.height, bitsPerComponent: 8,
+                    bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+            let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+            // L06 has three horizontal walls centered in its focused 7 × 7 region.
+            let cell = Double(min(image.width, image.height)) / 7
+            let y = image.height / 2
+            // Sample away from a grid dot, which is faintly visible beneath Modern opacity.
+            let center = (y * image.width + Int(Double(image.width) / 2 + cell * 0.25)) * 4
+            XCTAssertLessThan(pixels[center], 128, "Wall center must be dark")
+            for offset in [-0.51, -0.5, -0.49, 0.49, 0.5, 0.51] {
+                let x = Int(Double(image.width) / 2 + offset * cell)
+                let index = (y * image.width + x) * 4
+                for channel in 0..<3 {
+                    XCTAssertLessThanOrEqual(
+                        abs(Int(pixels[index + channel]) - Int(pixels[center + channel])), 3,
+                        "\(style) seam at \(offset) cells")
+                }
+            }
+        }
+        app.terminate()
+    }
+
+    @MainActor
     private func openProblem(_ id: Int, in app: XCUIApplication) {
         let search = app.textFields["problem-search"]
         search.activateControl()
@@ -229,6 +269,20 @@ final class HerbertUITests: XCTestCase {
             image.name = "readme-course-\(name)-board"
             image.lifetime = .keepAlways
             add(image)
+            if id == 10030 {
+                app.textViews["code-editor"].activateControl()
+                app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(4)")
+                for _ in 0..<4 { app.buttons["step-program"].activateControl() }
+                app.buttons["board-options"].activateControl()
+                selectBoardStyle("classic", in: app)
+                app.buttons["close-board-options"].activateControl()
+                XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+                capture(app, name: "course-garden-classic")
+                let classic = XCTAttachment(screenshot: board.screenshot())
+                classic.name = "readme-course-garden-classic-board"
+                classic.lifetime = .keepAlways
+                add(classic)
+            }
             app.buttons[language == "en" ? "Back" : "返回"].activateControl()
             app.buttons["clear-search"].activateControl()
         }

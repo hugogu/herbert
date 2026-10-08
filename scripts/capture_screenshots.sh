@@ -35,7 +35,7 @@ expected = {'library', 'flower', 'flower-board', 'shuriken', 'shuriken-board',
             'butterfly', 'butterfly-board', 'flower-classic', 'flower-classic-board'}
 images = {}
 if sys.argv[3] == 'store':
-    expected = {'course-library'} | {f'course-{name}{suffix}' for name in ['spiral', 'windows', 'garden'] for suffix in ['', '-board']}
+    expected = {'course-library'} | {f'course-{name}{suffix}' for name in ['spiral', 'windows', 'garden'] for suffix in ['', '-board']} | {'course-garden-classic', 'course-garden-classic-board'}
 for test in json.loads((source / 'manifest.json').read_text()):
     for item in test['attachments']:
         name = item['suggestedHumanReadableName'].split('_0_')[0].removeprefix('readme-')

@@ -82,13 +82,39 @@ struct BoardDrawing: View, Animatable {
                     path, with: .color(style == .classic ? .blue.opacity(0.50) : Palette.mint.opacity(0.40)),
                     style: StrokeStyle(lineWidth: max(1.5, cell * 0.09), lineCap: .round, lineJoin: .round))
             }
-            for point in board.walls {
-                let c = center(point)
-                let rect = CGRect(x: c.x - cell * 0.46, y: c.y - cell * 0.46, width: cell * 0.92, height: cell * 0.92)
-                context.fill(
-                    Path(roundedRect: rect, cornerRadius: style == .classic ? 0 : cell * 0.15),
-                    with: .color(style == .classic ? .black : Palette.ink.opacity(0.85)))
+            var walls = Path()
+            for contour in board.wallContours {
+                let corners = contour.map { p in
+                    CGPoint(
+                        x: origin.x + CGFloat(p.x - region.x) * cell,
+                        y: origin.y + CGFloat(p.y - region.y) * cell)
+                }
+                guard let first = corners.first else { continue }
+                if style == .classic {
+                    walls.move(to: first)
+                    for corner in corners.dropFirst() { walls.addLine(to: corner) }
+                } else {
+                    for index in corners.indices {
+                        let previous = corners[(index + corners.count - 1) % corners.count]
+                        let corner = corners[index]
+                        let next = corners[(index + 1) % corners.count]
+                        let entry = CGPoint(
+                            x: corner.x + (previous.x - corner.x) * 0.15,
+                            y: corner.y + (previous.y - corner.y) * 0.15)
+                        let exit = CGPoint(
+                            x: corner.x + (next.x - corner.x) * 0.15,
+                            y: corner.y + (next.y - corner.y) * 0.15)
+                        if index == 0 { walls.move(to: entry) } else { walls.addLine(to: entry) }
+                        if previous.x == next.x || previous.y == next.y {
+                            walls.addLine(to: exit)
+                        } else {
+                            walls.addQuadCurve(to: exit, control: corner)
+                        }
+                    }
+                }
+                walls.closeSubpath()
             }
+            context.fill(walls, with: .color(style == .classic ? .black : Palette.ink.opacity(0.85)))
             for point in board.traps {
                 let c = center(point)
                 let radius = cell * 0.23

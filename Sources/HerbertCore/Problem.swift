@@ -85,6 +85,7 @@ public struct Board: Sendable {
     public let targets: Set<GridPoint>
     public let traps: Set<GridPoint>
     public let walls: Set<GridPoint>
+    public let wallContours: [[GridPoint]]
 
     public init(problem: Problem) throws {
         guard problem.rows.count == 25, problem.rows.allSatisfy({ $0.count == 25 }) else {
@@ -116,6 +117,7 @@ public struct Board: Sendable {
         self.targets = targets
         self.traps = traps
         self.walls = walls
+        wallContours = WallContours.trace(walls)
     }
 
     public func canEnter(_ point: GridPoint) -> Bool {
