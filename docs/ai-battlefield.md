@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.1**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.2**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
@@ -21,7 +21,7 @@ Custom endpoints must support OpenAI-style chat completions. Choose `max_tokens`
 Redirects are rejected; enter the final URL directly. HTTP endpoints are not accepted.
 
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,
-`presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, and `thinking_budget`.
+`presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, and `thinking_budget`.
 Provider support varies; invalid combinations can return an API error. Model, message,
 stream and token-cap fields cannot be overridden by advanced JSON.
 
@@ -31,11 +31,47 @@ Protocol references: [OpenRouter models](https://openrouter.ai/docs/api/api-refe
 [SiliconFlow models](https://api-docs.siliconflow.cn/docs/api/models-get),
 [chat](https://api-docs.siliconflow.cn/docs/api/chat-completions-post).
 
+## Responses, reasoning and HTTP 400 diagnostics
+
+Open an answer in Current match or history. Full response is expanded by default and
+updates as the model replies, showing final content, `reasoning_content` / `reasoning`,
+and provider error details. Text received before a stream failure is retained. Error bodies
+are read up to 64 KiB and redact known credential fields, Bearer values and your API key.
+Successful response streams remain bounded to 4 MiB; oversized streams fail with their
+received partial text retained. History files retain the existing 64 MiB storage bound
+and report save failures rather than silently dropping text.
+Older 0.3.1 histories cannot recover text that the older client discarded.
+
+A `finish_reason: length` reply with reasoning but no final answer means the model used
+its output allowance without returning H. Reasoning counts toward the output cap.
+Increase that model's cap or adjust reasoning parameters supported by your provider.
+For Kimi, `thinking` is now allowed in advanced JSON; use only options supported by the
+specific endpoint/model. A larger allowance consumes more credits and is not a correctness guarantee.
+
+Retries now replay the original reasoning field with a nonempty assistant answer. If
+there was no final answer, judge feedback is merged into the last user message instead
+of sending an empty assistant turn. Moonshot's [official Kimi SDK](https://moonshotai.github.io/kosong/kosong/chat_provider/kimi.html)
+preserves reasoning on assistant turns and documents empty text compatibility errors.
+Kimi also documents missing reasoning as an HTTP 400 cause in its [error reference](https://www.kimi.com/code/docs/en/kimi-code/error-reference.html), specifically for assistant tool-call messages.
+These were request defects in 0.3.1; the exact cause of a historical HTTP 400 cannot be
+confirmed when its body was discarded. New diagnostics expose the provider's message
+and parameter details without making an unsupported automatic parameter change.
+
+The shared prompt is **`herbert-h-v3`**: explicit row/column rulers, start/target
+coordinates, wall/edge behavior, numeric-call termination, instruction arguments and
+post-recursion work. Two complete worked boards include a wall/trap example and a
+recursive pinwheel with two numeric parameters and an instruction parameter. They are
+separate from the scored catalog; L50's answer is not supplied. Both examples are
+replayed through the native judge in tests. Improved instructions do not establish that
+a particular commercial model will solve #0002/#0003; no paid model result is claimed.
+Compare runs only with matching prompt versions and puzzle IDs. v0.3.2 defaults to ten
+selected introductory lessons plus L31–L50, totaling 30 puzzles (maximum 3,000 points).
+
 ## Run a match
 
-**New match** starts with your default entrants and all **50 original puzzles**, L01–L50.
+**New match** starts with your default entrants and all **30 retained original puzzles**.
 Choose up to 32 provider/model pairs and a subset of puzzles. The open-source edition
-also permits community puzzles; the App Store edition exposes only its 50 originals.
+also permits community puzzles; the App Store edition exposes only its 30 originals.
 Models run concurrently, with one request at a time per model. Each model works through
 the same puzzles in catalog order, using the exact same English rules and board prompt.
 Optional additional instructions are identical for every entrant.
@@ -58,7 +94,7 @@ On Mac, switching to another app does not stop it. A force quit or crash is reco
 
 The platform extracts one H program and runs it through the **same HerbertCore parser,
 byte counter, VM and board rules used for human play**. H code cannot invoke tools,
-access the network or read files. The 50 original puzzles form **Herbert Benchmark**.
+access the network or read files. The 30 original puzzles form **Herbert Benchmark**.
 
 The versioned `coverageAndLengthV1` policy awards:
 

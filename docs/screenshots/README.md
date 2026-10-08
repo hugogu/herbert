@@ -43,7 +43,7 @@ Original puzzle layouts retain their authors' rights and are excluded from our M
 See [NOTICE.md](../../NOTICE.md).
 
 The `store` capture uses `HerbertAppStore` and exports eleven actual native Mac images into
-`en/course/` or `course/`: the 50-original library and L38 Hinged rosette, L44 Snowmelt seal,
+`en/course/` or `course/`: the 30-original library and L38 Hinged rosette, L44 Snowmelt seal,
 L49 Vaulted mosaic, L50 Astral cathedral (full screens and boards), plus L49 in Classic
 style with a three-step blue trail. The selection favors silhouettes, symmetry and
 legibility; see the [design study](../advanced-course-design.md). Adjacent walls form
@@ -51,14 +51,14 @@ continuous contours. Earlier L19/L29/L30 captures remain as historical illustrat
 These independently designed original layouts and their captures use MIT.
 They are not iPhone/iPad App Store screenshots.
 
-## Herbert Benchmark · 0.3.1
+## Herbert Benchmark · 0.3.2
 
 `en/battlefield/` contains actual English Mac windows captured by `BattlefieldUITests`:
 provider configuration, discovered models, compact match setup, rendered Markdown rules,
 a completed match with ranked model headers and two-line answers, native answer feedback,
 an answer prefilled for board trial with Back to match, and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
 models. They deliberately return an invalid program before retrying: both solve L01, while
-Model 1 also solves L02/L06 and Model 2 earns partial or zero points. The benchmark
+Model 1 also solves L06/L12 and Model 2 earns partial or zero points. The benchmark
 capture includes these three puzzles; the detailed trial flow uses L01. Thus
 the test verifies parallel requests, retry feedback, native judging, ranking, answer trials/back navigation
 and history. The captured match uses Time limited mode so both fixture entrants finish;
@@ -83,3 +83,7 @@ Use the manifest's `readme-ai-*` attachment names to select the PNGs, then inspe
 language, counts and window visibility before copying them into the gallery. The
 optional display environment variable described above works for these tests too.
 The share preview comes from the app's ImageRenderer and PNG export flow.
+
+0.3.2 adds `ai-reasoning.png` and `ai-provider-error.png`, captured from isolated deterministic
+responses while the answer dialog updates. The HTTP 400 message is a fixture illustrating
+diagnostics, not a captured Kimi API response. The three-puzzle gallery uses L01/L06/L12.

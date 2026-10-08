@@ -5,6 +5,27 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.2] - 2026-10-08
+
+### Fixed
+
+- Retain final responses, model reasoning and partial streamed text in live answer details
+  and match history. Expand full responses by default and update already-open dialogs.
+- Preserve bounded, credential-redacted provider error bodies instead of discarding HTTP
+  400 diagnostics. Explain reasoning-only output-cap exhaustion without showing empty programs.
+- Replay `reasoning_content` / `reasoning` on rejected-answer retries and avoid empty assistant
+  turns after reasoning-only replies. Allow provider-specific `thinking` parameters.
+
+### Changed
+
+- Upgrade the shared H prompt to `herbert-h-v3`, adding coordinate rulers, explicit target
+  coordinates, termination/reuse explanations and two complete native-verified teaching boards.
+  The recursive example is separate from L50 and other scored puzzles.
+- Condense L01–L30 into ten selected lessons; retain L31–L50, totaling 30 original puzzles
+  and 1,799 in the community edition. Only the first two can fit a direct primitive program.
+  Keep retained IDs/layouts/budgets stable and preserve retired records in backups/history.
+- Refresh English/Chinese documentation, Herbert Benchmark methodology and native app captures.
+
 ## [0.3.1] - 2026-10-08
 
 ### Changed

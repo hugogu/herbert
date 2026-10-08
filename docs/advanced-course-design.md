@@ -41,3 +41,10 @@ Independent primitive geometric routes generate the boards. Native tests replay 
 A bounded fixed-cycle probe found two overly easy drafts. `a:srsla` / `a` solved the original L37; `a:ssslslsla` / `a` solved the original L44. L37 now requires returning and rotating four opposing staircases. L44 now has four symmetric trap caps. Regression tests verify the known shortcuts enter an unsolved repeated state, rather than treating a fixed-step timeout as a proof. Template searches are not exhaustive and do not establish optimality.
 
 README selections favor clear silhouettes, symmetry, continuous walls and legibility at thumbnail size. L49 Vaulted mosaic is the hero; L38 Hinged rosette, L44 Snowmelt seal and L50 Astral cathedral form the advanced gallery. Dense L45 and the small L47 are not promoted merely because their programs use more procedures. All published captures come from the running native app, with English UI in the English README and Chinese UI in the Chinese README.
+
+## v0.3.2 course selection
+
+The original design study above describes the 0.2.0 course. v0.3.2 retains L01, L06, L12,
+L17, L22, L24, L25, L26, L27 and L30 plus L31–L50. This removes redundant introductory
+variants while retaining reuse, tail recursion, numeric termination, instruction growth,
+traps, alternating turns and nested composition. See the [current course](original-course.md).

@@ -10,10 +10,11 @@
 
 ## 本地存档
 
-题库分为两个模块：`HerbertCore` 仅包含原创的 50 题和语言资源，`HerbertCommunity` 包含可选社区快照。
+题库分为两个模块：`HerbertCore` 仅包含原创的 30 题和语言资源，`HerbertCommunity` 包含可选社区快照。
 默认 `Herbert` target 链接两者并先显示原创课程；`HerbertAppStore` 仅链接原创题库，编译条件 `APP_STORE` 控制对应文案与筛选。两个 target 均链接独立的 `HerbertBattlefield`，它不依赖社区题库。
 不是运行时隐藏资源。构建后的 App Store .app 由 `scripts/check_app_store_bundle.py` 验证题库隔离。
-原创 ID 为 10001–10050，显示编号 L01–L50；社区 ID 保持不变。下一关按当前目录顺序查找，不按数值大小猜测。
+原创保留十道入门题及 L31–L50，选中关卡的 ID 与显示编号不变；社区 ID 保持不变。
+退役原创 ID 不复用，存档与备份中的旧记录保留为不可游玩的历史数据。下一关按当前目录顺序查找，不按数值大小猜测。
 目标、提示和名称采用同一套三语资源；参考解在测试 target 中独立打包，不进入应用。
 
 `ProgressRepository` 目前由 `LocalProgressRepository` 实现。AppStore 协调草稿防抖保存、应用退后台时立即保存与错误提示。缺少文件返回空存档；已有文件损坏或版本不支持时报告错误并暂停保存。保存先校验 schema，再原子写入。
@@ -69,7 +70,12 @@ Foundation/SwiftUI match the system or per-app preferred language (en, zh-Hans, 
 as development-language fallback. `HerbertStrings` formats core diagnostics and dynamic
 labels; ordinary SwiftUI labels use native localization keys.
 
-0.3.1 比赛结果增加可选 `scoring` 策略标识；缺失时按 0.3.0 的通过题数、byte 与时间排序，
+0.3.2 比赛结果增加可选 `scoring` 策略标识；缺失时按 0.3.0 的通过题数、byte 与时间排序，
 新增比赛使用覆盖率/代码长度分数及 Token 同分排序。原有 JSON 无需重写，历史索引可读取整数或小数分数。
 试运行共用 `GameModel` 与棋盘，但以临时源代码初始化并禁用个人草稿、通关、访问记录的写入。
 Best Effort 在首个参赛者完成题目序列后由引擎统一结束、取消其余调用并冻结成绩。
+
+0.3.2 将 `reasoning_content` / `reasoning` 与最终回答分别保存在尝试记录中；流失败前刷新部分文本。
+HTTP 错误读取上限 64 KiB，脱敏后保存；旧历史的可选字段缺失仍可解码。重试保留 assistant 推理字段，
+仅有推理而无最终内容时把判题反馈合并到最后一条用户消息，避免生成空 assistant。
+共享规则升级为 `herbert-h-v3`，公开示例使用独立棋盘，计分题的参考解仍只在测试资源中。

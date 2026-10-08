@@ -30,3 +30,7 @@
 - AI Battlefield is a separate UI-independent Swift package. Never encode API keys into settings, history or share images; the app keeps keys in Keychain. Preserve SSE blank-line boundaries with the byte parser: `URLSession.AsyncBytes.lines` can omit them on Apple platforms. Test the actual HTTP stream, not just pre-split event fixtures.
 
 - `HerbertStrings.text` / `L10n.text` already applies printf arguments: pass values directly, never wrap it in a second `String(format:)`. Avoid identifiers on UI container groups when their children need distinct XCTest identifiers; SwiftUI can propagate the container identifier.
+
+- v0.3.2 retains ten introductory lessons plus L31–L50 (30 originals). Never reuse retired lesson IDs; inert old progress records remain importable. Public Battlefield teaching examples are separate from scored puzzle reference fixtures.
+- macOS sandbox/TCC may deny the app container even to an escalated terminal. Python `Path.glob()` can silently yield no files on that denial; use an explicit directory read before concluding history is empty.
+- Do not overlap native UI test runs or native computer-use sessions; they share focus and accessibility state.

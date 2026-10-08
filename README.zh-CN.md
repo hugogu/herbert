@@ -2,16 +2,18 @@
 
 [English](README.md) · **简体中文** · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
 
-先从 **30 道基础课程关卡**学习移动、避障、过程、递归与指令参数，再挑战 **20 道进阶题**：
+先从 **10 道入门课程关卡**学习移动、避障、过程、递归与指令参数，再挑战 **20 道进阶题**：
 让墙参与计数、交换参数、递归折返、互递归及多层子程序组合。
-全部 **50 道原创题 L01–L50** 都有中英日目标与两级提示，参考解通过原生引擎和 HOJ 参考引擎验证。
-默认开源版另含 1,769 道社区题，共 **1,819 题**；`HerbertAppStore` 仅打包原创的 50 题。
+全部 **30 道原创题** 都有中英日目标与两级提示，参考解通过原生引擎和 HOJ 参考引擎验证。
+默认开源版另含 1,769 道社区题，共 **1,799 题**；`HerbertAppStore` 仅打包原创的 30 题。
+入门精选 L01、L06、L12、L17、L22、L24、L25、L26、L27、L30，之后保留 L31–L50。
+仅前两题可直接逐步写出路线；编号空缺用于保持存档含义，退役题记录仍可导入。
 [完整原创课程](docs/original-course.zh-CN.md) · [解题分析与进阶设计](docs/advanced-course-design.zh-CN.md) · [App Store 与真机测试](docs/app-store.md)
 
 ## 下载 Mac 版
 
-**[下载 0.3.1 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.1/Herbert-macOS-universal.dmg)**
-— 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,819 道题。
+**[下载 0.3.2 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.2/Herbert-macOS-universal.dmg)**
+— 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
 
@@ -47,13 +49,15 @@
 
 两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
 
-## AI Battlefield · 0.3.1
+## AI Battlefield · 0.3.2
 
 手机端保留四个主 Tab。**AI 配置 → 新比赛 → 当前比赛 → 比赛历史**合并在 AI Battlefield 标题栏中。
 普通游戏继续支持完全离线。
 
+0.3.2 支持实时查看并保存最终回答、模型推理、部分输出和脱敏后的服务商错误详情；推理耗尽输出额度时会给出明确提示。重试保留推理字段并避免空 assistant 消息。共享提示词 `herbert-h-v3` 添加坐标尺、目标坐标与两道经过原生判题验证的完整棋盘示例，其中递归风车独立于计分题 L50。
+
 - 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过 `/models` 自动发现模型，选择默认参赛模型及参数；密钥保存在系统钥匙串。
-- 默认选中原创 L01–L50，可自选题目与模型。限时、限 Token 和 Best Effort 三种模式；Token 预算可全场共享或每个 AI 独立。
+- 默认选中 30 道原创题，可自选题目与模型。限时、限 Token 和 Best Effort 三种模式；Token 预算可全场共享或每个 AI 独立。
 - Mac 新比赛的模型和题目并排显示；统一规则按 Markdown 排版。AI 使用相同规则和棋盘提示词并行解答，每题默认 3 次机会，可设为 1–10 次。
 - 逐题进度用紧凑两行展示状态、尝试次数、分数和程序摘要；模型列动态按成绩排序，表头显示输入/输出/总 Token 与缓存率，拉宽窗口可显示更多 AI。
 - 点击答案查看完整提交、反馈和重试记录；**在棋盘中试运行**会预填答案，可编辑、运行并**返回比赛**，不修改个人草稿、最短解或比赛成绩。
@@ -64,7 +68,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 
 ## Herbert Benchmark · AI 编程评测
 
-使用 **50 道原创题 L01–L50**，从移动、墙体约束，到数值/指令参数、递归、多子程序及其组合，
+使用 **30 道原创题**，从移动、墙体约束，到数值/指令参数、递归、多子程序及其组合，
 考察模型的程序构造能力。所有回答交给与人类游戏共用的原生 H 引擎，按真实执行结果验题。
 
 **每次得分 = 目标覆盖率 ×（80 + 20 × 代码压缩率）**。覆盖率为最终点亮目标数 / 总目标数，
@@ -75,7 +79,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 
 比较时保持题目、重试次数、输出上限和提示词一致，并记录采样与推理参数。
 **每个 AI 独立 Token 预算**适合比较资源效率；**Best Effort 是竞速模式**，较慢 AI 可能未完成整套题目。
-历史保存规则、棋盘、模型参数、答案与计分版本，但服务商的模型版本仍可能变化。
+历史保存完整共享提示词及其版本、棋盘、模型参数、收到的答案与计分版本，但服务商的模型版本仍可能变化。
 这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
 
 ![Herbert Benchmark 英文实际界面：按分数排序的模型列、Token 表头与紧凑答案行](docs/screenshots/en/battlefield/ai-battlefield.png)
@@ -83,7 +87,8 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 *实际英文 Mac App 截图；确定性测试客户端演示答错后重试，不代表商业模型的能力或真实费用。*
 [新比赛](docs/screenshots/en/battlefield/ai-new-match.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
 [服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
-[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
+[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [推理内容](docs/screenshots/en/battlefield/ai-reasoning.png) ·
+[服务商错误详情](docs/screenshots/en/battlefield/ai-provider-error.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
 
 ## 运行
 
@@ -97,8 +102,8 @@ open Herbert.xcodeproj
 
 | Scheme | 题库 | 用途 |
 | --- | --- | --- |
-| `Herbert`（默认） | 50 道原创题 + 1,769 道社区题 | 开源版 |
-| `HerbertAppStore` | 仅 50 道原创题 | 真机检查、TestFlight、App Store 候选版 |
+| `Herbert`（默认） | 30 道原创题 + 1,769 道社区题 | 开源版 |
+| `HerbertAppStore` | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
 
 社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
 CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。
@@ -127,7 +132,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录；对照原解释器的发现与差异见 [兼容性审计](docs/hoj-compatibility.zh-CN.md)。
 - 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
-- 十章各五题的原创课程：独立设计的布局、稳定 ID 10001–10050、显示编号 L01–L50、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
+- 六章各五题的原创课程：独立设计的布局、保留选中关卡的稳定 ID 与原显示编号、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
 - 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
 - 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
 - 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中英日分步玩法手册。
@@ -166,7 +171,7 @@ docs/                           数据导入清单、规则核对说明、架构
 - [原站规则](http://herbert.tealang.info/rule.php)
 - [原站 Problems](http://herbert.tealang.info/problems.php)
 - 原站由 quolc 创建，社区关卡归各作者所有；本项目独立编写游戏代码，没有打包或执行原站 Flash 客户端。
-- 应用独立编写的代码、50 道原创题、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；社区题库及其截图布局不在本项目的 MIT 授权范围内。App Store scheme 不包含社区题库。详情见 [第三方内容说明](NOTICE.md)。
+- 应用独立编写的代码、30 道原创题、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；社区题库及其截图布局不在本项目的 MIT 授权范围内。App Store scheme 不包含社区题库。详情见 [第三方内容说明](NOTICE.md)。
 - 原站在线排名、账号、投稿与服务器评分未移植；应用展示个人最短代码记录。原站最短记录是导入时的快照，不进行在线比较。
 - 按原版限制运行最多 100 万个机器人指令；为保证手机可取消执行，额外限制 100 万次解释器展开、4096 层非尾递归栈、16 KiB 源代码、64 层参数语法嵌套和 128 层运行时参数嵌套。命令参数与待执行栈使用 100 万单位的展开预算，尾递归不增长调用栈。这些保护可能比原站更早停止极端程序。
 

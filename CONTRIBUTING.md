@@ -77,10 +77,14 @@ See [protocol, scoring and storage](docs/ai-battlefield.md) and [privacy](PRIVAC
 ## Problem data and H compatibility
 
 The original curriculum lives in `scripts/generate_original_problems.py`. Regenerate after
-edits and run `scripts/check.sh`; the real engine replays all 50 test-only references.
-Keep stable IDs 10001–10050, goals, two progressive hints, and all three translations.
+edits and run `scripts/check.sh`; the real engine replays all 30 test-only references.
+Keep each retained lesson ID and display number stable, plus goals, two progressive hints
+and all three translations. Never reuse retired IDs. v0.3.2 retains ten introductory
+lessons and L31–L50; retired records are inert but remain importable in backups.
 New original content must be independently designed and explicitly contributed under MIT.
-Do not put community JSON or reference programs in HerbertCore application resources.
+Do not put community JSON or scored puzzle reference programs in application resources.
+Public worked examples in `BattlefieldExamples.swift` must use separate teaching boards
+and pass the native judge; do not reveal scored benchmark answers in the shared prompt.
 Audit each final store `.app` with `scripts/check_app_store_bundle.py`. See
 [the curriculum](docs/original-course.md) and [device instructions](docs/app-store.md).
 

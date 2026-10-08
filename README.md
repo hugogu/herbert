@@ -17,20 +17,23 @@ SwiftUI. Guide the robot to every target using H, a tiny language whose short pr
 can express surprisingly intricate paths. Learn three commands, discover recursion,
 and keep making your solution smaller.
 
-Start with **30 foundational lessons**, then explore **20 advanced challenges** in
+Start with **10 introductory lessons**, then explore **20 advanced challenges** in
 wall-assisted counting, parameter swaps, recursive returns, mutual recursion and
-composition. All **50 original puzzles** have English, Chinese and Japanese goals
+composition. All **30 original puzzles** have English, Chinese and Japanese goals
 and two optional hints, with reference programs verified by the native and HOJ engines.
 The default open-source edition also includes **1,769 community problems**, preserving
-their IDs, authors and byte limits. The **App Store edition contains only the 50 originals**.
+their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
+The introductory selection is L01, L06, L12, L17, L22, L24, L25, L26, L27 and L30;
+L31–L50 remain the advanced course. Only the first two fit a direct sequence of commands.
+Numbering gaps preserve existing saves, and retired records remain importable.
 Code and original lessons use MIT; the archived community content has a separate,
 unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
 ## Download for Mac
 
-**[Download the 0.3.1 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.1/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.2 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.2/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
-no Xcode is needed. Includes all 1,819 problems.
+no Xcode is needed. Includes all 1,799 problems.
 
 This preview is ad-hoc signed and **not Apple notarized**. macOS may block its first
 launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
@@ -49,7 +52,7 @@ languages fall back to English.*
 
 ## Small programs, intricate places
 
-The ten-chapter [original course](docs/original-course.md) grows from a single `s` to
+The six-chapter [original course](docs/original-course.md) grows from a single `s` to
 layered recursive systems. Walls reveal rooms, folds and rotational units while
 constraining the route. These are three of the new challenges; click a board for its
 full game screen:
@@ -66,7 +69,7 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.1:** compare your own AI models on Herbert puzzles. The app has four
+**Updated in 0.3.2:** inspect full responses and reasoning while comparing your own AI models. The app has four
 main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 
 - Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
@@ -79,6 +82,11 @@ main tabs; **AI Battlefield** contains **AI Providers → New match → Current 
   to inspect every submission, native feedback and retry, then **Try on board** with the
   submitted code prefilled. **Back to match** returns to the results. Trials preserve
   personal drafts, shortest solutions and match scores.
+- Full response shows received final text, model reasoning and credential-redacted provider
+  error details, updating live and remaining available in history. Reasoning-only output
+  explains output-cap exhaustion. Retry requests preserve reasoning and avoid empty assistant turns.
+- Shared prompt `herbert-h-v3` includes coordinate rulers, target coordinates and two
+  native-verified worked boards, including a recursive pinwheel separate from scored L50.
 - Stop cancels active calls. Matches are saved locally and can be shared as PNG cards.
   **Best Effort ends the entire match when the first AI finishes its selected puzzle set**,
   including exhausted retries, and cancels the other entrants.
@@ -89,7 +97,7 @@ when the app enters the background. [Setup and accounting](docs/ai-battlefield.m
 
 ## Herbert Benchmark
 
-Use the **50 original puzzles, L01–L50**, as an AI programming benchmark: movement and
+Use the **30 retained original puzzles** as an AI programming benchmark: movement and
 walls, numeric and instruction parameters, recursion, multiple procedures and their
 composition. Every answer runs in the same bounded native H engine used for human play.
 The platform measures actual board outcomes and code length, with no model acting as judge.
@@ -106,7 +114,7 @@ their original 100-per-solved-puzzle scoring and tie-breaks.
 For repeatable comparisons, use the same puzzle set, attempt limit, output caps and shared
 prompt, and record sampling/reasoning parameters. Equal **per-model token budgets** suit
 resource comparisons; **Best Effort is a race** and can leave slower entrants unfinished.
-History snapshots preserve rules, boards, parameters, answers and the scoring policy;
+History snapshots preserve the full shared prompt and its version, boards, parameters, received answers and the scoring policy;
 provider model versions can still change. This composite score is our benchmark policy,
 inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
 
@@ -119,6 +127,8 @@ and a successful retry. These scores illustrate the app; they are not commercial
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
+[Reasoning-only response](docs/screenshots/en/battlefield/ai-reasoning.png) ·
+[Provider error details](docs/screenshots/en/battlefield/ai-provider-error.png) ·
 [Board trial](docs/screenshots/en/battlefield/ai-trial.png) ·
 [PNG share preview](docs/screenshots/en/battlefield/ai-share.png)
 
@@ -166,10 +176,10 @@ to change style, grid dots, and trail visibility.*
 
 ## What you can do
 
-- **Learn one idea at a time.** Follow L01–L50 from one step to the Astral cathedral;
+- **Learn one idea at a time.** Follow the 30-lesson course from one step to the Astral cathedral;
   reveal hints individually when you need them. Titles, goals and hints support all three languages.
-- **Play anywhere offline.** The default edition bundles 1,819 problems; the App Store
-  edition bundles 50 originals. Search by ID, title, or author;
+- **Play anywhere offline.** The default edition bundles 1,799 problems; the App Store
+  edition bundles 30 originals. Search by ID, title, or author;
   bookmark favorites and return to your last problem.
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
@@ -225,8 +235,8 @@ No developer account is configured in the repository.
 
 | Scheme | Included content | Intended use |
 | --- | --- | --- |
-| `Herbert` (default) | 50 original lessons + 1,769 archived community puzzles | Open-source edition |
-| `HerbertAppStore` | 50 original lessons only | TestFlight / App Store candidate |
+| `Herbert` (default) | 30 original lessons + 1,769 archived community puzzles | Open-source edition |
+| `HerbertAppStore` | 30 original lessons only | TestFlight / App Store candidate |
 
 The community archive is a separate optional Swift package target, not a runtime-hidden
 file in the store app. CI audits built iOS and Mac store apps for content isolation.
@@ -304,6 +314,6 @@ its problem authors. Original [rules](http://herbert.tealang.info/rule.php) and
 The original Flash client, online accounts, submissions, and leaderboard are not included;
 original best scores are an import-time snapshot, not live rankings.
 
-Our source code, 50 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
+Our source code, 30 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
 Third-party community puzzle data and community layouts visible in screenshots are
 **not relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.

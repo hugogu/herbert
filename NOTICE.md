@@ -7,11 +7,13 @@ and original robot icon are licensed under the [MIT License](LICENSE).
 
 ## Original Herbert problems
 
-The 50 independently designed course puzzles in
+The 30 independently designed course puzzles in
 `Sources/HerbertCore/Resources/original-problems.json`, their localized objectives/hints,
 and their reference programs are covered by this project's MIT License. They were
 designed from the public game rules, not adapted from archived community layouts.
-The `HerbertAppStore` scheme links only `HerbertCore` and bundles these 50 originals.
+The `HerbertAppStore` scheme bundles these 30 originals and links the puzzle-free Battlefield
+module. Its two public worked teaching boards and answers are also independently designed
+and MIT licensed; scored curriculum reference answers remain test-only.
 It excludes the community resource module, archive and community gallery images.
 
 ## Archived community Herbert problems

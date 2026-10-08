@@ -1,6 +1,6 @@
 # Privacy
 
-Effective for Herbert **0.3.1**. Herbert's developer does not operate an account,
+Effective for Herbert **0.3.2**. Herbert's developer does not operate an account,
 analytics, advertising or cloud storage service for this app.
 
 ## Offline game
@@ -28,13 +28,16 @@ API keys are stored in the system Keychain with synchronization disabled and dev
 accessibility. They are sent only in authentication headers to the configured HTTPS
 endpoint. Changing endpoints requires re-entering the key; redirects are rejected.
 Settings and match history are local JSON files. History contains full AI responses,
-programs, feedback, prompts, puzzle snapshots, model parameters and usage, but no keys.
+programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters and usage. From 0.3.2 it also
+retains received model reasoning and bounded provider error details (up to 64 KiB). Known
+credential fields, Bearer values and the configured API key are redacted from error details.
+Review provider text before sharing it; providers control the contents of their responses.
 App data may be included in operating-system device backups according to your settings;
 Herbert implements no cloud synchronization.
 
 Removing a provider in AI Providers deletes its configuration and Keychain entry.
 Existing match histories remain for review. Match histories are retained locally until
-app data is removed; 0.3.1 does not offer individual history deletion. Operating-system
+app data is removed; 0.3.2 does not offer individual history deletion. Operating-system
 app/container removal and backup retention vary by platform. Avoid assuming that deleting
 the app removes Keychain entries; remove providers in the app first if desired.
 

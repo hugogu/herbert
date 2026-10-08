@@ -1,7 +1,7 @@
 # Mac DMG distribution
 
 The open-source Mac preview supports **macOS 14+**, **Apple Silicon and Intel** in
-one universal app. It bundles 50 original lessons and the 1,769-problem community
+one universal app. It bundles 30 original lessons and the 1,769-problem community
 archive. The original-only `HerbertAppStore` target remains separate.
 
 ## Install
@@ -67,7 +67,7 @@ for subsequent local builds. Outputs and derived build files are ignored by Git.
 1. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in
    `scripts/generate_project.py`, regenerate the project, and update the changelog.
 2. Commit and push the tested changes. Use a new tag matching the app version,
-   for example `v0.3.1`; the workflow rejects a mismatch.
+   for example `v0.3.2`; the workflow rejects a mismatch.
 3. Push the tag. CI builds the exact tagged source, then the release job verifies
    the downloaded artifact checksum and creates a GitHub **pre-release** with the DMG.
 
