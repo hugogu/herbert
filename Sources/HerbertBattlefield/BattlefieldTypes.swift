@@ -238,7 +238,6 @@ public struct ProblemAnswer: Codable, Identifiable, Equatable, Sendable {
     public var status = ProblemAnswerStatus.queued
     public var attempts: [AnswerAttempt] = []
     public init(problemID: Int) { id = problemID }
-    public var score: Int { status == .solved ? 100 : 0 }
     public var acceptedBytes: Int? { attempts.first { $0.evaluation?.accepted == true }?.evaluation?.bytes }
 }
 
@@ -253,7 +252,6 @@ public struct EntrantResult: Codable, Identifiable, Equatable, Sendable {
         self.entrant = entrant
         answers = problems.map { ProblemAnswer(problemID: $0.id) }
     }
-    public var score: Int { answers.reduce(0) { $0 + $1.score } }
     public var solved: Int { answers.filter { $0.status == .solved }.count }
     public var bytes: Int { answers.compactMap(\.acceptedBytes).reduce(0, +) }
     public var usages: [TokenUsage] { answers.flatMap(\.attempts).map(\.usage) }
@@ -284,6 +282,7 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
     public let configuration: CompetitionConfiguration
     public let problems: [Problem]
     public let systemPrompt: String
+    public var scoring: BattlefieldScoring?
     public var entrants: [EntrantResult]
 
     public init(configuration: CompetitionConfiguration, problems: [Problem], entrants: [Entrant]) {
@@ -292,15 +291,36 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
         updatedAt = startedAt
         self.configuration = configuration
         self.problems = problems
-        systemPrompt = BattlefieldPrompt.rules + "\n" + configuration.extraPrompt
+        systemPrompt =
+            BattlefieldPrompt.rules
+            + (configuration.extraPrompt.isEmpty
+                ? "" : "\n\n## Additional instructions\n\n" + configuration.extraPrompt)
+        scoring = .coverageAndLengthV1
         self.entrants = entrants.map { EntrantResult(entrant: $0, problems: problems) }
     }
 
     public var totalTokens: Int { entrants.reduce(0) { $0 + $1.totalTokens } }
+    public var scoringPolicy: BattlefieldScoring { scoring ?? .legacyAccepted }
+    public func score(for answer: ProblemAnswer) -> Double {
+        guard let problem = problems.first(where: { $0.id == answer.id }) else { return 0 }
+        return scoringPolicy.score(answer, problem: problem)
+    }
+    public func score(for entrant: EntrantResult) -> Double {
+        let byID = Dictionary(uniqueKeysWithValues: problems.map { ($0.id, $0) })
+        let total = entrant.answers.reduce(0.0) { total, answer in
+            total + (byID[answer.id].map { scoringPolicy.score(answer, problem: $0) } ?? 0)
+        }
+        return (total * 100).rounded() / 100
+    }
     public var ranked: [EntrantResult] {
-        entrants.sorted {
-            if $0.score != $1.score { return $0.score > $1.score }
-            if $0.bytes != $1.bytes { return $0.bytes < $1.bytes }
+        let scores = Dictionary(uniqueKeysWithValues: entrants.map { ($0.id, score(for: $0)) })
+        return entrants.sorted {
+            if scores[$0.id] != scores[$1.id] { return scores[$0.id]! > scores[$1.id]! }
+            if scoringPolicy == .legacyAccepted {
+                if $0.bytes != $1.bytes { return $0.bytes < $1.bytes }
+            } else if $0.totalTokens != $1.totalTokens {
+                return $0.totalTokens < $1.totalTokens
+            }
             let left = $0.finishedAt ?? .distantFuture
             let right = $1.finishedAt ?? .distantFuture
             if left != right { return left < right }

@@ -24,7 +24,7 @@ public struct CompetitionSummary: Codable, Identifiable, Equatable, Sendable {
     public let problemCount: Int
     public let entrantCount: Int
     public let leader: String?
-    public let topScore: Int
+    public let topScore: Double
     public let totalTokens: Int
     public init(_ result: CompetitionResult) {
         id = result.id
@@ -34,7 +34,7 @@ public struct CompetitionSummary: Codable, Identifiable, Equatable, Sendable {
         problemCount = result.problems.count
         entrantCount = result.entrants.count
         leader = result.ranked.first?.entrant.preset.model.name
-        topScore = result.ranked.first?.score ?? 0
+        topScore = result.ranked.first.map { result.score(for: $0) } ?? 0
         totalTokens = result.totalTokens
     }
 }

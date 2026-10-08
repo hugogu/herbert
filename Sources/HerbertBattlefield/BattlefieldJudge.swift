@@ -11,33 +11,72 @@ public struct AIMessage: Codable, Equatable, Sendable {
 }
 
 public enum BattlefieldPrompt {
-    public static let version = "herbert-h-v1"
+    public static let version = "herbert-h-v2"
     public static let rules = """
-        Solve a Herbert programming puzzle using the H language. Return exactly one ```h code block,
-        containing the complete program, without explanation. Shorter valid programs are better.
-        RULES (herbert-h-v1):
-        The board is 25x25. Coordinates are zero-based (x,y), x rightward, y downward.
-        u is the robot, initially facing north; o is a target; x is a wall; * is a trap; . is empty.
-        s moves forward one cell. l and r rotate left/right 90 degrees without moving.
-        Walls and board edges leave the robot in place; execution continues. There is no wall sensor
-        or collision branch. Entering a trap clears ALL lit targets. Revisit targets to light them again.
-        Execution succeeds and stops immediately when all targets are lit, even if code remains.
-        H is case-sensitive. Procedures have single lowercase names other than s/l/r. Define each
-        on its own line before exactly one final execution line, e.g. a:sss then a on the last line.
-        Parameters are distinct single uppercase letters, e.g. a(X):sa(X-1) then a(3).
-        Procedures can recurse and call one another. Arguments can be numbers OR instruction sequences,
-        including nested calls and empty instruction arguments. Numeric arguments support + and -;
-        literals and evaluated values must stay in [-255,255]. If ANY numeric argument is <=0,
+        # Herbert H programming challenge
+
+        Solve the puzzle using **H**. Return exactly one fenced `h` code block containing
+        the complete program, without explanation. Shorter valid programs are better.
+
+        ## Board and movement
+
+        The board is **25 × 25**. Coordinates are zero-based `(x,y)`: x rightward, y downward.
+        `u` is the robot, initially facing north; `o` is a target; `x` is a wall;
+        `*` is a trap; `.` is empty. `s` moves forward one cell; `l` and `r` rotate
+        left/right 90 degrees without moving.
+
+        Walls and board edges leave the robot in place; execution continues. There is
+        **no wall sensor or collision branch**. Entering a trap clears **all** lit targets.
+        Revisit targets to light them again. Execution succeeds and stops immediately
+        when all targets are lit, even if code remains.
+
+        ## Procedures and parameters
+
+        H is case-sensitive. Procedures have single lowercase names other than `s/l/r`.
+        Define each on its own line before exactly one final execution line. Parameters
+        are distinct single uppercase letters. Procedures can recurse and call one another.
+        This example moves forward four cells:
+
+        ```h
+        a(X):sa(X-1)
+        a(4)
+        ```
+
+        Arguments can be numbers **or instruction sequences**, including nested calls and
+        empty instruction arguments. Numeric arguments support `+` and `-`; literals and
+        evaluated values must stay in `[-255,255]`. If **any numeric argument is ≤ 0**,
         that entire procedure call is skipped and the caller continues. Instruction parameters
         substitute the supplied sequence; they can be concatenated and passed into other calls.
-        Every ASCII letter counts as one byte; each numeric literal counts as ONE byte (12 is one byte).
-        Punctuation and whitespace are free. Count definitions, parameters and the execution line.
-        The entire program must fit the puzzle's byte limit. Robot steps do not affect score.
-        The native judge enforces 1,000,000 robot steps and 1,000,000 VM expansions, bounded memory,
-        4096 non-tail call frames, 16 KiB source, and bounded argument nesting. Tail recursion is supported.
-        Each accepted puzzle earns 100 points; invalid, over-limit or incomplete programs earn zero.
-        You receive native judge feedback after a failed attempt. Do not use Swift, Python, JavaScript,
-        loops, if-statements, prose, or code execution tools: submit only an H program.
+
+        ## Code length and execution limits
+
+        Every ASCII letter counts as **one byte**; each numeric literal counts as **one byte**
+        (`12` is one byte). Punctuation and whitespace are free. Count definitions, parameters
+        and the execution line. The entire program must fit the puzzle's byte limit.
+        Robot steps do **not** affect score.
+
+        The native judge enforces 1,000,000 robot steps and 1,000,000 VM expansions,
+        bounded memory, 4096 non-tail call frames, 16 KiB source, and bounded argument nesting.
+        Tail recursion is supported.
+
+        ## Battlefield scoring: coverage-and-length-v1
+
+        **Points = (lit targets / total targets) × (80 + 20 × (1 − bytes / byte limit)).**
+        Each evaluated attempt is rounded to two decimal places. Keep the best attempt per
+        puzzle; sum these scores across puzzles. Count targets lit at the end of execution,
+        after any trap resets. Invalid or over-limit programs earn zero. An incomplete valid
+        program can earn partial points. Each puzzle is worth at most 100 points.
+
+        Rank by total score descending, then total input + output tokens ascending, then
+        completion time. Include all retries and cached input in token consumption; live or
+        cancelled requests may use estimates. This is a Battlefield scoring policy inspired
+        by Herbert's shortest-code ranking, not a published HOJ composite score.
+
+        ## Response and retries
+
+        You receive native judge feedback after a failed attempt. Do not use Swift, Python,
+        JavaScript, loops, if-statements, prose, or code execution tools: submit only H.
+        Prompt version: **herbert-h-v2**. All entrants receive the same rules and puzzles.
         """
 
     public static func problem(_ problem: Problem) -> String {

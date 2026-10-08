@@ -122,11 +122,11 @@ final class BattlefieldTests: XCTestCase {
         let client = ScriptedAI(behavior: .retry)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
-        config.mode = .bestEffort
+        config.mode = .timed
         let result = try await engine.run(configuration: config, problems: first(), participants: participants()) { _ in
         }
         XCTAssertEqual(result.status, .completed)
-        XCTAssertEqual(result.entrants.map(\.score), [100, 100])
+        XCTAssertEqual(result.entrants.map { result.score(for: $0) }, [80, 80])
         XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 2)
         XCTAssertEqual(result.entrants[0].answers[0].attempts[1].program, "s")
         let requests = await client.requests
@@ -140,7 +140,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(result.entrants[0].cacheRate, 0.5)
     }
 
-    func testRetriesAreBoundedAndFailedProgramsNeverEarnPoints() async throws {
+    func testRetriesAreBoundedAndInvalidProgramsNeverEarnPoints() async throws {
         let client = ScriptedAI(behavior: .wrong)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
@@ -151,7 +151,29 @@ final class BattlefieldTests: XCTestCase {
         }
         XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 2)
         XCTAssertEqual(result.entrants[0].answers[0].status, .failed)
-        XCTAssertEqual(result.entrants[0].score, 0)
+        XCTAssertEqual(result.score(for: result.entrants[0]), 0)
+    }
+
+    func testBestEffortFirstFinishedEntrantCancelsOthersAfterSuccessOrExhaustedAttempts() async throws {
+        for behavior in [ScriptedAI.Behavior.race, .raceWrong] {
+            let client = ScriptedAI(behavior: behavior)
+            let engine = BattlefieldEngine(client: client)
+            var configuration = CompetitionConfiguration()
+            configuration.mode = .bestEffort
+            configuration.attemptsPerProblem = 2
+            let started = ContinuousClock.now
+            let result = try await engine.run(
+                configuration: configuration, problems: first(), participants: participants()
+            ) { _ in }
+            XCTAssertLessThan(ContinuousClock.now - started, .seconds(2))
+            XCTAssertEqual(result.status, .completed)
+            XCTAssertEqual(result.entrants[0].answers[0].status, behavior == .race ? .solved : .failed)
+            XCTAssertEqual(result.score(for: result.entrants[0]), behavior == .race ? 80 : 0)
+            XCTAssertEqual(result.entrants[1].answers[0].status, .cancelled)
+            XCTAssertEqual(result.score(for: result.entrants[1]), 0)
+            let cancelled = await client.cancelled
+            XCTAssertEqual(cancelled, 1)
+        }
     }
 
     func testTimedCompetitionCancelsAllInflightRequests() async throws {
@@ -184,7 +206,7 @@ final class BattlefieldTests: XCTestCase {
         await engine.stop()
         let result = try await run.value
         XCTAssertEqual(result.status, .userStopped)
-        XCTAssertEqual(result.entrants.reduce(0) { $0 + $1.score }, 0)
+        XCTAssertEqual(result.entrants.reduce(0) { $0 + result.score(for: $1) }, 0)
         XCTAssertTrue(result.entrants.flatMap(\.usages).allSatisfy(\.partial))
     }
 
@@ -198,7 +220,7 @@ final class BattlefieldTests: XCTestCase {
             _ in
         }
         XCTAssertEqual(result.status, .tokenLimit)
-        XCTAssertEqual(result.entrants[0].score, 100)
+        XCTAssertEqual(result.score(for: result.entrants[0]), 80)
         XCTAssertEqual(result.totalTokens, 2000)
         XCTAssertEqual(result.entrants[0].answers[1].status, .cancelled)
     }
@@ -214,7 +236,7 @@ final class BattlefieldTests: XCTestCase {
             _ in
         }
         XCTAssertEqual(result.status, .tokenLimit)
-        XCTAssertEqual(result.entrants.map(\.score), [100, 100])
+        XCTAssertEqual(result.entrants.map { result.score(for: $0) }, [80, 80])
         XCTAssertEqual(result.totalTokens, 4000)
     }
 
@@ -293,7 +315,7 @@ final class BattlefieldTests: XCTestCase {
 }
 
 actor ScriptedAI: AIClient {
-    enum Behavior: Sendable { case correct, retry, wrong, wait, exactBudget, providerFailure }
+    enum Behavior: Sendable { case correct, retry, wrong, wait, exactBudget, providerFailure, race, raceWrong }
     let behavior: Behavior
     var requests: [AICompletionRequest] = []
     var parallel = 0
@@ -309,14 +331,16 @@ actor ScriptedAI: AIClient {
         parallel += 1
         maximumParallel = max(parallel, maximumParallel)
         defer { parallel -= 1 }
-        do { try await Task.sleep(for: behavior == .wait ? .seconds(30) : .milliseconds(20)) } catch {
+        let slowRacer =
+            [.race, .raceWrong].contains(behavior) && request.participant.entrant.preset.model.id == "model-1"
+        do { try await Task.sleep(for: behavior == .wait || slowRacer ? .seconds(30) : .milliseconds(20)) } catch {
             cancelled += 1
             throw error
         }
         if behavior == .providerFailure && request.participant.entrant.preset.model.id == "model-0" {
             throw AIHTTPError(status: 401)
         }
-        let wrong = behavior == .wrong || (behavior == .retry && request.messages.count == 2)
+        let wrong = behavior == .wrong || behavior == .raceWrong || (behavior == .retry && request.messages.count == 2)
         let text = wrong ? "z" : "```h\ns\n```"
         let usage = TokenUsage(input: behavior == .exactBudget ? 1999 : 20, output: 1, cached: 10, estimated: false)
         await progress(AIProgress(text: text, usage: usage, isFinal: true))
