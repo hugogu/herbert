@@ -28,6 +28,10 @@ Dir.chdir(File.join(reference, 'judge')) do
     abort "Trace mismatch: #{fixture['name']}" unless output == fixture.fetch('commands')
     abort "Byte mismatch: #{fixture['name']}" unless CountSrc(fixture.fetch('source')) == fixture.fetch('bytes')
   end
+  corridor = JSON.parse(File.read(File.join(root, 'Sources/HerbertCommunity/Resources/problems.json'))).find { |p| p['id'] == 1 }
+  field = corridor.fetch('rows').join("\n") + "\n7"
+  result = HJudge.new(field, 'lsrssss').judge
+  abort 'Wall collision did not continue to completion' unless result.status == 'Passed System Test'
   # Bound even a broken reference interpreter without changing its source.
   HCode.prepend(Module.new do
     def turn
@@ -43,4 +47,4 @@ Dir.chdir(File.join(reference, 'judge')) do
     abort "Failed L#{problem['id'] - 10_000}: #{result.status}" unless result.status == 'Passed System Test'
   end
 end
-puts "PASS: #{fixtures.length} command/byte fixtures and #{problems.length} original lessons at #{commit}"
+puts "PASS: #{fixtures.length} command/byte fixtures and #{problems.length} original lessons, and community #0001 wall collision at #{commit}"
