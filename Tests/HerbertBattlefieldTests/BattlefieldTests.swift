@@ -276,6 +276,20 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertThrowsError(try repository.loadSettings())
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), "corrupt-but-preserve")
     }
+
+    func testOversizedSettingsCannotReplaceReadableSettings() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let repository = LocalBattlefieldRepository(directory: directory)
+        let original = BattlefieldSettings()
+        try repository.saveSettings(original)
+        var oversized = original
+        var provider = ProviderConfiguration(kind: .compatible)
+        provider.models = [AIModel(id: "m", name: String(repeating: "x", count: 8 * 1024 * 1024))]
+        oversized.providers = [provider]
+        XCTAssertThrowsError(try repository.saveSettings(oversized))
+        XCTAssertTrue(try repository.loadSettings().providers.isEmpty)
+    }
 }
 
 actor ScriptedAI: AIClient {

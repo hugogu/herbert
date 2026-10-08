@@ -70,11 +70,12 @@ public struct LocalBattlefieldRepository: BattlefieldRepository {
         return try decoder.decode(type, from: Data(contentsOf: url))
     }
 
-    private func write<T: Encodable>(_ object: T, url: URL) throws {
+    private func write<T: Encodable>(_ object: T, url: URL, limit: Int = 64 * 1024 * 1024) throws {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .millisecondsSince1970
         encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(object)
+        guard data.count <= limit else { throw BattlefieldError.storageCorrupt }
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: url, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
     }
@@ -85,7 +86,7 @@ public struct LocalBattlefieldRepository: BattlefieldRepository {
     }
 
     public func saveSettings(_ settings: BattlefieldSettings) throws {
-        try write(settings.validated(), url: settingsURL)
+        try write(settings.validated(), url: settingsURL, limit: 8 * 1024 * 1024)
     }
 
     public func summaries() throws -> [CompetitionSummary] {
@@ -126,7 +127,7 @@ public struct LocalBattlefieldRepository: BattlefieldRepository {
         try write(result, url: historyURL.appendingPathComponent("\(result.id.uuidString).json"))
         index.removeAll { $0.id == result.id }
         index.insert(CompetitionSummary(result), at: 0)
-        try write(index, url: indexURL)
+        try write(index, url: indexURL, limit: 8 * 1024 * 1024)
     }
 }
 

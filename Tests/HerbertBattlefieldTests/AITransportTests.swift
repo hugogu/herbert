@@ -5,6 +5,22 @@ import XCTest
 
 @MainActor
 final class AITransportTests: XCTestCase {
+    func testSSEPreservesEmptyLinesUnicodeMultilineAndAllLineEndings() throws {
+        for separator in ["\n", "\r\n", "\r"] {
+            var parser = ServerSentEventParser()
+            let bytes =
+                (": heartbeat" + separator + "data: 第一行" + separator
+                + "data: second line" + separator + separator + "data: [DONE]" + separator + separator).utf8
+            var events: [String] = []
+            for byte in bytes { if let event = try parser.consume(byte) { events.append(event) } }
+            XCTAssertEqual(events, ["第一行\nsecond line", "[DONE]"])
+            XCTAssertNil(try parser.finish())
+        }
+        var parser = ServerSentEventParser()
+        for byte in "data: no final newline".utf8 { _ = try parser.consume(byte) }
+        XCTAssertEqual(try parser.finish(), "no final newline")
+    }
+
     private func client() -> OpenAICompatibleClient {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [BattlefieldURLProtocol.self]
