@@ -16,6 +16,8 @@ INSTALL_NOTES = """Herbert for Mac — open-source preview
 Requires macOS 14 or later. Supports Apple Silicon and Intel Macs.
 Drag Herbert.app to Applications, then open Herbert from Applications.
 No Xcode, account, or network connection is required to play.
+Optional AI Battlefield uses your own provider API keys and an Internet connection.
+Provider API charges may apply. Keys stay in Keychain; match history stays on this Mac.
 
 This preview is ad-hoc signed, not Developer ID signed or Apple notarized.
 If macOS blocks the first launch, follow Apple's instructions for this app:
@@ -77,6 +79,8 @@ def check_app(app):
     entitlements = plistlib.loads(run('codesign', '-d', '--entitlements', '-', '--xml', str(app)))
     if not entitlements.get('com.apple.security.app-sandbox'):
         raise ValueError('The distributed app must retain its sandbox.')
+    if not entitlements.get('com.apple.security.network.client'):
+        raise ValueError('AI Battlefield requires the outgoing network client entitlement.')
     if entitlements.get('com.apple.security.get-task-allow'):
         raise ValueError('The distributed app must not permit debugger attachment.')
     check_resources(app)
