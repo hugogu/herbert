@@ -17,6 +17,14 @@
 			"isa" = "PBXBuildFile";
 			"productRef" = "8D6A224FA1D1DD751157EB0C";
 		};
+		"699E58090A4AF0A5EB63F1AE" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"productName" = "HerbertCommunity";
+		};
+		"C796A18C8CFBEA62B24C98BC" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "699E58090A4AF0A5EB63F1AE";
+		};
 		"4E783A9E10D2A8ABA38CD11C" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
@@ -27,6 +35,18 @@
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.cfbundle";
 			"path" = "HerbertUITests.xctest";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"BB851EA8BCEAC42177E9221F" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"path" = "HerbertAppStore.app";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"1C9D05A6E072BC723BE26B3F" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.cfbundle";
+			"path" = "HerbertAppStoreUITests.xctest";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
 		"B60FBC0336B0FFD50E1E5311" = {
@@ -220,9 +240,15 @@
 			"isa" = "PBXBuildFile";
 			"fileRef" = "37BE3F777F39296409EA08AE";
 		};
+		"78548ADD28CC7B5EA2D67C47" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "text.xcconfig";
+			"path" = "Config/Signing.xcconfig";
+			"sourceTree" = "<group>";
+		};
 		"FBDC4F23F93125BBEEAE800C" = {
 			"isa" = "PBXGroup";
-			"children" = ("4E783A9E10D2A8ABA38CD11C", "6C7CCDEB3609F1FAA874E941");
+			"children" = ("4E783A9E10D2A8ABA38CD11C", "6C7CCDEB3609F1FAA874E941", "BB851EA8BCEAC42177E9221F", "1C9D05A6E072BC723BE26B3F");
 			"name" = "Products";
 			"sourceTree" = "<group>";
 		};
@@ -240,7 +266,7 @@
 		};
 		"42944EBC669F21BC22392EB5" = {
 			"isa" = "PBXGroup";
-			"children" = ("3C3B0F03DC089F93B8457928", "E717C295FF9827DFF805D88B", "FBDC4F23F93125BBEEAE800C");
+			"children" = ("3C3B0F03DC089F93B8457928", "E717C295FF9827DFF805D88B", "78548ADD28CC7B5EA2D67C47", "FBDC4F23F93125BBEEAE800C");
 			"sourceTree" = "<group>";
 		};
 		"EEE53D504AFCC8D4B0AA715A" = {
@@ -292,6 +318,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
 			};
 			"name" = "Debug";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
 		};
 		"5A8C91857F674E16E2724F47" = {
 			"isa" = "XCBuildConfiguration";
@@ -329,6 +356,7 @@
 				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 			};
 			"name" = "Release";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
 		};
 		"F37922C48DA5978D02C9E50E" = {
 			"isa" = "XCConfigurationList";
@@ -345,7 +373,7 @@
 		"BD92572B49AC16A86614498D" = {
 			"isa" = "PBXFrameworksBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("E6E5511D0DFB6484AC21E80B");
+			"files" = ("E6E5511D0DFB6484AC21E80B", "C796A18C8CFBEA62B24C98BC");
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"8ECC8B5D05B79F879ACDF1A2" = {
@@ -361,7 +389,7 @@
 			"buildRules" = ();
 			"dependencies" = ();
 			"name" = "Herbert";
-			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C");
+			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C", "699E58090A4AF0A5EB63F1AE");
 			"productName" = "Herbert";
 			"productReference" = "4E783A9E10D2A8ABA38CD11C";
 			"productType" = "com.apple.product-type.application";
@@ -391,6 +419,7 @@
 				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG $(inherited)";
 			};
 			"name" = "Debug";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
 		};
 		"20B70E15FDC36C625E57F658" = {
 			"isa" = "XCBuildConfiguration";
@@ -416,6 +445,7 @@
 				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
 			};
 			"name" = "Release";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
 		};
 		"61AF5D6BEA2D148C6F2833BF" = {
 			"isa" = "XCConfigurationList";
@@ -444,6 +474,215 @@
 			"name" = "HerbertUITests";
 			"productName" = "HerbertUITests";
 			"productReference" = "6C7CCDEB3609F1FAA874E941";
+			"productType" = "com.apple.product-type.bundle.ui-testing";
+		};
+		"14EEB8A1447083E5397009AF" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
+				"PRODUCT_NAME" = "HerbertAppStore";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"MARKETING_VERSION" = "0.1.0";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = "YES";
+				"INFOPLIST_KEY_UILaunchScreen_Generation" = "YES";
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = "YES";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"ENABLE_APP_SANDBOX" = "YES";
+				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG APP_STORE $(inherited)";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+			};
+			"name" = "Debug";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
+		};
+		"A74910782AFD5ED9FC54E6DD" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
+				"PRODUCT_NAME" = "HerbertAppStore";
+				"CURRENT_PROJECT_VERSION" = "1";
+				"MARKETING_VERSION" = "0.1.0";
+				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
+				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
+				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation" = "YES";
+				"INFOPLIST_KEY_UILaunchScreen_Generation" = "YES";
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents" = "YES";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone" = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad" = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				"ENABLE_APP_SANDBOX" = "YES";
+				"ENABLE_USER_SELECTED_FILES" = "readwrite";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/../Frameworks", "@executable_path/Frameworks");
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "APP_STORE $(inherited)";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
+		};
+		"C4ACE9E0C090441EF2701FDA" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("14EEB8A1447083E5397009AF", "A74910782AFD5ED9FC54E6DD");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"EE80C9BC8157AF69F92583A7" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("CDB69BF99B0E2CB0D9016395", "E6FB0CB7E8AD7FD795C784E0", "491AB81029EED24C2D8BC51E", "40D97162C688072663B9A59E", "E24077BC87EFBA7E0F5B178C", "996BE9DB8BB0A4E6022A8FAD", "F235608970768B7FD15F4A62", "A0918985D1378F9EA59A1D99", "690560337C2F751DBCA4E2EE", "517E258E7B787329FBD901E5", "A1EC6AA04B1CFEE901B9D271", "6A5FC34FD706FE234F4DAF7D", "21D2864354D8BF2B3BBE05B9");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"E1276387DA080260E201B4DC" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("E6E5511D0DFB6484AC21E80B");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"531FB274AB63328867ECDCE5" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("31BF36017B0AFDB809786FD8", "5967618EEE597D973EA8F8CD", "43BF684E275A04DD49E83368");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"0461CC8D17ADAAC9E02F88E1" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "C4ACE9E0C090441EF2701FDA";
+			"buildPhases" = ("EE80C9BC8157AF69F92583A7", "E1276387DA080260E201B4DC", "531FB274AB63328867ECDCE5");
+			"buildRules" = ();
+			"dependencies" = ();
+			"name" = "HerbertAppStore";
+			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C");
+			"productName" = "HerbertAppStore";
+			"productReference" = "BB851EA8BCEAC42177E9221F";
+			"productType" = "com.apple.product-type.application";
+		};
+		"C1BCE869CC636305365A6A81" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "98F54143AB4E86B28C3AFEE0";
+			"proxyType" = "1";
+			"remoteGlobalIDString" = "0461CC8D17ADAAC9E02F88E1";
+			"remoteInfo" = "HerbertAppStore";
+		};
+		"4E3E4579411CCB6D39345B29" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "0461CC8D17ADAAC9E02F88E1";
+			"targetProxy" = "C1BCE869CC636305365A6A81";
+		};
+		"9984038059C9C0AA56F28EFE" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertAppStoreUITests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"TEST_TARGET_NAME" = "HerbertAppStore";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@loader_path/../Frameworks", "@executable_path/../Frameworks");
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "DEBUG APP_STORE $(inherited)";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"ONLY_ACTIVE_ARCH" = "YES";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+			};
+			"name" = "Debug";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
+		};
+		"E73738470AD9631718824B6C" = {
+			"isa" = "XCBuildConfiguration";
+			"buildSettings" = {
+				"SDKROOT" = "auto";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator macosx";
+				"IPHONEOS_DEPLOYMENT_TARGET" = "17.0";
+				"MACOSX_DEPLOYMENT_TARGET" = "14.0";
+				"TARGETED_DEVICE_FAMILY" = "1,2";
+				"SUPPORTS_MACCATALYST" = "NO";
+				"SWIFT_VERSION" = "6.0";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertAppStoreUITests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"TEST_TARGET_NAME" = "HerbertAppStore";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@loader_path/../Frameworks", "@executable_path/../Frameworks");
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS" = "APP_STORE $(inherited)";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"ONLY_ACTIVE_ARCH" = "NO";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+			};
+			"name" = "Release";
+			"baseConfigurationReference" = "78548ADD28CC7B5EA2D67C47";
+		};
+		"4A5CAD067A7B3DDBC973C308" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("9984038059C9C0AA56F28EFE", "E73738470AD9631718824B6C");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"AA3EA2FECE4B637E61589A28" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("9628EFAF44BC437921CED2C2");
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"590E14AAA2541840462CD01C" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ();
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"DFF5C6CBCD686DB20BD187AD" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "4A5CAD067A7B3DDBC973C308";
+			"buildPhases" = ("AA3EA2FECE4B637E61589A28", "590E14AAA2541840462CD01C");
+			"buildRules" = ();
+			"dependencies" = ("4E3E4579411CCB6D39345B29");
+			"name" = "HerbertAppStoreUITests";
+			"productName" = "HerbertAppStoreUITests";
+			"productReference" = "1C9D05A6E072BC723BE26B3F";
 			"productType" = "com.apple.product-type.bundle.ui-testing";
 		};
 		"89E1FD6268CC0F221A2BE178" = {
@@ -488,6 +727,13 @@
 						"CreatedOnToolsVersion" = "27.0";
 						"TestTargetID" = "7D1043473D55BFA90E8530D3";
 					};
+					"0461CC8D17ADAAC9E02F88E1" = {
+						"CreatedOnToolsVersion" = "27.0";
+					};
+					"DFF5C6CBCD686DB20BD187AD" = {
+						"CreatedOnToolsVersion" = "27.0";
+						"TestTargetID" = "0461CC8D17ADAAC9E02F88E1";
+					};
 				};
 			};
 			"buildConfigurationList" = "862894B703A6DEDF96A9DD6C";
@@ -500,7 +746,7 @@
 			"projectDirPath" = "";
 			"projectRoot" = "";
 			"packageReferences" = ("CF21FADD42EAB8F8303A3895");
-			"targets" = ("7D1043473D55BFA90E8530D3", "21A4721043EF7FE8B14BE5D9");
+			"targets" = ("7D1043473D55BFA90E8530D3", "21A4721043EF7FE8B14BE5D9", "0461CC8D17ADAAC9E02F88E1", "DFF5C6CBCD686DB20BD187AD");
 		};
 	};
 	"rootObject" = "98F54143AB4E86B28C3AFEE0";

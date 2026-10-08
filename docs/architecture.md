@@ -10,6 +10,12 @@
 
 ## 本地存档
 
+题库分为两个模块：`HerbertCore` 仅包含原创的 30 题和语言资源，`HerbertCommunity` 包含可选社区快照。
+默认 `Herbert` target 链接两者并先显示原创课程；`HerbertAppStore` 仅链接前者，编译条件 `APP_STORE` 控制对应文案与筛选。
+不是运行时隐藏资源。构建后的 App Store .app 由 `scripts/check_app_store_bundle.py` 验证题库隔离。
+原创 ID 为 10001–10030，显示编号 L01–L30；社区 ID 保持不变。下一关按当前目录顺序查找，不按数值大小猜测。
+目标、提示和名称采用同一套三语资源；参考解在测试 target 中独立打包，不进入应用。
+
 `ProgressRepository` 目前由 `LocalProgressRepository` 实现。AppStore 协调草稿防抖保存、应用退后台时立即保存与错误提示。缺少文件返回空存档；已有文件损坏或版本不支持时报告错误并暂停保存。保存先校验 schema，再原子写入。
 
 `ProgressSnapshot` v1：
@@ -17,8 +23,8 @@
 | 字段 | 含义 |
 | --- | --- |
 | `schemaVersion` | 目前为 1；未来版本必须通过迁移解码，不能默默丢弃未知数据 |
-| `lastProblemID` | 最近打开的原版题号 |
-| `records[].problemID` | 原版题号，稳定业务标识 |
+| `lastProblemID` | 最近打开的稳定题号 |
+| `records[].problemID` | 稳定业务标识，原创与社区使用不同范围 |
 | `draft` / `updatedAt` | 正在编辑的代码与更新时间 |
 | `bestSolution` / `bestBytes` | 已验证的最短解 |
 | `completedAt` | 首次完成日期 |

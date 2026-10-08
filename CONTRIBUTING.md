@@ -11,7 +11,9 @@ or reports from real devices. Small, focused changes are easiest to review.
 4. Create a branch for your change. Do not commit personal signing settings or save files.
 
 There are no external package dependencies. `HerbertCore` is a standalone local Swift
-package. The current interface is Simplified Chinese; English localization is welcome.
+package. UI and original lessons support English, Simplified Chinese and Japanese.
+Use `HerbertAppStore` to test the original-only edition. Personal signing can go in
+ignored `Config/Local.xcconfig`; generation keeps it intact.
 
 ## Before opening a pull request
 
@@ -49,6 +51,8 @@ python3 scripts/generate_project.py
 ```sh
 scripts/capture_screenshots.sh en
 scripts/capture_screenshots.sh zh-Hans
+scripts/capture_screenshots.sh en store
+scripts/capture_screenshots.sh zh-Hans store
 ```
 
 The opt-in XCTest captures the library, three full puzzle screens, and their actual board
@@ -58,6 +62,14 @@ default when no argument is supplied. Keep each README's images in its own langu
 Review each image before committing it. See [screenshot provenance](docs/screenshots/README.md).
 
 ## Problem data and H compatibility
+
+The original curriculum lives in `scripts/generate_original_problems.py`. Regenerate after
+edits and run `scripts/check.sh`; the real engine replays all 30 test-only references.
+Keep stable IDs 10001–10030, goals, two progressive hints, and all three translations.
+New original content must be independently designed and explicitly contributed under MIT.
+Do not put community JSON or reference programs in HerbertCore application resources.
+Audit each final store `.app` with `scripts/check_app_store_bundle.py`. See
+[the curriculum](docs/original-course.md) and [device instructions](docs/app-store.md).
 
 Preserve the original 25 × 25 geometry, IDs, titles, authors, byte limits, and source metadata.
 Do not silently simplify a puzzle. Explain behavior differences with a minimal H program

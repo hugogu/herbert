@@ -99,7 +99,7 @@ def main():
         if limit != problem['byteLimit']:
             raise ValueError(f"#{problem['id']}: listing/data byte limits disagree")
         return {**problem, 'rows': rows, 'sourceSHA256': hashlib.sha256(raw.encode()).hexdigest()}
-    out = ROOT / 'Sources/HerbertCore/Resources/problems.json'
+    out = ROOT / 'Sources/HerbertCommunity/Resources/problems.json'
     def save():
         out.write_text(json.dumps(sorted(imported, key=lambda item: item['id']), ensure_ascii=False, separators=(',', ':')) + '\n')
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:

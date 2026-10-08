@@ -32,7 +32,8 @@ jobs:
       - name: Verify generated Xcode project
         run: |
           python3 scripts/generate_project.py
-          git diff --exit-code -- Herbert.xcodeproj
+          python3 scripts/generate_original_problems.py
+          git diff --exit-code -- Herbert.xcodeproj Sources/HerbertCore/Resources Tests/HerbertCoreTests/Fixtures docs/original-course*.md
       - name: Build native Mac
         run: >-
           xcodebuild -project Herbert.xcodeproj -scheme Herbert -configuration Release
@@ -43,3 +44,13 @@ jobs:
           xcodebuild -project Herbert.xcodeproj -scheme Herbert
           -destination 'generic/platform=iOS' -derivedDataPath .build/ci-ios
           CODE_SIGNING_ALLOWED=NO build
+      - name: Build and audit App Store Mac
+        run: |
+          xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath .build/ci-store-mac CODE_SIGNING_ALLOWED=NO build
+          python3 scripts/check_app_store_bundle.py .build/ci-store-mac/Build/Products/Release/HerbertAppStore.app
+      - name: Build and audit App Store iPhone and iPad
+        run: |
+          xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath .build/ci-store-ios CODE_SIGNING_ALLOWED=NO build
+          python3 scripts/check_app_store_bundle.py .build/ci-store-ios/Build/Products/Release-iphoneos/HerbertAppStore.app

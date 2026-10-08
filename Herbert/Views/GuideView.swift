@@ -47,11 +47,17 @@ struct GuideView: View {
                 }.font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5).panel()
                 VStack(alignment: .leading, spacing: 10) {
                     Text("致谢与来源").font(.headline).foregroundStyle(Palette.ink)
-                    Text(
-                        "Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。"
-                    )
+                    #if APP_STORE
+                        Text("本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。")
+                    #else
+                        Text(
+                            "Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。"
+                        )
+                    #endif
                     Link("原版规则 ↗", destination: URL(string: "http://herbert.tealang.info/rule.php")!)
-                    Link("原版 Problems ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
+                    #if !APP_STORE
+                        Link("原版 Problems ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
+                    #endif
                 }.font(.system(size: 12)).foregroundStyle(Palette.muted).lineSpacing(4).padding(.vertical, 12)
             }.padding(24).frame(maxWidth: 760).frame(maxWidth: .infinity)
         }.background(Palette.paper).navigationTitle("玩法手册")

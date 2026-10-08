@@ -27,6 +27,14 @@ public enum Heading: Int, Codable, Sendable {
     }
 }
 
+public struct ProblemLesson: Codable, Hashable, Sendable {
+    public let order: Int
+    public let chapter: Int
+    public let chapterTitle: String
+    public let objective: String
+    public let hints: [String]
+}
+
 public struct Problem: Codable, Identifiable, Hashable, Sendable {
     public let id: Int
     public let title: String
@@ -36,10 +44,11 @@ public struct Problem: Codable, Identifiable, Hashable, Sendable {
     public let sourceURL: String
     public let sourceSHA256: String
     public let rows: [String]
+    public let lesson: ProblemLesson?
 
     public init(
         id: Int, title: String, author: String, byteLimit: Int, originalBest: Int? = nil,
-        sourceURL: String = "", sourceSHA256: String = "", rows: [String]
+        sourceURL: String = "", sourceSHA256: String = "", rows: [String], lesson: ProblemLesson? = nil
     ) {
         self.id = id
         self.title = title
@@ -49,10 +58,12 @@ public struct Problem: Codable, Identifiable, Hashable, Sendable {
         self.sourceURL = sourceURL
         self.sourceSHA256 = sourceSHA256
         self.rows = rows
+        self.lesson = lesson
     }
 
-    public var number: String { String(format: "%04d", id) }
-    public var isFoundation: Bool { title.hasPrefix("Problem Set 0 -") }
+    public var number: String { lesson.map { String(format: "L%02d", $0.order) } ?? String(format: "%04d", id) }
+    public var displayTitle: String { lesson == nil ? title : HerbertStrings.text(title) }
+    public var isFoundation: Bool { lesson.map { $0.order <= 10 } ?? title.hasPrefix("Problem Set 0 -") }
 }
 
 public enum CatalogError: Error, LocalizedError {
@@ -114,10 +125,14 @@ public struct Board: Sendable {
 
 public enum ProblemCatalog {
     public static func bundled() throws -> [Problem] {
-        guard let url = Bundle.module.url(forResource: "problems", withExtension: "json") else {
+        guard let url = Bundle.module.url(forResource: "original-problems", withExtension: "json") else {
             throw CatalogError.missingResource
         }
-        let problems = try JSONDecoder().decode([Problem].self, from: Data(contentsOf: url))
+        return try decode(Data(contentsOf: url))
+    }
+
+    public static func decode(_ data: Data) throws -> [Problem] {
+        let problems = try JSONDecoder().decode([Problem].self, from: data)
         guard Set(problems.map(\.id)).count == problems.count else { throw CatalogError.missingResource }
         for problem in problems { _ = try Board(problem: problem) }
         return problems.sorted { $0.id < $1.id }

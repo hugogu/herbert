@@ -9,3 +9,4 @@ xcuserdata/
 outputs/
 __pycache__/
 *.pyc
+Config/Local.xcconfig

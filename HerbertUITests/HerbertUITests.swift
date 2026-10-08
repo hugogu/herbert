@@ -13,6 +13,25 @@ final class HerbertUITests: XCTestCase {
             if !app.windows.firstMatch.waitForExistence(timeout: 3) {
                 app.typeKey("n", modifierFlags: .command)
             }
+            if let display = ProcessInfo.processInfo.environment["HERBERT_TEST_DISPLAY"] {
+                app.menuBars.menuBarItems.matching(
+                    NSPredicate(format: "title IN %@", ["Window", "窗口", "ウインドウ"])
+                ).firstMatch.click()
+                let move = app.menuBars.menuItems.matching(
+                    NSPredicate(format: "title ENDSWITH %@", display)
+                ).firstMatch
+                if move.exists {
+                    // Cache the menu frame: macOS changes the item's identity while hovering it.
+                    let frame = move.frame
+                    let window = app.windows.firstMatch
+                    let origin = window.frame.origin
+                    window.coordinate(withNormalizedOffset: .zero).withOffset(
+                        CGVector(dx: frame.midX - origin.x, dy: frame.midY - origin.y)
+                    ).click()
+                } else {
+                    app.typeKey(.escape, modifierFlags: [])
+                }
+            }
         #endif
         XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
         return app
@@ -25,19 +44,19 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
-    func testSolveOriginalProblemAndRestoreDraftAfterRelaunch() {
+    func testSolveFirstLessonAndRestoreDraftAfterRelaunch() {
         let app = launch()
         openFirst(app)
         let code = app.textViews["code-editor"]
         code.activateControl()
-        code.typeText("ssss")
+        code.typeText("s")
         app.buttons["run-program"].activateControl()
         XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
         app.terminate()
         app.launchArguments = ["--ui-testing"]
         app.launch()
         openFirst(app)
-        XCTAssertEqual(app.textViews["code-editor"].value as? String, "ssss")
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
     }
 
     @MainActor
@@ -57,9 +76,9 @@ final class HerbertUITests: XCTestCase {
     func testCommandKeysInsertAtCaretAndSingleStepCompletes() {
         let app = launch()
         openFirst(app)
-        for _ in 0..<4 { app.buttons["insert-s"].activateControl() }
-        XCTAssertEqual(app.textViews["code-editor"].value as? String, "ssss")
-        for _ in 0..<4 { app.buttons["step-program"].activateControl() }
+        app.buttons["insert-s"].activateControl()
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
+        app.buttons["step-program"].activateControl()
         XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
     }
 
@@ -86,7 +105,7 @@ final class HerbertUITests: XCTestCase {
     @MainActor
     func testBoardSettingsPersistAndTrailCanBeHiddenWithoutLosingMoves() {
         var app = launch(language: "en")
-        openFirst(app)
+        openProblem(10002, in: app)
         let code = app.textViews["code-editor"]
         code.activateControl()
         code.typeText("ssss")
@@ -119,58 +138,159 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
-    func testCaptureReadmeScreenshots() throws {
-        try XCTSkipUnless(
-            ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
-            "Run scripts/capture_screenshots.sh to refresh the documentation images.")
+    private func openProblem(_ id: Int, in app: XCUIApplication) {
+        let search = app.textFields["problem-search"]
+        search.activateControl()
+        search.typeText(String(id))
+        let problem = app.buttons["problem-\(id)"]
+        XCTAssertTrue(problem.waitForExistence(timeout: 5))
+        problem.activateControl()
+        XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testCurriculumHintsAndCatalogEdition() {
+        let app = launch(language: "en")
+        #if APP_STORE
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            XCTAssertFalse(app.buttons["filter-community"].exists)
+        #else
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,799 PROBLEMS")
+            app.buttons["filter-originals"].activateControl()
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            app.buttons["filter-community"].activateControl()
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,769 PROBLEMS")
+            app.buttons["filter-all"].activateControl()
+        #endif
+        openFirst(app)
+        XCTAssertTrue(app.staticTexts["lesson-objective"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["lesson-hint-1"].exists)
+        app.buttons["reveal-hint"].activateControl()
+        XCTAssertTrue(app.staticTexts["lesson-hint-1"].exists)
+        XCTAssertFalse(app.staticTexts["lesson-hint-2"].exists)
+        app.buttons["reveal-hint"].activateControl()
+        XCTAssertTrue(app.staticTexts["lesson-hint-2"].exists)
+        XCTAssertFalse(app.buttons["reveal-hint"].exists)
+        app.buttons["insert-s"].activateControl()
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
+        #if os(macOS)
+            app.scrollViews.containing(.textView, identifier: "code-editor").firstMatch.scroll(
+                byDeltaX: 0, deltaY: -500)
+        #else
+            app.scrollViews.containing(.textView, identifier: "code-editor").firstMatch.swipeUp()
+        #endif
+        app.buttons["step-program"].activateControl()
+        XCTAssertTrue(app.buttons["next-problem"].waitForExistence(timeout: 5), app.debugDescription)
+        app.buttons["next-problem"].activateControl()
+        XCTAssertTrue(app.staticTexts["Four lanterns"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["lesson-hint-1"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testCaptureOriginalCourseScreenshots() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1")
         let language = ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
-        XCTAssertTrue(["en", "zh-Hans"].contains(language), "Unsupported screenshot language")
+        XCTAssertTrue(["en", "zh-Hans"].contains(language))
         let app = launch(language: language)
         XCTAssertTrue(app.staticTexts[language == "en" ? "Explore problems" : "探索关卡"].exists)
-        capture(app, name: "library")
-        for (id, name) in [(37, "flower"), (27, "shuriken"), (361, "butterfly")] {
-            let search = app.textFields["problem-search"]
-            XCTAssertTrue(search.waitForExistence(timeout: 5))
-            search.activateControl()
-            search.typeText(String(format: "%04d", id))
-            let problem = app.buttons["problem-\(id)"]
-            XCTAssertTrue(problem.waitForExistence(timeout: 5))
-            problem.activateControl()
-            XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
-            if id == 37 {
-                let code = app.textViews["code-editor"]
-                code.activateControl()
-                code.typeText("a(X):sa(X-1)\na(4)")
+        #if os(macOS)
+            if app.windows.firstMatch.frame.height < 1000 {
+                app.menuBars.menuBarItems.matching(
+                    NSPredicate(format: "title IN %@", ["Window", "窗口", "ウインドウ"])
+                ).firstMatch.click()
+                app.menuBars.menuItems["performZoom:"].click()
             }
-            capture(app, name: name)
-            let board = app.descendants(matching: .any)["game-board"].firstMatch
-            XCTAssertTrue(board.exists)
+            let window = app.windows.firstMatch
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            window.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5)).withOffset(
+                CGVector(dx: -1, dy: 0)
+            ).click(
+                forDuration: 0.2,
+                thenDragTo: origin.withOffset(CGVector(dx: 1239, dy: window.frame.height / 2)))
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 1)).withOffset(
+                CGVector(dx: 0, dy: -1)
+            ).click(
+                forDuration: 0.2,
+                thenDragTo: origin.withOffset(CGVector(dx: window.frame.width / 2, dy: 1079)))
+            XCTAssertLessThanOrEqual(window.frame.width, 1800)
+            XCTAssertGreaterThanOrEqual(window.frame.height, 1000)
+        #endif
+        capture(app, name: "course-library")
+        for (id, name) in [(10019, "spiral"), (10029, "windows"), (10030, "garden")] {
+            openProblem(id, in: app)
+            capture(app, name: "course-\(name)")
             app.activate()
+            let board = app.descendants(matching: .any)["game-board"].firstMatch
+            #if os(macOS)
+                XCTAssertTrue(app.windows.firstMatch.frame.contains(board.frame))
+            #endif
             let image = XCTAttachment(screenshot: board.screenshot())
-            image.name = "readme-\(name)-board"
+            image.name = "readme-course-\(name)-board"
             image.lifetime = .keepAlways
             add(image)
-            if id == 37 {
-                for _ in 0..<4 { app.buttons["step-program"].activateControl() }
-                app.buttons["board-options"].activateControl()
-                selectBoardStyle("classic", in: app)
-                app.buttons["close-board-options"].activateControl()
-                XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
-                app.textViews["code-editor"].activateControl()
-                capture(app, name: "flower-classic")
-                app.activate()
-                let classic = XCTAttachment(screenshot: board.screenshot())
-                classic.name = "readme-flower-classic-board"
-                classic.lifetime = .keepAlways
-                add(classic)
-                app.buttons["board-options"].activateControl()
-                selectBoardStyle("modern", in: app)
-                app.buttons["close-board-options"].activateControl()
-            }
             app.buttons[language == "en" ? "Back" : "返回"].activateControl()
-            XCTAssertTrue(search.waitForExistence(timeout: 5))
             app.buttons["clear-search"].activateControl()
         }
+    }
+
+    @MainActor
+    func testCaptureReadmeScreenshots() throws {
+        #if APP_STORE
+            throw XCTSkip("Community gallery is excluded from the App Store edition.")
+        #else
+            try XCTSkipUnless(
+                ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
+                "Run scripts/capture_screenshots.sh to refresh the documentation images.")
+            let language = ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
+            XCTAssertTrue(["en", "zh-Hans"].contains(language), "Unsupported screenshot language")
+            let app = launch(language: language)
+            XCTAssertTrue(app.staticTexts[language == "en" ? "Explore problems" : "探索关卡"].exists)
+            capture(app, name: "library")
+            for (id, name) in [(37, "flower"), (27, "shuriken"), (361, "butterfly")] {
+                let search = app.textFields["problem-search"]
+                XCTAssertTrue(search.waitForExistence(timeout: 5))
+                search.activateControl()
+                search.typeText(String(format: "%04d", id))
+                let problem = app.buttons["problem-\(id)"]
+                XCTAssertTrue(problem.waitForExistence(timeout: 5))
+                problem.activateControl()
+                XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+                if id == 37 {
+                    let code = app.textViews["code-editor"]
+                    code.activateControl()
+                    code.typeText("a(X):sa(X-1)\na(4)")
+                }
+                capture(app, name: name)
+                let board = app.descendants(matching: .any)["game-board"].firstMatch
+                XCTAssertTrue(board.exists)
+                app.activate()
+                let image = XCTAttachment(screenshot: board.screenshot())
+                image.name = "readme-\(name)-board"
+                image.lifetime = .keepAlways
+                add(image)
+                if id == 37 {
+                    for _ in 0..<4 { app.buttons["step-program"].activateControl() }
+                    app.buttons["board-options"].activateControl()
+                    selectBoardStyle("classic", in: app)
+                    app.buttons["close-board-options"].activateControl()
+                    XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+                    app.textViews["code-editor"].activateControl()
+                    capture(app, name: "flower-classic")
+                    app.activate()
+                    let classic = XCTAttachment(screenshot: board.screenshot())
+                    classic.name = "readme-flower-classic-board"
+                    classic.lifetime = .keepAlways
+                    add(classic)
+                    app.buttons["board-options"].activateControl()
+                    selectBoardStyle("modern", in: app)
+                    app.buttons["close-board-options"].activateControl()
+                }
+                app.buttons[language == "en" ? "Back" : "返回"].activateControl()
+                XCTAssertTrue(search.waitForExistence(timeout: 5))
+                app.buttons["clear-search"].activateControl()
+            }
+        #endif
     }
 
     @MainActor
@@ -189,6 +309,7 @@ final class HerbertUITests: XCTestCase {
 
     @MainActor
     private func capture(_ app: XCUIApplication, name: String) {
+        guard ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1" else { return }
         app.activate()
         let image = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
         image.name = "readme-\(name)"

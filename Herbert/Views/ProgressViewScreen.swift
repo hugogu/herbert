@@ -17,7 +17,7 @@ struct ProgressViewScreen: View {
                 HStack(spacing: 16) {
                     counter("已完成", value: store.completedCount)
                     counter("已收藏", value: store.favoriteCount)
-                    counter("草稿", value: store.snapshot.records.filter { !$0.draft.isEmpty }.count)
+                    counter("草稿", value: store.visibleRecords.filter { !$0.draft.isEmpty }.count)
                 }
                 VStack(alignment: .leading, spacing: 16) {
                     Label("你的进度保存在这台设备上", systemImage: "internaldrive")
@@ -28,7 +28,8 @@ struct ProgressViewScreen: View {
                         Button {
                             do {
                                 store.flush()
-                                document = BackupDocument(data: try LocalProgressRepository.encode(store.snapshot))
+                                document = BackupDocument(
+                                    data: try LocalProgressRepository.encode(store.visibleSnapshot))
                                 exporting = true
                             } catch { message = error.localizedDescription }
                         } label: {
@@ -54,7 +55,7 @@ struct ProgressViewScreen: View {
                     Spacer()
                     Pill(text: L10n.text("%ld SOLVED", store.completedCount))
                 }
-                let completed = store.snapshot.records.filter { $0.bestBytes != nil }.sorted {
+                let completed = store.visibleRecords.filter { $0.bestBytes != nil }.sorted {
                     ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
                 }
                 if completed.isEmpty {
@@ -68,7 +69,7 @@ struct ProgressViewScreen: View {
                                     HStack(spacing: 14) {
                                         Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.mint)
                                         VStack(alignment: .leading, spacing: 5) {
-                                            Text(problem.title).font(.system(size: 14, weight: .semibold))
+                                            Text(problem.displayTitle).font(.system(size: 14, weight: .semibold))
                                             Text("\(problem.number) · \(problem.author)").font(
                                                 .system(size: 10, design: .monospaced)
                                             ).foregroundStyle(Palette.muted)

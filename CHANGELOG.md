@@ -7,6 +7,12 @@ save or API formats through documented migrations.
 
 ### Added
 
+- 30 independently designed MIT lessons in six stages, with three-language goals and
+  progressive hints; every reference program is verified with the real H engine.
+- `HerbertAppStore`, bundling only original lessons. Default `Herbert` contains 1,799
+  problems, with the 1,769-problem community archive in an optional module.
+- Final iOS/Mac store-bundle resource audits, original course documentation and device checks.
+- Ignored local signing configuration shared by both schemes.
 - Automatic English, Simplified Chinese, and Japanese localization, including guide,
   accessibility descriptions, and interpreter/storage errors; English fallback.
 - Movement trails that retain every walked edge at all speeds, with bounded memory.

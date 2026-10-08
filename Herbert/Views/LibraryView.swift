@@ -3,7 +3,11 @@ import SwiftUI
 
 private enum ProblemFilter: String, CaseIterable {
     case all = "全部"
-    case foundation = "入门"
+    #if !APP_STORE
+        case originals = "原创课程"
+        case community = "社区题库"
+        case foundation = "入门"
+    #endif
     case favorites = "收藏"
     case completed = "已完成"
 }
@@ -19,13 +23,18 @@ struct LibraryView: View {
             let included: Bool
             switch filter {
             case .all: included = true
-            case .foundation: included = problem.isFoundation
+            #if !APP_STORE
+                case .originals: included = problem.lesson != nil
+                case .community: included = problem.lesson == nil
+                case .foundation: included = problem.isFoundation
+            #endif
             case .favorites: included = record.isFavorite
             case .completed: included = record.bestBytes != nil
             }
             return included
                 && (query.isEmpty
-                    || "\(problem.number) \(problem.title) \(problem.author)".localizedCaseInsensitiveContains(query))
+                    || "\(problem.number) \(problem.id) \(problem.title) \(problem.displayTitle) \(problem.author)"
+                        .localizedCaseInsensitiveContains(query))
         }
     }
 
@@ -41,18 +50,21 @@ struct LibraryView: View {
                         Text("\(filtered.count) PROBLEMS").font(.system(size: 10, weight: .medium, design: .monospaced))
                             .foregroundStyle(Palette.muted).accessibilityIdentifier("catalog-count")
                     }
-                    HStack(spacing: 8) {
-                        ForEach(ProblemFilter.allCases, id: \.self) { item in
-                            Button {
-                                filter = item
-                            } label: {
-                                Text(LocalizedStringKey(item.rawValue)).font(.system(size: 13, weight: .medium))
-                                    .padding(.horizontal, 15).frame(minHeight: 40)
-                                    .background(filter == item ? Palette.ink : Color.white, in: Capsule())
-                                    .foregroundStyle(filter == item ? .white : Palette.muted)
-                                    .overlay(
-                                        Capsule().stroke(filter == item ? Color.clear : Palette.line, lineWidth: 1))
-                            }.buttonStyle(.plain).accessibilityAddTraits(filter == item ? .isSelected : [])
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(ProblemFilter.allCases, id: \.self) { item in
+                                Button {
+                                    filter = item
+                                } label: {
+                                    Text(LocalizedStringKey(item.rawValue)).font(.system(size: 13, weight: .medium))
+                                        .padding(.horizontal, 15).frame(minHeight: 40)
+                                        .background(filter == item ? Palette.ink : Color.white, in: Capsule())
+                                        .foregroundStyle(filter == item ? .white : Palette.muted)
+                                        .overlay(
+                                            Capsule().stroke(filter == item ? Color.clear : Palette.line, lineWidth: 1))
+                                }.buttonStyle(.plain).accessibilityAddTraits(filter == item ? .isSelected : [])
+                                    .accessibilityIdentifier("filter-\(item)")
+                            }
                         }
                     }
                     HStack(spacing: 10) {
@@ -87,8 +99,13 @@ struct LibraryView: View {
                 }
                 HStack(spacing: 8) {
                     Circle().fill(Palette.mint).frame(width: 5, height: 5)
-                    Text("全部关卡可离线游玩 · 保留原版编号与作者")
-                        .font(.system(size: 11)).foregroundStyle(Palette.muted)
+                    #if APP_STORE
+                        Text("30 道原创关卡 · 按学习顺序探索 · 全部离线可玩")
+                            .font(.system(size: 11)).foregroundStyle(Palette.muted)
+                    #else
+                        Text("30 道原创课程 + 社区题库 · 全部离线可玩")
+                            .font(.system(size: 11)).foregroundStyle(Palette.muted)
+                    #endif
                 }.frame(maxWidth: .infinity).padding(.vertical, 12)
             }.padding(24).frame(maxWidth: 1120)
                 .frame(maxWidth: .infinity)
@@ -126,7 +143,7 @@ struct LibraryView: View {
                         color: Palette.mintLight)
                     Text(LocalizedStringKey(store.snapshot.lastProblemID == nil ? "从第一步开始" : "继续你的探索"))
                         .font(.system(size: 23, weight: .semibold)).foregroundStyle(.white)
-                    Text("\(problem.number)  ·  \(problem.title)")
+                    Text("\(problem.number)  ·  \(problem.displayTitle)")
                         .font(.system(size: 11, design: .monospaced)).foregroundStyle(.white.opacity(0.65)).lineLimit(1)
                     HStack(spacing: 6) {
                         Text("进入关卡").font(.system(size: 12, weight: .bold))
@@ -168,7 +185,7 @@ private struct ProblemCard: View {
                 .background(Palette.paper.opacity(0.8), in: RoundedRectangle(cornerRadius: 12))
                 .accessibilityHidden(true)
             }
-            Text(problem.title).font(.system(size: 13, weight: .semibold)).lineLimit(1)
+            Text(problem.displayTitle).font(.system(size: 13, weight: .semibold)).lineLimit(1)
             HStack {
                 Text(problem.author).font(.system(size: 10)).foregroundStyle(Palette.muted).lineLimit(1)
                 Spacer(minLength: 4)
@@ -180,7 +197,7 @@ private struct ProblemCard: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(
                 L10n.text(
-                    "关卡 %@，%@，最多 %ld byte%@", problem.number, problem.title, problem.byteLimit,
+                    "关卡 %@，%@，最多 %ld byte%@", problem.number, problem.displayTitle, problem.byteLimit,
                     progress.bestBytes == nil ? "" : L10n.text("，已完成"))
             )
     }

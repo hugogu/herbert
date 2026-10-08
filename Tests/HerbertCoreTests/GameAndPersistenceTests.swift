@@ -1,3 +1,4 @@
+import HerbertCommunity
 import XCTest
 
 @testable import HerbertCore
@@ -10,7 +11,7 @@ final class GameAndPersistenceTests: XCTestCase {
     }
 
     func testEveryImportedBoardIsValidAndIdentifiable() throws {
-        let catalog = try ProblemCatalog.bundled()
+        let catalog = try CommunityProblemCatalog.bundled()
         XCTAssertFalse(catalog.isEmpty)
         XCTAssertEqual(Set(catalog.map(\.id)).count, catalog.count)
         for item in catalog {
@@ -24,7 +25,7 @@ final class GameAndPersistenceTests: XCTestCase {
     }
 
     func testOriginalProblemOneSolvesAtFourBytesAndPersists() throws {
-        let original = try XCTUnwrap(ProblemCatalog.bundled().first { $0.id == 1 })
+        let original = try XCTUnwrap(CommunityProblemCatalog.bundled().first { $0.id == 1 })
         var session = try GameSession(problem: original)
         try session.prepare(source: "ssss")
         for _ in 0..<4 { session.step() }
@@ -70,7 +71,7 @@ final class GameAndPersistenceTests: XCTestCase {
     }
 
     func testLengthAndExecutionLimits() throws {
-        let original = try XCTUnwrap(ProblemCatalog.bundled().first { $0.id == 1 })
+        let original = try XCTUnwrap(CommunityProblemCatalog.bundled().first { $0.id == 1 })
         var session = try GameSession(problem: original, stepLimit: 2)
         XCTAssertThrowsError(try session.prepare(source: "sssss"))
         try session.prepare(source: "ssss")

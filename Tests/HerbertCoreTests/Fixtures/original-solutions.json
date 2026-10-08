@@ -1,0 +1,122 @@
+[
+  {
+    "id": 10001,
+    "source": "s"
+  },
+  {
+    "id": 10002,
+    "source": "ssss"
+  },
+  {
+    "id": 10003,
+    "source": "sssrsss"
+  },
+  {
+    "id": 10004,
+    "source": "ssslssss"
+  },
+  {
+    "id": 10005,
+    "source": "ssrrssss"
+  },
+  {
+    "id": 10006,
+    "source": "rsslsslss"
+  },
+  {
+    "id": 10007,
+    "source": "sssrssslsssrsss"
+  },
+  {
+    "id": 10008,
+    "source": "ssrsslsssslss"
+  },
+  {
+    "id": 10009,
+    "source": "ssssrssssrssrssss"
+  },
+  {
+    "id": 10010,
+    "source": "ssssssrssssssrssssssrssssssr"
+  },
+  {
+    "id": 10011,
+    "source": "a:sss\naaaaaa"
+  },
+  {
+    "id": 10012,
+    "source": "a:ssssr\naaaa"
+  },
+  {
+    "id": 10013,
+    "source": "a:ssrssl\naaaaa"
+  },
+  {
+    "id": 10014,
+    "source": "a:sssrrsssr\naaaa"
+  },
+  {
+    "id": 10015,
+    "source": "a:ssrssl\nb:aaa\nbbb"
+  },
+  {
+    "id": 10016,
+    "source": "a:srsla\na"
+  },
+  {
+    "id": 10017,
+    "source": "a(X):sa(X-1)\na(7)ra(4)"
+  },
+  {
+    "id": 10018,
+    "source": "a(X):sa(X-1)\nb:a(8)ra(4)r\nbb"
+  },
+  {
+    "id": 10019,
+    "source": "b(X):sb(X-1)\na(X):b(X)ra(X+1)\na(1)"
+  },
+  {
+    "id": 10020,
+    "source": "b(X):sb(X-1)\na(X):b(X)rb(X)la(X-1)\na(6)"
+  },
+  {
+    "id": 10021,
+    "source": "a(X):XXXX\na(sssr)"
+  },
+  {
+    "id": 10022,
+    "source": "a(X,Y):Ya(X-1,Y)\na(6,ssrssl)"
+  },
+  {
+    "id": 10023,
+    "source": "a(X,Y):Xa(Y,X)\nra(ssssssrssr,sssssslssl)"
+  },
+  {
+    "id": 10024,
+    "source": "a(X):Xla(Xss)\na(ss)"
+  },
+  {
+    "id": 10025,
+    "source": "a(X):XrrXla(Xs)\na(s)"
+  },
+  {
+    "id": 10026,
+    "source": "a(X,Y):Ya(X-1,Y)\nb:a(10,s)\nbrrbla(8,s)lb"
+  },
+  {
+    "id": 10027,
+    "source": "b(X):sb(X-1)\na(X,Y):b(8)Yb(2)Ya(X-1,rrY)\nra(5,r)"
+  },
+  {
+    "id": 10028,
+    "source": "b(X):sb(X-1)\na(X):b(X)rrb(X)lsla(X+1)\na(1)"
+  },
+  {
+    "id": 10029,
+    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nb(3)b(6)b(9)b(12)"
+  },
+  {
+    "id": 10030,
+    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\ndddd"
+  }
+]

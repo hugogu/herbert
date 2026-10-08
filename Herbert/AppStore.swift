@@ -2,6 +2,10 @@ import HerbertCore
 import SwiftUI
 import UniformTypeIdentifiers
 
+#if !APP_STORE
+    import HerbertCommunity
+#endif
+
 @MainActor
 final class AppStore: ObservableObject {
     @Published private(set) var problems: [Problem] = []
@@ -23,7 +27,12 @@ final class AppStore: ObservableObject {
         } else {
             preferences = .standard
         }
-        do { problems = try ProblemCatalog.bundled() } catch { catalogMessage = error.localizedDescription }
+        do {
+            problems = try ProblemCatalog.bundled()
+            #if !APP_STORE
+                problems += try CommunityProblemCatalog.bundled()
+            #endif
+        } catch { catalogMessage = error.localizedDescription }
         do {
             let local: LocalProgressRepository
             if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
@@ -44,8 +53,15 @@ final class AppStore: ObservableObject {
         }
     }
 
-    var completedCount: Int { snapshot.records.filter { $0.bestBytes != nil }.count }
-    var favoriteCount: Int { snapshot.records.filter(\.isFavorite).count }
+    var visibleRecords: [ProblemProgress] {
+        let ids = Set(problems.map(\.id))
+        return snapshot.records.filter { ids.contains($0.problemID) }
+    }
+    var completedCount: Int { visibleRecords.filter { $0.bestBytes != nil }.count }
+    var favoriteCount: Int { visibleRecords.filter(\.isFavorite).count }
+    var visibleSnapshot: ProgressSnapshot {
+        ProgressSnapshot(records: visibleRecords, lastProblemID: problems.first { $0.id == snapshot.lastProblemID }?.id)
+    }
     var resumeProblem: Problem? {
         problems.first { $0.id == snapshot.lastProblemID } ?? problems.first
     }

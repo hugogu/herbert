@@ -23,10 +23,16 @@ struct GameView: View {
     @StateObject private var editor = EditorController()
     @State private var showGuide = false
     @State private var showBest = false
+    @State private var revealedHints = 0
 
     init(model: GameModel) { _model = StateObject(wrappedValue: model) }
 
-    private var nextProblem: Problem? { store.problems.first { $0.id > model.problem.id } }
+    private var nextProblem: Problem? {
+        guard let index = store.problems.firstIndex(where: { $0.id == model.problem.id }),
+            store.problems.indices.contains(index + 1)
+        else { return nil }
+        return store.problems[index + 1]
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -34,6 +40,7 @@ struct GameView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     heading
+                    if let lesson = model.problem.lesson { lessonPanel(lesson) }
                     stats
                     if wide {
                         HStack(alignment: .top, spacing: 20) {
@@ -102,11 +109,34 @@ struct GameView: View {
 
     private var heading: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: L10n.text("PROBLEM %@  /  ORIGINAL COLLECTION", model.problem.number))
-            Text(model.problem.title).font(.system(size: 25, weight: .bold, design: .rounded))
+            Eyebrow(
+                text: L10n.text(
+                    model.problem.lesson == nil
+                        ? "PROBLEM %@  /  COMMUNITY COLLECTION" : "LESSON %@  /  ORIGINAL COURSE",
+                    model.problem.number))
+            Text(model.problem.displayTitle).font(.system(size: 25, weight: .bold, design: .rounded))
             Text("由 \(model.problem.author) 创作 · 点亮所有目标，试着把代码再缩短一点。")
                 .font(.system(size: 12)).foregroundStyle(Palette.muted)
         }
+    }
+
+    private func lessonPanel(_ lesson: ProblemLesson) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L10n.text("第 %ld 章 · %@", lesson.chapter, L10n.text(lesson.chapterTitle)))
+                .font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.mint)
+            Text(L10n.text(lesson.objective)).font(.system(size: 13)).foregroundStyle(Palette.ink)
+                .accessibilityIdentifier("lesson-objective")
+            ForEach(Array(lesson.hints.prefix(revealedHints).enumerated()), id: \.offset) { index, hint in
+                Text(L10n.text("提示 %ld：%@", index + 1, L10n.text(hint)))
+                    .font(.system(size: 12)).foregroundStyle(Palette.muted)
+                    .accessibilityIdentifier("lesson-hint-\(index + 1)")
+            }
+            if revealedHints < lesson.hints.count {
+                Button("显示下一条提示") { revealedHints += 1 }
+                    .font(.system(size: 12, weight: .medium)).buttonStyle(.plain).foregroundStyle(Palette.mint)
+                    .accessibilityIdentifier("reveal-hint")
+            }
+        }.panel(padding: 16)
     }
 
     private var stats: some View {
