@@ -4,9 +4,10 @@ import SwiftUI
 struct GameDestination: View {
     let problem: Problem
     let store: AppStore
+    var trialSource: String?
 
     var body: some View {
-        if let model = try? GameModel(problem: problem, store: store) {
+        if let model = try? GameModel(problem: problem, store: store, trialSource: trialSource) {
             GameView(model: model)
         } else {
             ContentUnavailableView(
@@ -20,6 +21,7 @@ struct GameView: View {
     @StateObject private var model: GameModel
     @EnvironmentObject private var store: AppStore
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var editor = EditorController()
     @State private var showGuide = false
     @State private var showBest = false
@@ -28,6 +30,7 @@ struct GameView: View {
     init(model: GameModel) { _model = StateObject(wrappedValue: model) }
 
     private var nextProblem: Problem? {
+        guard !model.isTrial else { return nil }
         guard let index = store.problems.firstIndex(where: { $0.id == model.problem.id }),
             store.problems.indices.contains(index + 1)
         else { return nil }
@@ -40,6 +43,9 @@ struct GameView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     heading
+                    if model.isTrial {
+                        BattlefieldNotice(text: L10n.text("AI 答案试运行：可以修改和运行，不会更改个人草稿、最短解或比赛成绩。"))
+                    }
                     if let lesson = model.problem.lesson { lessonPanel(lesson) }
                     stats
                     if wide {
@@ -72,17 +78,30 @@ struct GameView: View {
             .background(Palette.paper)
         }
         .navigationTitle("\(model.problem.number)")
+        .navigationBarBackButtonHidden(model.isTrial)
         #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
         #endif
         .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                if model.isTrial {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Label("返回比赛", systemImage: "arrow.left")
+                    }.accessibilityIdentifier("backToBattlefield")
+                }
+            }
             ToolbarItemGroup(placement: .primaryAction) {
-                Button {
-                    store.toggleFavorite(model.problem.id)
-                } label: {
-                    Image(systemName: store.progress(for: model.problem.id).isFavorite ? "bookmark.fill" : "bookmark")
-                }.accessibilityLabel("收藏关卡")
+                if !model.isTrial {
+                    Button {
+                        store.toggleFavorite(model.problem.id)
+                    } label: {
+                        Image(
+                            systemName: store.progress(for: model.problem.id).isFavorite ? "bookmark.fill" : "bookmark")
+                    }.accessibilityLabel("收藏关卡")
+                }
                 Button {
                     model.pause()
                     showGuide = true
@@ -101,7 +120,7 @@ struct GameView: View {
         }
         .onChange(of: model.source) { _, _ in model.edited() }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.pause() } }
-        .onAppear { store.visit(model.problem.id) }
+        .onAppear { if !model.isTrial { store.visit(model.problem.id) } }
         .onDisappear { model.disappear() }
         .sensoryFeedback(.success, trigger: model.isCompleted)
         .sensoryFeedback(.warning, trigger: model.lastEvent == .trap)
@@ -200,7 +219,7 @@ struct GameView: View {
                 Text("字母和数值各算 1 byte，标点不计。")
                     .font(.system(size: 10)).foregroundStyle(Palette.muted)
                 Spacer(minLength: 0)
-                if store.progress(for: model.problem.id).bestSolution != nil {
+                if !model.isTrial, store.progress(for: model.problem.id).bestSolution != nil {
                     Button {
                         showBest.toggle()
                     } label: {
@@ -314,8 +333,12 @@ struct GameView: View {
             Image(systemName: "sparkles").font(.system(size: 30)).foregroundStyle(Palette.mint)
             VStack(alignment: .leading, spacing: 6) {
                 Text("漂亮，全部点亮！").font(.system(size: 20, weight: .bold)).accessibilityIdentifier("completion-title")
-                Text("\(model.session.programBytes) byte · 最短解已保存到本机")
-                    .font(.system(size: 12)).foregroundStyle(Palette.muted)
+                Text(
+                    model.isTrial
+                        ? L10n.text("%ld byte · AI 答案试运行完成", model.session.programBytes)
+                        : L10n.text("%ld byte · 最短解已保存到本机", model.session.programBytes)
+                )
+                .font(.system(size: 12)).foregroundStyle(Palette.muted)
             }
             Spacer(minLength: 0)
             if let next = nextProblem {

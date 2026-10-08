@@ -313,7 +313,13 @@ func battlefieldError(_ error: Error) -> String {
             progress: @escaping @Sendable (AIProgress) async -> Void
         ) async throws -> AIReply {
             try await Task.sleep(for: .milliseconds(400))
-            let text = request.messages.count == 2 ? "z" : "```h\ns\n```"
+            let firstAttempt = request.messages.count == 2
+            let problem = request.messages.first { $0.role == "user" }?.content ?? ""
+            let examples = [(10002, "ssss"), (10003, "sssrsss"), (10006, "rsslsslss")]
+            let program =
+                request.participant.entrant.preset.model.id == "fixture-1"
+                ? examples.first { problem.contains("ID \($0.0)") }?.1 ?? "s" : "s"
+            let text = firstAttempt ? "z" : "```h\n\(program)\n```"
             let usage = TokenUsage(input: 900, output: 12, cached: 450, estimated: false)
             await progress(AIProgress(text: text, usage: usage, isFinal: true))
             return AIReply(text: text, usage: usage)

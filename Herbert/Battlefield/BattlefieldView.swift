@@ -3,6 +3,7 @@ import HerbertCore
 import SwiftUI
 
 private enum BattlefieldPage: String, CaseIterable {
+    case providers = "AI 配置"
     case setup = "新比赛"
     case current = "当前比赛"
     case history = "比赛历史"
@@ -14,28 +15,48 @@ struct BattlefieldView: View {
     @State private var historyResult: CompetitionResult?
 
     var body: some View {
-        VStack(spacing: 0) {
-            Picker("AI Battlefield", selection: $page) {
-                ForEach(BattlefieldPage.allCases, id: \.self) { Text(LocalizedStringKey($0.rawValue)).tag($0) }
-            }.pickerStyle(.segmented).padding(20).frame(maxWidth: 700)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    BattlefieldMessages()
-                    switch page {
-                    case .setup: BattlefieldSetupView()
-                    case .current:
-                        if let result = battlefield.liveResult {
-                            BattlefieldDashboard(result: result)
-                        } else {
-                            ContentUnavailableView(
-                                L10n.text("等待开赛"), systemImage: "flag.checkered",
-                                description: Text("选择模型和题目，开始第一场比赛。"))
-                        }
-                    case .history: history
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                if page == .providers {
+                    AIProvidersView()
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 24) {
+                            BattlefieldMessages()
+                            switch page {
+                            case .providers: EmptyView()
+                            case .setup: BattlefieldSetupView(wide: geometry.size.width >= 800)
+                            case .current:
+                                if let result = battlefield.liveResult {
+                                    BattlefieldDashboard(result: result)
+                                } else {
+                                    ContentUnavailableView(
+                                        L10n.text("等待开赛"), systemImage: "flag.checkered",
+                                        description: Text("选择模型和题目，开始第一场比赛。"))
+                                }
+                            case .history: history
+                            }
+                        }.padding(28).frame(maxWidth: page == .setup ? 1200 : .infinity, alignment: .leading).frame(
+                            maxWidth: .infinity)
                     }
-                }.padding(28).frame(maxWidth: 1200, alignment: .leading).frame(maxWidth: .infinity)
+                }
             }
         }.background(Palette.paper).navigationTitle("AI Battlefield")
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Picker("AI Battlefield", selection: $page) {
+                        ForEach(BattlefieldPage.allCases, id: \.self) {
+                            Text(LocalizedStringKey($0.rawValue)).tag($0)
+                        }
+                    }.pickerStyle(.segmented).labelsHidden()
+                        #if os(macOS)
+                            .frame(width: 520)
+                        #endif
+                }
+            }
+            #if os(iOS)
+                .navigationBarTitleDisplayMode(.inline)
+            #endif
             .onChange(of: battlefield.busy) { _, busy in if busy { page = .current } }
             .sheet(item: $historyResult) { result in
                 BattlefieldSheet(title: L10n.text("比赛历史")) {
@@ -66,8 +87,8 @@ struct BattlefieldView: View {
                                 Palette.muted)
                             Text(
                                 L10n.text(
-                                    "%ld 个 AI · %ld 道题 · 最高 %ld 分", summary.entrantCount,
-                                    summary.problemCount, summary.topScore)
+                                    "%ld 个 AI · %ld 道题 · 最高 %@ 分", summary.entrantCount,
+                                    summary.problemCount, battlefieldScore(summary.topScore))
                             ).font(.caption)
                         }
                         Spacer()
@@ -89,16 +110,16 @@ private struct BattlefieldSetupView: View {
     @State private var choosingModels = false
     @State private var showingPrompt = false
     @State private var initialized = false
+    let wide: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 8) {
                 Eyebrow(text: "SAME PUZZLES. DIFFERENT MINDS.")
-                Text("AI Battlefield").font(.system(size: 36, weight: .bold, design: .rounded))
                 Text("相同规则，同场解题。让程序运行结果说话。")
                     .font(.title3).foregroundStyle(Palette.muted)
             }
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text("比赛模式").font(.title2.bold())
                 Picker("比赛模式", selection: $configuration.mode) {
                     ForEach(CompetitionMode.allCases, id: \.self) { Text($0.title).tag($0) }
@@ -124,65 +145,24 @@ private struct BattlefieldSetupView: View {
                     Text("预算包含所有尝试的输入与输出 Token。流式调用中使用估算，响应结束后核对服务商用量；取消时的实际账单可能高于已报告用量。")
                         .font(.caption).foregroundStyle(Palette.muted)
                 } else {
-                    Text("不限比赛时间和总 Token；全部题目完成尝试后结束，也可以随时终止。")
+                    Text("不限比赛时间和总 Token；首个 AI 完成全部所选题目的尝试后，全场立即结束并取消其他调用。也可以随时终止。")
                         .font(.callout).foregroundStyle(Palette.muted)
                 }
                 Stepper(value: $configuration.attemptsPerProblem, in: 1...10) {
                     Text(L10n.text("每题最多 %ld 次机会", configuration.attemptsPerProblem))
                 }.accessibilityIdentifier("attemptLimit")
             }.panel()
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("参赛模型").font(.title2.bold())
-                    Spacer()
-                    Text("\(selectedModels.count) / 32").font(.caption.monospaced()).foregroundStyle(Palette.muted)
-                    Button("选择参赛模型") { choosingModels = true }.accessibilityIdentifier("chooseBattlefieldModels")
+            if wide {
+                HStack(alignment: .top, spacing: 20) {
+                    entrantsPanel.frame(maxWidth: .infinity)
+                    puzzlesPanel.frame(maxWidth: .infinity)
                 }
-                if battlefield.modelOptions.isEmpty {
-                    BattlefieldNotice(text: L10n.text("先在 AI 配置中添加服务商并检测模型。"))
+            } else {
+                VStack(alignment: .leading, spacing: 18) {
+                    entrantsPanel
+                    puzzlesPanel
                 }
-                ForEach(battlefield.modelOptions.filter { selectedModels.contains($0.id) }) { option in
-                    Toggle(
-                        isOn: Binding(
-                            get: { selectedModels.contains(option.id) },
-                            set: { on in
-                                if on { selectedModels.insert(option.id) } else { selectedModels.remove(option.id) }
-                            })
-                    ) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(option.preset.model.name).font(.headline)
-                            Text(
-                                option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
-                                    + " max tokens"
-                            )
-                            .font(.caption).foregroundStyle(Palette.muted)
-                        }
-                    }.disabled(battlefield.busy).accessibilityIdentifier("entrant-\(option.preset.model.id)")
-                }
-            }.panel()
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("比赛题目").font(.title2.bold())
-                    Spacer()
-                    Button {
-                        choosingProblems = true
-                    } label: {
-                        Label(
-                            L10n.text("已选择 %ld 道", selectedProblems.count),
-                            systemImage: "square.grid.2x2")
-                    }.accessibilityIdentifier("chooseBattlefieldProblems")
-                }
-                Text("默认使用 50 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
-                    .font(.callout).foregroundStyle(Palette.muted)
-                Divider()
-                Text("每题通过得 100 分，否则 0 分。同分依次比较通过题目的代码总 byte 数与完成时间。错误答案会收到原生引擎的反馈，再次尝试。")
-                    .font(.callout).foregroundStyle(Palette.muted)
-                Button("查看统一规则提示词") { showingPrompt = true }
-                DisclosureGroup("附加提示词（所有 AI 相同）") {
-                    TextEditor(text: $configuration.extraPrompt).font(.system(.body, design: .monospaced))
-                        .frame(minHeight: 90).padding(.top, 8)
-                }
-            }.panel()
+            }
             BattlefieldNotice(text: L10n.text("点击开始后，将向所选服务商发送规则、题目和本次对话。服务商可能保存请求并按其价格收费，请确认你同意这些数据发送和费用。"))
             #if os(iOS)
                 Text("进入后台会终止比赛并保存结果。请保持 App 在前台。")
@@ -217,11 +197,68 @@ private struct BattlefieldSetupView: View {
         }.sheet(isPresented: $showingPrompt) {
             BattlefieldSheet(title: L10n.text("统一规则提示词")) {
                 ScrollView {
-                    Text(BattlefieldPrompt.rules).font(.system(.callout, design: .monospaced)).textSelection(.enabled)
-                        .padding(24)
+                    BattlefieldRulesView(source: BattlefieldPrompt.rules).padding(24)
                 }
             }
         }
+    }
+
+    private var entrantsPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("参赛模型").font(.title2.bold())
+                Spacer()
+                Text("\(selectedModels.count) / 32").font(.caption.monospaced()).foregroundStyle(Palette.muted)
+                Button("选择参赛模型") { choosingModels = true }.accessibilityIdentifier("chooseBattlefieldModels")
+            }
+            if battlefield.modelOptions.isEmpty {
+                BattlefieldNotice(text: L10n.text("先在 AI 配置中添加服务商并检测模型。"))
+            }
+            ForEach(battlefield.modelOptions.filter { selectedModels.contains($0.id) }) { option in
+                Toggle(
+                    isOn: Binding(
+                        get: { selectedModels.contains(option.id) },
+                        set: { on in
+                            if on { selectedModels.insert(option.id) } else { selectedModels.remove(option.id) }
+                        })
+                ) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(option.preset.model.name).font(.headline)
+                        Text(
+                            option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
+                                + " max tokens"
+                        )
+                        .font(.caption).foregroundStyle(Palette.muted)
+                    }
+                }.disabled(battlefield.busy).accessibilityIdentifier("entrant-\(option.preset.model.id)")
+            }
+        }.panel()
+    }
+
+    private var puzzlesPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("比赛题目").font(.title2.bold())
+                Spacer()
+                Button {
+                    choosingProblems = true
+                } label: {
+                    Label(
+                        L10n.text("已选择 %ld 道", selectedProblems.count),
+                        systemImage: "square.grid.2x2")
+                }.accessibilityIdentifier("chooseBattlefieldProblems")
+            }
+            Text("默认使用 50 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
+                .font(.callout).foregroundStyle(Palette.muted)
+            Divider()
+            Text("每题按点亮目标比例与代码长度计分，取各次尝试的最高分。同分时 Token 消耗更少者在前。错误答案会收到反馈后重试。")
+                .font(.callout).foregroundStyle(Palette.muted)
+            Button("查看统一规则提示词") { showingPrompt = true }
+            DisclosureGroup("附加提示词（所有 AI 相同）") {
+                TextEditor(text: $configuration.extraPrompt).font(.system(.body, design: .monospaced))
+                    .frame(minHeight: 90).padding(.top, 8)
+            }
+        }.panel()
     }
 }
 

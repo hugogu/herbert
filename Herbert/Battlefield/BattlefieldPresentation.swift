@@ -68,6 +68,19 @@ func battlefieldCache(_ entrant: EntrantResult) -> String {
     entrant.cacheRate.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? L10n.text("未提供")
 }
 
+func battlefieldScore(_ score: Double) -> String {
+    score.formatted(.number.precision(.fractionLength(0...2)))
+}
+
+extension CompetitionResult {
+    var scoringDescription: String {
+        L10n.text(
+            scoringPolicy == .legacyAccepted
+                ? "每题通过 100 分 · 同分比较代码 byte 数与完成时间"
+                : "目标覆盖率 ×（80 + 20 × 代码压缩率）· 每题取最高分 · 同分比较 Token 与完成时间")
+    }
+}
+
 struct BattlefieldNotice: View {
     let text: String
     var body: some View {

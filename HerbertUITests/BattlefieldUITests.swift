@@ -26,6 +26,13 @@ final class BattlefieldUITests: XCTestCase {
                     app.typeKey(.escape, modifierFlags: [])
                 }
             }
+            let window = app.windows.firstMatch
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            let frame = window.frame
+            if abs(frame.width - 1240) > 4 || abs(frame.height - 850) > 4 {
+                origin.withOffset(CGVector(dx: frame.width - 2, dy: frame.height - 2))
+                    .click(forDuration: 0.1, thenDragTo: origin.withOffset(CGVector(dx: 1238, dy: 848)))
+            }
         #endif
         XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
         return app
@@ -33,7 +40,9 @@ final class BattlefieldUITests: XCTestCase {
 
     @MainActor
     private func openSection(_ name: String, in app: XCUIApplication) {
-        app.descendants(matching: .any)["section-\(name)"].firstMatch.battlefieldTap()
+        app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
+            .battlefieldTap()
+        if name == "AI 配置" { choose("AI Providers", in: app) }
     }
 
     @MainActor
@@ -120,11 +129,34 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testCompactSetupAndFormattedSharedPrompt() {
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        choose("Best Effort", in: app)
+        let models = app.buttons["chooseBattlefieldModels"]
+        let puzzles = app.buttons["chooseBattlefieldProblems"]
+        XCTAssertTrue(models.waitForExistence(timeout: 5))
+        #if os(macOS)
+            XCTAssertEqual(models.frame.minY, puzzles.frame.minY, accuracy: 5)
+            XCTAssertLessThan(models.frame.maxX, puzzles.frame.minX)
+            XCTAssertTrue(app.buttons["startBattlefield"].isHittable, app.debugDescription)
+            XCTAssertLessThan(app.radioButtons["New match"].frame.minY, models.frame.minY)
+        #endif
+        capture(app, "ai-new-match")
+        app.buttons["View shared rules prompt"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Board and movement"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["## Board and movement"].exists)
+        capture(app, "ai-rules")
+        app.buttons["Close"].battlefieldTap()
+        app.terminate()
+    }
+
+    @MainActor
     func testParallelMatchRetryNativeJudgingHistoryAndShareImage() {
         var app = launch()
         openSection("AI Battlefield", in: app)
         XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("50 puzzles selected"))
-        choose("Best Effort", in: app)
+        choose("Time limited", in: app)
         reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
         app.buttons["clearBattlefieldProblems"].battlefieldTap()
         app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
@@ -133,7 +165,7 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15), app.debugDescription)
         for model in ["fixture-1", "fixture-2"] {
             let score = app.staticTexts["score-\(model)"]
-            XCTAssertEqual(score.value as? String ?? score.label, "100")
+            XCTAssertEqual(score.value as? String ?? score.label, "80")
         }
         XCTAssertTrue(app.staticTexts["AI: 2 · Puzzles: 1"].exists)
         capture(app, "ai-battlefield")
@@ -148,7 +180,23 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertTrue(app.staticTexts.matching(identifier: "Accepted").firstMatch.exists)
         capture(app, "ai-answer")
-        app.buttons["Close"].battlefieldTap()
+        reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
+        XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
+        capture(app, "ai-trial")
+        reveal("run-program", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
+        app.buttons["backToBattlefield"].battlefieldTap()
+        XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80")
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        reveal("tryBattlefieldAnswer-1", in: app).battlefieldTap()
+        XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "z")
+        reveal("run-program", in: app).battlefieldTap()
+        XCTAssertEqual(app.staticTexts["game-status"].value as? String, "Procedure z is not defined.")
+        app.buttons["insert-l"].battlefieldTap()
+        app.buttons["backToBattlefield"].battlefieldTap()
         // Scroll to the dashboard header before opening the export preview.
         #if os(macOS)
             app.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: 1000)
@@ -167,7 +215,51 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(history.waitForExistence(timeout: 10))
         history.battlefieldTap()
         XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "100")
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80")
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
+        XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
+        app.buttons["backToBattlefield"].battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        openSection("关卡", in: app)
+        app.buttons["continue-problem"].battlefieldTap()
+        XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "")
+        XCTAssertFalse(app.buttons["View my shortest solution"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testCaptureHerbertBenchmarkGallery() throws {
+        guard ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1" else {
+            throw XCTSkip("Opt-in README capture")
+        }
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        choose("Time limited", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        for id in [10001, 10002, 10006] {
+            app.descendants(matching: .any)["problemChoice-\(id)"].firstMatch.battlefieldTap()
+        }
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 20))
+        XCTAssertFalse(app.staticTexts["Live ranking"].exists)
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "240")
+        XCTAssertLessThan(app.staticTexts["score-fixture-1"].frame.minX, app.staticTexts["score-fixture-2"].frame.minX)
+        let accepted = reveal("answer-fixture-1-10006", in: app)
+        #if os(macOS)
+            XCTAssertLessThanOrEqual(accepted.frame.height, 64)
+        #endif
+        XCTAssertTrue(app.buttons["answer-fixture-2-10006"].label.contains("Rejected"))
+        #if os(macOS)
+            app.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: 1000)
+        #else
+            app.swipeDown()
+        #endif
+        capture(app, "herbert-benchmark")
         app.terminate()
     }
 

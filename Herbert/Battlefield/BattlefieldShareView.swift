@@ -111,11 +111,13 @@ private struct BattlefieldShareCard: View {
                         .font(.system(size: 16, design: .monospaced)).foregroundStyle(Palette.muted)
                     }
                     Spacer(minLength: 10)
-                    Text(entrant.score.formatted()).font(.system(size: 44, weight: .bold, design: .rounded))
-                        .foregroundStyle(Palette.mint)
+                    Text(battlefieldScore(result.score(for: entrant))).font(
+                        .system(size: 44, weight: .bold, design: .rounded)
+                    )
+                    .foregroundStyle(Palette.mint)
                 }.padding(22).background(.white, in: RoundedRectangle(cornerRadius: 18))
             }
-            Text("每题通过 100 分 · 同分比较代码 byte 数与完成时间")
+            Text(result.scoringDescription)
                 .font(.system(size: 17)).foregroundStyle(Palette.muted)
             if result.entrants.contains(where: \.hasEstimatedUsage) {
                 Text("≈ 包含估算或部分用量；实际账单以服务商为准。")

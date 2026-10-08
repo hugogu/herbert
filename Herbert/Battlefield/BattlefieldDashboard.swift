@@ -6,81 +6,40 @@ private struct BattlefieldAnswerSelection: Identifiable {
     let entrant: EntrantResult
     let answer: ProblemAnswer
     let problem: Problem
+    let scoring: BattlefieldScoring
     var id: String { "\(entrant.id)/\(answer.id)" }
+}
+
+private struct BattlefieldTrial: Hashable {
+    let problem: Problem
+    let source: String
 }
 
 struct BattlefieldDashboard: View {
     @EnvironmentObject private var battlefield: BattlefieldModel
+    @EnvironmentObject private var store: AppStore
     let result: CompetitionResult
     @State private var selectedAnswer: BattlefieldAnswerSelection?
     @State private var sharing = false
     @State private var inspecting = false
+    @State private var trial: BattlefieldTrial?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             header
-            HStack {
-                Text("实时排名").font(.title2.bold())
-                Spacer()
-                Text("100 / PROBLEM").font(.caption.monospaced()).foregroundStyle(Palette.muted)
-            }
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 270), spacing: 16)], spacing: 16) {
-                ForEach(Array(result.ranked.enumerated()), id: \.element.id) { index, entrant in
-                    rankCard(entrant, rank: index + 1)
-                }
-            }
             if result.entrants.contains(where: \.hasEstimatedUsage) {
                 BattlefieldNotice(text: L10n.text("≈ 表示包含实时估算或取消请求的部分用量。缓存率仅在全部尝试均返回准确缓存用量时显示。最终账单以服务商为准。"))
             }
-            VStack(alignment: .leading, spacing: 16) {
-                Text("逐题进度").font(.title2.bold())
-                Text("点击状态查看程序、反馈与重试记录。")
-                    .font(.caption).foregroundStyle(Palette.muted)
-                ScrollView(.horizontal) {
-                    Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                        GridRow {
-                            Text("题目").frame(width: 64, alignment: .leading)
-                            ForEach(result.ranked) { entrant in
-                                Text(entrant.entrant.preset.model.name).font(.caption.bold()).lineLimit(2)
-                                    .frame(width: 115, height: 44).help(
-                                        entrant.entrant.providerName + " / " + entrant.entrant.preset.model.id)
-                            }
-                        }
-                        ForEach(result.problems) { problem in
-                            GridRow {
-                                Text(battlefieldProblemID(problem.id)).font(.system(.callout, design: .monospaced))
-                                    .frame(width: 64, alignment: .leading)
-                                ForEach(result.ranked) { entrant in
-                                    if let answer = entrant.answers.first(where: { $0.id == problem.id }) {
-                                        Button {
-                                            selectedAnswer = BattlefieldAnswerSelection(
-                                                entrant: entrant, answer: answer, problem: problem)
-                                        } label: {
-                                            HStack(spacing: 6) {
-                                                Image(systemName: answer.status.symbol)
-                                                Text(answer.status.title).font(.caption)
-                                            }.frame(width: 115, height: 34)
-                                                .foregroundStyle(answer.status.color)
-                                                .background(
-                                                    answer.status.color.opacity(0.08),
-                                                    in: RoundedRectangle(cornerRadius: 8))
-                                        }.buttonStyle(.plain)
-                                            .accessibilityIdentifier(
-                                                "answer-\(entrant.entrant.preset.model.id)-\(problem.id)"
-                                            )
-                                            .accessibilityLabel(
-                                                battlefieldProblemID(problem.id) + " "
-                                                    + entrant.entrant.preset.model.name + " " + answer.status.title)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }.panel()
+            progressTable
+        }
+        .navigationDestination(item: $trial) { trial in
+            GameDestination(problem: trial.problem, store: store, trialSource: trial.source)
         }
         .sheet(item: $selectedAnswer) { selection in
-            BattlefieldAnswerView(selection: selection)
+            BattlefieldAnswerView(selection: selection) { program in
+                selectedAnswer = nil
+                trial = BattlefieldTrial(problem: selection.problem, source: program)
+            }
         }.sheet(isPresented: $sharing) { BattlefieldShareView(result: result) }
         .sheet(isPresented: $inspecting) {
             BattlefieldSheet(title: L10n.text("比赛配置与提示词")) {
@@ -94,7 +53,8 @@ struct BattlefieldDashboard: View {
                         Text(
                             result.configuration.tokenBudgetScope == .shared ? L10n.text("全场共享") : L10n.text("每个 AI 独立")
                         )
-                        Text(result.systemPrompt).font(.system(.callout, design: .monospaced))
+                        Text(result.scoringDescription).font(.callout).foregroundStyle(Palette.muted)
+                        BattlefieldRulesView(source: result.systemPrompt)
                     }.textSelection(.enabled).padding(24)
                 }
             }
@@ -102,8 +62,7 @@ struct BattlefieldDashboard: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Eyebrow(text: "AI BATTLEFIELD / LIVE RESULTS")
+        VStack(alignment: .leading, spacing: 12) {
             ViewThatFits(in: .horizontal) {
                 HStack {
                     Text(result.status.title).font(.largeTitle.bold())
@@ -167,34 +126,113 @@ struct BattlefieldDashboard: View {
         }
     }
 
-    private func rankCard(_ entrant: EntrantResult, rank: Int) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top) {
-                Text(String(format: "%02d", rank)).font(.system(size: 32, weight: .bold, design: .rounded))
-                    .foregroundStyle(rank == 1 ? Palette.mint : Palette.muted)
-                Spacer()
-                Text(entrant.score.formatted()).font(.system(size: 34, weight: .bold, design: .rounded))
-                    .contentTransition(.numericText())
-                    .accessibilityIdentifier("score-\(entrant.entrant.preset.model.id)")
+    private var progressTable: some View {
+        let ranking = result.ranked
+        let answers = Dictionary(
+            uniqueKeysWithValues: ranking.map { entrant in
+                (entrant.id, Dictionary(uniqueKeysWithValues: entrant.answers.map { ($0.id, $0) }))
+            })
+        return VStack(alignment: .leading, spacing: 16) {
+            Text("逐题进度").font(.title2.bold())
+            Text(result.scoringDescription).font(.caption).foregroundStyle(Palette.muted)
+            Text("点击答案查看完整程序、反馈与重试记录，或进入棋盘试运行。")
+                .font(.caption).foregroundStyle(Palette.muted)
+            ScrollView(.horizontal) {
+                Grid(alignment: .topLeading, horizontalSpacing: 12, verticalSpacing: 12) {
+                    GridRow {
+                        Text("题目").font(.caption.bold()).frame(width: 80, alignment: .leading)
+                        ForEach(Array(ranking.enumerated()), id: \.element.id) { index, entrant in
+                            modelHeader(entrant, rank: index + 1)
+                        }
+                    }
+                    Divider().gridCellUnsizedAxes(.horizontal)
+                    ForEach(result.problems) { problem in
+                        GridRow {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(battlefieldProblemID(problem.id)).font(.system(.callout, design: .monospaced))
+                                Text("\(problem.byteLimit) bytes").font(.caption2).foregroundStyle(Palette.muted)
+                            }.frame(width: 80, alignment: .leading).padding(.top, 12)
+                            ForEach(ranking) { entrant in
+                                if let answer = answers[entrant.id]?[problem.id] {
+                                    answerCell(answer, entrant: entrant, problem: problem)
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            VStack(alignment: .leading, spacing: 5) {
-                Text(entrant.entrant.preset.model.name).font(.headline).lineLimit(2)
-                Text(entrant.entrant.providerName).font(.caption).foregroundStyle(Palette.muted)
+        }.panel()
+    }
+
+    private func modelHeader(_ entrant: EntrantResult, rank: Int) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(String(format: "%02d", rank)).font(.title2.bold()).foregroundStyle(Palette.mint)
+                Text(entrant.entrant.preset.model.name).font(.headline).lineLimit(2).padding(
+                    .trailing, entrant.error == nil ? 0 : 20)
             }
-            Divider()
-            metric(L10n.text("已通过"), "\(entrant.solved) / \(result.problems.count)")
-            metric(L10n.text("代码总 byte"), entrant.bytes.formatted())
+            Text(entrant.entrant.providerName).font(.caption).foregroundStyle(Palette.muted)
             metric(
                 L10n.text("输入 / 输出 Token"),
                 (entrant.hasEstimatedUsage ? "≈ " : "")
                     + "\(entrant.inputTokens.formatted()) / \(entrant.outputTokens.formatted())")
-            metric(L10n.text("已确认 Token"), entrant.confirmedTokens.formatted())
             metric(L10n.text("输入缓存率"), battlefieldCache(entrant))
-            if entrant.exhaustedBudget { Pill(text: L10n.text("Token 预算用完"), color: Palette.amber) }
-            if let error = entrant.error {
-                Text(error).font(.caption).foregroundStyle(Palette.danger).textSelection(.enabled)
+            metric(L10n.text("总 Token"), (entrant.hasEstimatedUsage ? "≈ " : "") + entrant.totalTokens.formatted())
+            Divider()
+            HStack(alignment: .firstTextBaseline) {
+                Text(battlefieldScore(result.score(for: entrant))).font(
+                    .system(size: 30, weight: .bold, design: .rounded)
+                )
+                .contentTransition(.numericText()).foregroundStyle(Palette.mint)
+                .accessibilityIdentifier("score-\(entrant.entrant.preset.model.id)")
+                Text("分").font(.caption).foregroundStyle(Palette.muted)
+                Spacer(minLength: 4)
+                Text(L10n.text("通过 %ld/%ld", entrant.solved, result.problems.count)).font(.caption)
             }
-        }.panel()
+            if entrant.exhaustedBudget { Pill(text: L10n.text("Token 预算用完"), color: Palette.amber) }
+        }.frame(width: 224, alignment: .leading).padding(12)
+            .background(Palette.paper, in: RoundedRectangle(cornerRadius: 10))
+            .overlay(alignment: .topTrailing) {
+                if let error = entrant.error {
+                    BattlefieldErrorIndicator(message: error).padding(10)
+                }
+            }
+            .help(entrant.entrant.providerName + " / " + entrant.entrant.preset.model.id)
+    }
+
+    private func answerCell(_ answer: ProblemAnswer, entrant: EntrantResult, problem: Problem) -> some View {
+        let attempt = result.scoringPolicy.bestAttempt(answer, problem: problem)
+        let score = battlefieldScore(result.scoringPolicy.score(answer, problem: problem))
+        return Button {
+            selectedAnswer = BattlefieldAnswerSelection(
+                entrant: entrant, answer: answer, problem: problem, scoring: result.scoringPolicy)
+        } label: {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Image(systemName: answer.status.symbol)
+                    Text(answer.status.title).font(.caption.bold())
+                    Spacer(minLength: 4)
+                    if let attempt {
+                        Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.caption2.monospaced()).foregroundStyle(
+                            Palette.muted)
+                    }
+                    Text(score).font(.caption.monospaced().bold())
+                }.foregroundStyle(answer.status.color)
+                if let program = attempt?.program {
+                    Text(String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")).font(
+                        .system(.caption, design: .monospaced)
+                    )
+                    .foregroundStyle(Palette.ink).lineLimit(1)
+                } else {
+                    Text(answer.status.title).font(.caption).foregroundStyle(Palette.muted)
+                }
+            }.frame(width: 224, height: 38, alignment: .topLeading).padding(.horizontal, 12).padding(.vertical, 10)
+                .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+        }.buttonStyle(.plain)
+            .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
+            .accessibilityLabel(
+                battlefieldProblemID(problem.id) + " " + entrant.entrant.preset.model.name
+                    + " " + answer.status.title + " " + score)
     }
 
     private func metric(_ name: String, _ value: String) -> some View {
@@ -202,7 +240,7 @@ struct BattlefieldDashboard: View {
             Text(name).foregroundStyle(Palette.muted)
             Spacer(minLength: 4)
             Text(value).monospacedDigit()
-        }.font(.caption)
+        }.font(.caption2)
     }
 
     private func duration(_ seconds: Double) -> String {
@@ -213,6 +251,7 @@ struct BattlefieldDashboard: View {
 
 private struct BattlefieldAnswerView: View {
     let selection: BattlefieldAnswerSelection
+    let onTry: (String) -> Void
     var body: some View {
         BattlefieldSheet(
             title: battlefieldProblemID(selection.problem.id) + " · " + selection.entrant.entrant.preset.model.name
@@ -221,7 +260,9 @@ private struct BattlefieldAnswerView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Pill(text: selection.answer.status.title, color: selection.answer.status.color)
                     Text(L10n.text(selection.problem.title)).font(.title2.bold())
-                    Text("\(selection.problem.byteLimit) bytes · \(selection.answer.score) points").font(
+                    Text(
+                        "\(selection.problem.byteLimit) bytes · \(battlefieldScore(selection.scoring.score(selection.answer, problem: selection.problem))) points"
+                    ).font(
                         .caption.monospaced())
                     if selection.answer.attempts.isEmpty { Text("尚未作答").foregroundStyle(Palette.muted) }
                     ForEach(selection.answer.attempts) { attempt in
@@ -242,6 +283,16 @@ private struct BattlefieldAnswerView: View {
                                     systemImage: evaluation.accepted ? "checkmark.circle.fill" : "xmark.circle"
                                 )
                                 .foregroundStyle(evaluation.accepted ? Palette.mint : Palette.danger)
+                                Text(
+                                    L10n.text(
+                                        "点亮 %ld/%ld · %ld/%ld bytes · %@ 分",
+                                        evaluation.litTargets, evaluation.targetCount, evaluation.bytes,
+                                        selection.problem.byteLimit,
+                                        battlefieldScore(
+                                            selection.scoring.score(evaluation, byteLimit: selection.problem.byteLimit))
+                                    )
+                                )
+                                .font(.caption.monospaced())
                                 Text(evaluation.feedback).font(.system(.callout, design: .monospaced))
                             }
                             if let error = attempt.error { Text(error).foregroundStyle(Palette.danger) }
@@ -251,6 +302,12 @@ private struct BattlefieldAnswerView: View {
                                     maxWidth: .infinity, alignment: .leading
                                 )
                                 .padding(12).background(Palette.paper, in: RoundedRectangle(cornerRadius: 8))
+                                Button {
+                                    onTry(program)
+                                } label: {
+                                    Label("在棋盘中试运行", systemImage: "play.rectangle")
+                                }.buttonStyle(.borderedProminent)
+                                    .accessibilityIdentifier("tryBattlefieldAnswer-\(attempt.id)")
                             }
                             DisclosureGroup("完整回答") {
                                 Text(attempt.response).font(.system(.callout, design: .monospaced)).padding(.top, 8)
@@ -275,5 +332,22 @@ private struct BattlefieldAnswerView: View {
                 }.padding(24).textSelection(.enabled)
             }.background(Palette.paper)
         }
+    }
+}
+
+private struct BattlefieldErrorIndicator: View {
+    let message: String
+    @State private var expanded = false
+    var body: some View {
+        Button {
+            expanded.toggle()
+        } label: {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Palette.danger)
+        }.buttonStyle(.plain).accessibilityLabel(L10n.text("调用失败"))
+            .help(message)
+            .popover(isPresented: $expanded) {
+                Text(message).font(.callout).foregroundStyle(Palette.danger).textSelection(.enabled)
+                    .padding(16).frame(maxWidth: 300)
+            }
     }
 }

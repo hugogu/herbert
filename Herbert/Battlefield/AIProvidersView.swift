@@ -59,7 +59,7 @@ struct AIProvidersView: View {
                     }.buttonStyle(.plain).accessibilityIdentifier("provider-\(provider.name)")
                 }
             }.padding(28).frame(maxWidth: 1000, alignment: .leading).frame(maxWidth: .infinity)
-        }.background(Palette.paper).navigationTitle(L10n.text("AI 配置"))
+        }.background(Palette.paper)
             .sheet(isPresented: $adding) { AIProviderEditor(provider: ProviderConfiguration(kind: .openRouter)) }
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class GameModel: ObservableObject {
     let problem: Problem
+    let isTrial: Bool
     @Published var source: String
     @Published private(set) var session: GameSession
     @Published var message: String?
@@ -14,10 +15,11 @@ final class GameModel: ObservableObject {
     private var preparedSource: String?
     private var recordedCompletion = false
 
-    init(problem: Problem, store: AppStore) throws {
+    init(problem: Problem, store: AppStore, trialSource: String? = nil) throws {
         self.problem = problem
         self.store = store
-        source = store.progress(for: problem.id).draft
+        isTrial = trialSource != nil
+        source = trialSource ?? store.progress(for: problem.id).draft
         session = try GameSession(problem: problem)
     }
 
@@ -31,7 +33,7 @@ final class GameModel: ObservableObject {
         recordedCompletion = false
         if let reset = try? GameSession(problem: problem) { session = reset }
         message = nil
-        store.setDraft(source, for: problem.id)
+        if !isTrial { store.setDraft(source, for: problem.id) }
     }
 
     private func prepareIfNeeded() -> Bool {
@@ -85,8 +87,10 @@ final class GameModel: ObservableObject {
         }
         if isCompleted, !recordedCompletion {
             recordedCompletion = true
-            store.complete(problem, source: source, bytes: session.programBytes)
-            store.flush()
+            if !isTrial {
+                store.complete(problem, source: source, bytes: session.programBytes)
+                store.flush()
+            }
             task?.cancel()
         }
     }
