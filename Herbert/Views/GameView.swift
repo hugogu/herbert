@@ -46,7 +46,7 @@ struct GameView: View {
                     if model.isTrial {
                         BattlefieldNotice(text: L10n.text("AI 答案试运行：可以修改和运行，不会更改个人草稿、最短解或比赛成绩。"))
                     }
-                    if let lesson = model.problem.lesson { lessonPanel(lesson) }
+                    if !model.isTrial, let lesson = model.problem.lesson { lessonPanel(lesson) }
                     stats
                     if wide {
                         HStack(alignment: .top, spacing: 20) {

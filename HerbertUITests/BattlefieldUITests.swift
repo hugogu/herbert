@@ -183,6 +183,10 @@ final class BattlefieldUITests: XCTestCase {
         reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
+        XCTAssertFalse(app.staticTexts["lesson-objective"].exists)
+        #if os(macOS)
+            XCTAssertTrue(app.buttons["run-program"].isHittable)
+        #endif
         capture(app, "ai-trial")
         reveal("run-program", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
