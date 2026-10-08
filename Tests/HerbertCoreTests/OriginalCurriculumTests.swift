@@ -25,25 +25,45 @@ final class OriginalCurriculumTests: XCTestCase {
     func testCurriculumIsOrderedDistinctAndLocalized() throws {
         let originals = try ProblemCatalog.bundled()
         let community = try CommunityProblemCatalog.bundled()
-        XCTAssertEqual(originals.count, 50)
+        XCTAssertEqual(originals.count, 30)
         XCTAssertEqual(community.count, 1769)
-        XCTAssertEqual(originals.map(\.id), Array(10001...10050))
+        XCTAssertEqual(
+            originals.map(\.id), ([1, 6, 12, 17, 22, 24, 25, 26, 27, 30] + Array(31...50)).map { 10000 + $0 })
         XCTAssertTrue(Set(originals.map(\.id)).isDisjoint(with: community.map(\.id)))
-        XCTAssertEqual(Set(originals.map(\.rows)).count, 50)
+        XCTAssertEqual(Set(originals.map(\.rows)).count, 30)
         let archivedBoards = Set(community.map(\.rows))
         for (index, problem) in originals.enumerated() {
             XCTAssertFalse(archivedBoards.contains(problem.rows), problem.title)
             let lesson = try XCTUnwrap(problem.lesson)
-            XCTAssertEqual(lesson.order, index + 1)
+            XCTAssertEqual(lesson.order, problem.id - 10000)
             XCTAssertEqual(lesson.chapter, index / 5 + 1)
             XCTAssertEqual(lesson.hints.count, 2)
-            XCTAssertEqual(problem.number, String(format: "L%02d", index + 1))
+            XCTAssertEqual(problem.number, String(format: "L%02d", problem.id - 10000))
             XCTAssertTrue(problem.sourceURL.isEmpty)
             for key in [problem.title, lesson.chapterTitle, lesson.objective] + lesson.hints {
                 for language in ["zh-Hans", "ja"] {
                     XCTAssertNotEqual(HerbertStrings.text(key, language: language), key, "\(language): \(key)")
                 }
             }
+        }
+    }
+
+    func testOnlyTwoIntroductoryLessonsFitWithoutProcedures() throws {
+        let intro = try ProblemCatalog.bundled().filter { $0.id <= 10030 }
+        XCTAssertEqual(intro.count, 10)
+        XCTAssertTrue(intro.allSatisfy(\.isFoundation))
+        for problem in intro.dropFirst(2) {
+            let board = try Board(problem: problem)
+            // Each new target needs at least one move. A target off the starting ray also needs a turn.
+            let needsTurn = board.targets.contains { $0.x != board.start.x || $0.y >= board.start.y }
+            let primitiveLowerBound = board.targets.count + (needsTurn ? 1 : 0)
+            XCTAssertGreaterThan(primitiveLowerBound, problem.byteLimit, problem.number)
+        }
+        for (problem, source) in zip(intro.prefix(2), ["s", "rsslsslss"]) {
+            var session = try GameSession(problem: problem)
+            try session.prepare(source: source)
+            for _ in 0..<20 where session.status == .paused { session.step() }
+            XCTAssertEqual(session.status, .completed)
         }
     }
 
@@ -123,6 +143,28 @@ final class OriginalCurriculumTests: XCTestCase {
             }
             XCTAssertTrue(foundCycle, "The deterministic shortcut should cycle without solving \(problem.title)")
         }
+    }
+
+    func testRetiredLessonBackupsRemainImportableWithoutBecomingPlayable() throws {
+        let date = Date(timeIntervalSince1970: 100)
+        let retired = ProblemProgress(
+            problemID: 10002, draft: "sss", bestSolution: "ssss", bestBytes: 4,
+            completedAt: date, updatedAt: date)
+        let backup = ProgressSnapshot(records: [retired], lastProblemID: retired.problemID)
+        let catalog = try ProblemCatalog.bundled()
+        XCTAssertEqual(ProblemCatalog.retiredLessonIDs.count, 20)
+        XCTAssertTrue(ProblemCatalog.retiredLessonIDs.isDisjoint(with: catalog.map(\.id)))
+        XCTAssertEqual(Set(catalog.map(\.id)).union(ProblemCatalog.retiredLessonIDs), Set(10001...10050))
+        let restored = try ProgressTransfer.merge(current: ProgressSnapshot(), incoming: backup, catalog: catalog)
+        XCTAssertEqual(restored, backup)
+        let unknown = ProgressSnapshot(records: [ProblemProgress(problemID: 10051)], lastProblemID: 10051)
+        XCTAssertThrowsError(try ProgressTransfer.validate(unknown, catalog: catalog))
+        let activeInvalid = ProgressSnapshot(records: [
+            ProblemProgress(
+                problemID: 10001, bestSolution: "l",
+                bestBytes: 1, completedAt: date, updatedAt: date)
+        ])
+        XCTAssertThrowsError(try ProgressTransfer.validate(activeInvalid, catalog: catalog))
     }
 
     func testOriginalProgressAndCommunityProgressKeepTheirIdentities() throws {

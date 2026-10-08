@@ -106,7 +106,7 @@ final class HerbertUITests: XCTestCase {
     @MainActor
     func testBoardSettingsPersistAndTrailCanBeHiddenWithoutLosingMoves() {
         var app = launch(language: "en")
-        openProblem(10002, in: app)
+        openProblem(10012, in: app)
         let code = app.textViews["code-editor"]
         code.activateControl()
         code.typeText("ssss")
@@ -192,12 +192,12 @@ final class HerbertUITests: XCTestCase {
     func testCurriculumHintsAndCatalogEdition() {
         let app = launch(language: "en")
         #if APP_STORE
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
             XCTAssertFalse(app.buttons["filter-community"].exists)
         #else
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,819 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,799 PROBLEMS")
             app.buttons["filter-originals"].activateControl()
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
             app.buttons["filter-community"].activateControl()
             XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,769 PROBLEMS")
             app.buttons["filter-all"].activateControl()
@@ -222,7 +222,7 @@ final class HerbertUITests: XCTestCase {
         app.buttons["step-program"].activateControl()
         XCTAssertTrue(app.buttons["next-problem"].waitForExistence(timeout: 5), app.debugDescription)
         app.buttons["next-problem"].activateControl()
-        XCTAssertTrue(app.staticTexts["Four lanterns"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Around the block"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.staticTexts["lesson-hint-1"].exists)
         app.terminate()
     }

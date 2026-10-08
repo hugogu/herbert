@@ -9,8 +9,11 @@ public enum ProgressTransfer {
     public static func validate(_ incoming: ProgressSnapshot, catalog: [Problem]) throws -> ValidatedProgress {
         _ = try incoming.validated()
         let problems = Dictionary(uniqueKeysWithValues: catalog.map { ($0.id, $0) })
-        guard incoming.records.allSatisfy({ problems[$0.problemID] != nil }),
-            incoming.lastProblemID == nil || problems[incoming.lastProblemID!] != nil
+        func recognized(_ id: Int) -> Bool {
+            problems[id] != nil || ProblemCatalog.retiredLessonIDs.contains(id)
+        }
+        guard incoming.records.allSatisfy({ recognized($0.problemID) }),
+            incoming.lastProblemID == nil || recognized(incoming.lastProblemID!)
         else { throw ProgressError.invalidBackup }
         for record in incoming.records {
             try Task.checkCancellation()

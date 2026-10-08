@@ -170,6 +170,7 @@ final class BattlefieldUITests: XCTestCase {
             reasoning.value as? String ?? reasoning.label, "Inspecting the coordinates before producing the H program.")
         XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertFalse(app.buttons["tryBattlefieldAnswer-1"].exists)
+        _ = reveal("answer-reasoning-1", in: app)
         capture(app, "ai-reasoning")
         app.buttons["Close"].battlefieldTap()
         reveal("answer-fixture-2-10001", in: app).battlefieldTap()
@@ -185,7 +186,7 @@ final class BattlefieldUITests: XCTestCase {
     func testParallelMatchRetryNativeJudgingHistoryAndShareImage() {
         var app = launch()
         openSection("AI Battlefield", in: app)
-        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("50 puzzles selected"))
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("30 puzzles selected"))
         choose("Time limited", in: app)
         reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
         app.buttons["clearBattlefieldProblems"].battlefieldTap()
@@ -274,7 +275,7 @@ final class BattlefieldUITests: XCTestCase {
         choose("Time limited", in: app)
         reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
         app.buttons["clearBattlefieldProblems"].battlefieldTap()
-        for id in [10001, 10002, 10006] {
+        for id in [10001, 10006, 10012] {
             app.descendants(matching: .any)["problemChoice-\(id)"].firstMatch.battlefieldTap()
         }
         app.buttons["Close"].battlefieldTap()

@@ -336,7 +336,7 @@ func battlefieldError(_ error: Error) -> String {
                 }
             }
             try await Task.sleep(for: .milliseconds(400))
-            let examples = [(10002, "ssss"), (10003, "sssrsss"), (10006, "rsslsslss")]
+            let examples = [(10006, "rsslsslss"), (10012, "a:ssssr\naaaa")]
             let program =
                 request.participant.entrant.preset.model.id == "fixture-1"
                 ? examples.first { problem.contains("ID \($0.0)") }?.1 ?? "s" : "s"

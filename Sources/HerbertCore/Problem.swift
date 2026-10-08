@@ -63,7 +63,7 @@ public struct Problem: Codable, Identifiable, Hashable, Sendable {
 
     public var number: String { lesson.map { String(format: "L%02d", $0.order) } ?? String(format: "%04d", id) }
     public var displayTitle: String { lesson == nil ? title : HerbertStrings.text(title) }
-    public var isFoundation: Bool { lesson.map { $0.order <= 10 } ?? title.hasPrefix("Problem Set 0 -") }
+    public var isFoundation: Bool { lesson.map { $0.order <= 30 } ?? title.hasPrefix("Problem Set 0 -") }
 }
 
 public enum CatalogError: Error, LocalizedError {
@@ -126,6 +126,10 @@ public struct Board: Sendable {
 }
 
 public enum ProblemCatalog {
+    /// Reserved IDs from the pre-0.3.2 course; retain their inert backup records, never reuse them.
+    public static let retiredLessonIDs: Set<Int> = Set(
+        [2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 18, 19, 20, 21, 23, 28, 29].map { 10000 + $0 })
+
     public static func bundled() throws -> [Problem] {
         guard let url = Bundle.module.url(forResource: "original-problems", withExtension: "json") else {
             throw CatalogError.missingResource

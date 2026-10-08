@@ -48,7 +48,7 @@ struct GuideView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("致谢与来源").font(.headline).foregroundStyle(Palette.ink)
                     #if APP_STORE
-                        Text("本版本包含 50 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。")
+                        Text("本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。")
                     #else
                         Text(
                             "Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。"

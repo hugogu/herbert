@@ -30,7 +30,7 @@ https://support.apple.com/en-us/102445
 初回起動がブロックされた場合は、Apple の案内に従い、
 「システム設定 > プライバシーとセキュリティ」で許可してください。
 
-Includes 50 original lessons and 1,769 archived community problems.
+Includes 30 original lessons and 1,769 archived community problems.
 Code and original lessons: MIT. Community content: separate rights;
 see the included LICENSE and NOTICE.md for attribution and scope.
 Source, updates, and issues: https://github.com/hugogu/herbert
@@ -144,7 +144,7 @@ def main():
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         parser.exit(1, f'Mac packaging failed: {error}\n')
     print(f'Verified Herbert {info["CFBundleShortVersionString"]} ({info["CFBundleVersion"]}): '
-          'arm64 + x86_64, macOS 14+, sandboxed, 50 originals + 1,769 community problems.')
+          'arm64 + x86_64, macOS 14+, sandboxed, 30 originals + 1,769 community problems.')
 
 
 if __name__ == '__main__':

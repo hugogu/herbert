@@ -187,7 +187,7 @@ private struct BattlefieldSetupView: View {
                 initialized = true
                 configuration = battlefield.settings.competition
                 selectedModels = Set(battlefield.modelOptions.filter(\.isDefault).map(\.id))
-                selectedProblems = Set(store.problems.filter { (10_001...10_050).contains($0.id) }.map(\.id))
+                selectedProblems = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
             }
         }
         .sheet(isPresented: $choosingProblems) {
@@ -248,7 +248,7 @@ private struct BattlefieldSetupView: View {
                         systemImage: "square.grid.2x2")
                 }.accessibilityIdentifier("chooseBattlefieldProblems")
             }
-            Text("默认使用 50 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
+            Text("默认使用 30 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
                 .font(.callout).foregroundStyle(Palette.muted)
             Divider()
             Text("每题按点亮目标比例与代码长度计分，取各次尝试的最高分。同分时 Token 消耗更少者在前。错误答案会收到反馈后重试。")
@@ -309,18 +309,18 @@ private struct BattlefieldProblemPicker: View {
         BattlefieldSheet(title: L10n.text("比赛题目")) {
             VStack {
                 HStack {
-                    Button("原创 50 题") {
-                        selected = Set(store.problems.filter { (10_001...10_050).contains($0.id) }.map(\.id))
+                    Button("原创 30 题") {
+                        selected = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
                     }
                     Spacer()
                     Button("清空选择") { selected.removeAll() }.accessibilityIdentifier("clearBattlefieldProblems")
                 }.padding(.horizontal)
-                if store.problems.count > 50 {
+                if store.problems.contains(where: { $0.lesson == nil }) {
                     Toggle("包括社区题目", isOn: $includeCommunity).padding(.horizontal)
                 }
                 List(
                     store.problems.filter {
-                        (includeCommunity || (10_001...10_050).contains($0.id))
+                        (includeCommunity || $0.lesson != nil)
                             && (search.isEmpty || battlefieldProblemID($0.id).localizedCaseInsensitiveContains(search)
                                 || $0.title.localizedCaseInsensitiveContains(search))
                     }

@@ -12,54 +12,6 @@
     "endHeading": 0
   },
   {
-    "id": 10002,
-    "source": "ssss",
-    "steps": 4,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      12,
-      13
-    ],
-    "endHeading": 0
-  },
-  {
-    "id": 10003,
-    "source": "sssrsss",
-    "steps": 7,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      13,
-      13
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10004,
-    "source": "ssslssss",
-    "steps": 8,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      11,
-      14
-    ],
-    "endHeading": 3
-  },
-  {
-    "id": 10005,
-    "source": "ssrrssss",
-    "steps": 8,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      12,
-      14
-    ],
-    "endHeading": 2
-  },
-  {
     "id": 10006,
     "source": "rsslsslss",
     "steps": 9,
@@ -70,66 +22,6 @@
       12
     ],
     "endHeading": 3
-  },
-  {
-    "id": 10007,
-    "source": "sssrssslsssrsss",
-    "steps": 15,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      13,
-      14
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10008,
-    "source": "ssrsslsssslss",
-    "steps": 13,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      12,
-      11
-    ],
-    "endHeading": 3
-  },
-  {
-    "id": 10009,
-    "source": "ssssrssssrssrssss",
-    "steps": 17,
-    "blocked": 0,
-    "traps": 1,
-    "endPosition": [
-      10,
-      14
-    ],
-    "endHeading": 3
-  },
-  {
-    "id": 10010,
-    "source": "ssssssrssssssrssssssrssssssr",
-    "steps": 26,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      9,
-      18
-    ],
-    "endHeading": 3
-  },
-  {
-    "id": 10011,
-    "source": "a:sss\naaaaaa",
-    "steps": 18,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      12,
-      3
-    ],
-    "endHeading": 0
   },
   {
     "id": 10012,
@@ -144,54 +36,6 @@
     "endHeading": 3
   },
   {
-    "id": 10013,
-    "source": "a:ssrssl\naaaaa",
-    "steps": 29,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      17,
-      11
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10014,
-    "source": "a:sssrrsssr\naaaa",
-    "steps": 30,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      15,
-      12
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10015,
-    "source": "a:ssrssl\nb:aaa\nbbb",
-    "steps": 53,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      21,
-      3
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10016,
-    "source": "a:srsla\na",
-    "steps": 31,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      16,
-      13
-    ],
-    "endHeading": 1
-  },
-  {
     "id": 10017,
     "source": "a(X):sa(X-1)\na(7)ra(4)",
     "steps": 12,
@@ -204,54 +48,6 @@
     "endHeading": 1
   },
   {
-    "id": 10018,
-    "source": "a(X):sa(X-1)\nb:a(8)ra(4)r\nbb",
-    "steps": 26,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      10,
-      21
-    ],
-    "endHeading": 3
-  },
-  {
-    "id": 10019,
-    "source": "b(X):sb(X-1)\na(X):b(X)ra(X+1)\na(1)",
-    "steps": 53,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      8,
-      7
-    ],
-    "endHeading": 0
-  },
-  {
-    "id": 10020,
-    "source": "b(X):sb(X-1)\na(X):b(X)rb(X)la(X-1)\na(6)",
-    "steps": 53,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      23,
-      2
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10021,
-    "source": "a(X):XXXX\na(sssr)",
-    "steps": 14,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      11,
-      17
-    ],
-    "endHeading": 3
-  },
-  {
     "id": 10022,
     "source": "a(X,Y):Ya(X-1,Y)\na(6,ssrssl)",
     "steps": 35,
@@ -262,18 +58,6 @@
       9
     ],
     "endHeading": 1
-  },
-  {
-    "id": 10023,
-    "source": "a(X,Y):Xa(Y,X)\nra(ssssssrssr,sssssslssl)",
-    "steps": 57,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      8,
-      16
-    ],
-    "endHeading": 3
   },
   {
     "id": 10024,
@@ -322,30 +106,6 @@
       14
     ],
     "endHeading": 1
-  },
-  {
-    "id": 10028,
-    "source": "b(X):sb(X-1)\na(X):b(X)rrb(X)lsla(X+1)\na(1)",
-    "steps": 121,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      12,
-      12
-    ],
-    "endHeading": 0
-  },
-  {
-    "id": 10029,
-    "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nb(3)b(6)b(9)b(12)",
-    "steps": 125,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      16,
-      21
-    ],
-    "endHeading": 3
   },
   {
     "id": 10030,
