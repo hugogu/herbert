@@ -59,6 +59,6 @@ byte 上限是经过引擎验证可达的练习预算，不声称是最优解长
 | 10049 / L49 | 组合递归系统 | 穹顶镶嵌 | 嵌套单窗、整行、收缩层和旋转过程，各自保持折返不变量。 | 63 |
 | 10050 / L50 | 组合递归系统 | 星穹圣殿 | 把窗框生成器、带旋向的分杈树与高阶旋转过程组合成整体。 | 56 |
 
-运行 `scripts/check.sh` 使用真实 H 编译器和游戏引擎逐题重放参考解，检查 byte 限制、棋盘、ID 隔离、三语文案与存档。App Store 版本仅链接 HerbertCore；社区数据位于可选模块 HerbertCommunity。
+运行 `scripts/check.sh` 使用真实 H 编译器和游戏引擎逐题重放参考解，检查 byte 限制、棋盘、ID 隔离、三语文案与存档。App Store 题库仅来自 HerbertCore；两个发行版还链接不含题库的 HerbertBattlefield。社区数据位于可选模块 HerbertCommunity。
 
 参考解（含剧透）：[测试程序](../Tests/HerbertCoreTests/Fixtures/original-solutions.json)。设计源：[生成脚本](../scripts/generate_original_problems.py)。

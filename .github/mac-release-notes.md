@@ -6,6 +6,17 @@ This open-source preview includes **50 original lessons + 1,769 archived communi
 problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
 movement trails, grid dots, and local progress with JSON backup import/export.
 
+**New in 0.3.0 — AI Battlefield:** configure multiple OpenRouter, SiliconFlow or OpenAI
+compatible providers, discover models and choose parameters. Run parallel matches with
+shared prompts, native H judging and configurable retries. Choose time-limited,
+token-limited or Best Effort mode; watch live scores, per-puzzle states, input/output
+tokens and cache rates. Stop active calls, review local history and share a PNG result card.
+
+AI is optional and requires your own API key/credits. Keys stay in Keychain; settings
+and history stay local. Streaming estimates and cancellation cannot guarantee final
+provider billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/main/docs/ai-battlefield.md)
+and [privacy](https://github.com/hugogu/herbert/blob/main/PRIVACY.md).
+
 **Signing:** this preview is ad-hoc signed and has not been notarized by Apple.
 If macOS blocks the first launch, follow [Apple's instructions](https://support.apple.com/en-us/102445)
 for **System Settings → Privacy & Security → Open Anyway** after trying to open it.
@@ -29,6 +40,7 @@ The App Store scheme contains only the originals; this DMG is the open-source ed
 中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
 与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
 Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 50 道原创题和 1,769 道社区题。
+0.3.0 新增独立 AI 配置与 Battlefield：多模型并行、三种比赛模式、原生验题、失败重试、实时排名与 Token/缓存统计、本地历史及图片分享。AI 使用自己的 API 额度，密钥保存在钥匙串中。
 
 See the [changelog](https://github.com/hugogu/herbert/blob/main/CHANGELOG.md) for changes
 and the [README](https://github.com/hugogu/herbert#readme) for screenshots and controls.

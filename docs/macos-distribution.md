@@ -9,6 +9,8 @@ archive. The original-only `HerbertAppStore` target remains separate.
 Download `Herbert-macOS-universal.dmg` from [GitHub Releases](https://github.com/hugogu/herbert/releases).
 Open the image, drag `Herbert.app` to `Applications`, eject the image, then open Herbert
 from Applications. No Xcode is required. Progress is saved locally in the app sandbox.
+AI Battlefield is optional and uses your own provider API key and credits; keys use
+Keychain and match history stays local. See [privacy](../PRIVACY.md).
 
 **The preview is ad-hoc signed and has not been notarized by Apple.** If Gatekeeper
 blocks the first launch and you trust this download, follow
@@ -34,7 +36,8 @@ releases also publish both files as public Release assets for direct download.
 The packaging step runs after lint, unit/integration tests, native Mac/iOS builds,
 and original-only store-bundle audits. It verifies both executable architectures,
 the full code signature, retained sandbox and absence of debugger entitlements,
-exact puzzle catalogs, and absence of test answer files. It then creates a compressed
+outgoing-network entitlement for optional AI providers, exact puzzle catalogs, and absence
+of test answer files. It then creates a compressed
 read-only HFS+ image with an Applications shortcut, license, attribution and installation
 notes. Finally it verifies and mounts the image read-only and repeats the bundle audit.
 
@@ -64,7 +67,7 @@ for subsequent local builds. Outputs and derived build files are ignored by Git.
 1. Update `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in
    `scripts/generate_project.py`, regenerate the project, and update the changelog.
 2. Commit and push the tested changes. Use a new tag matching the app version,
-   for example `v0.2.0`; the workflow rejects a mismatch.
+   for example `v0.3.0`; the workflow rejects a mismatch.
 3. Push the tag. CI builds the exact tagged source, then the release job verifies
    the downloaded artifact checksum and creates a GitHub **pre-release** with the DMG.
 

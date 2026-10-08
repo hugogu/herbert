@@ -50,3 +50,31 @@ legibility; see the [design study](../advanced-course-design.md). Adjacent walls
 continuous contours. Earlier L19/L29/L30 captures remain as historical illustrations.
 These independently designed original layouts and their captures use MIT.
 They are not iPhone/iPad App Store screenshots.
+
+## AI Battlefield · 0.3.0
+
+`en/battlefield/` contains actual English Mac windows captured by `BattlefieldUITests`:
+provider configuration, discovered models, a completed match, native answer feedback,
+and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
+models. They deliberately return an invalid program before the valid `s` for L01, so
+the test verifies parallel requests, retry feedback, native judging, ranking and history.
+These images illustrate the application and do not benchmark a commercial model.
+No real API key or personal provider configuration appears in these captures.
+
+On an interactive Mac desktop, capture the fixture flow with:
+
+```sh
+TEST_RUNNER_HERBERT_CAPTURE_SCREENSHOTS=1 xcodebuild \
+  -project Herbert.xcodeproj -scheme Herbert -destination 'platform=macOS' \
+  -derivedDataPath .build/battlefield-screenshots \
+  -resultBundlePath .build/battlefield-screenshots.xcresult CODE_SIGN_IDENTITY=- \
+  -only-testing:HerbertUITests/BattlefieldUITests test
+xcrun xcresulttool export attachments \
+  --path .build/battlefield-screenshots.xcresult \
+  --output-path .build/battlefield-screenshots-attachments
+```
+
+Use the manifest's `readme-ai-*` attachment names to select the PNGs, then inspect
+language, counts and window visibility before copying them into the gallery. The
+optional display environment variable described above works for these tests too.
+The share preview comes from the app's ImageRenderer and PNG export flow.

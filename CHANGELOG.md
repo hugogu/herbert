@@ -5,6 +5,29 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.0] - 2026-10-08
+
+### Added
+
+- Independent AI Providers and AI Battlefield tabs in both editions, localized in English,
+  Simplified Chinese and Japanese.
+- Multiple OpenRouter, SiliconFlow and OpenAI compatible connections, authenticated model
+  discovery, default entrants, per-model sampling/output/reasoning parameters and Keychain keys.
+- Parallel competitions with identical rules/board prompts, the 50 originals selected by
+  default, configurable retries, time limits, shared/per-model token budgets and Best Effort.
+- Native H judging, failure feedback, live score ranking, per-puzzle inspection, streaming
+  input/output usage, cache rates, cancellation and local match history with crash recovery.
+- PNG result cards rendered locally and shared through the system share sheet.
+- Separate UI-independent `HerbertBattlefield` package, engine/HTTP integration tests,
+  native UI coverage, privacy disclosures and Mac outgoing-network entitlement audits.
+
+### Notes
+
+- AI is optional and uses your own provider credits. Live token estimates and cancellation
+  cannot guarantee final provider billing. iOS backgrounding ends a match and saves results.
+- Game progress and the 50/1,769 puzzle packaging boundary are unchanged.
+- Mac previews remain ad-hoc signed and unnotarized; iPhone/iPad runtime checks require devices.
+
 ## [0.2.0] - 2026-10-08
 
 ### Added
@@ -57,4 +80,5 @@ save or API formats through documented migrations.
   release, or notarized Mac binary.
 
 [0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
+[0.3.0]: https://github.com/hugogu/herbert/releases/tag/v0.3.0
 [0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0

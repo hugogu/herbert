@@ -28,7 +28,7 @@ unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
 ## Download for Mac
 
-**[Download the 0.2.0 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.2.0/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.0 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.0/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,819 problems.
 
@@ -62,7 +62,38 @@ full game screen:
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The new course is included in the 0.2.0 Mac preview.*
+The course is included in the Mac preview.*
+
+## AI Battlefield
+
+**New in 0.3.0:** compare your own AI models on real Herbert puzzles. Two independent
+tabs keep provider configuration separate from competitions.
+
+- **AI Providers:** connect multiple OpenRouter, SiliconFlow or OpenAI compatible
+  providers, discover models through `/models`, and choose default entrants and per-model
+  parameters. Configuration stays local; API keys stay in Keychain.
+- **AI Battlefield:** select models and puzzles (the 50 originals by default), then
+  compete in time-limited, token-limited or Best Effort mode. Models work in parallel
+  with identical rules and board prompts.
+- **Native judging:** the app runs each H answer, awards 100 points per solved puzzle,
+  and returns feedback on failure. Each puzzle allows three attempts by default.
+- **Live results:** scores determine the ranking; inspect every puzzle's state,
+  input/output tokens, cache rate and full retry history. Stop cancels active calls.
+- **Keep and share:** review saved matches and generate a PNG result card locally.
+
+AI is optional and uses **your own API credits**. Streaming usage can be estimated or
+partial; token budgets cannot guarantee a provider's final bill. iPhone/iPad matches end
+when the app enters the background. [Setup, scoring and accounting](docs/ai-battlefield.md)
+· [Privacy](PRIVACY.md).
+
+![English Mac AI Battlefield with native scores, token accounting and puzzle progress](docs/screenshots/en/battlefield/ai-battlefield.png)
+
+*Actual English app UI with deterministic test entrants, demonstrating a rejected answer
+and a successful retry. These scores are test data, not a commercial model benchmark.*
+[Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
+[Models](docs/screenshots/en/battlefield/ai-models.png) ·
+[Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
+[PNG share preview](docs/screenshots/en/battlefield/ai-share.png)
 
 ## Community patterns
 
@@ -129,7 +160,8 @@ to change style, grid dots, and trail visibility.*
   and Mac. Native text editing, cursor-aware command buttons, and `⌘ Return` on Mac.
 - **Keep your progress.** Drafts, favorites, and shortest solutions save locally. Export JSON
   backups and merge them back after their solutions have been replayed and validated.
-- **Keep your privacy.** No accounts, analytics SDKs, ads, or app network requests.
+- **Keep your privacy.** No app accounts, analytics SDKs or ads. Human play stays offline;
+  optional AI requests go directly to the providers you configure. [Data details](PRIVACY.md).
 
 ## Try your first program
 
@@ -202,7 +234,9 @@ or notarized binary release yet. See [verification details](docs/verification.md
 | `Herbert/` | SwiftUI screens, native editors, animation, app state |
 | `Sources/HerbertCore/` | UI-independent H parser, VM, board, session, progress storage |
 | `Sources/HerbertCommunity/` | Optional community archive, excluded from App Store targets |
+| `Sources/HerbertBattlefield/` | Provider protocol, streaming client, parallel competition engine, judging and local history |
 | `Tests/HerbertCoreTests/` | Language unit tests and game/save/backup integration tests |
+| `Tests/HerbertBattlefieldTests/` | AI engine, budgets, cancellation, persistence and HTTP/SSE integration tests |
 | `HerbertUITests/` | Native UI tests and reproducible screenshot captures |
 | `scripts/` | Project/icon generation, validated catalog import, local checks |
 | `docs/` | Rules, provenance, architecture, screenshots, verification |

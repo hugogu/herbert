@@ -319,13 +319,13 @@ def write_docs(problems):
             intro += f"| {problem['id']} / L{index+1:02} | {(CHAPTERS + ADVANCED_CHAPTERS)[index//5][language]} | {title[language]} | {objective[language]} | {problem['byteLimit']} |\n"
         intro += (
             '\n运行 `scripts/check.sh` 使用真实 H 编译器和游戏引擎逐题重放参考解，检查 byte 限制、'
-            '棋盘、ID 隔离、三语文案与存档。App Store 版本仅链接 HerbertCore；社区数据位于可选模块 HerbertCommunity。\n\n'
+            '棋盘、ID 隔离、三语文案与存档。App Store 题库仅来自 HerbertCore；两个发行版还链接不含题库的 HerbertBattlefield。社区数据位于可选模块 HerbertCommunity。\n\n'
             '参考解（含剧透）：[测试程序](../Tests/HerbertCoreTests/Fixtures/original-solutions.json)。'
             '设计源：[生成脚本](../scripts/generate_original_problems.py)。\n'
         ) if language == 1 else (
             '\n`scripts/check.sh` replays all references with the real H compiler and game engine, '
             'checking byte limits, boards, distinct IDs, translations and save compatibility. '
-            'App Store targets link HerbertCore only; the archive lives in optional HerbertCommunity.\n\n'
+            'App Store puzzle resources come only from HerbertCore; both editions also link the resource-free HerbertBattlefield. The archive lives in optional HerbertCommunity.\n\n'
             'Spoilers: [test-only references](../Tests/HerbertCoreTests/Fixtures/original-solutions.json). '
             'Design source: [generator](../scripts/generate_original_problems.py).\n'
         )

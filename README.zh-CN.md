@@ -10,7 +10,7 @@
 
 ## 下载 Mac 版
 
-**[下载 0.2.0 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.2.0/Herbert-macOS-universal.dmg)**
+**[下载 0.3.0 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.0/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,819 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
@@ -35,7 +35,7 @@
 | [![Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![Shuriken 棋盘](docs/screenshots/shuriken-board.png)](docs/screenshots/shuriken.png) | [![Butterfly 棋盘](docs/screenshots/butterfly-board.png)](docs/screenshots/butterfly.png) |
 | nai · ≤ 20 bytes | snuke · ≤ 39 bytes | nadsuki · ≤ 27 bytes |
 
-截图来自运行中的 App；点击棋盘查看完整界面。**0.2.0 预览版**界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
+截图来自运行中的 App；点击棋盘查看完整界面。界面会自动匹配系统的中文、英文或日文语言偏好，其他语言回退至英文。
 
 用最短的 H 语言程序，带 Herbert 点亮所有目标。原生 SwiftUI 游戏，共用一个与界面无关的游戏引擎，支持 **iPhone / iPad（iOS 17+）和原生 Mac（macOS 14+）**。
 
@@ -45,7 +45,27 @@
 | --- | --- |
 | [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) |
 
-两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。0.2.0 已包含新增的进阶课程。
+两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
+
+## AI Battlefield · 0.3.0
+
+两个独立 Tab：**AI 配置**和 **AI Battlefield**。普通游戏继续支持完全离线。
+
+- 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过标准 `/models` 接口自动发现模型，选择默认参赛模型及各自参数。
+- 默认选中原创 L01–L50，支持自选题目与模型。限时、限 Token 总预算和 Best Effort 三种模式；预算默认全场共享，也可设置每个 AI 独立预算。
+- 多个 AI 使用相同规则和题目提示词并行解答；平台用原生 H 引擎运行答案，错误反馈给 AI，每题默认 3 次机会，可调整为 1–10 次。
+- 通过每题得 100 分，按总分实时排名；同分比较通过程序的总 byte 数，再比较完成时间。逐题查看状态、答案、反馈和重试记录。
+- 实时显示输入/输出 Token、已确认用量及输入缓存率；到达限制或手动终止时取消调用并保存。历史可回顾，可生成 PNG 图片分享。
+- 配置和历史保存在本机，API Key 单独保存在系统钥匙串；两个发行版均包含 Battlefield。
+
+AI 使用你自己的 API 额度，可能产生费用。流式用量会标明估算或不完整数据；本地 Token 限制无法保证服务商最终账单。
+iPhone/iPad 进入后台会结束比赛并保存。详情见[配置、判分与用量说明](docs/ai-battlefield.md)和[隐私说明](PRIVACY.md)。
+
+![AI Battlefield 英文实际界面：排名、Token 和逐题状态](docs/screenshots/en/battlefield/ai-battlefield.png)
+
+*实际英文 Mac App 截图；参赛模型为确定性的测试客户端，演示先答错再重试通过，不代表商业模型的能力或真实费用。*
+[服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
+[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
 
 ## 运行
 
@@ -107,7 +127,9 @@ Herbert/                         SwiftUI 应用与平台文本编辑器
 Sources/HerbertCore/              H 解析器、虚拟机、棋盘、会话与存档
 Sources/HerbertCore/Resources/    原创题库与语言资源
 Sources/HerbertCommunity/         可选社区题库，不进 App Store 包
+Sources/HerbertBattlefield/       AI 客户端、并行比赛、验题与本地历史
 Tests/HerbertCoreTests/           单元测试、原题通关与存档/备份集成测试
+Tests/HerbertBattlefieldTests/    比赛引擎、预算、取消、存储及 HTTP/SSE 集成测试
 HerbertUITests/                  原生界面自动化
 scripts/                        可重复的题库导入、图标和工程生成、检查脚本
 docs/                           数据导入清单、规则核对说明、架构与验证记录
@@ -119,7 +141,7 @@ docs/                           数据导入清单、规则核对说明、架构
 
 数据存于应用 Application Support 下的 `Herbert/progress.json`（沙盒中的实际位置由系统决定）。格式带 `schemaVersion`，同一格式也用于备份；未接入云端、账号或分析 SDK。
 
-所有持久化通过 `ProgressRepository`。未来可在其上增加同步协调器，使用 **App → 已认证的 Cloudflare Worker → D1**。客户端不持有 Cloudflare API Token，不直接访问数据库。合并规则和数据迁移建议见 [架构说明](docs/architecture.md)。
+游戏进度通过 `ProgressRepository` 保存；AI 配置和历史使用独立的 `BattlefieldRepository`，密钥由 Keychain 管理。未来可增加同步协调器，使用 **App → 已认证的 Cloudflare Worker → D1**。客户端不持有 Cloudflare API Token，不直接访问数据库。合并规则和数据迁移建议见 [架构说明](docs/architecture.md)。
 
 ## 原版来源与移植边界
 
@@ -136,7 +158,7 @@ docs/                           数据导入清单、规则核对说明、架构
 python3 scripts/import_problems.py
 ```
 
-导入程序从公开列表发现全部页，排除原站 `0000 / Null` 占位项，逐一核对棋盘长度、符号、起点、目标和 byte 限制；有失败时会保存已取得的题目，并在清单列出缺失 ID，以非零状态退出。再次运行使用缓存，仅补取失败请求。原站仅提供旧 HTTP 接口，JSON 内置题库是离线资源，App 本身无需网络权限。
+导入程序从公开列表发现全部页，排除原站 `0000 / Null` 占位项，逐一核对棋盘长度、符号、起点、目标和 byte 限制；有失败时会保存已取得的题目，并在清单列出缺失 ID，以非零状态退出。再次运行使用缓存，仅补取失败请求。原站仅提供旧 HTTP 接口，JSON 内置题库是离线资源，游戏运行不访问原站；可选 AI 功能使用 HTTPS 连接用户配置的服务商。
 
 ## 参与贡献
 

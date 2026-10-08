@@ -5,7 +5,7 @@
 - `Herbert`：默认开源版，先显示原创 L01–L50，再显示社区题；总数 1,819。
 - `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；只有 L01–L50，总数 50。
 
-社区资源在 `Sources/HerbertCommunity/`，App Store target 仅链接 `HerbertCore`。
+社区资源在 `Sources/HerbertCommunity/`，App Store target 链接 `HerbertCore` 与不含社区资源的 `HerbertBattlefield`。
 `APP_STORE` 编译条件还会移除社区筛选和原站 Problems 链接。参考解位于测试 target，两个应用均不打包答案。
 原创关卡、名称、目标与提示使用 MIT；社区题库保留独立 NOTICE。
 
@@ -45,6 +45,12 @@
 - [ ] 开启 VoiceOver、大字体和减少动态效果检查关键操作；记录任何无法操作或裁切的位置。
 
 ## 构建和资源核验
+
+0.3.0 新增可选 AI 请求，提交前应更新公开隐私政策和 App Store Connect 隐私问卷，说明用户自选服务商、发送数据与密钥用途；不要沿用“App 没有网络请求”的旧描述。应用内 AI 配置页可打开隐私说明，比赛前展示发送范围和费用，用户点击“同意并开始比赛”才发送题目与对话。Apple [5.1.2(i)](https://developer.apple.com/app-store/review/guidelines/#data-use-and-sharing) 要求明确披露第三方 AI 数据共享并取得许可；当前实现及文档不能代替提交时的隐私评估与审核。
+
+隐私清单声明了 UserDefaults 用于本应用偏好的 CA92.1 原因，参见 [Apple TN3183](https://developer.apple.com/documentation/technotes/tn3183-adding-required-reason-api-entries-to-your-privacy-manifest)。清单中的 SDK 数据收集声明不等于 App Store Connect 的完整隐私问卷；应按实际服务商数据流单独评估。
+
+真机还需检查：保存服务商自动获取模型、钥匙串持久化、多个模型并行、三种模式、失败重试、断网/额度不足、手动终止、后台结束、重启历史及 PNG 系统分享。用少量题目和服务商侧低额度限制开始测试。Review Notes 需提供可审查 AI 功能的方法，勿将私人长期密钥打包到 App 中。
 
 ```sh
 scripts/check.sh

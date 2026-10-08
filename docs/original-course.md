@@ -59,6 +59,6 @@ Byte limits are verified achievable learning budgets, not claimed optimal scores
 | 10049 / L49 | Compose recursive systems | Vaulted mosaic | Nest window, row, shrinking tier and rotation routines, each with its own return invariant. | 63 |
 | 10050 / L50 | Compose recursive systems | Astral cathedral | Compose a window generator with a chiral branching tree and a higher-order rotation routine. | 56 |
 
-`scripts/check.sh` replays all references with the real H compiler and game engine, checking byte limits, boards, distinct IDs, translations and save compatibility. App Store targets link HerbertCore only; the archive lives in optional HerbertCommunity.
+`scripts/check.sh` replays all references with the real H compiler and game engine, checking byte limits, boards, distinct IDs, translations and save compatibility. App Store puzzle resources come only from HerbertCore; both editions also link the resource-free HerbertBattlefield. The archive lives in optional HerbertCommunity.
 
 Spoilers: [test-only references](../Tests/HerbertCoreTests/Fixtures/original-solutions.json). Design source: [generator](../scripts/generate_original_problems.py).

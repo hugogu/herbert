@@ -11,7 +11,7 @@
 ## 本地存档
 
 题库分为两个模块：`HerbertCore` 仅包含原创的 50 题和语言资源，`HerbertCommunity` 包含可选社区快照。
-默认 `Herbert` target 链接两者并先显示原创课程；`HerbertAppStore` 仅链接前者，编译条件 `APP_STORE` 控制对应文案与筛选。
+默认 `Herbert` target 链接两者并先显示原创课程；`HerbertAppStore` 仅链接原创题库，编译条件 `APP_STORE` 控制对应文案与筛选。两个 target 均链接独立的 `HerbertBattlefield`，它不依赖社区题库。
 不是运行时隐藏资源。构建后的 App Store .app 由 `scripts/check_app_store_bundle.py` 验证题库隔离。
 原创 ID 为 10001–10050，显示编号 L01–L50；社区 ID 保持不变。下一关按当前目录顺序查找，不按数值大小猜测。
 目标、提示和名称采用同一套三语资源；参考解在测试 target 中独立打包，不进入应用。
@@ -33,6 +33,10 @@
 备份先完成解码、schema 检查、题号检查与解法重放，再一次写入合并结果。解法验证在后台任务进行，保持界面可响应。草稿/收藏取更新时间较新的记录；解法取更小 byte 数，平手保留本机解法和日期。输入大小限制 32 MiB。所有处理成功后才更新内存快照和本地文件，失败不修改已有记录。
 
 这里的本地 `Codable` JSON 沿用 Swift 命名。未来数据库表和列一律 `snake_case`，无需把 DB 命名暴露给 Swift 模型。
+
+## AI Battlefield
+
+AI 配置与比赛由独立的 `HerbertBattlefield` 模块负责：actor 调度并行参赛者、预算与取消，复用 `HerbertCore` 验题；`BattlefieldRepository` 隔离本地历史存储。UI 负责 Keychain 和 PNG 渲染，运行时密钥不可编码。完整数据流与用量边界见 [AI Battlefield](ai-battlefield.md)。AI 历史与人类进度分别保存，现有进度备份格式保持不变。
 
 ## Cloudflare 的后续接入
 

@@ -11,7 +11,8 @@ or reports from real devices. Small, focused changes are easiest to review.
 4. Create a branch for your change. Do not commit personal signing settings or save files.
 
 There are no external package dependencies. `HerbertCore` is a standalone local Swift
-package. UI and original lessons support English, Simplified Chinese and Japanese.
+package; `HerbertBattlefield` contains the UI-independent AI client, judge and competition engine.
+UI and original lessons support English, Simplified Chinese and Japanese.
 Use `HerbertAppStore` to test the original-only edition. Personal signing can go in
 ignored `Config/Local.xcconfig`; generation keeps it intact.
 
@@ -61,6 +62,17 @@ for the community gallery or eleven for the original course. English images go t
 `docs/screenshots/en/`, Chinese to `docs/screenshots/`, with course images in `course/`.
 English is the default when no argument is supplied. Keep each README's images in its own language.
 Review each image before committing it. See [screenshot provenance](docs/screenshots/README.md).
+
+## AI Battlefield
+
+Use deterministic `AIClient` fixtures for engine tests and URLProtocol fixtures for HTTP
+integration tests. Exercise streamed usage, retries, cancellation and shared/per-model
+budgets without paid requests. Native `BattlefieldUITests` use isolated local files and
+in-memory keys; no real provider key is needed. Never commit API keys, provider error
+bodies, personal history or an unlabelled model benchmark. Keep API keys in Keychain
+and preserve the disclosure before sending puzzles to a provider.
+
+See [protocol, scoring and storage](docs/ai-battlefield.md) and [privacy](PRIVACY.md).
 
 ## Problem data and H compatibility
 

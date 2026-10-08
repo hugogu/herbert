@@ -23,3 +23,9 @@ expansion budgets, save corruption, and malicious backup handling are useful rev
 
 The current app has no account or cloud service. Never place Cloudflare credentials in
 clients; any future D1 access must go through an authenticated Worker.
+
+AI Battlefield accepts user-configured HTTPS providers. Keys belong only in Keychain
+and runtime Authorization headers, never in Codable settings/history, logs, screenshots
+or shared images. Redirects, oversized responses, unbounded streams, late callbacks after
+cancellation, budget reservations and unexpected provider JSON are relevant review areas.
+Match history contains user prompts and full model responses; redact them when reporting.

@@ -2,6 +2,19 @@
 
 日期：2026-10-07–08（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## AI Battlefield · 0.3.0（10 月 8 日）
+
+- 新增独立 `HerbertBattlefield` 模块与两个导航 Tab；配置和完整比赛快照本地保存，运行时密钥不参与 Codable，App 使用钥匙串。两个发行版都链接 AI 模块，社区模块的打包边界保留。
+- `scripts/check.sh`：40 项原有 Swift 测试、22 项 Battlefield 单元/HTTP 集成测试、15 项 Python 检查及严格格式检查全部通过。覆盖相同提示词、并行、失败反馈、重试、原生 byte/陷阱规则、限时、共享/独立 Token 预算、取消、用量核对、缓存缺失、原子存储与损坏/超限数据保护。
+- HTTP 测试使用 URLProtocol 的实际字节流：模型鉴权与 SiliconFlow 查询参数、SSE 空行/CRLF/CR/Unicode/分行数据、JSON 回退、输出参数、401/429/重定向，以及收到响应头后的底层请求取消。没有调用付费服务商。
+- `.build/battlefield-community-regression.xcresult`：默认版完整 Mac UI 回归通过，12 项功能用例通过、2 项截图用例按设计跳过。新增服务商添加/自动发现/移除、参数重启持久化、双模型答错后重试/各得 100 分、历史恢复、PNG 生成和手动终止；原有游戏用例全部通过。
+- `.build/battlefield-store-regression.xcresult`：原创版完整 Mac UI 回归也通过，12 项功能用例通过、2 项截图用例跳过，确认原生 50 题筛选和新增 AI 功能在该 target 可用。
+- `.build/battlefield-readme-final.xcresult`：最终英文截图流程通过，导出 5 张未修改的实际 App 窗口截图，逐张检查语言、数量、原生反馈与分享预览。全部使用隔离的确定性客户端和内存密钥，不代表商业模型成绩。界面测试发现并修复了重复格式化导致数字显示为 0 的问题，新增静态回归检查及真实 UI 数量断言。
+- 两个 scheme 的 Mac/iOS Release 构建通过；Mac 预览包含 arm64/x86_64。原创版两个实际 `.app` 均通过资源检查：50 题、无社区目录、社区 bundle 或参考答案。工程及课程重复生成一致。
+- `outputs/v0.3.0-final/Herbert-macOS-universal.dmg` 已压缩、校验并只读挂载，重新检查实际包的 0.3.0（3）元数据、双架构、完整签名、沙盒、AI 出站网络权限、1,819 题和无测试答案。预览仍为 ad-hoc 签名。
+- 初始原生 UI 自动化因桌面锁定未进入用例，恢复交互桌面后验证通过。截图使用可选显示器选择，不将设备显示器名称写入项目。
+- 未进行真实 OpenRouter/SiliconFlow 请求或 iPhone/iPad 运行时验证。没有 TestFlight/App Store 上传、Developer ID 签名或公证；真机 API/钥匙串/后台/分享检查见 [App Store 说明](app-store.md)。
+
 ## 20 道进阶题与 README 选图（10 月 8 日）
 
 - 新增 L31–L50，原创题共 50 道、十章。原先 30 道棋盘、编号、预算和参考解保持不变；社区 JSON 的 SHA-256 仍为 `c16b984bfefe35588139682ec2a41783f74b2f212fb6a2d43d45b96b88651d64`。
