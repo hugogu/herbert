@@ -2,21 +2,22 @@
 
 [English](README.md) · **简体中文** · [参与贡献](CONTRIBUTING.md) · [更新记录](CHANGELOG.md)
 
-先从 **30 道原创课程关卡 L01–L30** 开始，依次学习移动、避障、过程、递归、指令参数与组合。
-每题都有中英日学习目标和逐条展开的两级提示，全部参考解已由真实 H 引擎验证。
-默认开源版包含原创课程和 1,769 道社区题，共 **1,799 题**；`HerbertAppStore` 版本仅打包原创的 30 题。
-[完整原创课程](docs/original-course.zh-CN.md) · [App Store 版本与真机测试说明](docs/app-store.md)
+先从 **30 道基础课程关卡**学习移动、避障、过程、递归与指令参数，再挑战 **20 道进阶题**：
+让墙参与计数、交换参数、递归折返、互递归及多层子程序组合。
+全部 **50 道原创题 L01–L50** 都有中英日目标与两级提示，参考解通过原生引擎和 HOJ 参考引擎验证。
+默认开源版另含 1,769 道社区题，共 **1,819 题**；`HerbertAppStore` 仅打包原创的 50 题。
+[完整原创课程](docs/original-course.zh-CN.md) · [解题分析与进阶设计](docs/advanced-course-design.zh-CN.md) · [App Store 与真机测试](docs/app-store.md)
 
-![原创版原生 Mac App：发条花园](docs/screenshots/course/course-garden.png)
+![原创版原生 Mac App：穹顶镶嵌](docs/screenshots/course/course-mosaic.png)
 
-*实际原生 Mac App 的中文截图，L30「发条花园」组合计数重复、逐渐缩小的正方形与四向旋转。*
+*实际原生 Mac App 的中文截图。L49「穹顶镶嵌」组合收缩层、窗格与四向旋转；每层子过程都要恢复自己的位置和朝向，整体图案才接得起来。*
 
-| L19 · 生长的螺旋 | L29 · 层叠的窗 | L30 · 发条花园 |
+| L38 · 折页花窗 | L44 · 融雪方印 | L50 · 星穹圣殿 |
 | --- | --- | --- |
-| [![生长的螺旋棋盘](docs/screenshots/course/course-spiral-board.png)](docs/screenshots/course/course-spiral.png) | [![层叠的窗棋盘](docs/screenshots/course/course-windows-board.png)](docs/screenshots/course/course-windows.png) | [![发条花园棋盘](docs/screenshots/course/course-garden-board.png)](docs/screenshots/course/course-garden.png) |
-| 数值递归 · ≤ 16 bytes | 嵌套指令参数 · ≤ 24 bytes | 组合解题 · ≤ 31 bytes |
+| [![折页花窗的四向连续墙与递归分支](docs/screenshots/course/course-rosette-board.png)](docs/screenshots/course/course-rosette.png) | [![融雪方印的递归弯折与四个陷阱端点](docs/screenshots/course/course-seal-board.png)](docs/screenshots/course/course-seal.png) | [![星穹圣殿的方形庭院与分杈结构](docs/screenshots/course/course-cathedral-board.png)](docs/screenshots/course/course-cathedral.png) |
+| 递归折返 · ≤ 29 bytes | 指令展开层选择 · ≤ 34 bytes | 旋向分杈与组合 · ≤ 56 bytes |
 
-原创题目与这些截图均使用 MIT。课程按概念逐步增加难度，字节限制是已验证可达到的学习预算，不宣称最优解。
+原创题目与这些截图均使用 MIT。预算已验证可达，不宣称最优解。难度来源、社区试解和去掉过于简单解法的过程见[设计说明](docs/advanced-course-design.zh-CN.md)。
 
 ## 社区题库示例
 
@@ -35,9 +36,9 @@
 
 | 现代风格（默认） | Classic 经典风格与轨迹 |
 | --- | --- |
-| [![现代发条花园棋盘](docs/screenshots/course/course-garden-board.png)](docs/screenshots/course/course-garden.png) | [![经典发条花园棋盘与蓝色运动轨迹](docs/screenshots/course/course-garden-classic-board.png)](docs/screenshots/course/course-garden-classic.png) |
+| [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) |
 
-两张均为原创 L30 的实际 App 截图，相邻墙格连接成完整围墙。经典风格参考原站规则页中的棋盘；示例执行了四条指令，只有实际移动才会留下轨迹。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增功能目前位于 main，将纳入下一版本。
+两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。新增课程位于 main，将纳入下一版本。
 
 ## 运行
 
@@ -51,8 +52,8 @@ open Herbert.xcodeproj
 
 | Scheme | 题库 | 用途 |
 | --- | --- | --- |
-| `Herbert`（默认） | 30 道原创题 + 1,769 道社区题 | 开源版 |
-| `HerbertAppStore` | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
+| `Herbert`（默认） | 50 道原创题 + 1,769 道社区题 | 开源版 |
+| `HerbertAppStore` | 仅 50 道原创题 | 真机检查、TestFlight、App Store 候选版 |
 
 社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
 CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。
@@ -81,7 +82,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录；对照原解释器的发现与差异见 [兼容性审计](docs/hoj-compatibility.zh-CN.md)。
 - 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
-- 六章各五题的原创课程：独立设计的布局、稳定 ID 10001–10030、显示编号 L01–L30、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
+- 十章各五题的原创课程：独立设计的布局、稳定 ID 10001–10050、显示编号 L01–L50、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
 - 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
 - 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
 - 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中英日分步玩法手册。
@@ -118,7 +119,7 @@ docs/                           数据导入清单、规则核对说明、架构
 - [原站规则](http://herbert.tealang.info/rule.php)
 - [原站 Problems](http://herbert.tealang.info/problems.php)
 - 原站由 quolc 创建，社区关卡归各作者所有；本项目独立编写游戏代码，没有打包或执行原站 Flash 客户端。
-- 应用独立编写的代码、30 道原创题、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；社区题库及其截图布局不在本项目的 MIT 授权范围内。App Store scheme 不包含社区题库。详情见 [第三方内容说明](NOTICE.md)。
+- 应用独立编写的代码、50 道原创题、图标和文档使用 [MIT 许可证](LICENSE)。原站未声明可再分发题库的许可证，授权范围尚未确认；社区题库及其截图布局不在本项目的 MIT 授权范围内。App Store scheme 不包含社区题库。详情见 [第三方内容说明](NOTICE.md)。
 - 原站在线排名、账号、投稿与服务器评分未移植；应用展示个人最短代码记录。原站最短记录是导入时的快照，不进行在线比较。
 - 按原版限制运行最多 100 万个机器人指令；为保证手机可取消执行，额外限制 100 万次解释器展开、4096 层非尾递归栈、16 KiB 源代码、64 层参数语法嵌套和 128 层运行时参数嵌套。命令参数与待执行栈使用 100 万单位的展开预算，尾递归不增长调用栈。这些保护可能比原站更早停止极端程序。
 

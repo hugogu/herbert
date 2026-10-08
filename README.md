@@ -17,35 +17,41 @@ SwiftUI. Guide the robot to every target using H, a tiny language whose short pr
 can express surprisingly intricate paths. Learn three commands, discover recursion,
 and keep making your solution smaller.
 
-Start with **30 original lessons** that introduce movement, obstacles, procedures,
-recursion and instruction parameters in six stages. Every lesson has localized goals
-and two optional hints, with a reference program verified by the real H engine.
+Start with **30 foundational lessons**, then explore **20 advanced challenges** in
+wall-assisted counting, parameter swaps, recursive returns, mutual recursion and
+composition. All **50 original puzzles** have English, Chinese and Japanese goals
+and two optional hints, with reference programs verified by the native and HOJ engines.
 The default open-source edition also includes **1,769 community problems**, preserving
-their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
+their IDs, authors and byte limits. The **App Store edition contains only the 50 originals**.
 Code and original lessons use MIT; the archived community content has a separate,
 unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
 
-[Explore the original curriculum](docs/original-course.md) · [App Store build and device testing](docs/app-store.md)
+[Explore the original curriculum](docs/original-course.md) · [Design and community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md)
 
-![Herbert original course in the English Mac app: Clockwork garden](docs/screenshots/en/course/course-garden.png)
+![Herbert original course in the English Mac app: Vaulted mosaic](docs/screenshots/en/course/course-mosaic.png)
 
-*Actual native macOS App Store edition with English UI. L30 “Clockwork garden” combines
-counted repetition, shrinking squares and rotation. The app follows English, Simplified
-Chinese, or Japanese language preferences; other languages fall back to English.*
+*Actual native macOS App Store edition with English UI. L49 “Vaulted mosaic” combines
+shrinking tiers, window patterns and fourfold rotation. Its nested procedures must
+return to their starting position and heading before the next pattern can fit.
+The app follows English, Simplified Chinese, or Japanese language preferences; other
+languages fall back to English.*
 
-## From one step to a garden
+## Small programs, intricate places
 
-The six-stage [original course](docs/original-course.md) grows from a single `s` to
-procedures, recursion and instructions as arguments. These are three later lessons;
-click a board to see its full game screen:
+The ten-chapter [original course](docs/original-course.md) grows from a single `s` to
+layered recursive systems. Walls reveal rooms, folds and rotational units while
+constraining the route. These are three of the new challenges; click a board for its
+full game screen:
 
-| L19 · Growing spiral | L29 · Nested windows | L30 · Clockwork garden |
+| L38 · Hinged rosette | L44 · Snowmelt seal | L50 · Astral cathedral |
 | --- | --- | --- |
-| [![Growing spiral board](docs/screenshots/en/course/course-spiral-board.png)](docs/screenshots/en/course/course-spiral.png) | [![Nested windows board](docs/screenshots/en/course/course-windows-board.png)](docs/screenshots/en/course/course-windows.png) | [![Clockwork garden board](docs/screenshots/en/course/course-garden-board.png)](docs/screenshots/en/course/course-garden.png) |
-| Numeric recursion · ≤ 16 bytes | Nested instruction arguments · ≤ 24 bytes | Composition · ≤ 31 bytes |
+| [![Hinged rosette board with four walled spiral arms](docs/screenshots/en/course/course-rosette-board.png)](docs/screenshots/en/course/course-rosette.png) | [![Snowmelt seal board with recursive folds and four trap caps](docs/screenshots/en/course/course-seal-board.png)](docs/screenshots/en/course/course-seal.png) | [![Astral cathedral board with branching square courtyards](docs/screenshots/en/course/course-cathedral-board.png)](docs/screenshots/en/course/course-cathedral.png) |
+| Recursive return · ≤ 29 bytes | Selective instruction expansion · ≤ 34 bytes | Chiral branching + composition · ≤ 56 bytes |
 
-*These original puzzles and their screenshots are MIT licensed. Language and board
-options, and the original course, are on `main` for the next release.*
+*These original puzzles and their screenshots are MIT licensed. Budgets are verified
+achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
+explain the progression and the simple-loop shortcuts removed during design.
+The new course is on `main` for the next release.*
 
 ## Community patterns
 
@@ -71,15 +77,16 @@ These examples are excluded from the App Store edition. Search their IDs in `Her
 
 <table>
   <tr>
-    <td align="center"><a href="docs/screenshots/en/course/course-garden.png"><img src="docs/screenshots/en/course/course-garden-board.png" width="380" alt="Modern Clockwork garden board with mint robot and amber targets"></a></td>
-    <td align="center"><a href="docs/screenshots/en/course/course-garden-classic.png"><img src="docs/screenshots/en/course/course-garden-classic-board.png" width="380" alt="Classic Clockwork garden board with black walls, white targets, red robot and blue trail"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-mosaic.png"><img src="docs/screenshots/en/course/course-mosaic-board.png" width="380" alt="Modern Vaulted mosaic board with continuous walls and amber targets"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-mosaic-classic.png"><img src="docs/screenshots/en/course/course-mosaic-classic-board.png" width="380" alt="Classic Vaulted mosaic board with black walls, white targets, red robot and blue trail"></a></td>
   </tr>
   <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
 </table>
 
-*Both are actual app captures of original lesson L30. Classic follows the original rules-page board
-appearance. Its screenshot follows four instructions; only successful moves leave a trail.
-Adjacent walls share a continuous outline in both styles. Use the sliders button above the board to change style, grid dots, and trail visibility.*
+*Both are actual app captures of original lesson L49. Classic follows the original
+rules-page board appearance. Its screenshot follows three successful moves. Adjacent
+walls share a continuous outline in both styles. Use the sliders button above the board
+to change style, grid dots, and trail visibility.*
 
 <details>
 <summary>Explore the original course library</summary>
@@ -90,10 +97,10 @@ Adjacent walls share a continuous outline in both styles. Use the sliders button
 
 ## What you can do
 
-- **Learn one idea at a time.** Follow L01–L30 from one step to the Clockwork garden;
+- **Learn one idea at a time.** Follow L01–L50 from one step to the Astral cathedral;
   reveal hints individually when you need them. Titles, goals and hints support all three languages.
-- **Play anywhere offline.** The default edition bundles 1,799 problems; the App Store
-  edition bundles 30 originals. Search by ID, title, or author;
+- **Play anywhere offline.** The default edition bundles 1,819 problems; the App Store
+  edition bundles 50 originals. Search by ID, title, or author;
   bookmark favorites and return to your last problem.
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
@@ -148,8 +155,8 @@ No developer account is configured in the repository.
 
 | Scheme | Included content | Intended use |
 | --- | --- | --- |
-| `Herbert` (default) | 30 original lessons + 1,769 archived community puzzles | Open-source edition |
-| `HerbertAppStore` | 30 original lessons only | TestFlight / App Store candidate |
+| `Herbert` (default) | 50 original lessons + 1,769 archived community puzzles | Open-source edition |
+| `HerbertAppStore` | 50 original lessons only | TestFlight / App Store candidate |
 
 The community archive is a separate optional Swift package target, not a runtime-hidden
 file in the store app. CI audits built iOS and Mac store apps for content isolation.
@@ -225,6 +232,6 @@ its problem authors. Original [rules](http://herbert.tealang.info/rule.php) and
 The original Flash client, online accounts, submissions, and leaderboard are not included;
 original best scores are an import-time snapshot, not live rankings.
 
-Our source code, 30 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
+Our source code, 50 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
 Third-party community puzzle data and community layouts visible in screenshots are
 **not relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.

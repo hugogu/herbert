@@ -30,7 +30,7 @@ scripts/capture_screenshots.sh en store # Original-only English course
 scripts/capture_screenshots.sh zh-Hans store # Original-only Chinese course
 ```
 
-The test explicitly sets and checks the app language. It exports nine images per run for each edition,
+The test explicitly sets and checks the app language. It exports nine images per community run and eleven per store run,
 is opt-in, and is skipped during ordinary UI test runs. Review the images before committing;
 window size, system text rendering, and OS versions can change the output.
 If XCTest reports an image creation error on a secondary display, the optional
@@ -42,7 +42,11 @@ in the project.
 Original puzzle layouts retain their authors' rights and are excluded from our MIT grant.
 See [NOTICE.md](../../NOTICE.md).
 
-The `store` capture uses `HerbertAppStore` and exports nine actual native Mac images into
-`en/course/` or `course/`: the original-only library and L19 Growing spiral, L29 Nested
-windows, L30 Clockwork garden (full screens and boards), plus L30 in Classic style with a four-step blue trail. Adjacent walls form a continuous frame. These independently designed
-original layouts and their captures use MIT. They are not iPhone/iPad App Store screenshots.
+The `store` capture uses `HerbertAppStore` and exports eleven actual native Mac images into
+`en/course/` or `course/`: the 50-original library and L38 Hinged rosette, L44 Snowmelt seal,
+L49 Vaulted mosaic, L50 Astral cathedral (full screens and boards), plus L49 in Classic
+style with a three-step blue trail. The selection favors silhouettes, symmetry and
+legibility; see the [design study](../advanced-course-design.md). Adjacent walls form
+continuous contours. Earlier L19/L29/L30 captures remain as historical illustrations.
+These independently designed original layouts and their captures use MIT.
+They are not iPhone/iPad App Store screenshots.

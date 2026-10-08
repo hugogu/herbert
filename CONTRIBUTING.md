@@ -55,17 +55,18 @@ scripts/capture_screenshots.sh en store
 scripts/capture_screenshots.sh zh-Hans store
 ```
 
-The opt-in XCTest captures the library, three full puzzle screens, and their actual board
+The opt-in XCTest captures the library, full puzzle screens, and their actual board
 elements. It explicitly sets the app language and exports nine unmodified PNG attachments
-per run: English to `docs/screenshots/en/`, Chinese to `docs/screenshots/`. English is the
-default when no argument is supplied. Keep each README's images in its own language.
+for the community gallery or eleven for the original course. English images go to
+`docs/screenshots/en/`, Chinese to `docs/screenshots/`, with course images in `course/`.
+English is the default when no argument is supplied. Keep each README's images in its own language.
 Review each image before committing it. See [screenshot provenance](docs/screenshots/README.md).
 
 ## Problem data and H compatibility
 
 The original curriculum lives in `scripts/generate_original_problems.py`. Regenerate after
-edits and run `scripts/check.sh`; the real engine replays all 30 test-only references.
-Keep stable IDs 10001–10030, goals, two progressive hints, and all three translations.
+edits and run `scripts/check.sh`; the real engine replays all 50 test-only references.
+Keep stable IDs 10001–10050, goals, two progressive hints, and all three translations.
 New original content must be independently designed and explicitly contributed under MIT.
 Do not put community JSON or reference programs in HerbertCore application resources.
 Audit each final store `.app` with `scripts/check_app_store_bundle.py`. See
