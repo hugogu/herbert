@@ -38,7 +38,9 @@ jobs:
         run: >-
           xcodebuild -project Herbert.xcodeproj -scheme Herbert -configuration Release
           -destination 'generic/platform=macOS' -derivedDataPath .build/ci-mac
-          CODE_SIGNING_ALLOWED=NO build
+          ARCHS='arm64 x86_64' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+          CODE_SIGN_ENTITLEMENTS=Config/MacPreview.entitlements
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO ENABLE_HARDENED_RUNTIME=YES build
       - name: Build iPhone and iPad
         run: >-
           xcodebuild -project Herbert.xcodeproj -scheme Herbert
@@ -54,3 +56,53 @@ jobs:
           xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \
             -destination 'generic/platform=iOS' -derivedDataPath .build/ci-store-ios CODE_SIGNING_ALLOWED=NO build
           python3 scripts/check_app_store_bundle.py .build/ci-store-ios/Build/Products/Release-iphoneos/HerbertAppStore.app
+      - name: Package and verify universal Mac DMG
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            app_version=$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' \
+              .build/ci-mac/Build/Products/Release/Herbert.app/Contents/Info.plist)
+            test "$GITHUB_REF_NAME" = "v$app_version"
+          fi
+          python3 scripts/package_macos.py build \
+            --app .build/ci-mac/Build/Products/Release/Herbert.app \
+            --output outputs/Herbert-macOS-universal.dmg
+      - name: Upload Mac installer
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Herbert-macOS-universal
+          path: |
+            outputs/Herbert-macOS-universal.dmg
+            outputs/Herbert-macOS-universal.dmg.sha256
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+  release:
+    name: Publish Mac preview
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: Herbert-macOS-universal
+          path: outputs
+      - name: Verify download and publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          cd outputs
+          sha256sum --check Herbert-macOS-universal.dmg.sha256
+          gh release create "$RELEASE_TAG" \
+            Herbert-macOS-universal.dmg Herbert-macOS-universal.dmg.sha256 \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease \
+            --title "Herbert $RELEASE_TAG — Mac preview" \
+            --notes-file ../.github/mac-release-notes.md

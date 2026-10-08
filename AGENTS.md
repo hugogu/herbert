@@ -26,3 +26,4 @@
 
 - Advanced course L31–L50 uses independent geometric command oracles in `scripts/advanced_course.py`. Preserve literal turn expansion in those oracles: `rrT` flips the effective turn but adds two executed instructions every recursion; simplifying it to `l` makes exact instruction-count tests wrong.
 - Run native GUI and CLI UI tests sequentially: they share focus and can redirect each other's input. Xcode can rewrite shared scheme XML when a project is open; close the project and regenerate before checking generated-file consistency.
+- Mac DMG builds must pair `CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO` with explicit `Config/MacPreview.entitlements`: disabling injection alone also removes the sandbox. Audit the mounted app's actual entitlements, architectures and catalogs with `scripts/package_macos.py`; ad-hoc signatures are not Developer ID signing or notarization.

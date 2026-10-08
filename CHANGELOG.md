@@ -7,6 +7,8 @@ save or API formats through documented migrations.
 
 ### Added
 
+- Universal macOS DMG packaging with mounted-image audits, SHA-256 checksums,
+  downloadable Actions artifacts, and automatic tagged preview releases.
 - 50 independently designed MIT lessons in ten stages, including 20 advanced walled
   challenges with parameter swaps, recursive returns, mutual recursion and composition. Three-language goals and
   progressive hints; every reference program is verified with the real H engine.
