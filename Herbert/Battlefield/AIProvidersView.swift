@@ -33,7 +33,7 @@ struct AIProvidersView: View {
                     ContentUnavailableView(
                         L10n.text("还没有服务商"), systemImage: "network",
                         description: Text(
-                            L10n.text("添加 OpenRouter、SiliconFlow、Google Gemini 或兼容 OpenAI 的服务商，自动获取可用模型。"))
+                            L10n.text("添加 OpenRouter、SiliconFlow、Google Gemini、兼容 OpenAI 或 Anthropic 的服务商，自动获取可用模型。"))
                     )
                     .panel()
                 }
@@ -185,22 +185,27 @@ private struct AIProviderEditor: View {
                 Section {
                     Picker("服务类型", selection: $provider.kind) {
                         ForEach(ProviderKind.allCases, id: \.self) { kind in Text(kind.title).tag(kind) }
-                    }.onChange(of: provider.kind) { old, new in
+                    }.accessibilityIdentifier("providerKind").onChange(of: provider.kind) { old, new in
                         if provider.baseURL == old.defaultURL { provider.baseURL = new.defaultURL }
                         if provider.name == old.title { provider.name = new.title }
                     }
                     TextField("名称", text: $provider.name).accessibilityIdentifier("providerName")
                     TextField("API 基础地址", text: $provider.baseURL)
-                        .autocorrectionDisabled()
+                        .autocorrectionDisabled().accessibilityIdentifier("providerBaseURL")
                     SecureField(
                         battlefield.hasKey(provider.id) ? L10n.text("留空保留已有 API Key") : "API Key", text: $apiKey
                     )
                     .autocorrectionDisabled().accessibilityIdentifier("providerAPIKey")
-                    Picker("输出上限参数", selection: $provider.outputTokenParameter) {
-                        ForEach(OutputTokenParameter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    if provider.kind != .anthropic {
+                        Picker("输出上限参数", selection: $provider.outputTokenParameter) {
+                            ForEach(OutputTokenParameter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                        }.accessibilityIdentifier("outputTokenParameter")
                     }
                 } footer: {
                     Text("填写 HTTPS 基础地址，例如 https://api.siliconflow.cn/v1。保存后会请求 /models。更改地址时需要重新填写 API Key。")
+                    if provider.kind == .anthropic {
+                        Text("Anthropic 使用 /messages、x-api-key 和 API 版本 2023-06-01。填写包含 /v1 的基础地址；兼容服务商可使用自己的地址。")
+                    }
                 }
                 Section {
                     BattlefieldMessages()
@@ -266,6 +271,10 @@ struct AIModelEditor: View {
                         "允许 seed、top_k、min_p、frequency_penalty、presence_penalty、reasoning_effort、reasoning、enable_thinking 和 thinking_budget。"
                     )
                     .font(.caption).foregroundStyle(Palette.muted)
+                    if battlefield.settings.providers.first(where: { $0.id == providerID })?.kind == .anthropic {
+                        Text("Anthropic 兼容服务商允许 thinking、output_config 和 top_k。推理能力未知时不自动添加参数；可在此手动配置。")
+                            .font(.caption).foregroundStyle(Palette.muted)
+                    }
                 }
                 if invalid { Text("参数无效，请检查数值范围和 JSON。 ").foregroundStyle(Palette.danger) }
                 Button("保存参数") { save() }.accessibilityIdentifier("saveModelParameters")

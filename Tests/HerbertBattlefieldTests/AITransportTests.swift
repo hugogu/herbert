@@ -6,6 +6,170 @@ import XCTest
 
 @MainActor
 final class AITransportTests: XCTestCase {
+    private let anthropicAnswer =
+        #"{"type":"message","content":[{"type":"text","text":"```h\ns\n```"}],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":20}}"#
+
+    func testAnthropicDiscoveryPaginatesAndAuthenticatesUsingNativeHeaders() async throws {
+        let provider = provider(kind: .anthropic)
+        let first = HTTPStub(body: #"{"data":[{"id":"a","display_name":"Model A"}],"has_more":true,"last_id":"a"}"#)
+        let second = HTTPStub(body: #"{"data":[{"id":"b","max_tokens":8192}],"has_more":false}"#)
+        BattlefieldURLProtocol.registry.addSequence(
+            [first, second], host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let models = try await client().models(provider: provider, apiKey: "test-only-secret")
+        XCTAssertEqual(models.map(\.id), ["a", "b"])
+        XCTAssertEqual(models[0].name, "Model A")
+        XCTAssertEqual(models[1].maximumOutputTokens, 8192)
+        XCTAssertEqual(second.requests.first?.url?.query, "after_id=a")
+        for request in first.requests + second.requests {
+            XCTAssertEqual(request.url?.path, "/v1/models")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-api-key"), "test-only-secret")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "anthropic-version"), "2023-06-01")
+            XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+        }
+        let repeated = HTTPStub(body: first.body)
+        BattlefieldURLProtocol.registry.add(repeated, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        do {
+            _ = try await client().models(provider: provider, apiKey: "fixture")
+            XCTFail("Repeated cursors must not loop forever")
+        } catch { XCTAssertEqual(error as? BattlefieldError, .invalidResponse) }
+        XCTAssertEqual(repeated.requests.count, 2)
+    }
+
+    func testAnthropicMessagesRequestAndJSONFallbackUseNativeShape() async throws {
+        let provider = provider(kind: .anthropic)
+        let stub = HTTPStub(body: anthropicAnswer)
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let reply = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "native"))),
+                    apiKey: "fixture"),
+                messages: [
+                    AIMessage(role: "system", content: BattlefieldPrompt.rules),
+                    AIMessage(role: "user", content: "Puzzle"),
+                ],
+                maxOutputTokens: 4096)
+        ) { _ in }
+        XCTAssertEqual(try BattlefieldJudge.extractProgram(reply.text), "s")
+        XCTAssertEqual(reply.usage.total, 30)
+        let request = try XCTUnwrap(stub.requests.first)
+        XCTAssertEqual(request.url?.path, "/v1/messages")
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "x-api-key"), "fixture")
+        XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(stub.bodies.first)) as? [String: Any])
+        XCTAssertEqual(body["system"] as? String, BattlefieldPrompt.rules)
+        XCTAssertEqual(body["max_tokens"] as? Int, 4096)
+        XCTAssertNil(body["stream_options"])
+        XCTAssertNil(body["max_completion_tokens"])
+        XCTAssertEqual((body["messages"] as? [[String: String]])?.count, 1)
+    }
+
+    func testAnthropicStreamingStopsOnlyAtMessageStopAndRetainsIncompleteOutput() async throws {
+        let events = [
+            #"{"type":"message_start","message":{"usage":{"input_tokens":10,"cache_read_input_tokens":20,"output_tokens":1}}}"#,
+            #"{"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"Plan","signature":"signed"}}"#,
+            #"{"type":"content_block_stop","index":0}"#,
+            #"{"type":"content_block_start","index":1,"content_block":{"type":"text","text":"```h\ns\n```"}}"#,
+            #"{"type":"content_block_stop","index":1}"#,
+            #"{"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":15}}"#,
+        ]
+        for complete in [false, true] {
+            let provider = provider(kind: .anthropic)
+            let stream = events + (complete ? [#"{"type":"message_stop"}"#] : [])
+            let stub = HTTPStub(body: stream.map { "data: \($0)\n\n" }.joined(), contentType: "text/event-stream")
+            BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            let collector = ProgressCollector()
+            do {
+                let reply = try await client().complete(
+                    AICompletionRequest(
+                        participant: CompetitionParticipant(
+                            entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "native"))),
+                            apiKey: "fixture"),
+                        messages: [], maxOutputTokens: 4096)
+                ) { await collector.append($0) }
+                XCTAssertTrue(complete)
+                XCTAssertEqual(reply.usage.input, 30)
+                XCTAssertEqual(reply.usage.output, 15)
+                XCTAssertEqual(reply.contentBlocks?[0].signature, "signed")
+            } catch {
+                XCTAssertFalse(complete)
+                XCTAssertEqual(error as? BattlefieldError, .incompleteStream)
+            }
+            let progress = await collector.items
+            XCTAssertEqual(progress.last?.text, "```h\ns\n```")
+            XCTAssertEqual(progress.last?.reasoning?.content, "Plan")
+            XCTAssertEqual(progress.last?.isFinal, complete)
+            XCTAssertTrue(stub.stopped)
+        }
+    }
+
+    func testAnthropicOverloadBackoffAndTokenLimitIntegrateWithMatchEngine() async throws {
+        for limit in [false, true] {
+            let provider = provider(kind: .anthropic)
+            let failure = HTTPStub(
+                body: #"{"type":"error","error":{"type":"overloaded_error","message":"Busy"}}"#,
+                status: 529, headers: ["Retry-After": "30"])
+            let response = HTTPStub(
+                body: limit ? anthropicAnswer.replacingOccurrences(of: "end_turn", with: "max_tokens") : anthropicAnswer
+            )
+            let sequence = limit ? [response] : [failure, response]
+            BattlefieldURLProtocol.registry.addSequence(
+                sequence, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            let result = try await BattlefieldEngine(
+                client: client(),
+                retrySleep: { delay in
+                    XCTAssertGreaterThanOrEqual(delay, 30)
+                }
+            ).run(
+                configuration: CompetitionConfiguration(), problems: Array(try ProblemCatalog.bundled().prefix(1)),
+                participants: [
+                    CompetitionParticipant(
+                        entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "native"))),
+                        apiKey: "fixture")
+                ]
+            ) { _ in }
+            let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+            XCTAssertEqual(answer.status, limit ? .burnout : .solved)
+            XCTAssertEqual(answer.attempts.count, limit ? 1 : 2)
+            XCTAssertEqual(answer.attempts.last?.contentBlocks?.last?.text, "```h\ns\n```")
+            XCTAssertEqual(answer.attempts.last?.requestedMaxOutputTokens, 65_536)
+            XCTAssertEqual(response.requests.count, 1)
+            if !limit { XCTAssertNil(answer.attempts.first?.evaluation) }
+            let restored = try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result))
+            XCTAssertEqual(restored.entrants[0].answers[0], answer)
+        }
+    }
+
+    func testAnthropicJudgeRetryReplaysSignedContentWithTheSameSharedRules() async throws {
+        let provider = provider(kind: .anthropic)
+        let rejected = HTTPStub(
+            body:
+                #"{"type":"message","content":[{"type":"thinking","thinking":"Plan","signature":"original-signature"},{"type":"text","text":"```h\nz\n```"}],"stop_reason":"end_turn"}"#
+        )
+        let accepted = HTTPStub(body: anthropicAnswer)
+        BattlefieldURLProtocol.registry.addSequence(
+            [rejected, accepted], host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let result = try await BattlefieldEngine(client: client()).run(
+            configuration: .init(), problems: Array(try ProblemCatalog.bundled().prefix(1)),
+            participants: [
+                CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "native"))),
+                    apiKey: "fixture")
+            ]
+        ) { _ in }
+        XCTAssertEqual(result.entrants[0].answers[0].status, .solved)
+        XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 2)
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(accepted.bodies.first)) as? [String: Any])
+        XCTAssertEqual(body["system"] as? String, BattlefieldPrompt.rules)
+        let messages = try XCTUnwrap(body["messages"] as? [[String: Any]])
+        XCTAssertEqual(messages.count, 3)
+        let blocks = try XCTUnwrap(messages[1]["content"] as? [[String: String]])
+        XCTAssertEqual(blocks[0]["signature"], "original-signature")
+        XCTAssertEqual(blocks[1]["text"], "```h\nz\n```")
+        XCTAssertTrue((messages[2]["content"] as? String)?.contains("Rejected") == true)
+    }
+
     func testUnlimitedRequestOmitsTokenCapAndUsesDiscoveredMaximumReasoningEffort() async throws {
         let provider = provider(kind: .openRouter)
         let stub = HTTPStub(body: #"{"choices":[{"message":{"content":"s"},"finish_reason":"stop"}]}"#)
@@ -630,25 +794,35 @@ private final class HTTPStub: @unchecked Sendable {
 
 private final class StubRegistry: @unchecked Sendable {
     private let lock = NSLock()
-    private var stubs: [String: HTTPStub] = [:]
-    func add(_ stub: HTTPStub, host: String) { lock.withLock { stubs[host] = stub } }
-    func get(_ host: String) -> HTTPStub? { lock.withLock { stubs[host] } }
+    private var stubs: [String: [HTTPStub]] = [:]
+    func add(_ stub: HTTPStub, host: String) { addSequence([stub], host: host) }
+    func addSequence(_ values: [HTTPStub], host: String) { lock.withLock { stubs[host] = values } }
+    func get(_ host: String) -> HTTPStub? { lock.withLock { stubs[host]?.first } }
+    func take(_ host: String) -> HTTPStub? {
+        lock.withLock {
+            guard let first = stubs[host]?.first else { return nil }
+            if stubs[host]!.count > 1 { stubs[host]!.removeFirst() }
+            return first
+        }
+    }
 }
 
 private final class BattlefieldURLProtocol: URLProtocol, @unchecked Sendable {
     static let registry = StubRegistry()
+    private var activeStub: HTTPStub?
     override class func canInit(with request: URLRequest) -> Bool { registry.get(request.url?.host ?? "") != nil }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
-        guard let url = request.url, let stub = Self.registry.get(url.host ?? ""),
+        guard let url = request.url, let stub = Self.registry.take(url.host ?? ""),
             let response = HTTPURLResponse(
                 url: url, statusCode: stub.status, httpVersion: "HTTP/1.1",
                 headerFields: ["Content-Type": stub.contentType].merging(stub.headers) { _, value in value })
         else { return }
+        activeStub = stub
         stub.record(request)
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Data(stub.body.utf8))
         if !stub.staysOpen { client?.urlProtocolDidFinishLoading(self) }
     }
-    override func stopLoading() { Self.registry.get(request.url?.host ?? "")?.stop() }
+    override func stopLoading() { activeStub?.stop() }
 }

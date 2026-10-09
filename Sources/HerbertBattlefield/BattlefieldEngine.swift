@@ -110,8 +110,10 @@ public actor BattlefieldEngine {
         return max(0, result.configuration.problemTokenLimit - used)
     }
 
-    private func allowance(model: AIModel, messages: [AIMessage], remaining: Int?) -> Int? {
+    private func allowance(entrant: Entrant, messages: [AIMessage], remaining: Int?) -> Int? {
+        let model = entrant.preset.model
         var cap = model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }
+        if cap == nil, entrant.kind == .anthropic { cap = 65_536 }
         let input = TokenUsage.estimate(messages: messages).input
         if let context = model.contextLength, let maximum = cap {
             cap = min(maximum, max(1, context - input - max(256, input / 10)))
@@ -139,6 +141,7 @@ public actor BattlefieldEngine {
         result!.entrants[entrant].answers[problem].attempts[attempt].usage = progress.usage
         result!.entrants[entrant].answers[problem].attempts[attempt].response = progress.text
         result!.entrants[entrant].answers[problem].attempts[attempt].reasoning = progress.reasoning
+        result!.entrants[entrant].answers[problem].attempts[attempt].contentBlocks = progress.contentBlocks
         if !progress.isFinal, remainingBudget(entrant: entrant, problem: problem) == 0 {
             burnOut(entrant: entrant, problem: problem)
             requests[result!.entrants[entrant].id]?.cancel()
@@ -172,7 +175,7 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[pending.problem].retryAt = nil
                     guard await active() else { break }
                 }
-                let cap = allowance(model: participant.entrant.preset.model, messages: messages, remaining: remaining)
+                let cap = allowance(entrant: participant.entrant, messages: messages, remaining: remaining)
                 var attempt = AnswerAttempt(number: a + 1)
                 attempt.requestedMaxOutputTokens = cap
                 attempt.usage = .estimate(messages: messages)
@@ -201,6 +204,7 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].attempts[a].finishReason = reply.finishReason
                     result!.entrants[e].answers[p].attempts[a].response = reply.text
                     result!.entrants[e].answers[p].attempts[a].reasoning = reply.reasoning
+                    result!.entrants[e].answers[p].attempts[a].contentBlocks = reply.contentBlocks
                     result!.entrants[e].answers[p].attempts[a].finishedAt = .now
                     if reply.finishReason == "length"
                         || (remainingBudget(entrant: e, problem: p) == 0
@@ -268,6 +272,7 @@ public actor BattlefieldEngine {
                     if let partial = (error as? AIHTTPError)?.partialReply {
                         result!.entrants[e].answers[p].attempts[a].response = partial.text
                         result!.entrants[e].answers[p].attempts[a].reasoning = partial.reasoning
+                        result!.entrants[e].answers[p].attempts[a].contentBlocks = partial.contentBlocks
                         result!.entrants[e].answers[p].attempts[a].finishReason = partial.finishReason
                         result!.entrants[e].answers[p].attempts[a].usage = partial.usage
                     }

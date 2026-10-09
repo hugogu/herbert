@@ -2,7 +2,7 @@ import Foundation
 import HerbertCore
 
 public enum ProviderKind: String, Codable, CaseIterable, Sendable {
-    case openRouter, siliconFlow, gemini, compatible
+    case openRouter, siliconFlow, gemini, compatible, anthropic
 
     public var defaultURL: String {
         switch self {
@@ -10,6 +10,7 @@ public enum ProviderKind: String, Codable, CaseIterable, Sendable {
         case .siliconFlow: "https://api.siliconflow.cn/v1"
         case .gemini: "https://generativelanguage.googleapis.com/v1beta/openai"
         case .compatible: "https://api.openai.com/v1"
+        case .anthropic: "https://api.anthropic.com/v1"
         }
     }
 
@@ -19,6 +20,7 @@ public enum ProviderKind: String, Codable, CaseIterable, Sendable {
         case .siliconFlow: "SiliconFlow"
         case .gemini: "Google Gemini"
         case .compatible: "OpenAI compatible"
+        case .anthropic: "Anthropic compatible"
         }
     }
 }
@@ -41,11 +43,12 @@ public struct AIModel: Codable, Hashable, Identifiable, Sendable {
     public var supportedParameters: [String]?
     public var maximumOutputTokens: Int?
     public var supportedReasoningEfforts: [String]?
+    public var supportedThinkingTypes: [String]?
 
     public init(
         id: String, name: String? = nil, contextLength: Int? = nil,
         supportedParameters: [String]? = nil, maximumOutputTokens: Int? = nil,
-        supportedReasoningEfforts: [String]? = nil
+        supportedReasoningEfforts: [String]? = nil, supportedThinkingTypes: [String]? = nil
     ) {
         self.id = id
         self.name = name ?? id
@@ -53,6 +56,7 @@ public struct AIModel: Codable, Hashable, Identifiable, Sendable {
         self.supportedParameters = supportedParameters
         self.maximumOutputTokens = maximumOutputTokens
         self.supportedReasoningEfforts = supportedReasoningEfforts
+        self.supportedThinkingTypes = supportedThinkingTypes
     }
 }
 
@@ -92,7 +96,7 @@ public struct ModelParameters: Codable, Hashable, Sendable {
         else { throw BattlefieldError.invalidParameters }
         let allowed: Set<String> = [
             "seed", "top_k", "min_p", "frequency_penalty", "presence_penalty",
-            "reasoning_effort", "reasoning", "thinking", "enable_thinking", "thinking_budget",
+            "reasoning_effort", "reasoning", "thinking", "enable_thinking", "thinking_budget", "output_config",
         ]
         guard Set(object.keys).isSubset(of: allowed) else { throw BattlefieldError.invalidParameters }
         return self
@@ -274,8 +278,11 @@ public struct TokenUsage: Codable, Equatable, Sendable {
 
     public static func estimate(messages: [AIMessage], outputBytes: Int = 0) -> TokenUsage {
         TokenUsage(
-            input: messages.reduce(0) {
-                $0 + ($1.content.utf8.count + ($1.reasoning?.content.utf8.count ?? 0) + 3) / 4 + 16
+            input: messages.reduce(0) { total, message in
+                let bytes =
+                    message.contentBlocks.map { $0.reduce(0) { $0 + $1.byteCount } }
+                    ?? (message.content.utf8.count + (message.reasoning?.content.utf8.count ?? 0))
+                return total + (bytes + 3) / 4 + 16
             },
             output: (outputBytes + 3) / 4)
     }
@@ -292,6 +299,7 @@ public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
     public var finishedAt: Date?
     public var response = ""
     public var reasoning: AIReasoning?
+    public var contentBlocks: [AnthropicContentBlock]?
     public var providerResponse: String?
     public var program: String?
     public var evaluation: JudgeEvaluation?

@@ -78,6 +78,41 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testAnthropicProviderSelectionDiscoveryAndPersistence() {
+        var app = launch()
+        openSection("AI 配置", in: app)
+        app.buttons["addAIProvider"].battlefieldTap()
+        #if os(macOS)
+            app.popUpButtons["providerKind"].battlefieldTap()
+            app.menuItems["Anthropic compatible"].battlefieldTap()
+        #else
+            app.buttons["providerKind"].battlefieldTap()
+            app.buttons["Anthropic compatible"].battlefieldTap()
+        #endif
+        XCTAssertEqual(app.textFields["providerName"].value as? String, "Anthropic compatible")
+        XCTAssertEqual(app.textFields["providerBaseURL"].value as? String, "https://api.anthropic.com/v1")
+        XCTAssertFalse(app.descendants(matching: .any)["outputTokenParameter"].firstMatch.exists)
+        capture(app, "ai-anthropic-provider")
+        app.secureTextFields["providerAPIKey"].battlefieldTap()
+        app.secureTextFields["providerAPIKey"].typeText("fixture-not-a-real-key")
+        app.buttons["saveAIProvider"].battlefieldTap()
+        let provider = app.buttons["provider-Anthropic compatible"]
+        XCTAssertTrue(provider.waitForExistence(timeout: 10))
+        provider.battlefieldTap()
+        XCTAssertTrue(app.buttons["parameters-fixture-1"].waitForExistence(timeout: 5))
+        app.terminate()
+        app = launch(reset: false)
+        openSection("AI 配置", in: app)
+        app.buttons["provider-Anthropic compatible"].battlefieldTap()
+        app.buttons["Edit"].battlefieldTap()
+        XCTAssertTrue(app.textFields["providerBaseURL"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["providerBaseURL"].value as? String, "https://api.anthropic.com/v1")
+        XCTAssertFalse(app.descendants(matching: .any)["outputTokenParameter"].firstMatch.exists)
+        app.buttons["Close"].battlefieldTap()
+        app.terminate()
+    }
+
+    @MainActor
     func testAddProviderDiscoversModelsAndCanBeRemoved() {
         let app = launch()
         openSection("AI 配置", in: app)

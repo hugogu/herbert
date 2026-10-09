@@ -6,7 +6,7 @@ tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current mat
 
 ## Connect models
 
-1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, Google Gemini, or an OpenAI compatible provider.
+1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, Google Gemini, OpenAI compatible, or **Anthropic compatible**.
 2. Enter its HTTPS base URL and your own API key. Saving automatically requests
    `GET /models`; SiliconFlow adds `sub_type=chat` to discover chat models.
 3. Select any default entrants. Configure each model's optional temperature, top P, automatic thinking
@@ -15,17 +15,25 @@ tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current mat
 
 The base URL ends at the API version, for example `https://openrouter.ai/api/v1`,
 `https://api.siliconflow.cn/v1`, or `https://generativelanguage.googleapis.com/v1beta/openai`;
-do not append `/models` or `/chat/completions`.
+do not append `/models`, `/chat/completions` or `/messages`.
 The standard discovery endpoint is plural **`/models`**, not `/model`.
-Custom endpoints must support OpenAI-style chat completions. Choose `max_tokens` or
-`max_completion_tokens` according to that provider. Authentication uses the Bearer header.
+Choose **OpenAI compatible** for Chat Completions endpoints, with Bearer authentication
+and either `max_tokens` or `max_completion_tokens`. Choose **Anthropic compatible** for
+Messages endpoints: the default base URL is `https://api.anthropic.com/v1`, and custom
+compatible HTTPS URLs are supported. Requests use `x-api-key`,
+`anthropic-version: 2023-06-01`, `POST /messages`, a top-level system prompt and native
+content blocks. Model discovery follows `/models` pagination and uses `display_name`,
+token limits and thinking capabilities when available.
 Redirects are rejected; enter the final URL directly. HTTP endpoints are not accepted.
 
 **Match Settings** controls output allowances for every entrant; there is no per-model
 output-cap editor. With token limits off, requests use the provider-declared maximum
 output capacity, bounded by the remaining context when both limits are known. If no
-maximum is advertised, Herbert omits `max_tokens` / `max_completion_tokens` and lets the
-provider choose its default. “Unlimited” removes the app's arbitrary cap; it cannot
+maximum is advertised, Chat Completions requests omit the output cap and let the
+provider choose its default. Anthropic Messages requires `max_tokens`: Herbert uses the
+advertised capacity, or 65,536 when discovery omits it. This fallback is recorded in
+attempt details; a smaller shared problem budget can accommodate endpoints with lower
+undocumented limits. “Unlimited” removes the app's arbitrary cap; it cannot
 infer undocumented model capacity or override a provider's limits/defaults.
 
 Automatic thinking is **enabled by default** in Model Settings. OpenRouter uses
@@ -38,6 +46,22 @@ advertised thinking fields; an effort field without advertised levels uses `high
 The standalone Google Gemini provider uses `reasoning_effort: high` for Gemini 2.5/3
 thinking models, following [Google's OpenAI compatibility mapping](https://ai.google.dev/gemini-api/docs/openai#thinking).
 It requests streaming usage totals without injecting the unrelated `enable_thinking` field.
+Anthropic defaults follow discovered capabilities: prefer `thinking: {type: "adaptive"}`,
+otherwise use supported manual thinking with a budget below the request allowance
+(leaving 1,024 tokens for an answer when possible). Use the highest advertised effort in
+`output_config`. Unknown capabilities receive no guessed thinking parameters. Advanced
+JSON can explicitly set `thinking`, `output_config` and `top_k`; Chat Completions-only
+parameters are rejected for this protocol. Leave sampling blank for compatibility;
+manual thinking requires temperature 1 or an omitted temperature.
+Native thinking/signature and redacted-thinking blocks are retained in order and replayed
+unchanged with judge feedback. Streaming text, thinking, cumulative usage and the terminal
+`message_stop` are handled separately; an interrupted stream never becomes a judged answer.
+Anthropic input usage includes uncached input, cache creation and cache reads; the cache
+rate counts reads only. Thinking is already included in output usage and is not added twice.
+`max_tokens` / `model_context_window_exceeded` stop reasons become Burnout without retry.
+HTTP 529 and streamed `overloaded_error` / `rate_limit_error` use the same cancellable
+backoff as 429/503. See the [Messages API](https://platform.claude.com/docs/en/api/messages/create)
+and [streaming specification](https://platform.claude.com/docs/en/build-with-claude/streaming).
 Unsupported/undiscovered reasoning capabilities are not guessed for arbitrary endpoints.
 The editor previews the automatic JSON. Explicit reasoning-family values in advanced
 JSON replace the automatic reasoning defaults as a group, so you can use a provider's
@@ -76,7 +100,7 @@ their own instructions and generation settings, so identical text does not guara
 identical answers.
 
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,
-`presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, and `thinking_budget`.
+`presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, `thinking_budget`, and `output_config`.
 Provider support varies; invalid combinations can return an API error. Model, message,
 stream and token-cap fields cannot be overridden by advanced JSON.
 

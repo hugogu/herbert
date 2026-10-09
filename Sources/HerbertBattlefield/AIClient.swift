@@ -16,11 +16,16 @@ public struct AIProgress: Sendable {
     public let usage: TokenUsage
     public let isFinal: Bool
     public let reasoning: AIReasoning?
-    public init(text: String, usage: TokenUsage, isFinal: Bool = false, reasoning: AIReasoning? = nil) {
+    public let contentBlocks: [AnthropicContentBlock]?
+    public init(
+        text: String, usage: TokenUsage, isFinal: Bool = false, reasoning: AIReasoning? = nil,
+        contentBlocks: [AnthropicContentBlock]? = nil
+    ) {
         self.text = text
         self.usage = usage
         self.isFinal = isFinal
         self.reasoning = reasoning
+        self.contentBlocks = contentBlocks
     }
 }
 
@@ -29,11 +34,16 @@ public struct AIReply: Sendable {
     public let usage: TokenUsage
     public let finishReason: String?
     public let reasoning: AIReasoning?
-    public init(text: String, usage: TokenUsage, finishReason: String? = "stop", reasoning: AIReasoning? = nil) {
+    public let contentBlocks: [AnthropicContentBlock]?
+    public init(
+        text: String, usage: TokenUsage, finishReason: String? = "stop", reasoning: AIReasoning? = nil,
+        contentBlocks: [AnthropicContentBlock]? = nil
+    ) {
         self.text = text
         self.usage = usage
         self.finishReason = finishReason
         self.reasoning = reasoning
+        self.contentBlocks = contentBlocks
     }
 }
 
@@ -90,7 +100,12 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
             throw BattlefieldError.missingKey
         }
         var request = URLRequest(url: try provider.endpoint(path), cachePolicy: .reloadIgnoringLocalCacheData)
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        if provider.kind == .anthropic {
+            request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+            request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        } else {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         return request
     }
@@ -118,10 +133,39 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
     }
 
     public func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
+        if provider.kind == .anthropic {
+            var models: [AIModel] = []
+            var cursors: Set<String> = []
+            var cursor: String?
+            var pages = 0
+            repeat {
+                pages += 1
+                let data = try await modelPage(provider: provider, apiKey: apiKey, cursor: cursor)
+                let page = try AnthropicMessages.decodeModels(data)
+                models += page.models
+                cursor = page.next
+                guard models.count <= 10_000, pages <= 500, cursor.map({ cursors.insert($0).inserted }) ?? true else {
+                    throw BattlefieldError.invalidResponse
+                }
+            } while cursor != nil
+            var seen: Set<String> = []
+            return models.filter { seen.insert($0.id).inserted }
+                .sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
+        }
+        return try Self.decodeModels(await modelPage(provider: provider, apiKey: apiKey))
+    }
+
+    private func modelPage(provider: ProviderConfiguration, apiKey: String, cursor: String? = nil) async throws -> Data
+    {
         var request = try request(provider: provider, apiKey: apiKey, path: "models")
         if provider.kind == .siliconFlow {
             var parts = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
             parts.queryItems = [URLQueryItem(name: "sub_type", value: "chat")]
+            request.url = parts.url
+        }
+        if let cursor {
+            var parts = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+            parts.queryItems = [URLQueryItem(name: "after_id", value: cursor)]
             request.url = parts.url
         }
         request.timeoutInterval = 30
@@ -135,7 +179,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 data.append(byte)
                 guard data.count <= AIResponseLimits.contentBytes else { throw BattlefieldError.responseTooLarge }
             }
-            return try Self.decodeModels(data)
+            return data
         } onCancel: {
             bytes.task.cancel()
         }
@@ -194,35 +238,41 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
     ) async throws -> AIReply {
         try Task.checkCancellation()
         let entrant = request.participant.entrant
-        let parameters = try entrant.preset.parameters.validated()
-        var body = try JSONSerialization.jsonObject(with: Data(parameters.extraJSON.utf8)) as! [String: Any]
-        body["model"] = entrant.preset.model.id
-        body["messages"] = request.messages.map { message in
-            var value = ["role": message.role, "content": message.content]
-            if let reasoning = message.reasoning { value[reasoning.field.rawValue] = reasoning.content }
-            return value
-        }
-        body["stream"] = true
-        if let cap = request.maxOutputTokens { body[entrant.outputTokenParameter.rawValue] = cap }
-        body = ReasoningDefaults.applying(to: body, entrant: entrant)
-        if entrant.kind == .compatible || entrant.kind == .gemini {
-            body["stream_options"] = ["include_usage": true]
-        }
-        if let temperature = parameters.temperature {
-            if let supported = entrant.preset.model.supportedParameters, !supported.contains("temperature") {
-                throw BattlefieldError.invalidParameters
+        let anthropic = entrant.kind == .anthropic
+        var body: [String: Any]
+        if anthropic {
+            body = try AnthropicMessages.body(for: request)
+        } else {
+            let parameters = try entrant.preset.parameters.validated()
+            body = try JSONSerialization.jsonObject(with: Data(parameters.extraJSON.utf8)) as! [String: Any]
+            body["model"] = entrant.preset.model.id
+            body["messages"] = request.messages.map { message in
+                var value = ["role": message.role, "content": message.content]
+                if let reasoning = message.reasoning { value[reasoning.field.rawValue] = reasoning.content }
+                return value
             }
-            body["temperature"] = temperature
-        }
-        if let topP = parameters.topP {
-            if let supported = entrant.preset.model.supportedParameters, !supported.contains("top_p") {
-                throw BattlefieldError.invalidParameters
+            body["stream"] = true
+            if let cap = request.maxOutputTokens { body[entrant.outputTokenParameter.rawValue] = cap }
+            body = ReasoningDefaults.applying(to: body, entrant: entrant)
+            if entrant.kind == .compatible || entrant.kind == .gemini {
+                body["stream_options"] = ["include_usage": true]
             }
-            body["top_p"] = topP
+            if let temperature = parameters.temperature {
+                if let supported = entrant.preset.model.supportedParameters, !supported.contains("temperature") {
+                    throw BattlefieldError.invalidParameters
+                }
+                body["temperature"] = temperature
+            }
+            if let topP = parameters.topP {
+                if let supported = entrant.preset.model.supportedParameters, !supported.contains("top_p") {
+                    throw BattlefieldError.invalidParameters
+                }
+                body["top_p"] = topP
+            }
         }
         var http = try self.request(
             provider: entrant.provider, apiKey: request.participant.apiKey,
-            path: "chat/completions")
+            path: anthropic ? "messages" : "chat/completions")
         http.httpMethod = "POST"
         http.setValue("text/event-stream, application/json", forHTTPHeaderField: "Accept")
         http.httpBody = try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys])
@@ -240,10 +290,16 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                     guard data.count <= AIResponseLimits.payloadBytes else { throw BattlefieldError.responseTooLarge }
                 }
                 do {
-                    return try Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
+                    return try anthropic
+                        ? AnthropicMessages.decodeReply(
+                            data, messages: request.messages, apiKey: request.participant.apiKey)
+                        : Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
                 } catch { throw Self.includingRetryHint(error, response: response) }
             }
-            var accumulator = ChatStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
+            var accumulator: any CompletionStreamAccumulator =
+                anthropic
+                ? AnthropicStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
+                : ChatStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
             var parser = ServerSentEventParser()
             var lastUpdate = ContinuousClock.now
             do {
@@ -251,12 +307,12 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                     try Task.checkCancellation()
                     if let event = try parser.consume(byte) {
                         try accumulator.consume(event)
-                        if ContinuousClock.now - lastUpdate >= .milliseconds(150) || accumulator.reportedUsage != nil {
+                        if ContinuousClock.now - lastUpdate >= .milliseconds(150) || accumulator.shouldPublish {
                             await progress(
                                 AIProgress(
                                     text: accumulator.text, usage: accumulator.usage,
-                                    isFinal: accumulator.finishReason != nil && accumulator.reportedUsage != nil,
-                                    reasoning: accumulator.reasoning))
+                                    isFinal: accumulator.isFinal,
+                                    reasoning: accumulator.reasoning, contentBlocks: accumulator.contentBlocks))
                             lastUpdate = .now
                         }
                         if accumulator.done { break }
@@ -264,21 +320,24 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 }
                 if let event = try parser.finish() { try accumulator.consume(event) }
                 try Task.checkCancellation()
-                guard accumulator.done || accumulator.finishReason != nil else {
+                guard accumulator.isComplete else {
                     throw BattlefieldError.incompleteStream
                 }
             } catch {
                 // Flush text received since the last throttled update before recording a failure.
                 await progress(
-                    AIProgress(text: accumulator.text, usage: accumulator.usage, reasoning: accumulator.reasoning))
+                    AIProgress(
+                        text: accumulator.text, usage: accumulator.usage, reasoning: accumulator.reasoning,
+                        contentBlocks: accumulator.contentBlocks))
                 throw Self.includingRetryHint(error, response: response)
             }
             await progress(
                 AIProgress(
-                    text: accumulator.text, usage: accumulator.usage, isFinal: true, reasoning: accumulator.reasoning))
+                    text: accumulator.text, usage: accumulator.usage, isFinal: true, reasoning: accumulator.reasoning,
+                    contentBlocks: accumulator.contentBlocks))
             return AIReply(
                 text: accumulator.text, usage: accumulator.usage, finishReason: accumulator.finishReason,
-                reasoning: accumulator.reasoning)
+                reasoning: accumulator.reasoning, contentBlocks: accumulator.contentBlocks)
         } onCancel: {
             bytes.task.cancel()
         }
@@ -331,7 +390,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
 }
 
 // Bound retained model content and individual payloads, independently of repeated SSE framing.
-private enum AIResponseLimits {
+enum AIResponseLimits {
     static let contentBytes = 8 * 1024 * 1024
     static let payloadBytes = 16 * 1024 * 1024
 }
@@ -391,7 +450,21 @@ struct ServerSentEventParser {
     }
 }
 
-struct ChatStreamAccumulator {
+protocol CompletionStreamAccumulator {
+    var text: String { get }
+    var usage: TokenUsage { get }
+    var reasoning: AIReasoning? { get }
+    var contentBlocks: [AnthropicContentBlock]? { get }
+    var reportedUsage: TokenUsage? { get }
+    var finishReason: String? { get }
+    var done: Bool { get }
+    var isFinal: Bool { get }
+    var isComplete: Bool { get }
+    var shouldPublish: Bool { get }
+    mutating func consume(_ payload: String) throws
+}
+
+struct ChatStreamAccumulator: CompletionStreamAccumulator {
     let messages: [AIMessage]
     var text = ""
     var apiKey = ""
@@ -402,6 +475,10 @@ struct ChatStreamAccumulator {
     var reportedUsage: TokenUsage?
     var finishReason: String?
     var done = false
+    var contentBlocks: [AnthropicContentBlock]? { nil }
+    var isFinal: Bool { finishReason != nil && reportedUsage != nil }
+    var isComplete: Bool { done || finishReason != nil }
+    var shouldPublish: Bool { reportedUsage != nil }
     var usage: TokenUsage {
         reportedUsage ?? .estimate(messages: messages, outputBytes: text.utf8.count + reasoningBytes)
     }

@@ -2,6 +2,15 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## Anthropic 兼容 Messages API（10 月 9 日）
+
+- 新增可自定义 HTTPS 地址的 Anthropic compatible 服务商类型；使用 x-api-key、API 版本、顶层 system 与原生 /messages 内容块，复用比赛规则、HTTP 取消和判题引擎。模型发现支持分页、名称、输出额度及推理能力；未知能力不按模型名猜测。
+- `scripts/check.sh` 通过：142 项 Swift 测试（44 Core、98 Battlefield）、16 项 Python 检查和严格格式检查，无 Swift 编译警告。新增覆盖原生鉴权、请求格式、分页循环保护、thinking/signature/redacted 块与重试顺序、实际 HTTP 判题重试、缓存创建/读取计量、实时输出估算、JSON/SSE、完整结束事件、保留中断输出、529 冷却及达到上限后不再重试。
+- `.build/anthropic-ui.xcresult` 三项 Mac UI 检查通过：Anthropic 类型选择、默认地址、隐藏不适用的输出参数、保存检测模型与重启恢复，以及现有服务商添加/删除、模型参数持久化和刷新。`.build/anthropic-final-ui.xcresult` 两项最终回归通过：并行比赛、重试判题、历史、分享、试运行与返回，以及停止并保存取消结果。
+- [实际英文配置截图](screenshots/en/battlefield/ai-anthropic-provider.png)已检查并链接到两份 README；使用确定性测试客户端与 HTTP 夹具，没有调用付费服务。
+- iOS Release 无签名编译通过；工程、课程、三语资源重复生成一致，个人 scheme 未改变。本机没有 iOS Simulator runtime；真实服务商及 iPhone/iPad 检查列入真机清单。Messages 强制要求 max_tokens，未发现模型额度时使用并记录 65,536 的回退值。
+- 另行隔离原有重试取消测试的两种场景并捕获不可变配置，保留停止和时限取消检查。此前 CI 的 Swift 6.3.3 在合并循环中提示可变捕获并发生运行时崩溃；本机 Swift 6.4 通过，旧工具链结果以新的 CI 为准。
+
 ## 429 与过载重试等待（10 月 9 日）
 
 - HTTP / JSON / SSE 内的 429 均归为 Overloaded；HTTP 失败码仍优先于正文。等待取 Retry-After 秒数/日期、Gemini RetryInfo 与明确文字延迟的较大值，并与 2 秒起步的指数退避和正向抖动结合；跨题也保留服务商冷却。

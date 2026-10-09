@@ -18,10 +18,14 @@ public struct AIMessage: Codable, Equatable, Sendable {
     public let role: String
     public let content: String
     public let reasoning: AIReasoning?
-    public init(role: String, content: String, reasoning: AIReasoning? = nil) {
+    public let contentBlocks: [AnthropicContentBlock]?
+    public init(
+        role: String, content: String, reasoning: AIReasoning? = nil, contentBlocks: [AnthropicContentBlock]? = nil
+    ) {
         self.role = role
         self.content = content
         self.reasoning = reasoning
+        self.contentBlocks = contentBlocks
     }
 }
 
@@ -132,7 +136,10 @@ public enum BattlefieldPrompt {
     public static func retryMessages(_ messages: [AIMessage], reply: AIReply, feedback: String) -> [AIMessage] {
         var messages = messages
         if !reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            messages.append(AIMessage(role: "assistant", content: reply.text, reasoning: reply.reasoning))
+            messages.append(
+                AIMessage(
+                    role: "assistant", content: reply.text, reasoning: reply.reasoning,
+                    contentBlocks: reply.contentBlocks))
             messages.append(AIMessage(role: "user", content: feedback))
         } else if let last = messages.last, last.role == "user" {
             // A reasoning-only, length-limited turn has no assistant answer to replay.

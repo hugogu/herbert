@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Add Anthropic-compatible Messages API providers with native authentication, paginated model discovery, capability-based thinking/effort defaults, signed content replay, streaming and JSON responses, cache-aware usage and 529 overload backoff. Preserve shared prompts, match budgets and old history.
+
 - Classify HTTP/in-band 429 as Overloaded. Honor Retry-After and provider retry hints, use exponential backoff with jitter for transient retries, show the wait, and cancel it on Stop or the match deadline.
 
 - Copy a puzzle's complete AI prompt from its details, reusing Battlefield's rules, worked examples and exact board description for manual chat use.

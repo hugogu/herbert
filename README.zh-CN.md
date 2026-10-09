@@ -62,7 +62,8 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 可启用统一的**每模型、每题 Token 预算**，累计该题所有尝试的输入与输出（含推理）。
 达到输出上限或用尽该题预算时标记 **Burnout**，保留已收到的推理，并取消该题剩余重试；其他题目和模型继续。
 
-- 添加多个 OpenRouter、SiliconFlow、Google Gemini 或兼容服务商，通过 `/models` 自动检测模型并选择默认参赛者。配置本地保存，API Key 留在系统钥匙串。
+- 添加多个 OpenRouter、SiliconFlow、Google Gemini、OpenAI 或 Anthropic 兼容服务商，通过 `/models` 自动检测模型并选择默认参赛者。配置本地保存，API Key 留在系统钥匙串。
+- 「Anthropic compatible」支持 Claude 和自定义 Messages API 地址，使用原生鉴权、流式思考、签名推理块重试及缓存用量统计；基础地址填写到 `/v1`。缺少模型输出上限时采用必需的 65,536 Token 请求额度，具体见[配置说明](docs/ai-battlefield.md)。
 - 「模型设置」保留采样和高级 JSON，默认启用思考并选择服务商声明的最高推理等级；显式 JSON 可覆盖自动值。输出额度统一由比赛设置和服务商能力决定，不再单独配置每个模型的上限。
 - 默认选中 30 道原创题，可自选题目与模型。各模型并行、逐题作答，使用相同的 Markdown 规则和棋盘提示；关闭限制时等待全部模型完成。
 - Mac 新比赛将模型与题目并排；进度用紧凑两行展示状态、尝试次数、分数、用时和程序摘要，模型列按成绩排序，表头显示归一化百分比、参考总分、输入/输出/总 Token 与缓存率。每次尝试独立计时，进行中实时更新，完成后保存在历史中。显示名称去掉冒号前的服务商前缀和 `(free)`。
@@ -102,7 +103,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 [当前进度界面](docs/screenshots/en/battlefield/ai-battlefield.png) · [新比赛](docs/screenshots/en/battlefield/ai-new-match.png) ·
 [比赛设置](docs/screenshots/en/battlefield/ai-match-settings.png) · [模型设置](docs/screenshots/en/battlefield/ai-model-settings.png) ·
 [题目选择](docs/screenshots/en/battlefield/ai-puzzles.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
-[服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
+[服务商](docs/screenshots/en/battlefield/ai-providers.png) · [Anthropic 配置](docs/screenshots/en/battlefield/ai-anthropic-provider.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
 [原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [Burnout 与保留推理](docs/screenshots/en/battlefield/ai-burnout.png) ·
 [正在思考](docs/screenshots/en/battlefield/ai-thinking.png) · [服务商流错误](docs/screenshots/en/battlefield/ai-stream-error.png) · [网络中断详情](docs/screenshots/en/battlefield/ai-network-error.png) ·
 [服务商错误详情](docs/screenshots/en/battlefield/ai-provider-error.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)

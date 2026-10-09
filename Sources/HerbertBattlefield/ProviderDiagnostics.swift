@@ -134,7 +134,7 @@ extension ProviderDiagnostics {
         let message = errorDict?["message"] as? String ?? (errorObj as? String) ?? target["message"] as? String
         let status = errorDict?["status"] as? String ?? target["status"] as? String
         let metadata = errorDict?["metadata"] as? [String: Any] ?? target["metadata"] as? [String: Any]
-        let errorType = metadata?["error_type"] as? String
+        let errorType = metadata?["error_type"] as? String ?? errorDict?["type"] as? String
         return (code, message, status, errorType)
     }
 
@@ -167,9 +167,11 @@ extension ProviderDiagnostics {
                 return .timedout
             }
             return .tempUnavailable
-        case 429, 503: return .overloaded
+        case 429, 503, 529: return .overloaded
         case nil, 200:
-            if combined.contains("high demand") || combined.contains("spikes in demand") {
+            if combined.contains("high demand") || combined.contains("spikes in demand")
+                || errorType == "overloaded_error" || errorType == "rate_limit_error"
+            {
                 return .overloaded
             }
             if combined.contains("streaming request exceeded") { return .timedout }

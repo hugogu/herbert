@@ -86,7 +86,7 @@ attempts by default. Every model receives the same per-problem budget. Reaching 
 output or token limit marks that problem **Burnout**, retains received reasoning and
 cancels its remaining retries. Other problems and entrants continue.
 
-- Add multiple OpenRouter, SiliconFlow, Google Gemini or OpenAI compatible providers. Discover models
+- Add multiple OpenRouter, SiliconFlow, Google Gemini, OpenAI or Anthropic compatible providers. Discover models
   through `/models`, choose default entrants, and save settings locally. API keys stay
   in the system Keychain.
 - **Model Settings** covers sampling and advanced parameters. Automatic thinking is on
@@ -101,6 +101,9 @@ cancels its remaining retries. Other problems and entrants continue.
   the history list; answer dialogs remain resizable. Dates sit beside the match title,
   elapsed time and tokens align under the actions, and scoring/answer tips open from
   the progress help button. iPhone uses short icon tabs.
+- **Anthropic compatible** supports Claude and custom Messages API endpoints with
+  native authentication, model discovery, streamed thinking, signed-block retries and
+  cache-aware usage. Select it in AI Providers and enter the base URL ending in `/v1`.
 - Model headers show normalized percentages with total points as a reference,
   input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
   live timers advance and finished durations remain fixed in history.
@@ -145,7 +148,8 @@ For repeatable comparisons, use the same puzzle set, attempts, Match Settings an
 prompt, and record sampling/reasoning parameters. The optional **per-model, per-problem
 token budget** covers input and output across retries. With both limits off, every entrant
 can finish without a match deadline or app-imposed output cap. Known provider output
-limits still apply; unknown limits use provider defaults.
+limits still apply; unknown Chat Completions limits use provider defaults. Anthropic Messages requires a
+request cap, using discovered capacity or a documented 65,536-token fallback.
 History snapshots preserve the full shared prompt and its version, boards, parameters, received answers and the scoring policy;
 provider model versions can still change. This composite score is our benchmark policy,
 inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
@@ -163,6 +167,7 @@ The capture predates 0.3.7, so its model names still include provider prefixes.*
 [Puzzle selection](docs/screenshots/en/battlefield/ai-puzzles.png) ·
 [Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
+[Anthropic setup](docs/screenshots/en/battlefield/ai-anthropic-provider.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
 [Full-page three-AI history](docs/screenshots/en/battlefield/ai-history.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
