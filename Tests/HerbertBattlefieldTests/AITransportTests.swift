@@ -1,4 +1,5 @@
 import Foundation
+import HerbertCore
 import XCTest
 
 @testable import HerbertBattlefield
@@ -23,6 +24,49 @@ final class AITransportTests: XCTestCase {
         let reasoning = try XCTUnwrap(body["reasoning"] as? [String: Any])
         XCTAssertEqual(reasoning["enabled"] as? Bool, true)
         XCTAssertEqual(reasoning["effort"] as? String, "xhigh")
+    }
+
+    func testInBandFailuresAreClassifiedRetriedAndPersistedThroughTheHTTPClient() async throws {
+        let cases: [(String, ProblemAnswerStatus, Int)] = [
+            (#"{"choices":[{"error":{"code":503,"message":"high demand"}}]}"#, .overloaded, 2),
+            (
+                #"{"error":{"code":502,"message":"Streaming request exceeded the 900 second wall-clock limit."}}"#,
+                .timedout, 1
+            ),
+            (#"{"error":{"code":502,"message":"Network connection lost."}}"#, .tempUnavailable, 2),
+            (#"{"error":{"code":403,"message":"Forbidden"}}"#, .accessDenied, 1),
+        ]
+        for (payload, status, attempts) in cases {
+            let provider = provider()
+            let stub = HTTPStub(
+                body:
+                    "data: {\"choices\":[{\"delta\":{\"reasoning\":\"Partial planning\"}}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":20}}\n\n"
+                    + "data: \(payload)\n\n", contentType: "text/event-stream")
+            BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            var configuration = CompetitionConfiguration()
+            configuration.attemptsPerProblem = 2
+            let result = try await BattlefieldEngine(client: client()).run(
+                configuration: configuration, problems: Array(try ProblemCatalog.bundled().prefix(2)),
+                participants: [
+                    CompetitionParticipant(
+                        entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))),
+                        apiKey: "fixture")
+                ]
+            ) { _ in }
+            let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+            XCTAssertEqual(answer.status, status)
+            XCTAssertEqual(answer.attempts.count, attempts)
+            XCTAssertTrue(
+                answer.attempts.allSatisfy {
+                    $0.evaluation == nil && $0.finishedAt != nil && $0.reasoning?.content == "Partial planning"
+                        && $0.usage.output == 20 && $0.usage.partial
+                })
+            XCTAssertEqual(result.entrants[0].answers[1].status, status == .accessDenied ? .cancelled : status)
+            XCTAssertEqual(stub.requests.count, status == .accessDenied ? 1 : 2 * attempts)
+            let restored = try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result))
+            XCTAssertEqual(restored.entrants[0].answers[0].status, status)
+            XCTAssertEqual(restored.entrants[0].answers[0].attempts, answer.attempts)
+        }
     }
 
     func testClientPreservesResourceDeadlineSeparateFromInactivityTimeout() {

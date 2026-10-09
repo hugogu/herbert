@@ -115,6 +115,36 @@ final class SpecialErrorHandlingTests: XCTestCase {
         XCTAssertTrue(authClassification.shouldStopEntrant)
     }
 
+    func testClassificationDoesNotTreatIncidentalNumbersAsHTTPStatusCodes() {
+        for status in [200, 400, 401, 500] {
+            let error = AIHTTPError(status: status, providerResponse: "Invalid field at index 1503; request 403502")
+            XCTAssertEqual(ProviderDiagnostics.classify(error).status, .error)
+        }
+        let forbidden = AIHTTPError(status: 403, providerResponse: #"{"error":{"code":503,"message":"high demand"}}"#)
+        XCTAssertEqual(ProviderDiagnostics.classify(forbidden), .accessDenied)
+        let unauthorized = AIHTTPError(
+            status: 401, providerResponse: #"{"error":{"code":502,"message":"high demand"}}"#)
+        XCTAssertEqual(ProviderDiagnostics.classify(unauthorized).status, .error)
+        let unavailable = AIHTTPError(status: 503, providerResponse: #"{"error":{"code":403}}"#)
+        XCTAssertEqual(ProviderDiagnostics.classify(unavailable), .overloaded)
+        let modelText = AIHTTPError(
+            status: 200,
+            providerResponse:
+                #"{"choices":[{"delta":{"reasoning":"high demand"},"finish_reason":"error"}]}"#)
+        XCTAssertEqual(ProviderDiagnostics.classify(modelText).status, .error)
+    }
+
+    func testChoiceLevelAndStringErrorCodesAreClassifiedFromInBandResponses() throws {
+        for payload in [
+            #"{"choices":[{"error":{"code":503,"message":"capacity"}}]}"#,
+            #"{"error":null,"choices":[{"error":{"code":"503"}}]}"#,
+            #"[{"error":{"code":"503","status":"UNAVAILABLE"}}]"#,
+        ] {
+            let error = AIHTTPError(status: 200, providerResponse: payload)
+            XCTAssertEqual(ProviderDiagnostics.classify(error), .overloaded)
+        }
+    }
+
     func testOverloadedErrorRetriesAndSucceedsOnSecondAttempt() async throws {
         let gemini503 = AIHTTPError(
             status: 503,

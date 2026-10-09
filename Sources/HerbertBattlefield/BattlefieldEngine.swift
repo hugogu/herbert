@@ -266,7 +266,7 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].attempts[a].providerResponse = diagnostic
 
                     let classification = ProviderDiagnostics.classify(
-                        error, detail: diagnostic, entrant: participant.entrant)
+                        error, detail: diagnostic)
                     result!.entrants[e].answers[p].status = classification.status
 
                     if classification.shouldStopEntrant {

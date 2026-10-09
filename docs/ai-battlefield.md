@@ -89,10 +89,17 @@ and is not judged or sent back as an incorrect program. Old attempts with
 `finish_reason: error` also suppress the misleading Rejected presentation.
 
 Special provider and network conditions receive actionable classifications instead of an ambiguous failure:
+
 - **Overloaded**: 503 high demand or temporary capacity spikes (e.g. Gemini). This error can be retried across problem attempts.
-- **Timedout**: Network request timeouts (`NSURLErrorDomain -1001`) or 502 upstream errors where wall-clock streaming limits are exceeded. The problem is recorded as Timedout and the entrant proceeds to the next problem without stalling.
+- **Timed out**: Network request timeouts (`NSURLErrorDomain -1001`) or 502 upstream errors where wall-clock streaming limits are exceeded. The problem is recorded as Timed out and the entrant proceeds to the next problem without stalling.
 - **Temp Unavailable**: 502 network connection lost or transport disconnects. This transient state can be retried across problem attempts.
 - **Access Denied**: 403 authorization failures or Terms of Service violations. The entrant immediately stops and cancels remaining queued problems.
+
+HTTP failure statuses take precedence over contradictory body codes. With HTTP 200,
+structured top-level or choice-level error codes are used, including array envelopes.
+Incidental numbers in error prose never act as HTTP statuses. Transient retries reuse
+the existing messages and count toward the same attempt and token budgets; partial
+output, reasoning, usage and each attempt's duration remain available in history.
 
 HTTP 200 can still contain a provider error. Both JSON and SSE replies recognize
 top-level/choice errors and `finish_reason: error` or `content_filter`, preserving partial

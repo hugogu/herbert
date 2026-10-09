@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Distinguish overloaded, timed out, temporarily unavailable and access-denied attempts. Retry transient failures within the existing budgets, skip timed-out puzzles, and stop only entrants with terminal errors. Classify structured HTTP/SSE errors without mistaking incidental numbers for status codes.
+
 - Show each attempt's elapsed time in progress and answer details, keeping completed durations in history. Use the last saved checkpoint when closing interrupted attempts on recovery.
 - Keep the normalized percentage as the primary model score and replace its Benchmark score caption with total points.
 

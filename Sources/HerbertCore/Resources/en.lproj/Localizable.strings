@@ -156,7 +156,7 @@
 "让指令也成为参数" = "Pass commands as arguments";
 "记录" = "Progress";
 "试试其他筛选，或搜索关卡编号。" = "Try another filter or search for a problem ID.";
-"超时" = "Timedout";
+"超时" = "Timed out";
 "踩到陷阱，所有目标已重置。" = "A trap reset every target.";
 "轨迹保留本次运行走过的路径，重置棋盘或修改代码后清空。隐藏轨迹不会停止记录。" = "The trail shows paths walked during this run. Resetting the board or editing code clears it. Recording continues while hidden.";
 "载入最短解" = "Load shortest solution";

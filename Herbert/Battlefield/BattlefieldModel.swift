@@ -39,7 +39,8 @@ final class BattlefieldModel: ObservableObject {
                 if ProcessInfo.processInfo.arguments.contains("--battlefield-fixture") {
                     selectedClient = BattlefieldFixtureClient(
                         diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"),
-                        streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"))
+                        streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"),
+                        specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"))
                 }
             }
         #endif
@@ -309,9 +310,12 @@ func battlefieldError(_ error: Error) -> String {
     actor BattlefieldFixtureClient: AIClient {
         let diagnostics: Bool
         let streamErrors: Bool
-        init(diagnostics: Bool = false, streamErrors: Bool = false) {
+        let specialErrors: Bool
+        private var calls: [String: Int] = [:]
+        init(diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false) {
             self.diagnostics = diagnostics
             self.streamErrors = streamErrors
+            self.specialErrors = specialErrors
         }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
@@ -328,6 +332,20 @@ func battlefieldError(_ error: Error) -> String {
         ) async throws -> AIReply {
             let problem = request.messages.first { $0.role == "user" }?.content ?? ""
             let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
+            if specialErrors {
+                let model = request.participant.entrant.preset.model.id
+                let key = model + problem
+                calls[key, default: 0] += 1
+                try await Task.sleep(for: .milliseconds(400))
+                if model == "fixture-2" {
+                    throw AIHTTPError(status: 403, providerResponse: "Forbidden by provider")
+                }
+                if problem.contains("ID 10006") { throw URLError(.timedOut) }
+                if calls[key] == 1 {
+                    throw AIHTTPError(status: 503, providerResponse: "Service overloaded")
+                }
+                return AIReply(text: "```h\ns\n```", usage: TokenUsage(input: 900, output: 12))
+            }
             if streamErrors {
                 let reasoning = AIReasoning(
                     content:

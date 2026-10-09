@@ -3,7 +3,8 @@ import XCTest
 final class BattlefieldUITests: XCTestCase {
     @MainActor
     private func launch(
-        reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false
+        reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false,
+        specialErrors: Bool = false
     ) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -13,6 +14,7 @@ final class BattlefieldUITests: XCTestCase {
             + (diagnostics ? ["--battlefield-diagnostics"] : [])
             + (threeModels ? ["--battlefield-three-models"] : [])
             + (streamErrors ? ["--battlefield-stream-errors"] : [])
+            + (specialErrors ? ["--battlefield-special-errors"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -491,6 +493,40 @@ final class BattlefieldUITests: XCTestCase {
             app.swipeDown()
         #endif
         capture(app, "herbert-benchmark")
+        app.terminate()
+    }
+
+    @MainActor
+    func testSpecialProviderFailuresRetryAdvanceAndStopOnlyDeniedEntrant() {
+        let app = launch(specialErrors: true)
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        for id in [10001, 10006] {
+            app.descendants(matching: .any)["problemChoice-\(id)"].firstMatch.battlefieldTap()
+        }
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15))
+        XCTAssertTrue(reveal("answer-fixture-1-10001", in: app).label.contains("Accepted"))
+        XCTAssertTrue(reveal("answer-fixture-1-10006", in: app).label.contains("Timed out"))
+        XCTAssertTrue(reveal("answer-fixture-2-10001", in: app).label.contains("Access Denied"))
+        XCTAssertTrue(reveal("answer-fixture-2-10006", in: app).label.contains("Stopped"))
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["AI HTTP 503"].exists)
+        XCTAssertFalse(app.staticTexts["Rejected"].exists)
+        _ = reveal("attempt-time-2", in: app)
+        XCTAssertTrue(app.staticTexts["Attempt 2"].exists)
+        app.buttons["Close"].battlefieldTap()
+        reveal("answer-fixture-1-10006", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Timed out"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Attempt 2"].exists)
+        app.buttons["Close"].battlefieldTap()
+        reveal("answer-fixture-2-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Access Denied"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Attempt 2"].exists)
+        app.buttons["Close"].battlefieldTap()
         app.terminate()
     }
 

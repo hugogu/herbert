@@ -116,7 +116,7 @@ extension ProviderDiagnostics {
         guard let detail, let data = detail.data(using: .utf8),
             let json = try? JSONSerialization.jsonObject(with: data)
         else {
-            return (nil, nil, nil, nil)
+            return (nil, detail, nil, nil)
         }
         var dict: [String: Any]?
         if let array = json as? [[String: Any]] {
@@ -126,9 +126,11 @@ extension ProviderDiagnostics {
         }
         guard let target = dict else { return (nil, nil, nil, nil) }
 
-        let errorObj = target["error"]
+        let choice = (target["choices"] as? [[String: Any]])?.first
+        let errorObj = target["error"].flatMap { $0 is NSNull ? nil : $0 } ?? choice?["error"]
         let errorDict = errorObj as? [String: Any]
-        let code = errorDict?["code"] as? Int ?? target["code"] as? Int
+        let rawCode = errorDict?["code"] ?? target["code"]
+        let code = (rawCode as? Int) ?? (rawCode as? String).flatMap(Int.init)
         let message = errorDict?["message"] as? String ?? (errorObj as? String) ?? target["message"] as? String
         let status = errorDict?["status"] as? String ?? target["status"] as? String
         let metadata = errorDict?["metadata"] as? [String: Any] ?? target["metadata"] as? [String: Any]
@@ -136,94 +138,48 @@ extension ProviderDiagnostics {
         return (code, message, status, errorType)
     }
 
-    public static func classify(
-        _ error: any Error, detail: String? = nil, entrant: Entrant? = nil
+    static func classify(
+        _ error: any Error, detail: String? = nil
     ) -> AIProblemErrorClassification {
-        let (code, message, statusStr, errorType) = extractPayload(from: detail)
-        let effectiveCode = code ?? (error as? AIHTTPError)?.status
-        let combined = [
-            message,
-            statusStr,
-            errorType,
-            detail,
-            error.localizedDescription,
-        ].compactMap { $0 }.joined(separator: " ").lowercased()
-
-        let ns = error as NSError
-        if (error as? URLError)?.code == .timedOut
-            || (ns.domain == NSURLErrorDomain && ns.code == NSURLErrorTimedOut)
-            || (ns.domain == NSURLErrorDomain && combined.contains("timed out"))
-        {
-            return .timedout
+        let provider = error as? AIHTTPError
+        let detail = detail ?? provider?.providerResponse
+        let (code, message, status, errorType) = extractPayload(from: detail)
+        // An HTTP failure is authoritative; only successful HTTP streams use in-band codes.
+        let effectiveCode = provider.flatMap { (400..<600).contains($0.status) ? $0.status : nil } ?? code
+        let combined = [message, status, errorType, error.localizedDescription]
+            .compactMap { $0 }.joined(separator: " ").lowercased()
+        let network = error as NSError
+        if network.domain == NSURLErrorDomain {
+            switch network.code {
+            case NSURLErrorTimedOut: return .timedout
+            case NSURLErrorNetworkConnectionLost, NSURLErrorCannotConnectToHost: return .tempUnavailable
+            default: break
+            }
         }
-
-        if effectiveCode == 502 || combined.contains("502") {
-            let isExceededLimit =
-                combined.contains("exceeded")
-                && (combined.contains("limit")
-                    || combined.contains("wall-clock")
-                    || combined.contains("wall clock")
-                    || combined.contains("second")
-                    || combined.contains("timeout")
-                    || combined.contains("timed out"))
-            if isExceededLimit {
+        switch effectiveCode {
+        case 403: return .accessDenied
+        case 502:
+            if combined.contains("exceeded")
+                && (combined.contains("wall-clock") || combined.contains("wall clock")
+                    || combined.contains("timeout") || combined.contains("timed out")
+                    || (combined.contains("second") && combined.contains("limit")))
+            {
                 return .timedout
             }
-
-            let isConnectionLost =
-                combined.contains("connection lost")
-                || combined.contains("network connection")
-                || combined.contains("connection reset")
-                || combined.contains("bad gateway")
-                || combined.contains("provider_unavailable")
-                || combined.contains("temporarily unavailable")
-            if isConnectionLost || effectiveCode == 502 {
-                return .tempUnavailable
-            }
-        }
-
-        if (error as? URLError)?.code == .networkConnectionLost
-            || (error as? URLError)?.code == .cannotConnectToHost
-            || (ns.domain == NSURLErrorDomain
-                && (ns.code == NSURLErrorNetworkConnectionLost || ns.code == NSURLErrorCannotConnectToHost))
-        {
             return .tempUnavailable
-        }
-
-        if effectiveCode == 403 || combined.contains("403") {
-            return .accessDenied
-        }
-
-        if effectiveCode == 503 || combined.contains("503") {
-            let isOverloaded =
-                combined.contains("high demand")
-                || combined.contains("spikes in demand")
-                || combined.contains("overloaded")
-                || combined.contains("over capacity")
-                || combined.contains("unavailable")
-                || entrant?.kind == .gemini
-                || entrant?.preset.model.id.lowercased().contains("gemini") == true
-            if isOverloaded || effectiveCode == 503 {
+        case 503: return .overloaded
+        case nil, 200:
+            if combined.contains("high demand") || combined.contains("spikes in demand") {
                 return .overloaded
             }
+            if combined.contains("streaming request exceeded") { return .timedout }
+            if combined.contains("network connection lost") { return .tempUnavailable }
+            if combined.contains("terms of service") && combined.contains("prohibited") { return .accessDenied }
+        default: break
         }
-
-        if combined.contains("high demand") || combined.contains("spikes in demand") {
-            return .overloaded
-        }
-        if combined.contains("streaming request exceeded") {
-            return .timedout
-        }
-        if combined.contains("network connection lost") {
-            return .tempUnavailable
-        }
-        if combined.contains("terms of service") && combined.contains("prohibited") {
-            return .accessDenied
-        }
-
-        let desc = (error as? AIHTTPError)?.localizedDescription ?? error.localizedDescription
-        return .generic(message: desc)
+        return .generic(message: error.localizedDescription)
     }
+
 }
 
 extension AIReply {
