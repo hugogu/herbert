@@ -86,7 +86,7 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
         XCTAssertNil(attempt.evaluation)
     }
 
-    func testReasoningOnlyAttemptKeepsFullTextAndRetriesWithoutEmptyAssistant() async throws {
+    func testOutputLimitBurnsOutWithoutJudgeFeedbackOrRetry() async throws {
         let reasoning = String(repeating: "plan ", count: 14_000)
         let client = RetryClient(
             first: AIReply(
@@ -94,16 +94,14 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
                 finishReason: "length", reasoning: AIReasoning(content: reasoning)))
         let result = try await run(client)
         let attempts = try XCTUnwrap(result.entrants.first?.answers.first?.attempts)
-        XCTAssertEqual(attempts.count, 2)
+        XCTAssertEqual(attempts.count, 1)
         XCTAssertEqual(attempts[0].reasoning?.content, reasoning)
         XCTAssertNil(attempts[0].program)
-        XCTAssertTrue(attempts[0].evaluation?.feedback.contains("No final H program") == true)
+        XCTAssertNil(attempts[0].evaluation)
         XCTAssertEqual(attempts[0].finishReason, "length")
-        XCTAssertTrue(attempts[1].evaluation?.accepted == true)
         let requests = await client.requests
-        XCTAssertEqual(requests[1].map(\.role), ["system", "user"])
-        XCTAssertTrue(requests[1][1].content.contains("Judge feedback:"))
-        XCTAssertTrue(requests[1][1].content.contains("65536"))
+        XCTAssertEqual(requests.count, 1)
+        XCTAssertEqual(result.entrants.first?.answers.first?.status, .burnout)
         XCTAssertEqual(try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result)), result)
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -113,7 +111,7 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
         XCTAssertEqual(restored.id, result.id)
         XCTAssertEqual(restored.entrants.first?.answers.first?.attempts.map(\.reasoning), attempts.map(\.reasoning))
         XCTAssertEqual(restored.entrants.first?.answers.first?.attempts.map(\.response), attempts.map(\.response))
-        XCTAssertEqual(restored.entrants.first?.answers.first?.status, .solved)
+        XCTAssertEqual(restored.entrants.first?.answers.first?.status, .burnout)
     }
 
     func testRetryInputEstimatesIncludeReplayedReasoning() {

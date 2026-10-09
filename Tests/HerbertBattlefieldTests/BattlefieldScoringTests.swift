@@ -26,9 +26,10 @@ final class BattlefieldScoringTests: XCTestCase {
 
     func testDisplayNamesPreserveProviderIdentityAndMeaningfulModelLabels() throws {
         let model = AIModel(id: "nvidia/model:free", name: "NVIDIA: Nemotron 3 Super (free)")
-        XCTAssertEqual(model.displayName, "NVIDIA: Nemotron 3 Super")
+        XCTAssertEqual(model.displayName, "Nemotron 3 Super")
         XCTAssertEqual(model.name, "NVIDIA: Nemotron 3 Super (free)")
         XCTAssertEqual(model.id, "nvidia/model:free")
+        XCTAssertEqual(AIModel(id: "vendor/model:free").displayName, "vendor/model:free")
         XCTAssertEqual(AIModel(id: "m", name: "Model (vision) (FREE) ").displayName, "Model (vision)")
         XCTAssertEqual(AIModel(id: "m", name: "Model (2026)").displayName, "Model (2026)")
         XCTAssertEqual(try JSONDecoder().decode(AIModel.self, from: JSONEncoder().encode(model)), model)
@@ -113,7 +114,7 @@ final class BattlefieldScoringTests: XCTestCase {
         let client = ScriptedAI(behavior: .correct)
         let engine = BattlefieldEngine(client: client)
         var configuration = CompetitionConfiguration()
-        configuration.mode = .bestEffort
+
         configuration.attemptsPerProblem = 2
         let participant = CompetitionParticipant(
             entrant: Entrant(

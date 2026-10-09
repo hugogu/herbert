@@ -2,14 +2,14 @@ import Foundation
 import HerbertCore
 
 /// One sequential question stream per entrant, concurrently scheduled across entrants.
-/// The actor owns all scores, budget reservations and cancellation decisions.
+/// The actor owns all scores, per-problem budgets and cancellation decisions.
 public actor BattlefieldEngine {
     private let client: any AIClient
     private var result: CompetitionResult?
     private var workers: [UUID: Task<Void, Never>] = [:]
     private var timer: Task<Void, Never>?
     private var deadline: ContinuousClock.Instant?
-    private var outputReservations: [UUID: Int] = [:]
+    private var requests: [UUID: Task<AIReply, any Error>] = [:]
     private var observer: (@Sendable (CompetitionResult) async -> Void)?
     private var executing = false
 
@@ -38,8 +38,8 @@ public actor BattlefieldEngine {
         result = CompetitionResult(
             configuration: configuration, problems: problems, entrants: participants.map(\.entrant))
         observer = update
-        outputReservations = [:]
-        deadline = configuration.mode == .timed ? .now.advanced(by: .seconds(configuration.timeLimitSeconds)) : nil
+        requests = [:]
+        deadline = configuration.timeLimitEnabled ? .now.advanced(by: .seconds(configuration.timeLimitSeconds)) : nil
         await publish()
         if let deadline {
             timer = Task { [weak self] in
@@ -62,8 +62,7 @@ public actor BattlefieldEngine {
         timer = nil
         workers = [:]
         if result?.status == .running {
-            let exhausted = result?.entrants.contains(where: \.exhaustedBudget) == true
-            result?.finish(exhausted ? .tokenLimit : .completed)
+            result?.finish(.completed)
             await publish()
         }
         observer = nil
@@ -75,7 +74,8 @@ public actor BattlefieldEngine {
         result?.finish(reason == .running ? .userStopped : reason)
         timer?.cancel()
         for worker in workers.values { worker.cancel() }
-        outputReservations = [:]
+        for request in requests.values { request.cancel() }
+        requests = [:]
         await publish()
     }
 
@@ -95,71 +95,46 @@ public actor BattlefieldEngine {
         return true
     }
 
-    private func remainingBudget(entrantIndex: Int) -> Int {
-        guard let result, result.configuration.mode == .tokenLimited else { return Int.max }
-        if result.configuration.tokenBudgetScope == .perModel {
-            return max(0, result.configuration.tokenLimit - result.entrants[entrantIndex].totalTokens)
-        }
-        return max(0, result.configuration.tokenLimit - result.totalTokens)
+    private func remainingBudget(entrant: Int, problem: Int) -> Int? {
+        guard let result, result.configuration.problemTokenLimitEnabled else { return nil }
+        let used = result.entrants[entrant].answers[problem].attempts.reduce(0) { $0 + $1.usage.total }
+        return max(0, result.configuration.problemTokenLimit - used)
     }
 
-    /// Reservations bound concurrent output requests; prompt token estimates are reconciled
-    /// against provider usage. Providers cannot promise exact billing on an aborted stream.
-    private func permit(entrantIndex: Int, messages: [AIMessage], configured: Int) async -> Int? {
-        while await active() {
-            guard let result else { return nil }
-            if result.configuration.mode != .tokenLimited { return configured }
-            let entrant = result.entrants[entrantIndex]
-            let prompt = TokenUsage.estimate(messages: messages).input
-            let budget = remainingBudget(entrantIndex: entrantIndex)
-            let reserved =
-                result.configuration.tokenBudgetScope == .shared
-                ? outputReservations.values.reduce(0, +) : (outputReservations[entrant.id] ?? 0)
-            let available = budget - reserved - prompt
-            if available > 0 {
-                let waiting =
-                    result.configuration.tokenBudgetScope == .shared
-                    ? max(1, result.entrants.filter { $0.finishedAt == nil && outputReservations[$0.id] == nil }.count)
-                    : 1
-                let allowance = min(configured, max(1, available / waiting))
-                outputReservations[entrant.id] = allowance
-                return allowance
-            }
-            if reserved == 0 {
-                self.result?.entrants[entrantIndex].exhaustedBudget = true
-                if result.configuration.tokenBudgetScope == .shared { await stop(reason: .tokenLimit) }
-                return nil
-            }
-            do { try await Task.sleep(for: .milliseconds(100)) } catch { return nil }
+    private func allowance(model: AIModel, messages: [AIMessage], remaining: Int?) -> Int? {
+        var cap = model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }
+        let input = TokenUsage.estimate(messages: messages).input
+        if let context = model.contextLength, let maximum = cap {
+            cap = min(maximum, max(1, context - input - max(256, input / 10)))
         }
-        return nil
+        if let remaining { cap = min(cap ?? Int.max, max(1, remaining - input)) }
+        return cap
+    }
+
+    private func burnOut(entrant: Int, problem: Int) {
+        result!.entrants[entrant].answers[problem].status = .burnout
+        if let a = result!.entrants[entrant].answers[problem].attempts.indices.last,
+            result!.entrants[entrant].answers[problem].attempts[a].finishedAt == nil
+        {
+            result!.entrants[entrant].answers[problem].attempts[a].finishedAt = .now
+            result!.entrants[entrant].answers[problem].attempts[a].usage.partial = true
+        }
     }
 
     private func record(_ progress: AIProgress, entrant: Int, problem: Int, attempt: Int) async {
-        guard await active(), result!.entrants[entrant].answers[problem].attempts.indices.contains(attempt) else {
+        guard await active(), result!.entrants[entrant].answers[problem].status != .burnout,
+            result!.entrants[entrant].answers[problem].attempts.indices.contains(attempt)
+        else {
             return
         }
-        let previous = result!.entrants[entrant].answers[problem].attempts[attempt].usage
         result!.entrants[entrant].answers[problem].attempts[attempt].usage = progress.usage
         result!.entrants[entrant].answers[problem].attempts[attempt].response = progress.text
         result!.entrants[entrant].answers[problem].attempts[attempt].reasoning = progress.reasoning
-        if let reservation = outputReservations[result!.entrants[entrant].id] {
-            outputReservations[result!.entrants[entrant].id] = max(
-                0, reservation - max(0, progress.usage.output - previous.output))
+        if !progress.isFinal, remainingBudget(entrant: entrant, problem: problem) == 0 {
+            burnOut(entrant: entrant, problem: problem)
+            requests[result!.entrants[entrant].id]?.cancel()
         }
-        if !progress.isFinal && result!.configuration.mode == .tokenLimited
-            && remainingBudget(entrantIndex: entrant) == 0
-        {
-            if result!.configuration.tokenBudgetScope == .shared {
-                await stop(reason: .tokenLimit)
-            } else {
-                result!.entrants[entrant].exhaustedBudget = true
-                workers[result!.entrants[entrant].id]?.cancel()
-                await publish()
-            }
-        } else {
-            await publish()
-        }
+        await publish()
     }
 
     private func solve(_ participant: CompetitionParticipant) async {
@@ -167,18 +142,20 @@ public actor BattlefieldEngine {
         let problems = result!.problems
         let maxAttempts = result!.configuration.attemptsPerProblem
         for (p, problem) in problems.enumerated() {
-            guard await active(), result?.entrants[e].exhaustedBudget == false else { break }
+            guard await active() else { break }
             var messages = [
                 AIMessage(role: "system", content: result!.systemPrompt),
                 AIMessage(role: "user", content: BattlefieldPrompt.problem(problem)),
             ]
             for a in 0..<maxAttempts {
-                let maximum = min(
-                    participant.entrant.preset.parameters.maxOutputTokens,
-                    participant.entrant.preset.model.maximumOutputTokens ?? 65_536)
-                guard let cap = await permit(entrantIndex: e, messages: messages, configured: maximum),
-                    await active()
-                else { break }
+                guard await active() else { break }
+                let remaining = remainingBudget(entrant: e, problem: p)
+                if let remaining, remaining <= TokenUsage.estimate(messages: messages).input {
+                    burnOut(entrant: e, problem: p)
+                    await publish()
+                    break
+                }
+                let cap = allowance(model: participant.entrant.preset.model, messages: messages, remaining: remaining)
                 var attempt = AnswerAttempt(number: a + 1)
                 attempt.requestedMaxOutputTokens = cap
                 attempt.usage = .estimate(messages: messages)
@@ -187,25 +164,34 @@ public actor BattlefieldEngine {
                 await publish()
                 do {
                     try Task.checkCancellation()
-                    let reply = try await client.complete(
-                        AICompletionRequest(participant: participant, messages: messages, maxOutputTokens: cap)
-                    ) { progress in await self.record(progress, entrant: e, problem: p, attempt: a) }
-                    outputReservations[participant.entrant.id] = nil
-                    guard await active(), result?.entrants[e].exhaustedBudget == false else { break }
+                    let completion = AICompletionRequest(
+                        participant: participant, messages: messages, maxOutputTokens: cap)
+                    let request = Task {
+                        try await client.complete(
+                            completion
+                        ) { progress in await self.record(progress, entrant: e, problem: p, attempt: a) }
+                    }
+                    requests[participant.entrant.id] = request
+                    let reply = try await withTaskCancellationHandler {
+                        try await request.value
+                    } onCancel: {
+                        request.cancel()
+                    }
+                    requests[participant.entrant.id] = nil
+                    guard await active() else { break }
+                    if result!.entrants[e].answers[p].status == .burnout { break }
                     result!.entrants[e].answers[p].attempts[a].usage = reply.usage
                     result!.entrants[e].answers[p].attempts[a].finishReason = reply.finishReason
                     result!.entrants[e].answers[p].attempts[a].response = reply.text
                     result!.entrants[e].answers[p].attempts[a].reasoning = reply.reasoning
                     result!.entrants[e].answers[p].attempts[a].finishedAt = .now
-                    let used =
-                        result!.configuration.tokenBudgetScope == .shared
-                        ? result!.totalTokens : result!.entrants[e].totalTokens
-                    if result!.configuration.mode == .tokenLimited && used > result!.configuration.tokenLimit {
-                        if result!.configuration.tokenBudgetScope == .shared {
-                            await stop(reason: .tokenLimit)
-                        } else {
-                            result!.entrants[e].exhaustedBudget = true
-                        }
+                    if reply.finishReason == "length"
+                        || (remainingBudget(entrant: e, problem: p) == 0
+                            && result!.entrants[e].answers[p].attempts.reduce(0, { $0 + $1.usage.total })
+                                > result!.configuration.problemTokenLimit)
+                    {
+                        burnOut(entrant: e, problem: p)
+                        await publish()
                         break
                     }
                     if reply.providerFailed {
@@ -236,7 +222,7 @@ public actor BattlefieldEngine {
                             targetCount: try Board(problem: problem).targets.count,
                             feedback:
                                 reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                ? "No final H program was returned. The output allowance (\(cap) tokens) includes reasoning. Finish reason: \(reply.finishReason ?? "unknown"). Return a concise complete fenced H program."
+                                ? "No final H program was returned. The output allowance (\(cap.map(String.init) ?? "provider maximum") tokens) includes reasoning. Finish reason: \(reply.finishReason ?? "unknown"). Return a concise complete fenced H program."
                                 : "Invalid response format. Return exactly one fenced H program, no prose, at most 16 KiB."
                         )
                     }
@@ -246,12 +232,9 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].status =
                         evaluation.accepted ? .solved : (a + 1 == maxAttempts ? .failed : .requesting)
                     await publish()
-                    if result!.configuration.mode == .tokenLimited && remainingBudget(entrantIndex: e) == 0 {
-                        if result!.configuration.tokenBudgetScope == .shared {
-                            await stop(reason: .tokenLimit)
-                        } else {
-                            result!.entrants[e].exhaustedBudget = true
-                        }
+                    if !evaluation.accepted && remainingBudget(entrant: e, problem: p) == 0 {
+                        burnOut(entrant: e, problem: p)
+                        await publish()
                         break
                     }
                     if evaluation.accepted { break }
@@ -261,8 +244,9 @@ public actor BattlefieldEngine {
                             + " Battlefield points: \(BattlefieldScoring.coverageAndLengthV1.score(evaluation, byteLimit: problem.byteLimit)). Attempts remaining: \(maxAttempts - a - 1)."
                     )
                 } catch {
-                    outputReservations[participant.entrant.id] = nil
+                    requests[participant.entrant.id] = nil
                     guard result?.status == .running else { return }
+                    if result!.entrants[e].answers[p].status == .burnout { break }
                     if let partial = (error as? AIHTTPError)?.partialReply {
                         result!.entrants[e].answers[p].attempts[a].response = partial.text
                         result!.entrants[e].answers[p].attempts[a].reasoning = partial.reasoning
@@ -293,7 +277,7 @@ public actor BattlefieldEngine {
                 }
             }
         }
-        outputReservations[participant.entrant.id] = nil
+        requests[participant.entrant.id] = nil
         if result?.status == .running {
             result!.entrants[e].finishedAt = .now
             for p in result!.entrants[e].answers.indices {

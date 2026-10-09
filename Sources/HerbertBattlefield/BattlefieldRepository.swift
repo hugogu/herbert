@@ -1,13 +1,13 @@
 import Foundation
 
 public struct BattlefieldSettings: Codable, Sendable {
-    public var schemaVersion = 2
+    public var schemaVersion = 3
     public var providers: [ProviderConfiguration] = []
     public var competition = CompetitionConfiguration()
     public init() {}
 
     public func validated() throws -> BattlefieldSettings {
-        guard (1...2).contains(schemaVersion), providers.count <= 100,
+        guard (1...3).contains(schemaVersion), providers.count <= 100,
             Set(providers.map(\.id)).count == providers.count
         else { throw BattlefieldError.storageCorrupt }
         for provider in providers { _ = try provider.validated() }
@@ -15,25 +15,25 @@ public struct BattlefieldSettings: Codable, Sendable {
         return self
     }
 
-    public func upgradingOutputDefaults() -> BattlefieldSettings {
-        guard schemaVersion == 1 else { return self }
+    public func upgradingMatchSettings() -> BattlefieldSettings {
         var upgraded = self
+        upgraded.competition = competition.forNewMatch()
         for p in upgraded.providers.indices {
-            for m in upgraded.providers[p].presets.indices
-            where upgraded.providers[p].presets[m].parameters.maxOutputTokens == 4096 {
-                upgraded.providers[p].presets[m].parameters.maxOutputTokens = ModelParameters.defaultMaxOutputTokens
+            for m in upgraded.providers[p].presets.indices {
+                upgraded.providers[p].presets[m].parameters.maxOutputTokens = nil
             }
         }
-        upgraded.schemaVersion = 2
+        upgraded.schemaVersion = 3
         return upgraded
     }
+
 }
 
 public struct CompetitionSummary: Codable, Identifiable, Equatable, Sendable {
     public let id: UUID
     public let startedAt: Date
     public let status: CompetitionStatus
-    public let mode: CompetitionMode
+    public let mode: CompetitionMode?
     public let problemCount: Int
     public let entrantCount: Int
     public let leader: String?
@@ -47,7 +47,7 @@ public struct CompetitionSummary: Codable, Identifiable, Equatable, Sendable {
         id = result.id
         startedAt = result.startedAt
         status = result.status
-        mode = result.configuration.mode
+        mode = result.configuration.legacyMode
         problemCount = result.problems.count
         entrantCount = result.entrants.count
         leader = result.ranked.first?.entrant.preset.model.name
@@ -100,7 +100,7 @@ public struct LocalBattlefieldRepository: BattlefieldRepository {
     public func loadSettings() throws -> BattlefieldSettings {
         guard FileManager.default.fileExists(atPath: settingsURL.path) else { return BattlefieldSettings() }
         return try decode(BattlefieldSettings.self, url: settingsURL, limit: 8 * 1024 * 1024)
-            .validated().upgradingOutputDefaults()
+            .validated().upgradingMatchSettings()
     }
 
     public func saveSettings(_ settings: BattlefieldSettings) throws {

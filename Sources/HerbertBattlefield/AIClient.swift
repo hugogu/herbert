@@ -3,8 +3,8 @@ import Foundation
 public struct AICompletionRequest: Sendable {
     public let participant: CompetitionParticipant
     public let messages: [AIMessage]
-    public let maxOutputTokens: Int
-    public init(participant: CompetitionParticipant, messages: [AIMessage], maxOutputTokens: Int) {
+    public let maxOutputTokens: Int?
+    public init(participant: CompetitionParticipant, messages: [AIMessage], maxOutputTokens: Int?) {
         self.participant = participant
         self.messages = messages
         self.maxOutputTokens = maxOutputTokens
@@ -157,7 +157,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 id: id, name: record["name"] as? String,
                 contextLength: record["context_length"] as? Int,
                 supportedParameters: record["supported_parameters"] as? [String],
-                maximumOutputTokens: top?["max_completion_tokens"] as? Int)
+                maximumOutputTokens: top?["max_completion_tokens"] as? Int,
+                supportedReasoningEfforts: (record["reasoning"] as? [String: Any])?["supported_efforts"] as? [String])
         }.sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
     }
 
@@ -197,7 +198,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
             return value
         }
         body["stream"] = true
-        body[entrant.outputTokenParameter.rawValue] = request.maxOutputTokens
+        if let cap = request.maxOutputTokens { body[entrant.outputTokenParameter.rawValue] = cap }
+        body = ReasoningDefaults.applying(to: body, entrant: entrant)
         if entrant.kind == .compatible { body["stream_options"] = ["include_usage": true] }
         if let temperature = parameters.temperature {
             if let supported = entrant.preset.model.supportedParameters, !supported.contains("temperature") {

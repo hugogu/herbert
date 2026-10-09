@@ -128,8 +128,7 @@ final class BattlefieldTests: XCTestCase {
     func testParallelEntrantsUseIdenticalPromptsAndNativeFeedback() async throws {
         let client = ScriptedAI(behavior: .retry)
         let engine = BattlefieldEngine(client: client)
-        var config = CompetitionConfiguration()
-        config.mode = .timed
+        let config = CompetitionConfiguration()
         let result = try await engine.run(configuration: config, problems: first(), participants: participants()) { _ in
         }
         XCTAssertEqual(result.status, .completed)
@@ -151,7 +150,6 @@ final class BattlefieldTests: XCTestCase {
         let client = ScriptedAI(behavior: .wrong)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
-        config.mode = .bestEffort
         config.attemptsPerProblem = 2
         let result = try await engine.run(configuration: config, problems: first(), participants: participants(1)) {
             _ in
@@ -166,7 +164,6 @@ final class BattlefieldTests: XCTestCase {
             let client = ScriptedAI(behavior: behavior)
             let engine = BattlefieldEngine(client: client)
             var configuration = CompetitionConfiguration()
-            configuration.mode = .bestEffort
             configuration.attemptsPerProblem = 2
             let started = ContinuousClock.now
             let result = try await engine.run(
@@ -192,6 +189,7 @@ final class BattlefieldTests: XCTestCase {
         let client = ScriptedAI(behavior: .wait)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
+        config.timeLimitEnabled = true
         config.timeLimitSeconds = 0.05
         let start = ContinuousClock.now
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants()) {
@@ -207,8 +205,7 @@ final class BattlefieldTests: XCTestCase {
     func testUserStopCancelsWithoutAcceptingLateAnswers() async throws {
         let client = ScriptedAI(behavior: .wait)
         let engine = BattlefieldEngine(client: client)
-        var config = CompetitionConfiguration()
-        config.mode = .bestEffort
+        let config = CompetitionConfiguration()
         let problems = try first()
         let entrants = participants()
         let run = Task {
@@ -222,45 +219,45 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertTrue(result.entrants.flatMap(\.usages).allSatisfy(\.partial))
     }
 
-    func testCompletedAnswerAtExactTokenLimitCountsThenStops() async throws {
+    func testCompletedAnswerAtExactProblemLimitCountsAndNextProblemGetsFreshBudget() async throws {
         let client = ScriptedAI(behavior: .exactBudget)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
-        config.mode = .tokenLimited
-        config.tokenLimit = 8000
+        config.problemTokenLimitEnabled = true
+        config.problemTokenLimit = 8000
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants(1)) {
             _ in
         }
-        XCTAssertEqual(result.status, .tokenLimit)
-        XCTAssertEqual(result.score(for: result.entrants[0]), 80)
-        XCTAssertEqual(result.totalTokens, 8000)
-        XCTAssertEqual(result.entrants[0].answers[1].status, .cancelled)
+        XCTAssertEqual(result.status, .completed)
+        XCTAssertEqual(result.entrants[0].answers[0].status, .solved)
+        XCTAssertEqual(result.totalTokens, 16000)
+        XCTAssertEqual(result.entrants[0].answers[1].attempts.count, 1)
     }
 
-    func testPerModelBudgetsDoNotStopOtherEntrants() async throws {
+    func testProblemBudgetsAreIndependentAcrossEntrantsAndProblems() async throws {
         let client = ScriptedAI(behavior: .exactBudget)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
-        config.mode = .tokenLimited
-        config.tokenBudgetScope = .perModel
-        config.tokenLimit = 8000
+        config.problemTokenLimitEnabled = true
+        config.problemTokenLimit = 8000
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants()) {
             _ in
         }
-        XCTAssertEqual(result.status, .tokenLimit)
-        XCTAssertEqual(result.entrants.map { result.score(for: $0) }, [80, 80])
-        XCTAssertEqual(result.totalTokens, 16000)
+        XCTAssertEqual(result.status, .completed)
+        XCTAssertTrue(
+            result.entrants.allSatisfy { $0.answers[0].status == .solved && $0.answers[1].attempts.count == 1 })
+        XCTAssertEqual(result.totalTokens, 32000)
     }
 
     func testBudgetTooSmallDoesNotSendRequests() async throws {
         let client = ScriptedAI(behavior: .correct)
         let engine = BattlefieldEngine(client: client)
         var config = CompetitionConfiguration()
-        config.mode = .tokenLimited
-        config.tokenLimit = 1
+        config.problemTokenLimitEnabled = true
+        config.problemTokenLimit = 1
         let result = try await engine.run(configuration: config, problems: first(), participants: participants()) { _ in
         }
-        XCTAssertEqual(result.status, .tokenLimit)
+        XCTAssertEqual(result.status, .completed)
         let requestCount = await client.requests.count
         XCTAssertEqual(requestCount, 0)
     }
@@ -268,8 +265,7 @@ final class BattlefieldTests: XCTestCase {
     func testProviderFailureStopsOnlyItsEntrantAndDoesNotLeakErrorBody() async throws {
         let client = ScriptedAI(behavior: .providerFailure)
         let engine = BattlefieldEngine(client: client)
-        var config = CompetitionConfiguration()
-        config.mode = .bestEffort
+        let config = CompetitionConfiguration()
         let result = try await engine.run(configuration: config, problems: first(2), participants: participants()) {
             _ in
         }
@@ -288,8 +284,14 @@ final class BattlefieldTests: XCTestCase {
         var provider = ProviderConfiguration(kind: .siliconFlow)
         provider.presets = [ModelPreset(model: AIModel(id: "fixture"))]
         settings.providers = [provider]
+        settings.competition.timeLimitEnabled = true
+        settings.competition.timeLimitSeconds = 120
+        settings.competition.problemTokenLimitEnabled = true
+        settings.competition.problemTokenLimit = 50_000
+        settings.competition.attemptsPerProblem = 2
         try repository.saveSettings(settings)
         XCTAssertEqual(try repository.loadSettings().providers, settings.providers)
+        XCTAssertEqual(try repository.loadSettings().competition, settings.competition)
         var result = CompetitionResult(
             configuration: settings.competition, problems: try first(),
             entrants: participants().map(\.entrant))
@@ -311,13 +313,12 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), "corrupt-but-preserve")
     }
 
-    func test64KDefaultsUpgradeLegacySettingsButPreserveCustomCapsAndHistoricalRequests() throws {
-        XCTAssertEqual(ModelParameters().maxOutputTokens, 65_536)
+    func testLegacyOutputCapsMigrateOutOfSettingsButRemainInHistoricalSnapshots() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
         let repository = LocalBattlefieldRepository(directory: directory)
         var settings = BattlefieldSettings()
-        settings.schemaVersion = 1
+        settings.schemaVersion = 2
         var provider = ProviderConfiguration(kind: .compatible)
         provider.presets = [ModelPreset(model: AIModel(id: "old-default")), ModelPreset(model: AIModel(id: "custom"))]
         provider.presets[0].parameters.maxOutputTokens = 4096
@@ -325,12 +326,9 @@ final class BattlefieldTests: XCTestCase {
         settings.providers = [provider]
         try repository.saveSettings(settings)
         let upgraded = try repository.loadSettings()
-        XCTAssertEqual(upgraded.schemaVersion, 2)
-        XCTAssertEqual(upgraded.providers[0].presets.map { $0.parameters.maxOutputTokens }, [65_536, 2048])
-        var custom = upgraded
-        custom.providers[0].presets[0].parameters.maxOutputTokens = 4096
-        try repository.saveSettings(custom)
-        XCTAssertEqual(try repository.loadSettings().providers[0].presets[0].parameters.maxOutputTokens, 4096)
+        XCTAssertEqual(upgraded.schemaVersion, 3)
+        XCTAssertTrue(upgraded.providers[0].presets.allSatisfy { $0.parameters.maxOutputTokens == nil })
+        XCTAssertTrue(upgraded.providers[0].presets.allSatisfy { $0.parameters.automaticReasoning })
         let result = CompetitionResult(
             configuration: settings.competition, problems: try first(),
             entrants: [Entrant(provider: provider, preset: provider.presets[0])])
@@ -338,7 +336,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(try repository.loadResult(result.id).entrants[0].entrant.preset.parameters.maxOutputTokens, 4096)
     }
 
-    func test64KRequestsRespectDeclaredModelLimit() async throws {
+    func testUnlimitedRequestsUseDeclaredCapacityOrOmitCap() async throws {
         for maximum in [nil, 8192] as [Int?] {
             let client = ScriptedAI(behavior: .correct)
             let engine = BattlefieldEngine(client: client)
@@ -346,13 +344,12 @@ final class BattlefieldTests: XCTestCase {
                 entrant: Entrant(
                     provider: ProviderConfiguration(kind: .compatible),
                     preset: ModelPreset(model: AIModel(id: "m", maximumOutputTokens: maximum))), apiKey: "fixture")
-            var configuration = CompetitionConfiguration()
-            configuration.mode = .bestEffort
+            let configuration = CompetitionConfiguration()
             _ = try await engine.run(configuration: configuration, problems: first(), participants: [participant]) {
                 _ in
             }
             let requests = await client.requests
-            XCTAssertEqual(requests[0].maxOutputTokens, maximum ?? 65_536)
+            XCTAssertEqual(requests[0].maxOutputTokens, maximum)
         }
     }
 

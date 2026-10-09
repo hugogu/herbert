@@ -5,6 +5,26 @@ import XCTest
 
 @MainActor
 final class AITransportTests: XCTestCase {
+    func testUnlimitedRequestOmitsTokenCapAndUsesDiscoveredMaximumReasoningEffort() async throws {
+        let provider = provider(kind: .openRouter)
+        let stub = HTTPStub(body: #"{"choices":[{"message":{"content":"s"},"finish_reason":"stop"}]}"#)
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let model = AIModel(id: "m", supportedParameters: ["reasoning"], supportedReasoningEfforts: ["xhigh", "high"])
+        _ = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: model)), apiKey: "fixture"),
+                messages: [], maxOutputTokens: nil)
+        ) { _ in }
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(stub.bodies.first)) as? [String: Any])
+        XCTAssertNil(body["max_tokens"])
+        XCTAssertNil(body["max_completion_tokens"])
+        XCTAssertNil(body["enable_thinking"])
+        let reasoning = try XCTUnwrap(body["reasoning"] as? [String: Any])
+        XCTAssertEqual(reasoning["enabled"] as? Bool, true)
+        XCTAssertEqual(reasoning["effort"] as? String, "xhigh")
+    }
+
     func testClientPreservesResourceDeadlineSeparateFromInactivityTimeout() {
         let configuration = URLSessionConfiguration.ephemeral
         let resourceDeadline = configuration.timeoutIntervalForResource

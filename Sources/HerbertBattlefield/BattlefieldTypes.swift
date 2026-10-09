@@ -26,23 +26,31 @@ public struct AIModel: Codable, Hashable, Identifiable, Sendable {
     public var name: String
     /// Provider pricing qualifiers are presentation metadata, never part of the model ID.
     public var displayName: String {
-        name.replacingOccurrences(
+        let unqualified =
+            name == id
+            ? name
+            : (name.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false).last.map(String.init) ?? name)
+        let cleaned = unqualified.replacingOccurrences(
             of: #"\s*\(free\)\s*$"#, with: "", options: [.regularExpression, .caseInsensitive]
         ).trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? name : cleaned
     }
     public var contextLength: Int?
     public var supportedParameters: [String]?
     public var maximumOutputTokens: Int?
+    public var supportedReasoningEfforts: [String]?
 
     public init(
         id: String, name: String? = nil, contextLength: Int? = nil,
-        supportedParameters: [String]? = nil, maximumOutputTokens: Int? = nil
+        supportedParameters: [String]? = nil, maximumOutputTokens: Int? = nil,
+        supportedReasoningEfforts: [String]? = nil
     ) {
         self.id = id
         self.name = name ?? id
         self.contextLength = contextLength
         self.supportedParameters = supportedParameters
         self.maximumOutputTokens = maximumOutputTokens
+        self.supportedReasoningEfforts = supportedReasoningEfforts
     }
 }
 
@@ -52,17 +60,29 @@ public enum OutputTokenParameter: String, Codable, CaseIterable, Sendable {
 }
 
 public struct ModelParameters: Codable, Hashable, Sendable {
-    public static let defaultMaxOutputTokens = 65_536
-    public var maxOutputTokens = Self.defaultMaxOutputTokens
+    // Retained only to describe older saved matches; new requests use match settings.
+    public var maxOutputTokens: Int?
+    public var automaticReasoning = true
     public var temperature: Double?
     public var topP: Double?
     public var extraJSON = "{}"
 
     public init() {}
 
+    private enum CodingKeys: String, CodingKey {
+        case maxOutputTokens, automaticReasoning, temperature, topP, extraJSON
+    }
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        maxOutputTokens = try c.decodeIfPresent(Int.self, forKey: .maxOutputTokens)
+        automaticReasoning = try c.decodeIfPresent(Bool.self, forKey: .automaticReasoning) ?? true
+        temperature = try c.decodeIfPresent(Double.self, forKey: .temperature)
+        topP = try c.decodeIfPresent(Double.self, forKey: .topP)
+        extraJSON = try c.decodeIfPresent(String.self, forKey: .extraJSON) ?? "{}"
+    }
+
     public func validated() throws -> ModelParameters {
-        guard (1...65_536).contains(maxOutputTokens),
-            temperature.map({ $0.isFinite && (0...2).contains($0) }) ?? true,
+        guard temperature.map({ $0.isFinite && (0...2).contains($0) }) ?? true,
             topP.map({ $0.isFinite && $0 > 0 && $0 <= 1 }) ?? true,
             extraJSON.utf8.count <= 8192,
             let data = extraJSON.data(using: .utf8),
@@ -132,18 +152,56 @@ public enum TokenBudgetScope: String, Codable, CaseIterable, Sendable {
 }
 
 public struct CompetitionConfiguration: Codable, Equatable, Sendable {
-    public var mode = CompetitionMode.timed
+    public var settingsVersion = 2
+    public var timeLimitEnabled = false
     public var timeLimitSeconds: Double = 600
-    public var tokenLimit = 100_000
-    public var tokenBudgetScope = TokenBudgetScope.shared
+    public var problemTokenLimitEnabled = false
+    public var problemTokenLimit = 100_000
     public var attemptsPerProblem = 3
     public var extraPrompt = ""
+    // Preserve the meaning of historical snapshots without exposing old modes in new matches.
+    public var legacyMode: CompetitionMode?
+    public var legacyTokenLimit: Int?
+    public var legacyTokenBudgetScope: TokenBudgetScope?
 
     public init() {}
-
+    private enum CodingKeys: String, CodingKey {
+        case settingsVersion, timeLimitEnabled, timeLimitSeconds, problemTokenLimitEnabled, problemTokenLimit,
+            attemptsPerProblem, extraPrompt, legacyMode, legacyTokenLimit, legacyTokenBudgetScope
+    }
+    private enum LegacyKeys: String, CodingKey { case mode, tokenLimit, tokenBudgetScope }
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let old = try decoder.container(keyedBy: LegacyKeys.self)
+        settingsVersion = try c.decodeIfPresent(Int.self, forKey: .settingsVersion) ?? 1
+        legacyMode =
+            try c.decodeIfPresent(CompetitionMode.self, forKey: .legacyMode)
+            ?? old.decodeIfPresent(CompetitionMode.self, forKey: .mode)
+        legacyTokenLimit =
+            try c.decodeIfPresent(Int.self, forKey: .legacyTokenLimit)
+            ?? old.decodeIfPresent(Int.self, forKey: .tokenLimit)
+        legacyTokenBudgetScope =
+            try c.decodeIfPresent(TokenBudgetScope.self, forKey: .legacyTokenBudgetScope)
+            ?? old.decodeIfPresent(TokenBudgetScope.self, forKey: .tokenBudgetScope)
+        timeLimitEnabled = try c.decodeIfPresent(Bool.self, forKey: .timeLimitEnabled) ?? (legacyMode == .timed)
+        timeLimitSeconds = try c.decodeIfPresent(Double.self, forKey: .timeLimitSeconds) ?? 600
+        problemTokenLimitEnabled = try c.decodeIfPresent(Bool.self, forKey: .problemTokenLimitEnabled) ?? false
+        problemTokenLimit = try c.decodeIfPresent(Int.self, forKey: .problemTokenLimit) ?? 100_000
+        attemptsPerProblem = try c.decodeIfPresent(Int.self, forKey: .attemptsPerProblem) ?? 3
+        extraPrompt = try c.decodeIfPresent(String.self, forKey: .extraPrompt) ?? ""
+    }
+    public func forNewMatch() -> CompetitionConfiguration {
+        var current = self
+        current.settingsVersion = 2
+        current.legacyMode = nil
+        current.legacyTokenLimit = nil
+        current.legacyTokenBudgetScope = nil
+        return current
+    }
     public func validated() throws -> CompetitionConfiguration {
-        guard timeLimitSeconds.isFinite, timeLimitSeconds > 0, timeLimitSeconds <= 86_400,
-            (1...100_000_000).contains(tokenLimit), (1...10).contains(attemptsPerProblem),
+        guard (1...2).contains(settingsVersion), timeLimitSeconds.isFinite, timeLimitSeconds > 0,
+            timeLimitSeconds <= 86_400,
+            (1...100_000_000).contains(problemTokenLimit), (1...10).contains(attemptsPerProblem),
             extraPrompt.utf8.count <= 8192
         else { throw BattlefieldError.invalidConfiguration }
         return self
@@ -222,7 +280,7 @@ public struct TokenUsage: Codable, Equatable, Sendable {
 }
 
 public enum ProblemAnswerStatus: String, Codable, Sendable {
-    case queued, requesting, judging, solved, failed, error, cancelled
+    case queued, requesting, judging, solved, failed, error, cancelled, burnout
 }
 
 public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
