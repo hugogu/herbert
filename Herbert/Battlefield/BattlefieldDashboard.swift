@@ -28,10 +28,10 @@ struct BattlefieldDashboard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
             header
+            progressTable
             if result.entrants.contains(where: \.hasEstimatedUsage) {
                 BattlefieldNotice(text: L10n.text("≈ 表示包含实时估算或取消请求的部分用量。缓存率仅在全部尝试均返回准确缓存用量时显示。最终账单以服务商为准。"))
             }
-            progressTable
         }
         .navigationDestination(item: $trial) { trial in
             GameDestination(problem: trial.problem, store: store, trialSource: trial.source)
@@ -48,12 +48,16 @@ struct BattlefieldDashboard: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Text(result.id.uuidString).font(.caption.monospaced())
                         Text(L10n.text("每题最多 %ld 次机会", result.configuration.attemptsPerProblem))
-                        Text("模式：") + Text(result.configuration.mode.title)
-                        Text("时限（秒）：") + Text(result.configuration.timeLimitSeconds.formatted())
-                        Text("Token 总预算：") + Text(result.configuration.tokenLimit.formatted())
-                        Text(
-                            result.configuration.tokenBudgetScope == .shared ? L10n.text("全场共享") : L10n.text("每个 AI 独立")
-                        )
+                        Text(result.configuration.settingsDescription)
+                        if let legacy = result.configuration.legacyMode {
+                            Text(L10n.text("旧版比赛设置：%@", legacy.title))
+                            if let limit = result.configuration.legacyTokenLimit, legacy == .tokenLimited {
+                                Text("Legacy token budget: " + limit.formatted())
+                                Text(
+                                    result.configuration.legacyTokenBudgetScope == .shared
+                                        ? L10n.text("全场共享") : L10n.text("每个 AI 独立"))
+                            }
+                        }
                         Text(result.scoringDescription).font(.callout).foregroundStyle(Palette.muted)
                         BattlefieldRulesView(source: result.systemPrompt)
                     }.textSelection(.enabled).padding(24)
@@ -76,7 +80,7 @@ struct BattlefieldDashboard: View {
                 }
             }
             HStack(spacing: 12) {
-                Pill(text: result.configuration.mode.title)
+                Pill(text: result.configuration.settingsDescription)
                 Text(L10n.text("%ld 个 AI · %ld 道题", result.entrants.count, result.problems.count))
                     .font(.callout).foregroundStyle(Palette.muted)
             }
@@ -86,19 +90,13 @@ struct BattlefieldDashboard: View {
                 let elapsed = max(0, (result.finishedAt ?? context.date).timeIntervalSince(result.startedAt))
                 HStack(spacing: 16) {
                     Label(duration(elapsed), systemImage: "clock")
-                    if result.configuration.mode == .timed {
+                    if result.configuration.timeLimitEnabled {
                         Text(L10n.text("时限 %@", duration(result.configuration.timeLimitSeconds)))
                     }
                     Label(result.totalTokens.formatted() + " tokens", systemImage: "sparkles")
                 }.font(.caption.monospaced()).foregroundStyle(Palette.muted)
             }
-            if result.configuration.mode == .tokenLimited {
-                Text(
-                    (result.configuration.tokenBudgetScope == .shared ? L10n.text("全场共享") : L10n.text("每个 AI 独立"))
-                        + " · " + result.configuration.tokenLimit.formatted() + " tokens"
-                )
-                .font(.caption).foregroundStyle(Palette.muted)
-            }
+
         }
     }
 
@@ -193,7 +191,7 @@ struct BattlefieldDashboard: View {
                 Spacer(minLength: 4)
                 Text("综合得分").font(.caption).foregroundStyle(Palette.muted)
             }
-            if entrant.exhaustedBudget { Pill(text: L10n.text("Token 预算用完"), color: Palette.amber) }
+
         }.frame(width: 224, alignment: .leading).padding(12)
             .background(Palette.paper, in: RoundedRectangle(cornerRadius: 10))
             .overlay(alignment: .topTrailing) {
@@ -279,14 +277,22 @@ private struct BattlefieldAnswerView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     let status: ProblemAnswerStatus =
                         selection.answer.attempts.last.map(providerFailed) == true
-                        ? .error : selection.answer.status
+                        ? .error
+                        : (selection.answer.attempts.last?.finishReason == "length"
+                            ? .burnout : selection.answer.status)
                     Pill(text: status.title, color: status.color)
                     Text(L10n.text(selection.problem.title)).font(.title2.bold())
                     Text(
                         "\(selection.problem.byteLimit) bytes · \(battlefieldScore(selection.scoring.score(selection.answer, problem: selection.problem))) points"
                     ).font(
                         .caption.monospaced())
-                    if selection.answer.attempts.isEmpty { Text("尚未作答").foregroundStyle(Palette.muted) }
+                    if selection.answer.attempts.isEmpty {
+                        if selection.answer.status == .burnout {
+                            BattlefieldNotice(text: L10n.text("Burnout：此题剩余额度不足以发送提示词，已跳过后续请求。"))
+                        } else {
+                            Text("尚未作答").foregroundStyle(Palette.muted)
+                        }
+                    }
                     ForEach(selection.answer.attempts) { attempt in
                         VStack(alignment: .leading, spacing: 14) {
                             Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.headline)
@@ -313,14 +319,20 @@ private struct BattlefieldAnswerView: View {
                                     + "\(attempt.usage.input) input / \(attempt.usage.output) output tokens"
                             )
                             .font(.caption.monospaced()).foregroundStyle(Palette.muted)
-                            if let cap = attempt.requestedMaxOutputTokens {
-                                Text("max output: \(cap) · finish: \(attempt.finishReason ?? "—")").font(
-                                    .caption.monospaced())
-                            }
+                            Text(
+                                "max output: \(attempt.requestedMaxOutputTokens.map { $0.formatted() } ?? L10n.text("服务商决定")) · finish: \(attempt.finishReason ?? "—")"
+                            )
+                            .font(.caption.monospaced())
                             if attempt.finishReason == "length" {
-                                BattlefieldNotice(text: L10n.text("已达到输出上限，推理也占用此额度。可提高模型输出上限，或调整服务商支持的推理参数。"))
+                                BattlefieldNotice(text: L10n.text("Burnout：已达到输出上限（包含推理），不再重试此题。已收到的内容已保留。"))
+                            } else if selection.answer.status == .burnout,
+                                attempt.id == selection.answer.attempts.last?.id
+                            {
+                                BattlefieldNotice(text: L10n.text("Burnout：已用完此题的 Token 预算，不再重试此题。其他题目继续。"))
                             }
-                            if let evaluation = attempt.evaluation, !providerFailed(attempt) {
+                            if let evaluation = attempt.evaluation, !providerFailed(attempt),
+                                attempt.finishReason != "length"
+                            {
                                 Label(
                                     evaluation.accepted ? L10n.text("通过") : L10n.text("未通过"),
                                     systemImage: evaluation.accepted ? "checkmark.circle.fill" : "xmark.circle"
@@ -416,7 +428,10 @@ private struct BattlefieldAnswerView: View {
                                 .system(.caption, design: .monospaced))
                             Text(selection.entrant.entrant.preset.parameters.extraJSON).font(
                                 .system(.caption, design: .monospaced))
-                            Text("max output: \(selection.entrant.entrant.preset.parameters.maxOutputTokens)")
+                            Text("模型输出额度由全局比赛设置决定。")
+                            if let legacy = selection.entrant.entrant.preset.parameters.maxOutputTokens {
+                                Text("Legacy max output: \(legacy)")
+                            }
                             Text(
                                 "temperature: \(selection.entrant.entrant.preset.parameters.temperature.map(String.init(describing:)) ?? "default")"
                             )

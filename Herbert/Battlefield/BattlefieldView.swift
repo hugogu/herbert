@@ -119,7 +119,7 @@ struct BattlefieldView: View {
                         VStack(alignment: .leading, spacing: 7) {
                             Text(summary.startedAt, format: .dateTime.year().month().day().hour().minute()).font(
                                 .headline)
-                            Text(summary.status.title + " · " + summary.mode.title).font(.caption).foregroundStyle(
+                            Text(summary.status.title).font(.caption).foregroundStyle(
                                 Palette.muted)
                             Text(
                                 L10n.text(
@@ -157,34 +157,31 @@ private struct BattlefieldSetupView: View {
                     .font(.title3).foregroundStyle(Palette.muted)
             }
             VStack(alignment: .leading, spacing: 12) {
-                Text("比赛模式").font(.title2.bold())
-                Picker("比赛模式", selection: $configuration.mode) {
-                    ForEach(CompetitionMode.allCases, id: \.self) { Text($0.title).tag($0) }
-                }.pickerStyle(.segmented).accessibilityIdentifier("competitionMode")
-                if configuration.mode == .timed {
+                Text("比赛设置").font(.title2.bold())
+                Toggle("限制比赛时间", isOn: $configuration.timeLimitEnabled)
+                    .accessibilityIdentifier("matchTimeLimitEnabled")
+                if configuration.timeLimitEnabled {
                     HStack {
                         Text("时限（秒）")
                         Spacer()
                         TextField("时限（秒）", value: $configuration.timeLimitSeconds, format: .number)
                             .textFieldStyle(.roundedBorder).frame(width: 120)
+                            .accessibilityIdentifier("matchTimeLimit")
                     }
-                } else if configuration.mode == .tokenLimited {
-                    HStack {
-                        Text("Token 总预算")
-                        Spacer()
-                        TextField("Token 总预算", value: $configuration.tokenLimit, format: .number)
-                            .textFieldStyle(.roundedBorder).frame(width: 150)
-                    }
-                    Picker("预算范围", selection: $configuration.tokenBudgetScope) {
-                        Text("全场共享").tag(TokenBudgetScope.shared)
-                        Text("每个 AI 独立").tag(TokenBudgetScope.perModel)
-                    }
-                    Text("预算包含所有尝试的输入与输出 Token。流式调用中使用估算，响应结束后核对服务商用量；取消时的实际账单可能高于已报告用量。")
-                        .font(.caption).foregroundStyle(Palette.muted)
-                } else {
-                    Text("不限比赛时间和总 Token；每个 AI 都会完成全部所选题目的尝试，所有 AI 完成后才结束。也可以随时终止。")
-                        .font(.callout).foregroundStyle(Palette.muted)
                 }
+                Toggle("限制每题 Token 用量", isOn: $configuration.problemTokenLimitEnabled)
+                    .accessibilityIdentifier("problemTokenLimitEnabled")
+                if configuration.problemTokenLimitEnabled {
+                    HStack {
+                        Text("每模型每题 Token 上限")
+                        Spacer()
+                        TextField("每模型每题 Token 上限", value: $configuration.problemTokenLimit, format: .number)
+                            .textFieldStyle(.roundedBorder).frame(width: 150)
+                            .accessibilityIdentifier("problemTokenLimit")
+                    }
+                }
+                Text("所有模型使用相同的每题预算，累计该题所有尝试的输入与输出（含推理）。不限用量时使用服务商声明的最大输出能力；能力未知时由服务商决定。")
+                    .font(.caption).foregroundStyle(Palette.muted)
                 Stepper(value: $configuration.attemptsPerProblem, in: 1...10) {
                     Text(L10n.text("每题最多 %ld 次机会", configuration.attemptsPerProblem))
                 }.accessibilityIdentifier("attemptLimit")
@@ -222,7 +219,7 @@ private struct BattlefieldSetupView: View {
         }.onAppear {
             if !initialized {
                 initialized = true
-                configuration = battlefield.settings.competition
+                configuration = battlefield.settings.competition.forNewMatch()
                 selectedModels = Set(battlefield.modelOptions.filter(\.isDefault).map(\.id))
                 selectedProblems = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
             }
@@ -264,11 +261,8 @@ private struct BattlefieldSetupView: View {
                     ) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(option.preset.model.displayName).font(.headline)
-                            Text(
-                                option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
-                                    + " max tokens"
-                            )
-                            .font(.caption).foregroundStyle(Palette.muted)
+                            Text(option.provider.name)
+                                .font(.caption).foregroundStyle(Palette.muted)
                         }
                     }.disabled(battlefield.busy).accessibilityIdentifier("entrant-\(option.preset.model.id)")
                     Button {

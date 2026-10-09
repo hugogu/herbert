@@ -39,6 +39,7 @@ extension ProblemAnswerStatus {
         case .failed: L10n.text("未通过")
         case .error: L10n.text("调用失败")
         case .cancelled: L10n.text("已停止")
+        case .burnout: "Burnout"
         }
     }
 
@@ -51,6 +52,7 @@ extension ProblemAnswerStatus {
         case .failed: "xmark"
         case .error: "exclamationmark"
         case .cancelled: "stop.fill"
+        case .burnout: "flame.fill"
         }
     }
 
@@ -58,7 +60,7 @@ extension ProblemAnswerStatus {
         switch self {
         case .solved: Palette.mint
         case .failed, .error: Palette.danger
-        case .requesting, .judging: Palette.amber
+        case .requesting, .judging, .burnout: Palette.amber
         case .queued, .cancelled: Palette.muted
         }
     }
@@ -74,6 +76,16 @@ func battlefieldScore(_ score: Double) -> String {
 
 func battlefieldPercentage(_ fraction: Double) -> String {
     fraction.formatted(.percent.precision(.fractionLength(0...2)))
+}
+
+extension CompetitionConfiguration {
+    var settingsDescription: String {
+        if let legacyMode { return L10n.text("旧版比赛设置：%@", legacyMode.title) }
+        let time = timeLimitEnabled ? L10n.text("时限 %@", String(Int(timeLimitSeconds)) + "s") : L10n.text("不限时")
+        let tokens =
+            problemTokenLimitEnabled ? L10n.text("每题 %@ tokens", problemTokenLimit.formatted()) : L10n.text("不限 Token")
+        return time + " · " + tokens
+    }
 }
 
 extension CompetitionResult {

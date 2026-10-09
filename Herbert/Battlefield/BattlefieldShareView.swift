@@ -85,7 +85,7 @@ private struct BattlefieldShareCard: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 10) {
-                    Text(result.configuration.mode.title).font(.system(size: 24, weight: .semibold))
+                    Text(result.configuration.settingsDescription).font(.system(size: 24, weight: .semibold))
                     Text(L10n.text("%ld 个 AI · %ld 道题", result.entrants.count, result.problems.count))
                         .font(.system(size: 18)).foregroundStyle(Palette.muted)
                 }

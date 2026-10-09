@@ -236,24 +236,29 @@ struct AIModelEditor: View {
                 Section {
                     Text(preset.model.displayName).font(.headline)
                     Toggle("默认参与比赛", isOn: $preset.isDefault)
-                    LabeledContent("单次最大输出 Token") {
-                        TextField("单次最大输出 Token", value: $preset.parameters.maxOutputTokens, format: .number)
-                            .labelsHidden().accessibilityLabel(L10n.text("单次最大输出 Token"))
-                            .multilineTextAlignment(.trailing).frame(minWidth: 90, maxWidth: 150)
-                            .accessibilityIdentifier("modelOutputLimit")
-                    }
-                    Button("使用 64K 输出上限") {
-                        preset.parameters.maxOutputTokens = ModelParameters.defaultMaxOutputTokens
-                    }.accessibilityIdentifier("use64KOutputLimit")
                     if let maximum = preset.model.maximumOutputTokens {
                         Text(L10n.text("服务商声明的模型输出上限：%ld tokens", maximum)).font(.caption)
                     }
                     TextField("Temperature（留空使用服务商默认值）", text: $temperature)
                     TextField("Top P（留空使用服务商默认值）", text: $topP)
                 } footer: {
-                    Text("默认上限为 65,536 tokens，包含推理。实际请求取此设置、服务商声明上限与剩余比赛预算中的较小值。部分模型不支持采样参数，留空可提高兼容性。")
+                    Text("模型输出额度由全局比赛设置决定。部分模型不支持采样参数，留空可提高兼容性。")
                 }
                 Section("高级参数 JSON") {
+                    Toggle("自动启用最高推理强度", isOn: $preset.parameters.automaticReasoning)
+                        .accessibilityIdentifier("automaticReasoning")
+                    Text("按服务商及模型能力默认启用推理并选用最高支持强度。下方 JSON 可覆盖默认推理配置。")
+                        .font(.caption).foregroundStyle(Palette.muted)
+                    if let provider = battlefield.settings.providers.first(where: { $0.id == providerID }),
+                        let data = try? JSONSerialization.data(
+                            withJSONObject: ReasoningDefaults.parameters(
+                                for: Entrant(provider: provider, preset: preset)),
+                            options: [.prettyPrinted, .sortedKeys]),
+                        let json = String(data: data, encoding: .utf8)
+                    {
+                        Text(json).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                            .accessibilityIdentifier("defaultReasoningJSON")
+                    }
                     TextEditor(text: $preset.parameters.extraJSON).font(.system(.body, design: .monospaced)).frame(
                         minHeight: 110)
                     Text(

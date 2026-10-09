@@ -277,7 +277,8 @@ final class BattlefieldModel: ObservableObject {
                 for index in 1...(ProcessInfo.processInfo.arguments.contains("--battlefield-three-models") ? 3 : 2) {
                     var provider = ProviderConfiguration(kind: .compatible, name: "Fixture Provider \(index)")
                     let model = AIModel(
-                        id: "fixture-\(index)", name: "Fixture Model \(index) (free)",
+                        id: "fixture-\(index)", name: "Fixture: Fixture Model \(index) (free)",
+                        supportedParameters: ["enable_thinking", "reasoning_effort"],
                         maximumOutputTokens: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics")
                             ? 4096 : nil)
                     provider.models = [model]
@@ -316,7 +317,10 @@ func battlefieldError(_ error: Error) -> String {
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
             return [
-                AIModel(id: "fixture-1", name: "Fixture Model 1"), AIModel(id: "fixture-2", name: "Fixture Model 2"),
+                AIModel(
+                    id: "fixture-1", name: "Fixture: Fixture Model 1",
+                    supportedParameters: ["enable_thinking", "reasoning_effort"]),
+                AIModel(id: "fixture-2", name: "Fixture Model 2"),
             ]
         }
         func complete(
