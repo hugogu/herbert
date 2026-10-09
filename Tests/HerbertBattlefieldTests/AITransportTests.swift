@@ -9,6 +9,64 @@ final class AITransportTests: XCTestCase {
     private let anthropicAnswer =
         #"{"type":"message","content":[{"type":"text","text":"```h\ns\n```"}],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":20}}"#
 
+    func testReasoningFinalAndOverLimitSubmissionSurviveHTTPJudgingAndManualRetry() async throws {
+        let provider = provider()
+        let first = HTTPStub(
+            body:
+                #"{"choices":[{"message":{"content":"","reasoning_content":"Final answer:\n```h\nss\n```"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20}}"#
+        )
+        let second = HTTPStub(
+            body:
+                #"{"choices":[{"message":{"content":"```h\ns\n```"},"finish_reason":"stop"}],"usage":{"prompt_tokens":30,"completion_tokens":40}}"#
+        )
+        BattlefieldURLProtocol.registry.addSequence(
+            [first, second], host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let participant = CompetitionParticipant(
+            entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "test"))), apiKey: "fixture")
+        let problem = try XCTUnwrap(ProblemCatalog.bundled().first)
+        var configuration = CompetitionConfiguration()
+        configuration.attemptsPerProblem = 1
+        let engine = BattlefieldEngine(client: client())
+        let initial = try await engine.run(
+            configuration: configuration, problems: [problem], participants: [participant]
+        ) { _ in }
+        let original = initial.entrants[0].answers[0].attempts[0]
+        XCTAssertEqual(original.program, "ss")
+        XCTAssertEqual(original.programSource, .reasoning)
+        XCTAssertEqual(original.evaluation?.bytes, 2)
+        XCTAssertEqual(initial.score(for: initial.entrants[0]), 0)
+        XCTAssertFalse(original.reasoning!.content.isEmpty)
+        let retried = try await engine.retry(initial, participant: participant, problemID: problem.id) { _ in }
+        XCTAssertEqual(retried.entrants[0].answers[0].status, .solved)
+        XCTAssertEqual(retried.totalTokens, 100)
+        XCTAssertEqual(retried.entrants[0].answers[0].attempts[0], original)
+        XCTAssertEqual(first.requests.count + second.requests.count, 2)
+        let requestBody = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: XCTUnwrap(second.bodies.first)) as? [String: Any])
+        let messages = try XCTUnwrap(requestBody["messages"] as? [[String: Any]])
+        XCTAssertTrue((messages.last?["content"] as? String)?.contains("Rejected") == true)
+    }
+
+    func testOpenRouterHTTP402StopsEntrantWithoutDroppingDiagnostic() async throws {
+        let provider = provider(kind: .openRouter)
+        let stub = HTTPStub(
+            body:
+                #"{"error":{"code":402,"message":"This request requires more credits, or fewer max_tokens.","metadata":{"previous_errors":[{"code":400,"message":"Context window exceeded"}]}}}"#,
+            status: 402)
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let participant = CompetitionParticipant(
+            entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "test"))), apiKey: "fixture")
+        let result = try await BattlefieldEngine(client: client()).run(
+            configuration: CompetitionConfiguration(), problems: Array(try ProblemCatalog.bundled().prefix(2)),
+            participants: [participant]
+        ) { _ in }
+        XCTAssertEqual(result.entrants[0].answers.map(\.status), [.burnout, .cancelled])
+        let attempt = result.entrants[0].answers[0].attempts[0]
+        XCTAssertTrue(attempt.providerResponse?.contains("more credits") == true)
+        XCTAssertNil(attempt.evaluation)
+        XCTAssertEqual(stub.requests.count, 1)
+    }
+
     func testAnthropicDiscoveryPaginatesAndAuthenticatesUsingNativeHeaders() async throws {
         let provider = provider(kind: .anthropic)
         let first = HTTPStub(body: #"{"data":[{"id":"a","display_name":"Model A"}],"has_more":true,"last_id":"a"}"#)
