@@ -208,6 +208,13 @@ public actor BattlefieldEngine {
                         }
                         break
                     }
+                    if reply.providerFailed {
+                        throw AIHTTPError(
+                            status: 200,
+                            providerResponse:
+                                "Provider ended generation with finish_reason: \(reply.finishReason ?? "error").",
+                            partialReply: reply)
+                    }
                     result!.entrants[e].answers[p].status = .judging
                     await publish()
                     let program: String
@@ -256,20 +263,22 @@ public actor BattlefieldEngine {
                 } catch {
                     outputReservations[participant.entrant.id] = nil
                     guard result?.status == .running else { return }
+                    if let partial = (error as? AIHTTPError)?.partialReply {
+                        result!.entrants[e].answers[p].attempts[a].response = partial.text
+                        result!.entrants[e].answers[p].attempts[a].reasoning = partial.reasoning
+                        result!.entrants[e].answers[p].attempts[a].finishReason = partial.finishReason
+                        result!.entrants[e].answers[p].attempts[a].usage = partial.usage
+                    }
                     result!.entrants[e].answers[p].attempts[a].finishedAt = .now
                     result!.entrants[e].answers[p].attempts[a].usage.partial = true
                     if Task.isCancelled || error is CancellationError {
                         result!.entrants[e].answers[p].status = .cancelled
                     } else {
-                        // Only persist bounded, credential-redacted provider diagnostics.
-                        let message =
-                            (error as? AIHTTPError)?.localizedDescription
-                            ?? (error as? BattlefieldError)?.rawValue ?? "AI request failed"
+                        let failure = ProviderDiagnostics.failure(error, apiKey: participant.apiKey)
+                        let message = failure.message
+                        let diagnostic = failure.detail
                         result!.entrants[e].answers[p].attempts[a].error = message
                         result!.entrants[e].answers[p].status = .error
-                        let diagnostic = (error as? AIHTTPError)?.providerResponse.map {
-                            ProviderDiagnostics.response(Data($0.utf8), apiKey: participant.apiKey)
-                        }
                         result!.entrants[e].answers[p].attempts[a].providerResponse = diagnostic
                         result!.entrants[e].error = message + (diagnostic.map { "\n" + String($0.prefix(512)) } ?? "")
                     }

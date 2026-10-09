@@ -5,6 +5,96 @@ import XCTest
 
 @MainActor
 final class AITransportTests: XCTestCase {
+    func testClientPreservesResourceDeadlineSeparateFromInactivityTimeout() {
+        let configuration = URLSessionConfiguration.ephemeral
+        let resourceDeadline = configuration.timeoutIntervalForResource
+        _ = OpenAICompatibleClient(configuration: configuration)
+        XCTAssertEqual(configuration.timeoutIntervalForResource, resourceDeadline)
+        XCTAssertGreaterThan(resourceDeadline, 600)
+        XCTAssertEqual(configuration.timeoutIntervalForRequest, 600)
+    }
+
+    func testInBandStreamErrorsRetainFinishReasonPartialOutputAndUsage() async throws {
+        for terminal in [
+            #"{"choices":[{"delta":{},"finish_reason":"error"}]}"#,
+            #"{"error":{"message":"upstream timeout test-only-secret","code":502},"choices":[{"delta":{},"finish_reason":"error"}]}"#,
+            #"{"choices":[{"delta":{},"error":{"message":"provider disconnected"},"finish_reason":"error"}]}"#,
+            #"{"error":{"message":"generation failed"}}"#,
+        ] {
+            let provider = provider()
+            let stub = HTTPStub(
+                body:
+                    "data: {\"choices\":[{\"delta\":{\"reasoning\":\"Still planning\"}}],\"usage\":{\"prompt_tokens\":100,\"completion_tokens\":23}}\n\n"
+                    + "data: \(terminal)\n\ndata: [DONE]\n\n", contentType: "text/event-stream")
+            BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            let collector = ProgressCollector()
+            do {
+                _ = try await client().complete(
+                    AICompletionRequest(
+                        participant: CompetitionParticipant(
+                            entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))),
+                            apiKey: "test-only-secret"), messages: [], maxOutputTokens: 65_536)
+                ) { await collector.append($0) }
+                XCTFail("Provider error must not become a judgeable answer")
+            } catch let error as AIHTTPError {
+                XCTAssertEqual(error.status, 200)
+                XCTAssertEqual(error.partialReply?.finishReason, "error")
+                XCTAssertEqual(error.partialReply?.reasoning?.content, "Still planning")
+                XCTAssertEqual(error.partialReply?.usage.output, 23)
+                XCTAssertFalse(error.providerResponse?.contains("test-only-secret") == true)
+            }
+            let progress = await collector.items
+            XCTAssertEqual(progress.last?.reasoning?.content, "Still planning")
+            XCTAssertEqual(progress.last?.isFinal, false)
+            XCTAssertTrue(stub.stopped)
+        }
+    }
+
+    func testJSONProviderFailuresAreNotCompletedAnswersAndNullErrorsAreAllowed() throws {
+        for reason in ["error", "content_filter"] {
+            let body = """
+                {"choices":[{"message":{"content":"s","reasoning":"Plan"},"finish_reason":"\(reason)"}],"usage":{"prompt_tokens":5,"completion_tokens":10}}
+                """
+            XCTAssertThrowsError(try OpenAICompatibleClient.decodeReply(Data(body.utf8), messages: [])) { error in
+                let reply = (error as? AIHTTPError)?.partialReply
+                XCTAssertEqual(reply?.text, "s")
+                XCTAssertEqual(reply?.reasoning?.content, "Plan")
+                XCTAssertEqual(reply?.finishReason, reason)
+                XCTAssertEqual(reply?.usage.output, 10)
+            }
+        }
+        let body = #"{"error":null,"choices":[{"error":null,"message":{"content":"s"},"finish_reason":"stop"}]}"#
+        XCTAssertEqual(try OpenAICompatibleClient.decodeReply(Data(body.utf8), messages: []).text, "s")
+        var accumulator = ChatStreamAccumulator(messages: [])
+        try accumulator.consume(
+            #"{"error":null,"choices":[{"error":null,"delta":{"content":"s"},"finish_reason":"stop"}]}"#)
+        XCTAssertEqual(accumulator.text, "s")
+    }
+
+    func testPrematureEOFReportsIncompleteStreamAndFlushesPartialReasoning() async throws {
+        let provider = provider()
+        let stub = HTTPStub(
+            body: "data: {\"choices\":[{\"delta\":{\"reasoning\":\"Still planning\"}}]}\n\n",
+            contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let collector = ProgressCollector()
+        do {
+            _ = try await client().complete(
+                AICompletionRequest(
+                    participant: CompetitionParticipant(
+                        entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))),
+                        apiKey: "key"),
+                    messages: [], maxOutputTokens: 65_536)
+            ) { await collector.append($0) }
+            XCTFail("Unfinished stream must not be judged")
+        } catch {
+            XCTAssertEqual(error as? BattlefieldError, .incompleteStream)
+        }
+        let progress = await collector.items
+        XCTAssertEqual(progress.last?.reasoning?.content, "Still planning")
+        XCTAssertEqual(progress.last?.isFinal, false)
+    }
+
     func testSSEPreservesEmptyLinesUnicodeMultilineAndAllLineEndings() throws {
         for separator in ["\n", "\r\n", "\r"] {
             var parser = ServerSentEventParser()

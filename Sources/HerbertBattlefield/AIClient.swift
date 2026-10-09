@@ -48,9 +48,11 @@ public protocol AIClient: Sendable {
 public struct AIHTTPError: Error, LocalizedError, Sendable {
     public let status: Int
     public let providerResponse: String?
-    public init(status: Int, providerResponse: String? = nil) {
+    public let partialReply: AIReply?
+    public init(status: Int, providerResponse: String? = nil, partialReply: AIReply? = nil) {
         self.status = status
         self.providerResponse = providerResponse
+        self.partialReply = partialReply
     }
     public var errorDescription: String? { status == 200 ? "AI response error" : "AI HTTP \(status)" }
 }
@@ -73,7 +75,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         configuration.httpCookieStorage = nil
         configuration.httpShouldSetCookies = false
         configuration.timeoutIntervalForRequest = 600
-        configuration.timeoutIntervalForResource = 600
+        // Keep Foundation's multi-day transfer deadline; match limits cancel tasks separately.
         session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
     }
 
@@ -252,7 +254,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 if let event = try parser.finish() { try accumulator.consume(event) }
                 try Task.checkCancellation()
                 guard accumulator.done || accumulator.finishReason != nil else {
-                    throw BattlefieldError.invalidResponse
+                    throw BattlefieldError.incompleteStream
                 }
             } catch {
                 // Flush text received since the last throttled update before recording a failure.
@@ -272,21 +274,33 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
     }
 
     public static func decodeReply(_ data: Data, messages: [AIMessage], apiKey: String = "") throws -> AIReply {
-        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let choices = object["choices"] as? [[String: Any]], let first = choices.first,
-            let message = first["message"] as? [String: Any]
-        else {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw AIHTTPError(status: 200, providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey))
         }
-        let text = message["content"] as? String ?? ""
-        let reasoning = Self.decodeReasoning(message)
+        let first = (object["choices"] as? [[String: Any]])?.first
+        let message = first?["message"] as? [String: Any]
+        let text = message?["content"] as? String ?? ""
+        let reasoning = message.flatMap(Self.decodeReasoning)
         guard text.utf8.count + (reasoning?.content.utf8.count ?? 0) <= AIResponseLimits.contentBytes else {
             throw BattlefieldError.responseTooLarge
         }
         let fallback = TokenUsage.estimate(
             messages: messages, outputBytes: text.utf8.count + (reasoning?.content.utf8.count ?? 0))
         let usage = (object["usage"] as? [String: Any]).map { decodeUsage($0, fallback: fallback) } ?? fallback
-        return AIReply(text: text, usage: usage, finishReason: first["finish_reason"] as? String, reasoning: reasoning)
+        let reply = AIReply(
+            text: text, usage: usage, finishReason: first?["finish_reason"] as? String, reasoning: reasoning)
+        if ProviderDiagnostics.hasError(object) || first.map(ProviderDiagnostics.hasError) == true
+            || reply.providerFailed
+        {
+            throw AIHTTPError(
+                status: 200, providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey),
+                partialReply: AIReply(
+                    text: text, usage: usage, finishReason: reply.finishReason ?? "error", reasoning: reasoning))
+        }
+        guard message != nil else {
+            throw AIHTTPError(status: 200, providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey))
+        }
+        return reply
     }
     static func decodeReasoning(_ object: [String: Any]) -> AIReasoning? {
         if let content = object["reasoning_content"] as? String { return AIReasoning(content: content) }
@@ -377,13 +391,13 @@ struct ChatStreamAccumulator {
             done = true
             return
         }
-        guard let object = try? JSONSerialization.jsonObject(with: Data(payload.utf8)) as? [String: Any],
-            object["error"] == nil
+        guard let object = try? JSONSerialization.jsonObject(with: Data(payload.utf8)) as? [String: Any]
         else {
             throw AIHTTPError(
                 status: 200, providerResponse: ProviderDiagnostics.response(Data(payload.utf8), apiKey: apiKey))
         }
-        if let choices = object["choices"] as? [[String: Any]], let first = choices.first {
+        let first = (object["choices"] as? [[String: Any]])?.first
+        if let first {
             if let delta = first["delta"] as? [String: Any] {
                 let partText = delta["content"] as? String ?? ""
                 let partReasoning = OpenAICompatibleClient.decodeReasoning(delta)
@@ -402,6 +416,15 @@ struct ChatStreamAccumulator {
         }
         if let usage = object["usage"] as? [String: Any] {
             reportedUsage = OpenAICompatibleClient.decodeUsage(usage, fallback: self.usage)
+        }
+        let reply = AIReply(text: text, usage: usage, finishReason: finishReason, reasoning: reasoning)
+        if ProviderDiagnostics.hasError(object) || first.map(ProviderDiagnostics.hasError) == true
+            || reply.providerFailed
+        {
+            throw AIHTTPError(
+                status: 200, providerResponse: ProviderDiagnostics.response(Data(payload.utf8), apiKey: apiKey),
+                partialReply: AIReply(
+                    text: text, usage: usage, finishReason: finishReason ?? "error", reasoning: reasoning))
         }
     }
 }

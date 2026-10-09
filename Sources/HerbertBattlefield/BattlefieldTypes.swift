@@ -366,6 +366,6 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
 
 public enum BattlefieldError: String, Error, LocalizedError, Sendable {
     case invalidEndpoint, invalidConfiguration, invalidParameters, missingKey, invalidResponse,
-        responseTooLarge, redirected, storageCorrupt, alreadyRunning
+        responseTooLarge, incompleteStream, redirected, storageCorrupt, alreadyRunning
     public var errorDescription: String? { rawValue }
 }

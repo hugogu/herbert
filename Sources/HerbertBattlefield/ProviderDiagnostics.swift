@@ -3,6 +3,42 @@ import Foundation
 enum ProviderDiagnostics {
     static let byteLimit = 65_536
 
+    static func hasError(_ object: [String: Any]) -> Bool {
+        object["error"].map { !($0 is NSNull) } ?? false
+    }
+
+    static func failure(_ error: any Error, apiKey: String) -> (message: String, detail: String?) {
+        if let provider = error as? AIHTTPError {
+            return (
+                provider.localizedDescription, provider.providerResponse.map { response(Data($0.utf8), apiKey: apiKey) }
+            )
+        }
+        if let local = error as? BattlefieldError {
+            let message: String
+            switch local {
+            case .incompleteStream:
+                message = "The response stream ended before completion. Partial output was retained."
+            case .responseTooLarge:
+                message = "The response exceeded the local processing limit. Partial output was retained."
+            default: message = local.localizedDescription
+            }
+            return (message, nil)
+        }
+        let network = error as NSError
+        let description: String
+        switch (network.domain, network.code) {
+        case (NSURLErrorDomain, NSURLErrorTimedOut): description = "AI network request timed out"
+        case (NSURLErrorDomain, NSURLErrorNetworkConnectionLost): description = "AI connection was lost"
+        case (NSURLErrorDomain, NSURLErrorNotConnectedToInternet): description = "No internet connection"
+        default: description = "AI request failed"
+        }
+        let code = "\(network.domain) \(network.code)"
+        return (
+            response(Data("\(description) (\(code))".utf8), apiKey: apiKey),
+            response(Data("\(code)\n\(network.localizedDescription)".utf8), apiKey: apiKey)
+        )
+    }
+
     static func response(_ data: Data, apiKey: String, truncated: Bool = false) -> String {
         let sensitive: Set<String> = [
             "authorization", "apikey", "accesskey", "accesstoken", "refreshtoken",
@@ -39,4 +75,8 @@ enum ProviderDiagnostics {
         if truncated || data.count > byteLimit { text += "\n[Provider response truncated at 64 KiB]" }
         return text
     }
+}
+
+extension AIReply {
+    public var providerFailed: Bool { ["error", "content_filter"].contains(finishReason ?? "") }
 }

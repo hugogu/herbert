@@ -5,6 +5,87 @@ import XCTest
 @testable import HerbertBattlefield
 
 final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
+    func testProviderFinishErrorNeverReachesJudgeOrRetryAndPreservesHistory() async throws {
+        for reason in ["error", "content_filter"] {
+            let client = RetryClient(
+                first: AIReply(
+                    text: "s", usage: TokenUsage(input: 10, output: 22, estimated: false),
+                    finishReason: reason, reasoning: AIReasoning(content: "Still thinking")))
+            let result = try await run(client)
+            let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+            let attempt = try XCTUnwrap(answer.attempts.first)
+            XCTAssertEqual(answer.status, .error)
+            XCTAssertEqual(answer.attempts.count, 1)
+            XCTAssertNil(attempt.evaluation)
+            XCTAssertNil(attempt.program)
+            XCTAssertNotNil(attempt.finishedAt)
+            XCTAssertEqual(attempt.error, "AI response error")
+            XCTAssertEqual(attempt.finishReason, reason)
+            XCTAssertEqual(attempt.reasoning?.content, "Still thinking")
+            XCTAssertEqual(attempt.response, "s")
+            XCTAssertEqual(attempt.usage.output, 22)
+            XCTAssertTrue(attempt.usage.partial)
+            let requests = await client.requests
+            XCTAssertEqual(requests.count, 1)
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: directory) }
+            let repository = LocalBattlefieldRepository(directory: directory)
+            try repository.saveResult(result)
+            let restored = try repository.loadResult(result.id)
+            let savedAttempt = try XCTUnwrap(restored.entrants.first?.answers.first?.attempts.first)
+            XCTAssertEqual(restored.entrants.first?.answers.first?.status, .error)
+            XCTAssertNotNil(savedAttempt.finishedAt)
+            XCTAssertNil(savedAttempt.evaluation)
+            XCTAssertEqual(savedAttempt.reasoning, attempt.reasoning)
+            XCTAssertEqual(savedAttempt.finishReason, attempt.finishReason)
+            XCTAssertEqual(savedAttempt.error, attempt.error)
+            XCTAssertEqual(savedAttempt.usage, attempt.usage)
+        }
+    }
+
+    func testNetworkFailuresRetainPartialReasoningAndActionableRedactedDiagnostics() async throws {
+        for code in [URLError.timedOut, .networkConnectionLost] {
+            let client = RetryClient(
+                first: AIReply(
+                    text: "", usage: TokenUsage(input: 10, output: 200),
+                    reasoning: AIReasoning(content: "Still thinking")),
+                failure: NSError(
+                    domain: NSURLErrorDomain, code: code.rawValue,
+                    userInfo: [
+                        NSLocalizedDescriptionKey:
+                            "Connection interrupted test-only-secret https://example.com?api_key=hidden"
+                    ]))
+            let result = try await run(client)
+            let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+            let attempt = try XCTUnwrap(answer.attempts.first)
+            XCTAssertEqual(answer.status, .error)
+            XCTAssertNil(attempt.evaluation)
+            XCTAssertNotNil(attempt.finishedAt)
+            XCTAssertEqual(attempt.reasoning?.content, "Still thinking")
+            XCTAssertTrue(attempt.error?.contains("NSURLErrorDomain \(code.rawValue)") == true)
+            XCTAssertTrue(attempt.providerResponse?.contains("Connection interrupted") == true)
+            XCTAssertTrue(attempt.usage.partial)
+            let encoded = String(decoding: try JSONEncoder().encode(result), as: UTF8.self)
+            XCTAssertFalse(encoded.contains("test-only-secret"))
+            XCTAssertFalse(encoded.contains("api_key=hidden"))
+        }
+    }
+
+    func testHTTPErrorPartialReplyOverridesThrottledProgress() async throws {
+        let client = RetryClient(
+            failure: AIHTTPError(
+                status: 200, providerResponse: "upstream timeout",
+                partialReply: AIReply(
+                    text: "", usage: TokenUsage(input: 3, output: 7), finishReason: "error",
+                    reasoning: AIReasoning(content: "latest reasoning"))))
+        let result = try await run(client)
+        let attempt = try XCTUnwrap(result.entrants.first?.answers.first?.attempts.first)
+        XCTAssertEqual(attempt.reasoning?.content, "latest reasoning")
+        XCTAssertEqual(attempt.finishReason, "error")
+        XCTAssertEqual(attempt.usage.output, 7)
+        XCTAssertNil(attempt.evaluation)
+    }
+
     func testReasoningOnlyAttemptKeepsFullTextAndRetriesWithoutEmptyAssistant() async throws {
         let reasoning = String(repeating: "plan ", count: 14_000)
         let client = RetryClient(
@@ -88,8 +169,8 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
 private actor RetryClient: AIClient {
     var requests: [[AIMessage]] = []
     let first: AIReply?
-    let failure: AIHTTPError?
-    init(first: AIReply? = nil, failure: AIHTTPError? = nil) {
+    let failure: (any Error)?
+    init(first: AIReply? = nil, failure: (any Error)? = nil) {
         self.first = first
         self.failure = failure
     }
@@ -98,7 +179,12 @@ private actor RetryClient: AIClient {
         -> AIReply
     {
         requests.append(request.messages)
-        if let failure { throw failure }
+        if let failure {
+            if let first {
+                await progress(AIProgress(text: first.text, usage: first.usage, reasoning: first.reasoning))
+            }
+            throw failure
+        }
         let reply = requests.count == 1 ? first! : AIReply(text: "```h\ns\n```", usage: TokenUsage())
         await progress(AIProgress(text: reply.text, usage: reply.usage, isFinal: true, reasoning: reply.reasoning))
         return reply
