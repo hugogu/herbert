@@ -35,6 +35,9 @@ advertises reasoning without listing levels. SiliconFlow defaults to
 `enable_thinking: true`, with `reasoning_effort: max` for its documented DeepSeek V4 /
 GLM-5.2 models or models advertising effort control. Compatible providers receive only
 advertised thinking fields; an effort field without advertised levels uses `high`.
+The standalone Google Gemini provider uses `reasoning_effort: high` for Gemini 2.5/3
+thinking models, following [Google's OpenAI compatibility mapping](https://ai.google.dev/gemini-api/docs/openai#thinking).
+It requests streaming usage totals without injecting the unrelated `enable_thinking` field.
 Unsupported/undiscovered reasoning capabilities are not guessed for arbitrary endpoints.
 The editor previews the automatic JSON. Explicit reasoning-family values in advanced
 JSON replace the automatic reasoning defaults as a group, so you can use a provider's

@@ -7,6 +7,11 @@ public enum ReasoningDefaults {
         let model = entrant.preset.model
         let supported = Set(model.supportedParameters ?? [])
         let effort = model.supportedReasoningEfforts?.first(where: { $0 != "none" })
+        if entrant.kind == .gemini {
+            let name = model.id.split(separator: "/").last.map(String.init) ?? model.id
+            return name.hasPrefix("gemini-2.5-") || name.hasPrefix("gemini-3")
+                ? ["reasoning_effort": "high"] : [:]
+        }
         if entrant.kind == .openRouter {
             guard supported.contains("reasoning") || supported.contains("reasoning_effort") || effort != nil else {
                 return [:]

@@ -78,7 +78,7 @@ attempts by default. Every model receives the same per-problem budget. Reaching 
 output or token limit marks that problem **Burnout**, retains received reasoning and
 cancels its remaining retries. Other problems and entrants continue.
 
-- Add multiple OpenRouter, SiliconFlow or OpenAI compatible providers. Discover models
+- Add multiple OpenRouter, SiliconFlow, Google Gemini or OpenAI compatible providers. Discover models
   through `/models`, choose default entrants, and save settings locally. API keys stay
   in the system Keychain.
 - **Model Settings** covers sampling and advanced parameters. Automatic thinking is on

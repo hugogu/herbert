@@ -2,6 +2,14 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## PR #3：异常处理复核（10 月 9 日）
+
+- 原 PR 的检查通过；复核补修 HTTP 状态与正文码冲突、普通数字误判、choice 级错误漏读，以及模型推理文字被当作错误诊断的边界。HTTP 200 内嵌错误支持对象、数组和字符串数值码。
+- `scripts/check.sh` 最终通过：119 项 Swift 测试（44 Core、75 Battlefield）、16 项 Python 检查和严格格式检查。新增 HTTP/SSE → 引擎 → 历史往返检查，覆盖 503/502 有限重试、超时跳题、403 取消后续题目，且不判题、不丢部分推理、用量与计时。
+- `.build/pr3-review-ui.xcresult` 三项原生 Mac 用例通过：服务商配置、流式错误及保留内容、异常重试/跳题/单模型停止。最终分类代码的 `.build/pr3-review-ui-final.xcresult` 再次通过异常流程；包含重试详情计时、无 Rejected、Timed out 与 Access Denied 状态。
+- 对照 Google 官方兼容文档核对 Gemini 基础地址、模型发现与 streaming usage；补上 Gemini 2.5/3 的自动 `high`，测试手动覆盖、关闭自动设置及旧模型不注入。实际 HTTP 请求测试使用隔离 URLProtocol，没有调用真实付费 API。
+- iOS Release 无签名编译通过；工程、课程与三语资源重复生成一致。没有 iPhone/iPad 运行时验证。
+
 ## 每次尝试计时与参考总分（10 月 9 日）
 
 - `scripts/check.sh`：107 项 Swift 测试（44 Core、63 Battlefield）、16 项 Python 检查和严格格式检查通过。新增独立重试计时、完成后冻结、时钟倒退下限、JSON 与磁盘往返，以及恢复时使用最后检查点而不累计离开 App 时间的检查。

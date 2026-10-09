@@ -26,6 +26,41 @@ final class AITransportTests: XCTestCase {
         XCTAssertEqual(reasoning["effort"] as? String, "xhigh")
     }
 
+    func testGeminiDiscoveryStreamingUsageAndThinkingRequest() async throws {
+        let provider = provider(kind: .gemini)
+        let host = try XCTUnwrap(URL(string: provider.baseURL)?.host)
+        let discovery = HTTPStub(body: #"{"data":[{"id":"models/gemini-2.5-flash"}]}"#)
+        BattlefieldURLProtocol.registry.add(discovery, host: host)
+        let models = try await client().models(provider: provider, apiKey: "fixture")
+        XCTAssertEqual(discovery.requests.first?.url?.path, "/v1/models")
+        XCTAssertNil(discovery.requests.first?.url?.query)
+        let stub = HTTPStub(
+            body: """
+                data: {"choices":[{"delta":{"content":"s"},"finish_reason":"stop"}]}
+
+                data: {"choices":[],"usage":{"prompt_tokens":20,"completion_tokens":10,"total_tokens":30}}
+
+                data: [DONE]
+
+                """, contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: host)
+        let reply = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: try XCTUnwrap(models.first))),
+                    apiKey: "fixture"), messages: [], maxOutputTokens: nil)
+        ) { _ in }
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(stub.bodies.first)) as? [String: Any])
+        XCTAssertEqual(body["model"] as? String, "models/gemini-2.5-flash")
+        XCTAssertEqual(body["reasoning_effort"] as? String, "high")
+        XCTAssertNil(body["enable_thinking"])
+        XCTAssertNil(body["max_tokens"])
+        XCTAssertEqual((body["stream_options"] as? [String: Bool])?["include_usage"], true)
+        XCTAssertEqual(reply.text, "s")
+        XCTAssertEqual(reply.usage.total, 30)
+        XCTAssertFalse(reply.usage.estimated)
+    }
+
     func testInBandFailuresAreClassifiedRetriedAndPersistedThroughTheHTTPClient() async throws {
         let cases: [(String, ProblemAnswerStatus, Int)] = [
             (#"{"choices":[{"error":{"code":503,"message":"high demand"}}]}"#, .overloaded, 2),

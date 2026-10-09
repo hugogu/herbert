@@ -126,6 +126,22 @@ final class MatchSettingsTests: XCTestCase, @unchecked Sendable {
         let unknown = Entrant(
             provider: ProviderConfiguration(kind: .compatible), preset: ModelPreset(model: AIModel(id: "unknown")))
         XCTAssertTrue(ReasoningDefaults.parameters(for: unknown).isEmpty)
+        for id in ["models/gemini-2.5-flash", "gemini-3.1-pro"] {
+            let gemini = Entrant(
+                provider: ProviderConfiguration(kind: .gemini), preset: ModelPreset(model: AIModel(id: id)))
+            XCTAssertEqual(ReasoningDefaults.parameters(for: gemini)["reasoning_effort"] as? String, "high")
+            XCTAssertEqual(
+                ReasoningDefaults.applying(to: ["reasoning_effort": "low"], entrant: gemini)["reasoning_effort"]
+                    as? String,
+                "low")
+            var disabled = gemini.preset
+            disabled.parameters.automaticReasoning = false
+            XCTAssertTrue(
+                ReasoningDefaults.parameters(for: Entrant(provider: provider, preset: disabled)).isEmpty)
+        }
+        let olderGemini = Entrant(
+            provider: ProviderConfiguration(kind: .gemini), preset: ModelPreset(model: AIModel(id: "gemini-2.0-flash")))
+        XCTAssertTrue(ReasoningDefaults.parameters(for: olderGemini).isEmpty)
     }
 }
 
