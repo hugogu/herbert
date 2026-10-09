@@ -160,6 +160,7 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.3.7]: https://github.com/hugogu/herbert/releases/tag/v0.3.7
 [0.3.6]: https://github.com/hugogu/herbert/releases/tag/v0.3.6
 [0.3.5]: https://github.com/hugogu/herbert/releases/tag/v0.3.5
 [0.3.4]: https://github.com/hugogu/herbert/tree/v0.3.4
