@@ -119,6 +119,8 @@ cancels its remaining retries. Other problems and entrants continue.
 - Shared prompt `herbert-h-v4` includes coordinate rulers, target coordinates and two
   native-verified worked boards, including a recursive pinwheel separate from scored L30.
 - Stop cancels active calls. Matches save locally and can be shared as PNG cards.
+  Model headers and share cards show the same input/output and reported total tokens,
+  plus cumulative attempt time and points. Share cards omit unavailable cache rates.
   Token accounting notes sit below puzzle progress.
 
 AI is optional and uses **your own API credits**. Streaming usage can be estimated or
@@ -146,7 +148,7 @@ Display the benchmark as **total points / (100 × selected puzzles) × 100%**:
 this measures coverage and code efficiency, rather than the fraction of solved puzzles. Compile-invalid
 and over-limit programs earn zero; incomplete runs can earn partial points. Traps reset
 coverage. A shorter accepted program earns more points. Robot steps do not affect score.
-Rank by **score descending → total input + output tokens ascending → completion time**.
+Rank by **score descending → total tokens ascending → completion time**.
 Cached input and all retries count toward token consumption. Older 0.3.0 histories retain
 their original 100-per-solved-puzzle scoring and tie-breaks.
 
@@ -160,11 +162,11 @@ History snapshots preserve the full shared prompt and its version, boards, param
 provider model versions can still change. This composite score is our benchmark policy,
 inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
 
-![User-provided Herbert Benchmark run showing six LLMs side by side](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
+![User-provided Herbert Benchmark run showing four model columns and per-attempt timing](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 
-*User-provided English app capture of six models over a ten-puzzle selection. Several
-answers were stopped; this is an illustrative run, not a completed controlled comparison.
-The capture predates 0.3.7, so its model names still include provider prefixes.*
+*User-provided English app capture showing four model columns from a twelve-puzzle
+community selection. Several answers were stopped; this illustrates an actual run,
+rather than a completed controlled comparison.*
 
 [Current progress UI](docs/screenshots/en/battlefield/ai-battlefield.png) ·
 [New match](docs/screenshots/en/battlefield/ai-new-match.png) ·

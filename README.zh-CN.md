@@ -89,18 +89,19 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 界面、历史与分享图统一显示 **总分 /（100 × 所选题数）× 100%**：8 题获得 160 分即 **20%**。
 未完成题目也计入分母；百分比同时反映目标覆盖和代码效率，不等同于通过题数比例。
 编译错误或超出长度限制为零分；未完成的有效运行也有部分分，陷阱会清空目标覆盖。
-同样通过时，代码越短分数越高；步数不参与评分。按**总分降序 → 输入和输出 Token 总量升序 → 完成时间**排名，
+同样通过时，代码越短分数越高；步数不参与评分。按**总分降序 → 总 Token 用量升序 → 完成时间**排名，
 缓存输入和所有重试均计入用量。0.3.0 旧历史保留原来的通过题数计分及排序方式。
 
 比较时保持题目、机会数、比赛设置和提示词一致，并记录采样与推理参数。
 统一的**每模型每题 Token 预算**覆盖所有重试；关闭两项限制时，全部模型可以完成各自作答，
 使用服务商声明的最大输出能力，未知能力则由服务商决定。
+模型表头和分享图统一显示输入/输出与服务商报告的总 Token、累计尝试用时及总分；分享图省略缺失的缓存率。
 历史保存完整共享提示词及其版本、棋盘、模型参数、收到的答案与计分版本，但服务商的模型版本仍可能变化。
 这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
 
-![用户提供的六模型 Herbert Benchmark 运行截图](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
+![用户提供的 Herbert Benchmark 运行截图，显示四个模型及每次尝试用时](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 
-*用户提供的英文 App 截图：六个模型、所选十题，部分回答已停止，仅演示实际运行，不代表完整的受控模型比较。截图早于 0.3.7，因此仍显示模型名称的服务商前缀。*
+*用户提供的英文 App 截图：展示所选十二道社区题目中的四个模型列。部分回答已停止，仅演示实际运行，不代表完整的受控模型比较。*
 
 [当前进度界面](docs/screenshots/en/battlefield/ai-battlefield.png) · [新比赛](docs/screenshots/en/battlefield/ai-new-match.png) ·
 [比赛设置](docs/screenshots/en/battlefield/ai-match-settings.png) · [模型设置](docs/screenshots/en/battlefield/ai-model-settings.png) ·

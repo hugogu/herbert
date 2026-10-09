@@ -74,6 +74,19 @@ allowing all fixture entrants to finish.
 These images illustrate the application and do not benchmark a commercial model.
 No real API key or personal provider configuration appears in these captures.
 
+`herbert-benchmark-user-run.png` is a user-supplied English app capture, replaced on
+October 9 with the twelve-community-puzzle run showing four model columns. It includes
+stopped and failed answers and illustrates a partial run, without establishing a
+controlled commercial-model ranking.
+
+`ai-share.png` was refreshed from the app's actual PNG export during the passing
+`testParallelMatchRetryNativeJudgingHistoryAndShareImage` case in
+`.build/benchmark-metrics-ui.xcresult`. Both deterministic entrants have two attempts,
+1,800 input / 24 output tokens and a provider-reported total of 2,400 tokens. The first
+fixture reports a 50% cache rate; the second omits cache data, so its card hides that
+metric. The image includes cumulative model time, points and match duration and remains
+an unmodified English app export.
+
 On October 9, `ai-battlefield.png`, `ai-answer.png`, `ai-history.png` and
 `ai-thinking.png` were refreshed from `.build/attempt-timing-ui.xcresult` to show total
 points beside normalized percentages and each attempt's elapsed timer. Fixture replies
