@@ -2,6 +2,13 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 超长试运行、答案恢复与手动重试（10 月 9 日）
+
+- `scripts/check.sh` 通过：155 项 Swift 测试（45 Core、110 Battlefield）、16 项 Python 检查和严格格式检查。新增超长程序可执行但不可通过、显式最终答案恢复与原始内容保留、残缺围栏、拒绝歧义候选、中断/截断不判题、手动追加与顺序、旧尝试及评分保留、磁盘往返、累计预算、取消、闲置时间排除及保存的过载冷却。HTTP 集成检查覆盖推理中的超长最终答案 → 原生拒绝 → 手动重试通过，以及 402 正文优先于嵌套 400、保留详情且不再自动请求。
+- `.build/answer-retry-functional-ui.xcresult` 四项 Mac UI 检查通过：超长程序运行且重启后仍未通过；推理中的最终程序恢复、402 Burnout、历史中手动追加并保留原错误、重启恢复同一条结果；原有并行比赛、判题、分享、试运行返回；Stop 取消并保存。没有调用付费 API。
+- 原生检查发现共享容器背景后的 plain Button 空白区域不能点击，已给答案标签补充矩形命中区域。使用独立测试 App 标识，避免与用户正在运行的开发版混淆。此环境的 XCTest 在次屏生成可选截图失败；功能检查在关闭截图导出后通过，没有将桌面视频或无效截图发布到 README。
+- iOS Release 无签名编译通过；工程与课程重复生成一致，个人 scheme 未改变。新增界面文案覆盖中英日；本机没有 Simulator runtime，未声称 iPhone / iPad 真机运行验证。
+
 ## Anthropic 兼容 Messages API（10 月 9 日）
 
 - 新增可自定义 HTTPS 地址的 Anthropic compatible 服务商类型；使用 x-api-key、API 版本、顶层 system 与原生 /messages 内容块，复用比赛规则、HTTP 取消和判题引擎。模型发现支持分页、名称、输出额度及推理能力；未知能力不按模型名猜测。

@@ -5,6 +5,11 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Allow over-limit programs to run in Playground without recording accepted progress; the benchmark judge still enforces byte limits.
+- Recover explicitly marked final H programs from reasoning and incomplete code fences, preserve raw output and show recovery provenance, including saved history trials.
+- Add per-model, per-puzzle manual retry actions to live and saved results. Append one timed attempt with the original snapshots, cumulative budgets, overload cooldown and best-score retention.
+- Classify HTTP/in-band 402 credit failures as Burnout, retain provider details and stop that entrant's automatic requests.
+
 - Keep the default async retry closure inside its defining module to avoid an older Swift cross-module task allocator crash; retain real cooldown cancellation coverage.
 
 - Add Anthropic-compatible Messages API providers with native authentication, paginated model discovery, capability-based thinking/effort defaults, signed content replay, streaming and JSON responses, cache-aware usage and 529 overload backoff. Preserve shared prompts, match budgets and old history.

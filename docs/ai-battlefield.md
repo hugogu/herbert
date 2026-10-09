@@ -194,6 +194,39 @@ a particular commercial model will solve #0002/#0003; no paid model result is cl
 Compare runs only with matching prompt versions and puzzle IDs. v0.3.3 uses continuous L01–L30 numbers, with ten
 introductory lessons followed by twenty advanced challenges, totaling 30 puzzles (maximum 3,000 points).
 
+## Recover answers and grant another attempt
+
+Herbert retains the original final response, reasoning and provider diagnostics separately.
+If a model places an explicitly labeled **Final answer** in reasoning instead of the final
+response field, Herbert recovers that H program and labels its origin. A single unclosed
+H fence can also be recovered when its content compiles. Arbitrary intermediate reasoning
+blocks and ambiguous competing answers are never selected. Failed/interrupted or output-limited
+requests are not scored, even when partial reasoning contains code; the text remains available
+for manual trials. Saved history can expose a recoverable final program without rewriting its
+original output or retroactively changing its benchmark score.
+
+Use the **circular retry arrow** on a non-accepted progress cell to grant that model one extra
+attempt on that puzzle. During a match it waits for that model's current puzzle to finish;
+other models continue. In history it resumes the saved result, appends a **Manual retry**
+record and updates the same history entry. Puzzle/model settings and the system prompt come
+from that result, with native feedback from earlier judged attempts. The current API key
+must still belong to the saved endpoint. Accepted answers cannot be retried.
+
+Manual retries retain cumulative token usage and the remaining match time, and honor saved
+provider cooldowns. They are unavailable after those budgets are exhausted or while a different
+match is running. Idle time between saved runs is excluded from match duration. Earlier attempts,
+best scores, timing and errors stay visible; extra tokens count in ranking. A manually extended
+run is distinguishable from a run with only the configured automatic attempts.
+
+OpenRouter **HTTP 402** and streamed/in-band 402 credit errors become **Burnout**, preserve
+the credit diagnostic, and stop that entrant's remaining automatic requests. Other entrants
+continue. After resolving the credit issue, a manual retry is available if match budgets remain.
+The app does not silently reduce the shared allowance in response to a credit failure.
+
+Playground can execute over-limit programs for analysis, including recovered AI answers.
+Lighting all targets with such a program shows a trial-only completion and does not save an
+accepted personal solution. Battlefield scoring still assigns zero to over-limit submissions.
+
 ## Run a match
 
 **New match** starts with your default entrants and all **30 retained original puzzles**.

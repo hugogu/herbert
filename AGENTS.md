@@ -50,3 +50,6 @@
 - Keep a popover's presenter unique across adaptive layouts. Binding the same popover to multiple `ViewThatFits` candidates can dismiss it immediately; use `AnyLayout` to rearrange one control tree. Wait for popover disappearance before capturing screenshots.
 
 - Avoid async closure literals in public default arguments: older Swift toolchains can emit conflicting async context layouts across library/client modules (swiftlang/swift#92017). Construct the default inside a library-owned initializer overload. Test real default cooldown cancellation as well as injected sleeps.
+
+- When a plain Button shares a container background with a sibling action, give its label a rectangular contentShape. Otherwise blank space inside the apparent progress cell may not open answer details.
+- Battlefield repositories encode dates as milliseconds since 1970. Normalize expected values through that date strategy when comparing complete disk round trips; in-memory Date precision can differ slightly.

@@ -125,6 +125,12 @@ AI is optional and uses **your own API credits**. Streaming usage can be estimat
 partial; token budgets cannot guarantee a provider's final bill. iPhone/iPad matches end
 when the app enters the background. [Setup and accounting](docs/ai-battlefield.md) · [Privacy](PRIVACY.md).
 
+Non-accepted progress cells offer a **manual retry** arrow: one extra attempt with the saved
+prompt, model settings and remaining budgets, including from history. Attempts and original
+output stay visible. Explicit final answers placed in reasoning can be recovered for judging
+or board trials. Over-limit programs can run in Playground for analysis without earning an
+accepted solution; OpenRouter 402 credit failures become Burnout.
+
 ## Herbert Benchmark
 
 Use the **30 retained original puzzles** as an AI programming benchmark: movement and
