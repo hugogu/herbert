@@ -53,6 +53,10 @@ Short landscape layouts keep the sidebar compact and put the board and code side
 side, with statistics below. Puzzle details, AI trial notes and rules open from title tags.
 See the [compact workspace capture](docs/screenshots/en/compact-playground.png) from a short Mac window.
 
+To ask an AI in its own chat window, open **Puzzle details** (or **AI trial**) and choose
+**Copy AI prompt**. It includes Battlefield's exact English rules, worked examples and
+the selected board, ready to paste as one message.
+
 ## Small programs, intricate places
 
 The six-chapter [original course](docs/original-course.md) grows from a single `s` to

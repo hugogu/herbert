@@ -119,6 +119,16 @@ public enum BattlefieldPrompt {
         Prompt version: **herbert-h-v4**. All entrants receive the same rules and puzzles.
         """
 
+    public static func messages(for problem: Problem, rules: String = BattlefieldPrompt.rules) -> [AIMessage] {
+        [AIMessage(role: "system", content: rules), AIMessage(role: "user", content: self.problem(problem))]
+    }
+
+    /// The same initial turn as Battlefield, combined for chat windows with a single input.
+    public static func manual(_ problem: Problem) -> String {
+        let messages = messages(for: problem)
+        return messages[0].content + "\n\n---\n\n## Puzzle to solve\n\n" + messages[1].content
+    }
+
     public static func retryMessages(_ messages: [AIMessage], reply: AIReply, feedback: String) -> [AIMessage] {
         var messages = messages
         if !reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

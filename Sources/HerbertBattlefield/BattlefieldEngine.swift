@@ -143,10 +143,7 @@ public actor BattlefieldEngine {
         let maxAttempts = result!.configuration.attemptsPerProblem
         for (p, problem) in problems.enumerated() {
             guard await active() else { break }
-            var messages = [
-                AIMessage(role: "system", content: result!.systemPrompt),
-                AIMessage(role: "user", content: BattlefieldPrompt.problem(problem)),
-            ]
+            var messages = BattlefieldPrompt.messages(for: problem, rules: result!.systemPrompt)
             for a in 0..<maxAttempts {
                 guard await active() else { break }
                 let remaining = remainingBudget(entrant: e, problem: p)

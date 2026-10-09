@@ -1,6 +1,10 @@
 import ImageIO
 import XCTest
 
+#if os(macOS)
+    import AppKit
+#endif
+
 final class HerbertUITests: XCTestCase {
     @MainActor
     private func launch(reset: Bool = true, language: String = "zh-Hans", shortWindow: Bool = false) -> XCUIApplication
@@ -45,6 +49,31 @@ final class HerbertUITests: XCTestCase {
     private func openFirst(_ app: XCUIApplication) {
         app.buttons["continue-problem"].activateControl()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testCopyProblemPromptIncludesSharedRulesExamplesAndBoardWithoutChangingDraft() {
+        let app = launch(language: "en")
+        openFirst(app)
+        app.buttons["insert-r"].activateControl()
+        app.buttons["problem-details"].activateControl()
+        let copy = app.buttons["copy-ai-prompt"]
+        XCTAssertTrue(copy.waitForExistence(timeout: 5))
+        copy.activateControl()
+        XCTAssertTrue(copy.label.contains("copied"))
+        #if os(macOS)
+            let prompt = NSPasteboard.general.string(forType: .string) ?? ""
+            XCTAssertTrue(prompt.hasPrefix("# Herbert H programming challenge"))
+            XCTAssertTrue(prompt.contains("## Worked example 2"))
+            XCTAssertTrue(prompt.contains("## Puzzle to solve\n\nPuzzle L01 (ID 10001), byte limit: 1."))
+            XCTAssertTrue(prompt.contains("24: ........................."))
+            XCTAssertTrue(
+                prompt.hasSuffix(
+                    "Return one complete fenced h block, with definitions first and an execution line last."))
+        #endif
+        app.buttons["close-problem-details"].activateControl()
+        XCTAssertEqual(app.textViews["code-editor"].value as? String, "r")
+        app.terminate()
     }
 
     @MainActor

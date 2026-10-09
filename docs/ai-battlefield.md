@@ -67,6 +67,14 @@ help button contains the scoring formula and answer/trial instructions. In a sho
 landscape playground, the board and editor appear first, statistics follow below, and
 the title's **AI trial** tag explains how trial editing preserves personal progress.
 
+Every playground's **Puzzle details** / **AI trial** panel offers **Copy AI prompt**.
+The copied Markdown combines the same initial system rules and user puzzle message
+used by Battlefield, including the public worked examples and exact board/rulers.
+The selected puzzle appears last under **Puzzle to solve**. Copying makes no API call
+and does not include personal drafts, provider settings or keys. Chat products may add
+their own instructions and generation settings, so identical text does not guarantee
+identical answers.
+
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,
 `presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, and `thinking_budget`.
 Provider support varies; invalid combinations can return an API error. Model, message,

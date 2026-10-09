@@ -4,6 +4,22 @@ import XCTest
 @testable import HerbertBattlefield
 
 final class PromptExamplesTests: XCTestCase {
+    func testManualPromptReusesBattlefieldMessagesAndEndsWithTheSelectedPuzzle() throws {
+        let problems = try ProblemCatalog.bundled()
+        for problem in [try XCTUnwrap(problems.first), try XCTUnwrap(problems.last)] {
+            let messages = BattlefieldPrompt.messages(for: problem)
+            XCTAssertEqual(messages.map(\.role), ["system", "user"])
+            XCTAssertEqual(messages[0].content, BattlefieldPrompt.rules)
+            XCTAssertEqual(messages[1].content, BattlefieldPrompt.problem(problem))
+            let prompt = BattlefieldPrompt.manual(problem)
+            XCTAssertTrue(prompt.hasPrefix(messages[0].content))
+            XCTAssertTrue(prompt.hasSuffix("## Puzzle to solve\n\n" + messages[1].content))
+            XCTAssertTrue(prompt.contains("Worked example 2"))
+        }
+        let custom = BattlefieldPrompt.messages(for: problems[0], rules: "Saved match rules")
+        XCTAssertEqual(custom[0].content, "Saved match rules")
+    }
+
     func testWorkedBoardsAndAnswersPassNativeJudgeAndStayOutsideBenchmark() throws {
         let catalog = try ProblemCatalog.bundled()
         XCTAssertEqual(BattlefieldPrompt.examples.count, 2)

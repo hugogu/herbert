@@ -1,5 +1,12 @@
+import HerbertBattlefield
 import HerbertCore
 import SwiftUI
+
+#if os(macOS)
+    import AppKit
+#else
+    import UIKit
+#endif
 
 struct GameDestination: View {
     let problem: Problem
@@ -25,6 +32,7 @@ struct GameView: View {
     @StateObject private var editor = EditorController()
     @State private var showGuide = false
     @State private var showProblemInfo = false
+    @State private var promptCopied = false
     @State private var showBest = false
     @State private var showOriginalBestInfo = false
     @State private var revealedHints = 0
@@ -144,6 +152,7 @@ struct GameView: View {
         HStack(spacing: 8) {
             Button {
                 model.pause()
+                promptCopied = false
                 showProblemInfo = true
             } label: {
                 Label(LocalizedStringKey(model.isTrial ? "AI 试运行" : "题目说明"), systemImage: "info.circle")
@@ -169,6 +178,27 @@ struct GameView: View {
                 Text(LocalizedStringKey(model.isTrial ? "AI 试运行" : "题目说明")).font(.headline)
                 Spacer()
                 Button("完成") { showProblemInfo = false }.accessibilityIdentifier("close-problem-details")
+            }.padding(16)
+            Divider()
+            VStack(alignment: .leading, spacing: 8) {
+                Button {
+                    let prompt = BattlefieldPrompt.manual(model.problem)
+                    #if os(macOS)
+                        NSPasteboard.general.clearContents()
+                        promptCopied = NSPasteboard.general.setString(prompt, forType: .string)
+                    #else
+                        UIPasteboard.general.string = prompt
+                        promptCopied = true
+                    #endif
+                } label: {
+                    Label(
+                        LocalizedStringKey(promptCopied ? "已复制 AI 提示词" : "复制 AI 提示词"),
+                        systemImage: promptCopied ? "checkmark" : "doc.on.doc"
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 32)
+                }.buttonStyle(.borderedProminent).accessibilityIdentifier("copy-ai-prompt")
+                Text("包含规则、示例与当前棋盘，与 AI Battlefield 使用相同的提示词。")
+                    .font(.caption).foregroundStyle(Palette.muted)
             }.padding(16)
             Divider()
             ScrollView {
