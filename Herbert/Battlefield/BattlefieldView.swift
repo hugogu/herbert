@@ -123,8 +123,8 @@ struct BattlefieldView: View {
                                 Palette.muted)
                             Text(
                                 L10n.text(
-                                    "%ld 个 AI · %ld 道题 · 最高 %@ 分", summary.entrantCount,
-                                    summary.problemCount, battlefieldScore(summary.topScore))
+                                    "%ld 个 AI · %ld 道题 · 最高 %@", summary.entrantCount,
+                                    summary.problemCount, battlefieldPercentage(summary.topScoreFraction))
                             ).font(.caption)
                         }
                         Spacer()
@@ -263,7 +263,7 @@ private struct BattlefieldSetupView: View {
                             })
                     ) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(option.preset.model.name).font(.headline)
+                            Text(option.preset.model.displayName).font(.headline)
                             Text(
                                 option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
                                     + " max tokens"
@@ -324,7 +324,7 @@ private struct BattlefieldModelPicker: View {
                 }.padding(.horizontal)
                 List(
                     battlefield.modelOptions.filter {
-                        search.isEmpty || $0.preset.model.name.localizedCaseInsensitiveContains(search)
+                        search.isEmpty || $0.preset.model.displayName.localizedCaseInsensitiveContains(search)
                             || $0.preset.model.id.localizedCaseInsensitiveContains(search)
                             || $0.provider.name.localizedCaseInsensitiveContains(search)
                     }
@@ -337,7 +337,7 @@ private struct BattlefieldModelPicker: View {
                             })
                     ) {
                         VStack(alignment: .leading) {
-                            Text(option.preset.model.name).font(.headline)
+                            Text(option.preset.model.displayName).font(.headline)
                             Text(option.provider.name + " / " + option.preset.model.id).font(.caption).foregroundStyle(
                                 Palette.muted)
                         }

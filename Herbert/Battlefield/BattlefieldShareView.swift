@@ -95,7 +95,8 @@ private struct BattlefieldShareCard: View {
                     Text(String(format: "%02d", rank + 1)).font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundStyle(rank == 0 ? Palette.mint : Palette.muted).frame(width: 54)
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(entrant.entrant.preset.model.name).font(.system(size: 25, weight: .bold)).lineLimit(2)
+                        Text(entrant.entrant.preset.model.displayName).font(.system(size: 25, weight: .bold)).lineLimit(
+                            2)
                         Text(entrant.entrant.providerName).font(.system(size: 17)).foregroundStyle(Palette.muted)
                         Text(
                             L10n.text(
@@ -111,7 +112,7 @@ private struct BattlefieldShareCard: View {
                         .font(.system(size: 16, design: .monospaced)).foregroundStyle(Palette.muted)
                     }
                     Spacer(minLength: 10)
-                    Text(battlefieldScore(result.score(for: entrant))).font(
+                    Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
                         .system(size: 44, weight: .bold, design: .rounded)
                     )
                     .foregroundStyle(Palette.mint)

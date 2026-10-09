@@ -24,6 +24,12 @@ public enum ProviderKind: String, Codable, CaseIterable, Sendable {
 public struct AIModel: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var name: String
+    /// Provider pricing qualifiers are presentation metadata, never part of the model ID.
+    public var displayName: String {
+        name.replacingOccurrences(
+            of: #"\s*\(free\)\s*$"#, with: "", options: [.regularExpression, .caseInsensitive]
+        ).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     public var contextLength: Int?
     public var supportedParameters: [String]?
     public var maximumOutputTokens: Int?
@@ -316,6 +322,11 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
             total + (byID[answer.id].map { scoringPolicy.score(answer, problem: $0) } ?? 0)
         }
         return (total * 100).rounded() / 100
+    }
+    public var maximumScore: Double { Double(problems.count) * 100 }
+    public func scoreFraction(for entrant: EntrantResult) -> Double {
+        guard maximumScore > 0 else { return 0 }
+        return min(1, max(0, score(for: entrant) / maximumScore))
     }
     public var ranked: [EntrantResult] {
         let scores = Dictionary(uniqueKeysWithValues: entrants.map { ($0.id, score(for: $0)) })

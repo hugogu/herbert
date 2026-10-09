@@ -24,6 +24,40 @@ final class BattlefieldScoringTests: XCTestCase {
         return attempt
     }
 
+    func testDisplayNamesPreserveProviderIdentityAndMeaningfulModelLabels() throws {
+        let model = AIModel(id: "nvidia/model:free", name: "NVIDIA: Nemotron 3 Super (free)")
+        XCTAssertEqual(model.displayName, "NVIDIA: Nemotron 3 Super")
+        XCTAssertEqual(model.name, "NVIDIA: Nemotron 3 Super (free)")
+        XCTAssertEqual(model.id, "nvidia/model:free")
+        XCTAssertEqual(AIModel(id: "m", name: "Model (vision) (FREE) ").displayName, "Model (vision)")
+        XCTAssertEqual(AIModel(id: "m", name: "Model (2026)").displayName, "Model (2026)")
+        XCTAssertEqual(try JSONDecoder().decode(AIModel.self, from: JSONEncoder().encode(model)), model)
+    }
+
+    func testBenchmarkPercentageUsesEverySelectedPuzzleAndRetainsRawScores() throws {
+        let puzzles = (1...8).map { id in
+            let original = puzzle()
+            return Problem(id: id, title: original.title, author: original.author, byteLimit: 3, rows: original.rows)
+        }
+        let entrant = Entrant(
+            provider: ProviderConfiguration(kind: .compatible), preset: ModelPreset(model: AIModel(id: "m")))
+        var result = CompetitionResult(
+            configuration: CompetitionConfiguration(), problems: puzzles, entrants: [entrant])
+        for index in 0..<2 {
+            result.entrants[0].answers[index].attempts = [try attempt("sss", problem: puzzles[index])]
+            result.entrants[0].answers[index].status = .solved
+        }
+        XCTAssertEqual(result.maximumScore, 800)
+        XCTAssertEqual(result.score(for: result.entrants[0]), 160)
+        XCTAssertEqual(result.scoreFraction(for: result.entrants[0]), 0.2)
+        let restored = try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result))
+        XCTAssertEqual(restored.scoreFraction(for: restored.entrants[0]), 0.2)
+        XCTAssertEqual(CompetitionSummary(restored).topScoreFraction, 0.2)
+        let empty = CompetitionResult(configuration: CompetitionConfiguration(), problems: [], entrants: [entrant])
+        XCTAssertEqual(empty.scoreFraction(for: empty.entrants[0]), 0)
+        XCTAssertEqual(CompetitionSummary(empty).topScoreFraction, 0)
+    }
+
     func testNativePartialCoverageShorterSolutionsAndHardByteLimit() throws {
         let problem = puzzle()
         let policy = BattlefieldScoring.coverageAndLengthV1

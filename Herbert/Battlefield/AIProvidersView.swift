@@ -151,7 +151,7 @@ private struct AIProviderDetail: View {
                     })
             ) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(model.name).font(.headline)
+                    Text(model.displayName).font(.headline)
                     if model.name != model.id {
                         Text(model.id).font(.caption.monospaced()).foregroundStyle(Palette.muted)
                     }
@@ -234,7 +234,7 @@ struct AIModelEditor: View {
         BattlefieldSheet(title: L10n.text("模型参数")) {
             Form {
                 Section {
-                    Text(preset.model.name).font(.headline)
+                    Text(preset.model.displayName).font(.headline)
                     Toggle("默认参与比赛", isOn: $preset.isDefault)
                     LabeledContent("单次最大输出 Token") {
                         TextField("单次最大输出 Token", value: $preset.parameters.maxOutputTokens, format: .number)

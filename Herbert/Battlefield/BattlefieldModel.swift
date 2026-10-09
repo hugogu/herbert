@@ -276,7 +276,7 @@ final class BattlefieldModel: ObservableObject {
                 for index in 1...(ProcessInfo.processInfo.arguments.contains("--battlefield-three-models") ? 3 : 2) {
                     var provider = ProviderConfiguration(kind: .compatible, name: "Fixture Provider \(index)")
                     let model = AIModel(
-                        id: "fixture-\(index)", name: "Fixture Model \(index)",
+                        id: "fixture-\(index)", name: "Fixture Model \(index) (free)",
                         maximumOutputTokens: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics")
                             ? 4096 : nil)
                     provider.models = [model]

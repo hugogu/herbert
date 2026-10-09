@@ -169,10 +169,14 @@ struct BattlefieldDashboard: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(String(format: "%02d", rank)).font(.title2.bold()).foregroundStyle(Palette.mint)
-                Text(entrant.entrant.preset.model.name).font(.headline).lineLimit(2).padding(
+                Text(entrant.entrant.preset.model.displayName).font(.headline).lineLimit(2).padding(
                     .trailing, entrant.error == nil ? 0 : 20)
             }
-            Text(entrant.entrant.providerName).font(.caption).foregroundStyle(Palette.muted)
+            HStack {
+                Text(entrant.entrant.providerName).lineLimit(1)
+                Spacer(minLength: 4)
+                Text(L10n.text("通过 %ld/%ld", entrant.solved, result.problems.count))
+            }.font(.caption).foregroundStyle(Palette.muted)
             metric(
                 L10n.text("输入 / 输出 Token"),
                 (entrant.hasEstimatedUsage ? "≈ " : "")
@@ -181,14 +185,13 @@ struct BattlefieldDashboard: View {
             metric(L10n.text("总 Token"), (entrant.hasEstimatedUsage ? "≈ " : "") + entrant.totalTokens.formatted())
             Divider()
             HStack(alignment: .firstTextBaseline) {
-                Text(battlefieldScore(result.score(for: entrant))).font(
+                Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
                     .system(size: 30, weight: .bold, design: .rounded)
                 )
                 .contentTransition(.numericText()).foregroundStyle(Palette.mint)
                 .accessibilityIdentifier("score-\(entrant.entrant.preset.model.id)")
-                Text("分").font(.caption).foregroundStyle(Palette.muted)
                 Spacer(minLength: 4)
-                Text(L10n.text("通过 %ld/%ld", entrant.solved, result.problems.count)).font(.caption)
+                Text("综合得分").font(.caption).foregroundStyle(Palette.muted)
             }
             if entrant.exhaustedBudget { Pill(text: L10n.text("Token 预算用完"), color: Palette.amber) }
         }.frame(width: 224, alignment: .leading).padding(12)
@@ -232,7 +235,7 @@ struct BattlefieldDashboard: View {
         }.buttonStyle(.plain)
             .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
             .accessibilityLabel(
-                problem.number + " " + entrant.entrant.preset.model.name
+                problem.number + " " + entrant.entrant.preset.model.displayName
                     + " " + answer.status.title + " " + score)
     }
 
@@ -266,7 +269,7 @@ private struct BattlefieldAnswerView: View {
     }
     var body: some View {
         BattlefieldSheet(
-            title: selection.problem.number + " · " + selection.entrant.entrant.preset.model.name,
+            title: selection.problem.number + " · " + selection.entrant.entrant.preset.model.displayName,
             layout: .answer
         ) {
             ScrollView {

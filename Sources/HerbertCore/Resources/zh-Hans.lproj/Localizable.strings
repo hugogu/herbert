@@ -490,3 +490,7 @@
 "Compose a window generator with a chiral branching tree and a higher-order rotation routine." = "把窗框生成器、带旋向的分杈树与高阶旋转过程组合成整体。";
 "Every node is both a square courtyard and a branch junction; depth, size and chirality change independently." = "每个节点既是方形庭院也是分杈点；深度、尺寸与旋向分别变化。";
 "Prove the courtyard and each subtree return to the same pose. Build one sector from those contracts, then pass it to a fourfold repeater." = "先确认庭院与每个子树都恢复原状态；按这个约定组合一个扇区，再交给四次重复器。";
+
+// Benchmark scores
+"综合得分" = "综合得分";
+"%ld 个 AI · %ld 道题 · 最高 %@" = "%ld 个 AI · %ld 道题 · 最高 %@";

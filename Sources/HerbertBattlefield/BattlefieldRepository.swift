@@ -39,6 +39,10 @@ public struct CompetitionSummary: Codable, Identifiable, Equatable, Sendable {
     public let leader: String?
     public let topScore: Double
     public let totalTokens: Int
+    public var topScoreFraction: Double {
+        guard problemCount > 0 else { return 0 }
+        return min(1, max(0, topScore / (Double(problemCount) * 100)))
+    }
     public init(_ result: CompetitionResult) {
         id = result.id
         startedAt = result.startedAt

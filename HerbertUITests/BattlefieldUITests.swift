@@ -280,7 +280,7 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15), app.debugDescription)
         for model in ["fixture-1", "fixture-2"] {
             let score = app.staticTexts["score-\(model)"]
-            XCTAssertEqual(score.value as? String ?? score.label, "80")
+            XCTAssertEqual(score.value as? String ?? score.label, "80%")
         }
         XCTAssertTrue(app.staticTexts["AI: 2 · Puzzles: 1"].exists)
         capture(app, "ai-battlefield")
@@ -307,7 +307,7 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
         app.buttons["backToBattlefield"].battlefieldTap()
         XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80")
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80%")
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         reveal("tryBattlefieldAnswer-1", in: app).battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
@@ -334,7 +334,7 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(history.waitForExistence(timeout: 10))
         history.battlefieldTap()
         XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80")
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80%")
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
@@ -366,7 +366,10 @@ final class BattlefieldUITests: XCTestCase {
         reveal("startBattlefield", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 20))
         XCTAssertFalse(app.staticTexts["Live ranking"].exists)
-        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "240")
+        XCTAssertFalse(app.staticTexts["Fixture Model 1 (free)"].exists)
+        XCTAssertTrue(app.staticTexts["Fixture Model 1"].exists)
+        XCTAssertTrue(app.staticTexts["Solved 3/3"].exists)
+        XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80%")
         XCTAssertLessThan(app.staticTexts["score-fixture-1"].frame.minX, app.staticTexts["score-fixture-2"].frame.minX)
         let accepted = reveal("answer-fixture-1-10006", in: app)
         #if os(macOS)

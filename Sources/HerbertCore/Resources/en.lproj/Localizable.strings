@@ -490,3 +490,7 @@
 "Compose a window generator with a chiral branching tree and a higher-order rotation routine." = "Compose a window generator with a chiral branching tree and a higher-order rotation routine.";
 "Every node is both a square courtyard and a branch junction; depth, size and chirality change independently." = "Every node is both a square courtyard and a branch junction; depth, size and chirality change independently.";
 "Prove the courtyard and each subtree return to the same pose. Build one sector from those contracts, then pass it to a fourfold repeater." = "Prove the courtyard and each subtree return to the same pose. Build one sector from those contracts, then pass it to a fourfold repeater.";
+
+// Benchmark scores
+"综合得分" = "Benchmark score";
+"%ld 个 AI · %ld 道题 · 最高 %@" = "AI: %ld · Puzzles: %ld · Top score: %@";

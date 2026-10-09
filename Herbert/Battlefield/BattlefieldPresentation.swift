@@ -72,6 +72,10 @@ func battlefieldScore(_ score: Double) -> String {
     score.formatted(.number.precision(.fractionLength(0...2)))
 }
 
+func battlefieldPercentage(_ fraction: Double) -> String {
+    fraction.formatted(.percent.precision(.fractionLength(0...2)))
+}
+
 extension CompetitionResult {
     var scoringDescription: String {
         L10n.text(
