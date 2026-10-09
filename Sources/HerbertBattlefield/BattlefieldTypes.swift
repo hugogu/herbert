@@ -2,12 +2,13 @@ import Foundation
 import HerbertCore
 
 public enum ProviderKind: String, Codable, CaseIterable, Sendable {
-    case openRouter, siliconFlow, compatible
+    case openRouter, siliconFlow, gemini, compatible
 
     public var defaultURL: String {
         switch self {
         case .openRouter: "https://openrouter.ai/api/v1"
         case .siliconFlow: "https://api.siliconflow.cn/v1"
+        case .gemini: "https://generativelanguage.googleapis.com/v1beta/openai"
         case .compatible: "https://api.openai.com/v1"
         }
     }
@@ -16,6 +17,7 @@ public enum ProviderKind: String, Codable, CaseIterable, Sendable {
         switch self {
         case .openRouter: "OpenRouter"
         case .siliconFlow: "SiliconFlow"
+        case .gemini: "Google Gemini"
         case .compatible: "OpenAI compatible"
         }
     }
@@ -281,6 +283,7 @@ public struct TokenUsage: Codable, Equatable, Sendable {
 
 public enum ProblemAnswerStatus: String, Codable, Sendable {
     case queued, requesting, judging, solved, failed, error, cancelled, burnout
+    case overloaded, timedout, tempUnavailable, accessDenied
 }
 
 public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {

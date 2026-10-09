@@ -279,11 +279,22 @@ private struct BattlefieldAnswerView: View {
         ) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    let status: ProblemAnswerStatus =
-                        selection.answer.attempts.last.map(providerFailed) == true
-                        ? .error
-                        : (selection.answer.attempts.last?.finishReason == "length"
-                            ? .burnout : selection.answer.status)
+                    let status: ProblemAnswerStatus = {
+                        let current = selection.answer.status
+                        if [
+                            .overloaded, .timedout, .tempUnavailable, .accessDenied, .burnout, .solved, .failed,
+                            .cancelled, .error,
+                        ].contains(current) {
+                            return current
+                        }
+                        if selection.answer.attempts.last?.finishReason == "length" {
+                            return .burnout
+                        }
+                        if selection.answer.attempts.last.map(providerFailed) == true {
+                            return .error
+                        }
+                        return current
+                    }()
                     Pill(text: status.title, color: status.color)
                     Text(L10n.text(selection.problem.title)).font(.title2.bold())
                     Text(

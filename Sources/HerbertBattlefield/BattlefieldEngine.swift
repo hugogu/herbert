@@ -257,23 +257,37 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].attempts[a].usage.partial = true
                     if Task.isCancelled || error is CancellationError {
                         result!.entrants[e].answers[p].status = .cancelled
-                    } else {
-                        let failure = ProviderDiagnostics.failure(error, apiKey: participant.apiKey)
-                        let message = failure.message
-                        let diagnostic = failure.detail
-                        result!.entrants[e].answers[p].attempts[a].error = message
-                        result!.entrants[e].answers[p].status = .error
-                        result!.entrants[e].answers[p].attempts[a].providerResponse = diagnostic
+                        break
+                    }
+                    let failure = ProviderDiagnostics.failure(error, apiKey: participant.apiKey)
+                    let message = failure.message
+                    let diagnostic = failure.detail
+                    result!.entrants[e].answers[p].attempts[a].error = message
+                    result!.entrants[e].answers[p].attempts[a].providerResponse = diagnostic
+
+                    let classification = ProviderDiagnostics.classify(
+                        error, detail: diagnostic, entrant: participant.entrant)
+                    result!.entrants[e].answers[p].status = classification.status
+
+                    if classification.shouldStopEntrant {
                         result!.entrants[e].error = message + (diagnostic.map { "\n" + String($0.prefix(512)) } ?? "")
-                    }
-                    result!.entrants[e].finishedAt = .now
-                    for remaining in result!.entrants[e].answers.indices where remaining != p {
-                        if result!.entrants[e].answers[remaining].status == .queued {
-                            result!.entrants[e].answers[remaining].status = .cancelled
+                        result!.entrants[e].finishedAt = .now
+                        for remaining in result!.entrants[e].answers.indices where remaining != p {
+                            if result!.entrants[e].answers[remaining].status == .queued {
+                                result!.entrants[e].answers[remaining].status = .cancelled
+                            }
                         }
+                        await publish()
+                        return
                     }
-                    await publish()
-                    return
+
+                    if classification.isRetriable && a + 1 < maxAttempts {
+                        await publish()
+                        continue
+                    } else {
+                        await publish()
+                        break
+                    }
                 }
             }
         }

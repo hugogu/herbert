@@ -23,6 +23,7 @@
 "上" = "up";
 "下" = "down";
 "下一关" = "Next problem";
+"临时不可用" = "Temp Unavailable";
 "为你的设备重新设计" = "Designed for your device";
 "从第一步开始" = "Take the first step";
 "代码用了 %ld byte，本关最多 %ld byte。" = "Program uses %ld bytes; this problem allows %ld.";
@@ -98,6 +99,7 @@
 "找不到内置关卡资源。" = "Bundled problems could not be found.";
 "把思路，\n变成路径。" = "Turn a thought\ninto a path.";
 "把重复的动作交给过程" = "Give repeated actions a name";
+"拒绝访问" = "Access Denied";
 "换行" = "New line";
 "探索关卡" = "Explore problems";
 "插入 %@ %@" = "Insert %@ %@";
@@ -154,6 +156,7 @@
 "让指令也成为参数" = "Pass commands as arguments";
 "记录" = "Progress";
 "试试其他筛选，或搜索关卡编号。" = "Try another filter or search for a problem ID.";
+"超时" = "Timedout";
 "踩到陷阱，所有目标已重置。" = "A trap reset every target.";
 "轨迹保留本次运行走过的路径，重置棋盘或修改代码后清空。隐藏轨迹不会停止记录。" = "The trail shows paths walked during this run. Resetting the board or editing code clears it. Recording continues while hidden.";
 "载入最短解" = "Load shortest solution";
@@ -164,6 +167,7 @@
 "过程名须是 s、l、r 以外的单个小写字母。" = "A procedure name must be one lowercase letter other than s, l or r.";
 "过程最多接受 26 个参数，可以混合数值与命令。下面的程序执行四次 s。空命令参数写成 a() 或多参数中的空项，如 a(4,)。" = "A procedure takes up to 26 arguments, mixing numbers and commands. This program runs s four times. Write an empty command argument as a() or an empty slot such as a(4,).";
 "过程模板 a(X):…" = "Procedure template a(X):…";
+"过载" = "Overloaded";
 "运行" = "Run";
 "返回关卡列表后重试。" = "Return to the library and try again.";
 "这里还没有关卡" = "No problems here yet";
@@ -268,6 +272,7 @@
 "比赛配置与提示词" = "Match settings & prompt";
 "比赛题目" = "Match puzzles";
 "添加 OpenRouter、SiliconFlow 或兼容 OpenAI 的服务商，自动获取可用模型。" = "Add OpenRouter, SiliconFlow or an OpenAI compatible provider to discover available models.";
+"添加 OpenRouter、SiliconFlow、Google Gemini 或兼容 OpenAI 的服务商，自动获取可用模型。" = "Add OpenRouter, SiliconFlow, Google Gemini or an OpenAI compatible provider to discover available models.";
 "添加服务商" = "Add provider";
 "清空选择" = "Clear selection";
 "点击开始后，将向所选服务商发送规则、题目和本次对话。服务商可能保存请求并按其价格收费，请确认你同意这些数据发送和费用。" = "Starting sends rules, puzzles and the current conversation to your selected providers. They may retain requests and charge their API rates. Start only if you agree to this sharing and cost.";

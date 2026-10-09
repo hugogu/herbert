@@ -200,7 +200,9 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         body["stream"] = true
         if let cap = request.maxOutputTokens { body[entrant.outputTokenParameter.rawValue] = cap }
         body = ReasoningDefaults.applying(to: body, entrant: entrant)
-        if entrant.kind == .compatible { body["stream_options"] = ["include_usage": true] }
+        if entrant.kind == .compatible || entrant.kind == .gemini {
+            body["stream_options"] = ["include_usage": true]
+        }
         if let temperature = parameters.temperature {
             if let supported = entrant.preset.model.supportedParameters, !supported.contains("temperature") {
                 throw BattlefieldError.invalidParameters

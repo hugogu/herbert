@@ -6,15 +6,16 @@ tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current mat
 
 ## Connect models
 
-1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, or an OpenAI compatible provider.
+1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, Google Gemini, or an OpenAI compatible provider.
 2. Enter its HTTPS base URL and your own API key. Saving automatically requests
    `GET /models`; SiliconFlow adds `sub_type=chat` to discover chat models.
 3. Select any default entrants. Configure each model's optional temperature, top P, automatic thinking
    and supported advanced JSON parameters. Blank sampling values use provider defaults.
 4. Use **Refresh models** after provider permissions or model availability change.
 
-The base URL ends at the API version, for example `https://openrouter.ai/api/v1` or
-`https://api.siliconflow.cn/v1`; do not append `/models` or `/chat/completions`.
+The base URL ends at the API version, for example `https://openrouter.ai/api/v1`,
+`https://api.siliconflow.cn/v1`, or `https://generativelanguage.googleapis.com/v1beta/openai`;
+do not append `/models` or `/chat/completions`.
 The standard discovery endpoint is plural **`/models`**, not `/model`.
 Custom endpoints must support OpenAI-style chat completions. Choose `max_tokens` or
 `max_completion_tokens` according to that provider. Authentication uses the Bearer header.
@@ -83,9 +84,15 @@ Older 0.3.1 histories cannot recover text that the older client discarded.
 Live attempts distinguish **Waiting for provider**, **Thinking** and **Generating answer**.
 After a request ends, retained reasoning is explicitly marked as partial received text;
 its wording does not imply that generation is still running. A completed, invalid H
-submission is **Rejected** by the native judge. A provider failure is **Request failed**
+submission is **Rejected** by the native judge. A generic provider failure is **Request failed**
 and is not judged or sent back as an incorrect program. Old attempts with
 `finish_reason: error` also suppress the misleading Rejected presentation.
+
+Special provider and network conditions receive actionable classifications instead of an ambiguous failure:
+- **Overloaded**: 503 high demand or temporary capacity spikes (e.g. Gemini). This error can be retried across problem attempts.
+- **Timedout**: Network request timeouts (`NSURLErrorDomain -1001`) or 502 upstream errors where wall-clock streaming limits are exceeded. The problem is recorded as Timedout and the entrant proceeds to the next problem without stalling.
+- **Temp Unavailable**: 502 network connection lost or transport disconnects. This transient state can be retried across problem attempts.
+- **Access Denied**: 403 authorization failures or Terms of Service violations. The entrant immediately stops and cancels remaining queued problems.
 
 HTTP 200 can still contain a provider error. Both JSON and SSE replies recognize
 top-level/choice errors and `finish_reason: error` or `content_filter`, preserving partial
@@ -93,9 +100,8 @@ text, reasoning, usage, finish reason and redacted diagnostics. This follows
 [OpenRouter's documented in-stream error protocol](https://openrouter.ai/docs/api_reference/errors-and-debugging).
 Network failures retain their domain and code (for example `NSURLErrorDomain -1005`
 for a lost connection), rather than only saying “AI request failed”. An EOF without a
-finish reason or `[DONE]` is reported as an incomplete stream. Provider/transport errors
-stop that entrant, without spending further paid requests on an automatic retry; other
-entrants continue. Historical generic errors cannot recover missing network diagnostics.
+finish reason or `[DONE]` is reported as an incomplete stream. Unclassified terminal errors
+stop that entrant, while other entrants continue. Historical generic errors cannot recover missing network diagnostics.
 
 A `finish_reason: length` reply means the provider exhausted the request's output
 allowance. That problem becomes **Burnout**, with no second request or invalid-program

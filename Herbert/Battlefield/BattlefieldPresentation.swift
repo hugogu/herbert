@@ -40,6 +40,10 @@ extension ProblemAnswerStatus {
         case .error: L10n.text("调用失败")
         case .cancelled: L10n.text("已停止")
         case .burnout: "Burnout"
+        case .overloaded: L10n.text("过载")
+        case .timedout: L10n.text("超时")
+        case .tempUnavailable: L10n.text("临时不可用")
+        case .accessDenied: L10n.text("拒绝访问")
         }
     }
 
@@ -53,14 +57,18 @@ extension ProblemAnswerStatus {
         case .error: "exclamationmark"
         case .cancelled: "stop.fill"
         case .burnout: "flame.fill"
+        case .overloaded: "exclamationmark.triangle"
+        case .timedout: "clock.badge.exclamationmark"
+        case .tempUnavailable: "wifi.exclamationmark"
+        case .accessDenied: "lock.slash.fill"
         }
     }
 
     var color: Color {
         switch self {
         case .solved: Palette.mint
-        case .failed, .error: Palette.danger
-        case .requesting, .judging, .burnout: Palette.amber
+        case .failed, .error, .accessDenied: Palette.danger
+        case .requesting, .judging, .burnout, .overloaded, .timedout, .tempUnavailable: Palette.amber
         case .queued, .cancelled: Palette.muted
         }
     }

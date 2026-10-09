@@ -32,7 +32,8 @@ struct AIProvidersView: View {
                 if battlefield.settings.providers.isEmpty {
                     ContentUnavailableView(
                         L10n.text("还没有服务商"), systemImage: "network",
-                        description: Text("添加 OpenRouter、SiliconFlow 或兼容 OpenAI 的服务商，自动获取可用模型。")
+                        description: Text(
+                            L10n.text("添加 OpenRouter、SiliconFlow、Google Gemini 或兼容 OpenAI 的服务商，自动获取可用模型。"))
                     )
                     .panel()
                 }

@@ -58,7 +58,8 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
             let result = try await run(client)
             let answer = try XCTUnwrap(result.entrants.first?.answers.first)
             let attempt = try XCTUnwrap(answer.attempts.first)
-            XCTAssertEqual(answer.status, .error)
+            let expectedStatus: ProblemAnswerStatus = code == .timedOut ? .timedout : .tempUnavailable
+            XCTAssertEqual(answer.status, expectedStatus)
             XCTAssertNil(attempt.evaluation)
             XCTAssertNotNil(attempt.finishedAt)
             XCTAssertEqual(attempt.reasoning?.content, "Still thinking")
