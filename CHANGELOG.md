@@ -5,6 +5,13 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.6] - 2026-10-09
+
+- Treat HTTP 200 in-band provider errors, including `finish_reason: error` / `content_filter`, as request failures instead of invalid H submissions. Preserve partial text, reasoning, finish reasons, usage and credential-redacted error details; do not judge or retry these as incorrect programs.
+- Retain network error domains/codes and distinguish incomplete streams from malformed answers. Remove the independent 600-second total transfer timeout while keeping the inactivity timeout, match limits and cancellation.
+- Show live waiting/thinking/answer-generation phases and explicit notices on retained interrupted output. Suppress misleading Rejected labels in older provider-error attempts, without rewriting historical scores.
+- Add transport, engine, persistence and native Mac UI regressions, plus actual English app captures of thinking, provider failure and network interruption.
+
 ## [0.3.5] - 2026-10-09
 
 - Include all 0.3.4 benchmark, streaming and puzzle picker improvements in the published Mac preview.
@@ -144,6 +151,7 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.3.6]: https://github.com/hugogu/herbert/releases/tag/v0.3.6
 [0.3.5]: https://github.com/hugogu/herbert/releases/tag/v0.3.5
 [0.3.4]: https://github.com/hugogu/herbert/tree/v0.3.4
 [0.3.3]: https://github.com/hugogu/herbert/releases/tag/v0.3.3

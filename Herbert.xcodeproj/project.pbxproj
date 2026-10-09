@@ -396,8 +396,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.3.5";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.3.6";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -436,8 +436,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.3.5";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.3.6";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -593,8 +593,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "HerbertAppStore";
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.3.5";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.3.6";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -633,8 +633,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "HerbertAppStore";
-				"CURRENT_PROJECT_VERSION" = "8";
-				"MARKETING_VERSION" = "0.3.5";
+				"CURRENT_PROJECT_VERSION" = "9";
+				"MARKETING_VERSION" = "0.3.6";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";

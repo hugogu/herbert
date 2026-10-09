@@ -50,6 +50,8 @@
 
 真机还需检查：保存服务商自动获取模型、钥匙串持久化、多个模型并行、三种模式、失败重试、断网/额度不足、手动终止、后台结束、重启历史及 PNG 系统分享。用少量题目和服务商侧低额度限制开始测试。Review Notes 需提供可审查 AI 功能的方法，勿将私人长期密钥打包到 App 中。
 
+0.3.6 还需在真实服务商上检查：长推理持续更新时显示「正在思考」，请求中断后显示保留内容说明及具体错误码；`finish_reason: error` 归类为调用失败，不出现程序 Rejected。Best Effort 下持续返回数据的请求应可超过 10 分钟，限时模式和手动停止仍须及时终止本地请求。原生 Mac 测试使用确定性测试服务商，不代表真实商业模型验证。
+
 ```sh
 scripts/check.sh
 xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \

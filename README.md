@@ -30,7 +30,7 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.5 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.5/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.6 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.6/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -72,8 +72,10 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.5:** normalized benchmark percentages, a structured puzzle picker, and
-long reasoning streams without counting SSE packaging against the output allowance.
+**Updated in 0.3.6:** distinguish live thinking from interrupted requests, retain specific
+network diagnostics, and treat provider stream errors as request failures. Remove the
+independent ten-minute total transfer cap that could interrupt active reasoning streams.
+Benchmark percentages, structured puzzle selection and 64K output settings remain available.
 The app has four main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 
 - Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
@@ -91,6 +93,9 @@ The app has four main tabs; **AI Battlefield** contains **AI Providers → New m
 - Full response shows received final text, independently collapsible Markdown reasoning and credential-redacted provider
   error details, updating live and remaining available in history. Reasoning-only output
   explains output-cap exhaustion. Retry requests preserve reasoning and avoid empty assistant turns.
+- Live answers show **Thinking**, **Generating answer** or **Waiting for provider**.
+  Interrupted requests mark retained output explicitly. Provider `finish_reason: error`
+  is not judged as a rejected program; network errors show their diagnostic code.
 - Shared prompt `herbert-h-v4` includes coordinate rulers, target coordinates and two
   native-verified worked boards, including a recursive pinwheel separate from scored L30.
 - Stop cancels active calls. Matches are saved locally and can be shared as PNG cards.
@@ -141,6 +146,9 @@ and a successful retry. These scores illustrate the app; they are not commercial
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
 [Reasoning-only response](docs/screenshots/en/battlefield/ai-reasoning.png) ·
 [Provider error details](docs/screenshots/en/battlefield/ai-provider-error.png) ·
+[Live thinking](docs/screenshots/en/battlefield/ai-thinking.png) ·
+[Interrupted provider stream](docs/screenshots/en/battlefield/ai-stream-error.png) ·
+[Network diagnostics](docs/screenshots/en/battlefield/ai-network-error.png) ·
 [Board trial](docs/screenshots/en/battlefield/ai-trial.png) ·
 [PNG share preview](docs/screenshots/en/battlefield/ai-share.png)
 

@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.5**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.6**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
@@ -61,6 +61,23 @@ limit; explanatory prose outside the code block does not consume it. History fil
 the existing 64 MiB storage bound and report save failures rather than silently dropping text.
 Older 0.3.1 histories cannot recover text that the older client discarded.
 
+Live attempts distinguish **Waiting for provider**, **Thinking** and **Generating answer**.
+After a request ends, retained reasoning is explicitly marked as partial received text;
+its wording does not imply that generation is still running. A completed, invalid H
+submission is **Rejected** by the native judge. A provider failure is **Request failed**
+and is not judged or sent back as an incorrect program. Old attempts with
+`finish_reason: error` also suppress the misleading Rejected presentation.
+
+HTTP 200 can still contain a provider error. Both JSON and SSE replies recognize
+top-level/choice errors and `finish_reason: error` or `content_filter`, preserving partial
+text, reasoning, usage, finish reason and redacted diagnostics. This follows
+[OpenRouter's documented in-stream error protocol](https://openrouter.ai/docs/api_reference/errors-and-debugging).
+Network failures retain their domain and code (for example `NSURLErrorDomain -1005`
+for a lost connection), rather than only saying “AI request failed”. An EOF without a
+finish reason or `[DONE]` is reported as an incomplete stream. Provider/transport errors
+stop that entrant, without spending further paid requests on an automatic retry; other
+entrants continue. Historical generic errors cannot recover missing network diagnostics.
+
 A `finish_reason: length` reply with reasoning but no final answer means the model used
 its output allowance without returning H. Reasoning counts toward the output cap.
 Increase that model's cap or adjust reasoning parameters supported by your provider.
@@ -101,8 +118,15 @@ Optional additional instructions are identical for every entrant.
 | Token limited | Input + output tokens across all attempts reach the budget, or the next prompt cannot fit. Default: 100,000, shared across the match. An equal independent budget per model is also available. |
 | Best Effort | No match time or aggregate token limit. Every entrant can solve or exhaust its attempts on all selected puzzles. The match completes after all entrants finish; an early finisher does not cancel others. |
 
-Every mode can finish naturally or be stopped by the user. Individual HTTP requests
-have a 600-second timeout; model discovery has a 30-second timeout. Authentication,
+Every mode can finish naturally or be stopped by the user. Completion requests keep a
+600-second **inactivity** timeout, reset by incoming data, and use Foundation's default
+multi-day total resource timeout. The previous independent 600-second total transfer
+deadline could interrupt a model still streaming reasoning; 0.3.6 removes that override.
+Match time/token limits and Stop continue to cancel active requests. Model discovery
+has a 30-second inactivity timeout. See Apple's
+[request timeout](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/timeoutintervalforrequest)
+and [resource timeout](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/timeoutintervalforresource).
+Authentication,
 quota, transport and protocol failures stop the affected entrant and retain its results;
 other entrants continue. There is no automatic paid network retry after such a failure.
 On iPhone/iPad, moving the app to the background ends the match and saves its results.
