@@ -96,31 +96,39 @@ final class ProviderRetryTests: XCTestCase {
             })
     }
 
-    func testStopAndDeadlineCancelLongRetryWaitWithoutSendingAnotherRequest() async throws {
-        for timed in [false, true] {
-            let client = RetryClient(failures: [AIHTTPError(status: 429, providerResponse: Self.quotaPayload)])
-            let engine = BattlefieldEngine(client: client)
-            let waiting = expectation(description: "Retry wait is visible")
-            waiting.assertForOverFulfill = false
-            var config = CompetitionConfiguration()
-            config.timeLimitEnabled = timed
-            config.timeLimitSeconds = 0.3
-            let problem = try XCTUnwrap(ProblemCatalog.bundled().first)
-            let participants = [participant()]
-            let run = Task {
-                try await engine.run(configuration: config, problems: [problem], participants: participants) { result in
-                    if result.entrants[0].answers[0].retryAt != nil { waiting.fulfill() }
-                }
+    func testStopCancelsLongRetryWaitWithoutSendingAnotherRequest() async throws {
+        try await checkCancelledRetryWait(timed: false)
+    }
+
+    func testDeadlineCancelsLongRetryWaitWithoutSendingAnotherRequest() async throws {
+        try await checkCancelledRetryWait(timed: true)
+    }
+
+    private func checkCancelledRetryWait(timed: Bool) async throws {
+        let client = RetryClient(failures: [AIHTTPError(status: 429, providerResponse: Self.quotaPayload)])
+        let engine = BattlefieldEngine(client: client)
+        let waiting = expectation(description: "Retry wait is visible")
+        waiting.assertForOverFulfill = false
+        var config = CompetitionConfiguration()
+        config.timeLimitEnabled = timed
+        config.timeLimitSeconds = 0.3
+        let problem = try XCTUnwrap(ProblemCatalog.bundled().first)
+        let participants = [participant()]
+        let configuration = config
+        let run = Task {
+            try await engine.run(configuration: configuration, problems: [problem], participants: participants) {
+                result in
+                if result.entrants[0].answers[0].retryAt != nil { waiting.fulfill() }
             }
-            await fulfillment(of: [waiting], timeout: 2)
-            if !timed { await engine.stop() }
-            let result = try await run.value
-            XCTAssertEqual(result.status, timed ? .timeLimit : .userStopped)
-            let calls = await client.messages.count
-            XCTAssertEqual(calls, 1)
-            XCTAssertNil(result.entrants[0].answers[0].retryAt)
-            XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 1)
         }
+        await fulfillment(of: [waiting], timeout: 2)
+        if !timed { await engine.stop() }
+        let result = try await run.value
+        XCTAssertEqual(result.status, timed ? .timeLimit : .userStopped)
+        let calls = await client.messages.count
+        XCTAssertEqual(calls, 1)
+        XCTAssertNil(result.entrants[0].answers[0].retryAt)
+        XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 1)
     }
 
     func testWaitingEntrantDoesNotBlockOtherModels() async throws {
