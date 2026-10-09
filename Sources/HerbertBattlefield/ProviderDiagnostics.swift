@@ -78,6 +78,7 @@ enum ProviderDiagnostics {
 }
 
 public enum AIProblemErrorClassification: Sendable, Equatable {
+    case burnout
     case overloaded
     case timedout
     case tempUnavailable
@@ -86,6 +87,7 @@ public enum AIProblemErrorClassification: Sendable, Equatable {
 
     public var status: ProblemAnswerStatus {
         switch self {
+        case .burnout: .burnout
         case .overloaded: .overloaded
         case .timedout: .timedout
         case .tempUnavailable: .tempUnavailable
@@ -97,13 +99,13 @@ public enum AIProblemErrorClassification: Sendable, Equatable {
     public var isRetriable: Bool {
         switch self {
         case .overloaded, .tempUnavailable: true
-        case .timedout, .accessDenied, .generic: false
+        case .burnout, .timedout, .accessDenied, .generic: false
         }
     }
 
     public var shouldStopEntrant: Bool {
         switch self {
-        case .accessDenied, .generic: true
+        case .burnout, .accessDenied, .generic: true
         case .overloaded, .tempUnavailable, .timedout: false
         }
     }
@@ -157,6 +159,7 @@ extension ProviderDiagnostics {
             }
         }
         switch effectiveCode {
+        case 402: return .burnout
         case 403: return .accessDenied
         case 502:
             if combined.contains("exceeded")

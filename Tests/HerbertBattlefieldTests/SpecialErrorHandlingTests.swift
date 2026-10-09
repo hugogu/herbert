@@ -265,6 +265,25 @@ final class SpecialErrorHandlingTests: XCTestCase {
         XCTAssertTrue(entrant.error?.contains("403") == true)
     }
 
+    func testCreditFailureIsBurnoutAndStopsAutomaticRequestsForEntrant() async throws {
+        let body =
+            #"{"error":{"code":402,"message":"This request requires more credits, or fewer max_tokens.","metadata":{"limit_source":"openrouter_key_limit","previous_errors":[{"code":400,"message":"Context exceeded"}]}}}"#
+        for status in [200, 402] {
+            let error = AIHTTPError(status: status, providerResponse: body)
+            let classification = ProviderDiagnostics.classify(error)
+            XCTAssertEqual(classification, .burnout)
+            XCTAssertFalse(classification.isRetriable)
+            XCTAssertTrue(classification.shouldStopEntrant)
+            let client = SequenceClient(responses: [.failure(error)])
+            let result = try await run(client: client, configuration: CompetitionConfiguration(), problemCount: 2)
+            XCTAssertEqual(result.entrants[0].answers[0].status, .burnout)
+            XCTAssertEqual(result.entrants[0].answers[0].attempts.count, 1)
+            XCTAssertTrue(result.entrants[0].answers[0].attempts[0].providerResponse?.contains("more credits") == true)
+            XCTAssertEqual(result.entrants[0].answers[1].status, .cancelled)
+        }
+        XCTAssertEqual(ProviderDiagnostics.classify(AIHTTPError(status: 400, providerResponse: body)).status, .error)
+    }
+
     private func run(
         client: SequenceClient, configuration: CompetitionConfiguration, problemCount: Int
     ) async throws -> CompetitionResult {
