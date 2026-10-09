@@ -5,6 +5,15 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.3] - 2026-10-09
+
+- Raise the default model output allowance to 65,536 tokens, including reasoning. Add a persistent model-parameter shortcut to New match, a 64K reset button, and the provider-declared limit in the editor. Legacy 4K defaults upgrade; other custom settings and historical requests are preserved.
+- Best Effort now waits for every AI to finish its attempts. A slower entrant can still win on points or token efficiency; manual Stop cancels active requests.
+- Open Mac match history wide enough for three model columns and make history and answer dialogs resizable in both dimensions.
+- Use compact icon-and-title Battlefield navigation on iPhone/iPad. Reasoning can collapse independently and uses Markdown headings, lists, emphasis, quotes and fenced code.
+- Display the original course continuously as L01–L30. Replace the former L25/L26 with symmetric, walled L07 Turning rose and L08 Tandem lanterns; retain the other boards. Display order is independent of save IDs, and prior board snapshots/retired progress remain readable.
+- Update shared prompt identity to `herbert-h-v4` for the renamed course finale, documentation, device checks and actual app screenshots.
+
 ## [0.3.2] - 2026-10-08
 
 ### Fixed
@@ -123,7 +132,9 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
-[0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
+[0.3.3]: https://github.com/hugogu/herbert/releases/tag/v0.3.3
+[0.3.2]: https://github.com/hugogu/herbert/releases/tag/v0.3.2
 [0.3.1]: https://github.com/hugogu/herbert/releases/tag/v0.3.1
 [0.3.0]: https://github.com/hugogu/herbert/releases/tag/v0.3.0
+[0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
 [0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0

@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.2**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.3**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
@@ -19,6 +19,21 @@ The standard discovery endpoint is plural **`/models`**, not `/model`.
 Custom endpoints must support OpenAI-style chat completions. Choose `max_tokens` or
 `max_completion_tokens` according to that provider. Authentication uses the Bearer header.
 Redirects are rejected; enter the final URL directly. HTTP endpoints are not accepted.
+
+The default output cap is **65,536 tokens**, including reasoning. **New match → selected
+model → sliders → Maximum output tokens** opens the same persistent editor as the
+provider’s model list. A **Use 64K output limit** button restores the default. The actual
+request uses the lowest of the configured cap, a provider-declared model maximum, and
+available token budget. Unknown provider limits cannot be inferred automatically.
+
+Settings schema 2 upgrades legacy 4,096-token presets to 65,536 on load. Other custom
+caps remain unchanged; an explicit 4,096 cap saved in schema 2 is preserved. Historical
+match parameters and actual requested caps are never rewritten.
+
+On iPhone the four pages use short titles with icons: **Models / New / Live / History**.
+On Mac, history opens wide enough for three model columns; history and answer dialogs
+can be resized in both dimensions. Reasoning is collapsed independently of final text
+and rendered with Markdown headings, emphasis, lists, quotes and fenced code.
 
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,
 `presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, and `thinking_budget`.
@@ -57,15 +72,15 @@ These were request defects in 0.3.1; the exact cause of a historical HTTP 400 ca
 confirmed when its body was discarded. New diagnostics expose the provider's message
 and parameter details without making an unsupported automatic parameter change.
 
-The shared prompt is **`herbert-h-v3`**: explicit row/column rulers, start/target
+The shared prompt is **`herbert-h-v4`**: explicit row/column rulers, start/target
 coordinates, wall/edge behavior, numeric-call termination, instruction arguments and
 post-recursion work. Two complete worked boards include a wall/trap example and a
 recursive pinwheel with two numeric parameters and an instruction parameter. They are
-separate from the scored catalog; L50's answer is not supplied. Both examples are
+separate from the scored catalog; L30's answer is not supplied. Both examples are
 replayed through the native judge in tests. Improved instructions do not establish that
 a particular commercial model will solve #0002/#0003; no paid model result is claimed.
-Compare runs only with matching prompt versions and puzzle IDs. v0.3.2 defaults to ten
-selected introductory lessons plus L31–L50, totaling 30 puzzles (maximum 3,000 points).
+Compare runs only with matching prompt versions and puzzle IDs. v0.3.3 uses continuous L01–L30 numbers, with ten
+introductory lessons followed by twenty advanced challenges, totaling 30 puzzles (maximum 3,000 points).
 
 ## Run a match
 
@@ -80,7 +95,7 @@ Optional additional instructions are identical for every entrant.
 | --- | --- |
 | Time limited | A monotonic deadline cancels all requests and local judging. Default: 600 seconds. |
 | Token limited | Input + output tokens across all attempts reach the budget, or the next prompt cannot fit. Default: 100,000, shared across the match. An equal independent budget per model is also available. |
-| Best Effort | No match time or aggregate token limit. The first entrant to solve or exhaust attempts on every selected puzzle ends the entire match; all other requests are cancelled. |
+| Best Effort | No match time or aggregate token limit. Every entrant can solve or exhaust its attempts on all selected puzzles. The match completes after all entrants finish; an early finisher does not cancel others. |
 
 Every mode can finish naturally or be stopped by the user. Individual HTTP requests
 have a 600-second timeout; model discovery has a 30-second timeout. Authentication,
@@ -141,9 +156,9 @@ available window width, with horizontal scrolling for additional models.
 
 For comparable measurements, keep puzzle sets, attempts, output caps and shared prompts
 fixed; record sampling/reasoning parameters. Per-model token budgets suit equal resource
-comparisons. **Best Effort is a race**: the first completed entrant ends the match, so
-slower entrants may not finish. Provider failures stop only that entrant and do not win
-the race. Histories retain boards, the full shared prompt, model parameters and scoring
+comparisons. **Best Effort waits for every entrant** to finish its selected attempts.
+A slower entrant can still overtake an early finisher on points or token efficiency.
+Provider failures stop only the affected entrant; other entrants continue. Histories retain boards, the full shared prompt, model parameters and scoring
 policy. Remote model versions and provider routing can still change; snapshots do not
 make a third-party model deterministic.
 

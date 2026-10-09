@@ -84,7 +84,7 @@ which cells block the robot. The reference repository contains no wall renderer 
 plus board, completion, trap and persistence integration tests. The optional Ruby check also
 replays the community #0001 corridor after a wall collision (using an enlarged test-only
 byte budget, leaving the archived four-byte limit unchanged). The same fixtures and all
-50 original lesson solutions and eight independently found community #0001–#0020
+30 current original lesson solutions (including the redesigned L07/L08 in 0.3.3) and eight independently found community #0001–#0020
 study solutions were also replayed successfully against the pinned Ruby judge, within
 their original byte budgets. See the [advanced course study](advanced-course-design.md).
 

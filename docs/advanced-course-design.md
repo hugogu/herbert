@@ -48,3 +48,7 @@ The original design study above describes the 0.2.0 course. v0.3.2 retains L01, 
 L17, L22, L24, L25, L26, L27 and L30 plus L31–L50. This removes redundant introductory
 variants while retaining reuse, tail recursion, numeric termination, instruction growth,
 traps, alternating turns and nested composition. See the [current course](original-course.md).
+
+## Current numbering in 0.3.3
+
+The historical design discussion above uses its original numbers. The advanced boards are now **L11–L30** (former L31–L50), with unchanged layouts and reference programs. The ten introductory lessons are L01–L10; new L07 Turning rose and L08 Tandem lanterns replace the former L25/L26. Current labels, goals and budgets are listed in [the course](original-course.md).

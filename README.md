@@ -23,15 +23,14 @@ composition. All **30 original puzzles** have English, Chinese and Japanese goal
 and two optional hints, with reference programs verified by the native and HOJ engines.
 The default open-source edition also includes **1,769 community problems**, preserving
 their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
-The introductory selection is L01, L06, L12, L17, L22, L24, L25, L26, L27 and L30;
-L31–L50 remain the advanced course. Only the first two fit a direct sequence of commands.
-Numbering gaps preserve existing saves, and retired records remain importable.
-Code and original lessons use MIT; the archived community content has a separate,
-unconfirmed licensing status explained in [NOTICE.md](NOTICE.md).
+The course uses continuous **L01–L30** numbers: ten introductory lessons followed
+by twenty advanced challenges. Only the first two fit a direct sequence of commands.
+L07 “Turning rose” and L08 “Tandem lanterns” are newly designed symmetric, walled boards.
+Display numbers are separate from internal save IDs; retired records remain importable.
 
 ## Download for Mac
 
-**[Download the 0.3.2 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.2/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.3 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.3/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -44,7 +43,7 @@ See [checksums, installation and build details](docs/macos-distribution.md).
 
 ![Herbert original course in the English Mac app: Vaulted mosaic](docs/screenshots/en/course/course-mosaic.png)
 
-*Actual native macOS App Store edition with English UI. L49 “Vaulted mosaic” combines
+*Actual native macOS App Store edition with English UI. L29 “Vaulted mosaic” combines
 shrinking tiers, window patterns and fourfold rotation. Its nested procedures must
 return to their starting position and heading before the next pattern can fit.
 The app follows English, Simplified Chinese, or Japanese language preferences; other
@@ -57,7 +56,7 @@ layered recursive systems. Walls reveal rooms, folds and rotational units while
 constraining the route. These are three of the new challenges; click a board for its
 full game screen:
 
-| L38 · Hinged rosette | L44 · Snowmelt seal | L50 · Astral cathedral |
+| L18 · Hinged rosette | L24 · Snowmelt seal | L30 · Astral cathedral |
 | --- | --- | --- |
 | [![Hinged rosette board with four walled spiral arms](docs/screenshots/en/course/course-rosette-board.png)](docs/screenshots/en/course/course-rosette.png) | [![Snowmelt seal board with recursive folds and four trap caps](docs/screenshots/en/course/course-seal-board.png)](docs/screenshots/en/course/course-seal.png) | [![Astral cathedral board with branching square courtyards](docs/screenshots/en/course/course-cathedral-board.png)](docs/screenshots/en/course/course-cathedral.png) |
 | Recursive return · ≤ 29 bytes | Selective instruction expansion · ≤ 34 bytes | Chiral branching + composition · ≤ 56 bytes |
@@ -67,29 +66,35 @@ achievable, not proven minima. Our [community study and design notes](docs/advan
 explain the progression and the simple-loop shortcuts removed during design.
 The course is included in the Mac preview.*
 
+| L07 · Turning rose | L08 · Tandem lanterns |
+| --- | --- |
+| [![Four symmetric folded petals with continuous walls](docs/screenshots/en/course/course-rose-board.png)](docs/screenshots/en/course/course-rose.png) | [![Paired square lanterns joined by a lower bridge](docs/screenshots/en/course/course-lanterns-board.png)](docs/screenshots/en/course/course-lanterns.png) |
+
 ## AI Battlefield
 
-**Updated in 0.3.2:** inspect full responses and reasoning while comparing your own AI models. The app has four
+**Updated in 0.3.3:** 64K output defaults, resizable Mac results and collapsible Markdown reasoning. The app has four
 main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 
 - Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
-  models through `/models`, and set default entrants and model parameters. Keys stay in Keychain.
+  models through `/models`, and set default entrants and model parameters. Keys stay in Keychain. Model output defaults to **65,536 tokens**, including reasoning;
+  edit it directly from a selected model’s parameter button in **New match**, or from AI Providers.
 - Choose models and puzzles, then run time-limited, token-limited or Best Effort matches.
   Models work in parallel with identical Markdown rules and board prompts.
 - The Mac setup places entrants and puzzles side by side. Progress uses compact two-line
-  answers and score-sorted model columns; widen the window to see more models.
+  answers and score-sorted model columns. Mac history opens with room for at least three
+  model columns; both history and answer dialogs can be resized. iPhone uses short icon tabs.
 - Model headers show scores, input/output/total tokens and cache rates. Select an answer
   to inspect every submission, native feedback and retry, then **Try on board** with the
   submitted code prefilled. **Back to match** returns to the results. Trials preserve
   personal drafts, shortest solutions and match scores.
-- Full response shows received final text, model reasoning and credential-redacted provider
+- Full response shows received final text, independently collapsible Markdown reasoning and credential-redacted provider
   error details, updating live and remaining available in history. Reasoning-only output
   explains output-cap exhaustion. Retry requests preserve reasoning and avoid empty assistant turns.
-- Shared prompt `herbert-h-v3` includes coordinate rulers, target coordinates and two
-  native-verified worked boards, including a recursive pinwheel separate from scored L50.
+- Shared prompt `herbert-h-v4` includes coordinate rulers, target coordinates and two
+  native-verified worked boards, including a recursive pinwheel separate from scored L30.
 - Stop cancels active calls. Matches are saved locally and can be shared as PNG cards.
-  **Best Effort ends the entire match when the first AI finishes its selected puzzle set**,
-  including exhausted retries, and cancels the other entrants.
+  **Best Effort waits for every AI to finish its selected puzzle set**, including exhausted
+  retries. An early finisher does not cancel other entrants; a later result can still win.
 
 AI is optional and uses **your own API credits**. Streaming usage can be estimated or
 partial; token budgets cannot guarantee a provider's final bill. iPhone/iPad matches end
@@ -113,7 +118,7 @@ their original 100-per-solved-puzzle scoring and tie-breaks.
 
 For repeatable comparisons, use the same puzzle set, attempt limit, output caps and shared
 prompt, and record sampling/reasoning parameters. Equal **per-model token budgets** suit
-resource comparisons; **Best Effort is a race** and can leave slower entrants unfinished.
+resource comparisons; **Best Effort lets every entrant finish** without a match deadline or aggregate token limit.
 History snapshots preserve the full shared prompt and its version, boards, parameters, received answers and the scoring policy;
 provider model versions can still change. This composite score is our benchmark policy,
 inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
@@ -126,6 +131,8 @@ and a successful retry. These scores illustrate the app; they are not commercial
 [Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
+[64K output settings](docs/screenshots/en/battlefield/ai-output-limit.png) ·
+[Resizable three-AI history](docs/screenshots/en/battlefield/ai-history.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
 [Reasoning-only response](docs/screenshots/en/battlefield/ai-reasoning.png) ·
 [Provider error details](docs/screenshots/en/battlefield/ai-provider-error.png) ·
@@ -162,7 +169,7 @@ These examples are excluded from the App Store edition. Search their IDs in `Her
   <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
 </table>
 
-*Both are actual app captures of original lesson L49. Classic follows the original
+*Both are actual app captures of original lesson L29. Classic follows the original
 rules-page board appearance. Its screenshot follows three successful moves. Adjacent
 walls share a continuous outline in both styles. Use the sliders button above the board
 to change style, grid dots, and trail visibility.*

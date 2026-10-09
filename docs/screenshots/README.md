@@ -1,7 +1,7 @@
 # App screenshots
 
-These PNGs are unmodified captures of the actual native SwiftUI Mac app, taken with
-XCTest on October 8, 2026. Community windows are 2480 × 1700 Retina pixels; course windows are 2480 × 2160 so the lesson and entire board fit. Board-only images
+The current README PNGs are unmodified captures of the actual native SwiftUI Mac app, taken with
+XCTest on October 9, 2026. Community windows are 2480 × 1700 Retina pixels; course windows are 2480 × 2160 so the lesson and entire board fit. Board-only images
 come directly from the `game-board` accessibility element's screenshot, not a separate
 renderer, mockup, or image generator.
 
@@ -17,7 +17,7 @@ The Flower editor shows a valid starter program; it is not presented as a soluti
 The Classic capture follows four instructions (on the open path), with a blue
 trail for successful movement. Modern remains the default. Progress
 starts empty in a dedicated UI-test save file. The root PNGs show Simplified Chinese
-(October 8); `en/` contains the same nine captures with English UI (October 8), used by
+(October 9); `en/` contains the same nine captures with English UI (October 9), used by
 the English README. Original problem titles and author names are preserved.
 These are Mac screenshots, not evidence of iPhone/iPad runtime validation.
 
@@ -30,7 +30,7 @@ scripts/capture_screenshots.sh en store # Original-only English course
 scripts/capture_screenshots.sh zh-Hans store # Original-only Chinese course
 ```
 
-The test explicitly sets and checks the app language. It exports nine images per community run and eleven per store run,
+The test explicitly sets and checks the app language. It exports nine images per community run and fifteen per store run,
 is opt-in, and is skipped during ordinary UI test runs. Review the images before committing;
 window size, system text rendering, and OS versions can change the output.
 If XCTest reports an image creation error on a secondary display, the optional
@@ -42,27 +42,27 @@ in the project.
 Original puzzle layouts retain their authors' rights and are excluded from our MIT grant.
 See [NOTICE.md](../../NOTICE.md).
 
-The `store` capture uses `HerbertAppStore` and exports eleven actual native Mac images into
-`en/course/` or `course/`: the 30-original library and L38 Hinged rosette, L44 Snowmelt seal,
-L49 Vaulted mosaic, L50 Astral cathedral (full screens and boards), plus L49 in Classic
+The `store` capture uses `HerbertAppStore` and exports fifteen actual native Mac images into
+`en/course/` or `course/`: the 30-original library, redesigned L07 Turning rose and L08 Tandem lanterns, and L18 Hinged rosette, L24 Snowmelt seal,
+L29 Vaulted mosaic, L30 Astral cathedral (full screens and boards), plus L29 in Classic
 style with a three-step blue trail. The selection favors silhouettes, symmetry and
 legibility; see the [design study](../advanced-course-design.md). Adjacent walls form
 continuous contours. Earlier L19/L29/L30 captures remain as historical illustrations.
 These independently designed original layouts and their captures use MIT.
 They are not iPhone/iPad App Store screenshots.
 
-## Herbert Benchmark · 0.3.2
+## Herbert Benchmark · 0.3.3
 
 `en/battlefield/` contains actual English Mac windows captured by `BattlefieldUITests`:
 provider configuration, discovered models, compact match setup, rendered Markdown rules,
 a completed match with ranked model headers and two-line answers, native answer feedback,
 an answer prefilled for board trial with Back to match, and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
 models. They deliberately return an invalid program before retrying: both solve L01, while
-Model 1 also solves L06/L12 and Model 2 earns partial or zero points. The benchmark
+Model 1 also solves L02/L03 and Model 2 earns partial or zero points. The benchmark
 capture includes these three puzzles; the detailed trial flow uses L01. Thus
 the test verifies parallel requests, retry feedback, native judging, ranking, answer trials/back navigation
 and history. The captured match uses Time limited mode so both fixture entrants finish;
-Best Effort race cancellation is covered separately.
+Best Effort waiting for all entrants is covered by native and engine tests.
 These images illustrate the application and do not benchmark a commercial model.
 No real API key or personal provider configuration appears in these captures.
 
@@ -86,4 +86,6 @@ The share preview comes from the app's ImageRenderer and PNG export flow.
 
 0.3.2 adds `ai-reasoning.png` and `ai-provider-error.png`, captured from isolated deterministic
 responses while the answer dialog updates. The HTTP 400 message is a fixture illustrating
-diagnostics, not a captured Kimi API response. The three-puzzle gallery uses L01/L06/L12.
+diagnostics, not a captured Kimi API response. The three-puzzle gallery uses L01/L02/L03.
+
+0.3.3 adds English captures of the persistent 64K output editor and resizable three-model history. Model reasoning is independently collapsed by default and expanded in its Markdown capture. The diagnostic fixture declares a 4,096-token provider limit to demonstrate exhaustion despite the new configurable 64K default.

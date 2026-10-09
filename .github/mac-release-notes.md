@@ -6,17 +6,23 @@ This open-source preview includes **30 original lessons + 1,769 archived communi
 problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
 movement trails, grid dots, and local progress with JSON backup import/export.
 
-**Updated in 0.3.2:** Full responses now retain model reasoning, final answers,
-partial streams and redacted provider error bodies, including HTTP 400 details.
-Open answer dialogs update live. Retry requests preserve reasoning and avoid empty
-assistant turns. Shared H prompt v3 adds coordinate rulers and two verified worked
-boards, including a recursive example separate from scored L50.
+**Updated in 0.3.3:** Model output defaults to **65,536 tokens**, including reasoning.
+Use the parameter button beside a selected model in **New match** to configure it; the editor
+also offers **Use 64K output limit**. Provider-declared lower limits and token budgets
+still apply. Legacy 4K presets upgrade, while other custom caps and historical requests remain unchanged.
 
-The course now contains ten selected introductory lessons plus L31–L50: **30 originals**
-and **1,799 puzzles** in this edition. Only the first two fit direct movement programs;
-retained IDs and saved progress keep their meanings. Retired records remain importable.
-Herbert Benchmark ranks models by coverage/code-length points, then tokens. Best Effort
-ends when the first AI finishes its selected set. README shows updated English app captures.
+**Best Effort now waits for all AIs to finish** their attempts. An early finisher does
+not cancel its rivals, so a later answer can still take the lead. Manual Stop remains available.
+Mac history opens with room for three AI columns; history and answer dialogs are resizable.
+Reasoning collapses independently and renders Markdown. iPhone/iPad navigation uses short icon tabs.
+
+The course has continuous **L01–L30** numbers. New L07 “Turning rose” and L08 “Tandem lanterns”
+replace the former L25/L26 with symmetric walled boards. Other boards, saved progress
+identities and historical snapshots are retained. Both editions contain 30 originals;
+this open-source preview also contains the 1,769 community puzzles. Prompt v4 retains
+the verified public examples and refers to the course finale by its current identity.
+README screenshots are actual app captures; English documentation uses English UI.
+
 AI is optional and requires your own API key/credits. Keys stay in Keychain; settings
 and history stay local. Streaming estimates and cancellation cannot guarantee final
 provider billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/main/docs/ai-battlefield.md)
@@ -45,8 +51,9 @@ The App Store scheme contains only the originals; this DMG is the open-source ed
 中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
 与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
 Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 30 道原创题和 1,769 道社区题。
-0.3.2 保存并实时显示最终回答、推理、部分输出与脱敏后的服务商错误详情，修复重试时丢失推理和空 assistant 消息。
-提示词 v3 增加坐标尺与两道完整示例；原创课程精简为十道入门题和二十道进阶题，保留存档与历史记录。
+0.3.3 默认单次输出上限提高到 65,536 tokens，可从新比赛已选模型旁的参数按钮直接修改。
+Best Effort 等待所有 AI 完成；Mac 历史默认可见三列模型，历史和答案窗口均可调整大小；推理可折叠并按 Markdown 显示。
+原创课程连续编号 L01–L30，新 L07「旋转玫瑰」和 L08「双灯相映」替换原 L25/L26。
 AI 使用自己的 API 额度，密钥保存在钥匙串中。
 
 See the [changelog](https://github.com/hugogu/herbert/blob/main/CHANGELOG.md) for changes

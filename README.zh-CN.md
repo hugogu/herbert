@@ -6,22 +6,21 @@
 让墙参与计数、交换参数、递归折返、互递归及多层子程序组合。
 全部 **30 道原创题** 都有中英日目标与两级提示，参考解通过原生引擎和 HOJ 参考引擎验证。
 默认开源版另含 1,769 道社区题，共 **1,799 题**；`HerbertAppStore` 仅打包原创的 30 题。
-入门精选 L01、L06、L12、L17、L22、L24、L25、L26、L27、L30，之后保留 L31–L50。
-仅前两题可直接逐步写出路线；编号空缺用于保持存档含义，退役题记录仍可导入。
-[完整原创课程](docs/original-course.zh-CN.md) · [解题分析与进阶设计](docs/advanced-course-design.zh-CN.md) · [App Store 与真机测试](docs/app-store.md)
+课程连续编号为 **L01–L30**：前十题入门，后二十题进阶。仅前两题可直接逐步写出路线。
+L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续墙的图案。显示编号与内部存档 ID 分开，退役记录仍可导入。
 
 ## 下载 Mac 版
 
-**[下载 0.3.2 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.2/Herbert-macOS-universal.dmg)**
+**[下载 0.3.3 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.3/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
 
 ![原创版原生 Mac App：穹顶镶嵌](docs/screenshots/course/course-mosaic.png)
 
-*实际原生 Mac App 的中文截图。L49「穹顶镶嵌」组合收缩层、窗格与四向旋转；每层子过程都要恢复自己的位置和朝向，整体图案才接得起来。*
+*实际原生 Mac App 的中文截图。L29「穹顶镶嵌」组合收缩层、窗格与四向旋转；每层子过程都要恢复自己的位置和朝向，整体图案才接得起来。*
 
-| L38 · 折页花窗 | L44 · 融雪方印 | L50 · 星穹圣殿 |
+| L18 · 折页花窗 | L24 · 融雪方印 | L30 · 星穹圣殿 |
 | --- | --- | --- |
 | [![折页花窗的四向连续墙与递归分支](docs/screenshots/course/course-rosette-board.png)](docs/screenshots/course/course-rosette.png) | [![融雪方印的递归弯折与四个陷阱端点](docs/screenshots/course/course-seal-board.png)](docs/screenshots/course/course-seal.png) | [![星穹圣殿的方形庭院与分杈结构](docs/screenshots/course/course-cathedral-board.png)](docs/screenshots/course/course-cathedral.png) |
 | 递归折返 · ≤ 29 bytes | 指令展开层选择 · ≤ 34 bytes | 旋向分杈与组合 · ≤ 56 bytes |
@@ -47,21 +46,27 @@
 | --- | --- |
 | [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) |
 
-两张均为原创 L49 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
+两张均为原创 L29 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
 
-## AI Battlefield · 0.3.2
+| L07 · 旋转玫瑰 | L08 · 双灯相映 |
+| --- | --- |
+| [![四向对称的折叠花瓣与连续墙](docs/screenshots/course/course-rose-board.png)](docs/screenshots/course/course-rose.png) | [![底部直桥连接的两个方形灯框](docs/screenshots/course/course-lanterns-board.png)](docs/screenshots/course/course-lanterns.png) |
+
+## AI Battlefield · 0.3.3
+
+默认单次输出上限提高至 **65,536 tokens**（包含推理），可从「新比赛」已选模型旁的参数按钮直接修改，也可在「AI 配置」的模型参数里设置。旧默认 4K 配置升级为 64K，其他自定义值保留；服务商声明的较低上限和比赛预算仍生效。Mac 历史窗口默认并排显示至少三个 AI，历史与答案窗口均可拖动边缘调整大小。推理可独立收起并按 Markdown 显示，iPhone 导航改为短标题加图标。
 
 手机端保留四个主 Tab。**AI 配置 → 新比赛 → 当前比赛 → 比赛历史**合并在 AI Battlefield 标题栏中。
 普通游戏继续支持完全离线。
 
-0.3.2 支持实时查看并保存最终回答、模型推理、部分输出和脱敏后的服务商错误详情；推理耗尽输出额度时会给出明确提示。重试保留推理字段并避免空 assistant 消息。共享提示词 `herbert-h-v3` 添加坐标尺、目标坐标与两道经过原生判题验证的完整棋盘示例，其中递归风车独立于计分题 L50。
+0.3.3 支持实时查看并保存最终回答、模型推理、部分输出和脱敏后的服务商错误详情；推理耗尽输出额度时会给出明确提示。重试保留推理字段并避免空 assistant 消息。共享提示词 `herbert-h-v4` 添加坐标尺、目标坐标与两道经过原生判题验证的完整棋盘示例，其中递归风车独立于计分题 L30。
 
 - 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过 `/models` 自动发现模型，选择默认参赛模型及参数；密钥保存在系统钥匙串。
 - 默认选中 30 道原创题，可自选题目与模型。限时、限 Token 和 Best Effort 三种模式；Token 预算可全场共享或每个 AI 独立。
 - Mac 新比赛的模型和题目并排显示；统一规则按 Markdown 排版。AI 使用相同规则和棋盘提示词并行解答，每题默认 3 次机会，可设为 1–10 次。
 - 逐题进度用紧凑两行展示状态、尝试次数、分数和程序摘要；模型列动态按成绩排序，表头显示输入/输出/总 Token 与缓存率，拉宽窗口可显示更多 AI。
 - 点击答案查看完整提交、反馈和重试记录；**在棋盘中试运行**会预填答案，可编辑、运行并**返回比赛**，不修改个人草稿、最短解或比赛成绩。
-- **Best Effort 在首个 AI 完成所有所选题目的尝试后结束全场**，包括用完重试机会，并取消其他 AI 的调用。各模式均可手动终止；本地历史可回顾，可生成 PNG 分享图片。
+- **Best Effort 等待全部 AI 完成所有所选题目的尝试**，包括用完重试机会；先完成者不会取消其他 AI，后来者仍可能取得更高分。各模式均可手动终止；本地历史可回顾，可生成 PNG 分享图片。
 
 AI 使用自己的 API 额度，可能产生费用。流式用量会标明估算或不完整数据；本地 Token 限制无法保证服务商最终账单。
 iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说明](docs/ai-battlefield.md)和[隐私说明](PRIVACY.md)。
@@ -78,7 +83,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 缓存输入和所有重试均计入用量。0.3.0 旧历史保留原来的通过题数计分及排序方式。
 
 比较时保持题目、重试次数、输出上限和提示词一致，并记录采样与推理参数。
-**每个 AI 独立 Token 预算**适合比较资源效率；**Best Effort 是竞速模式**，较慢 AI 可能未完成整套题目。
+**每个 AI 独立 Token 预算**适合比较资源效率；**Best Effort 允许每个 AI 完成**，没有比赛时限或累计 Token 上限。
 历史保存完整共享提示词及其版本、棋盘、模型参数、收到的答案与计分版本，但服务商的模型版本仍可能变化。
 这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
 
@@ -132,7 +137,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 原版计数：每个字母 1 byte，每个数值常量 1 byte，标点与空白不计；每关按原站限制判定，步数不影响最短解记录；对照原解释器的发现与差异见 [兼容性审计](docs/hoj-compatibility.zh-CN.md)。
 - 25×25 棋盘：目标、墙、陷阱，踩陷阱清空已点亮目标，撞墙或边界留在原地，点亮全部目标立即通关。
 - 离线原版题库：保留编号、标题、作者、长度限制、原站最短记录快照、数据校验摘要与来源；数量和缺失项以 `docs/problem-import-manifest.json` 为准。
-- 六章各五题的原创课程：独立设计的布局、保留选中关卡的稳定 ID 与原显示编号、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
+- 六章各五题的原创课程：独立设计的布局、连续显示编号 L01–L30，内部 ID 与存档含义分开、三语名称/学习目标/提示；参考解只在测试资源中，不进安装包。
 - 手机上下布局与固定运行栏；iPad/Mac 并排棋盘和编辑器；原生可选中文本编辑器、光标处插入指令、更多符号、代码模板、单步、暂停/继续、重置、4 档速度、触觉反馈。
 - 有内容区域自动聚焦、完整棋盘切换、双指缩放和放大后拖动。颜色配合目标环、陷阱叉与墙形状区分元素，支持 VoiceOver 棋盘状态描述。
 - 关卡搜索、入门/收藏/完成筛选、继续最近关卡、中英日分步玩法手册。
