@@ -107,8 +107,7 @@ final class ProviderRetryTests: XCTestCase {
     private func checkCancelledRetryWait(timed: Bool) async throws {
         let client = RetryClient(failures: [AIHTTPError(status: 429, providerResponse: Self.quotaPayload)])
         let engine = BattlefieldEngine(client: client)
-        let waiting = expectation(description: "Retry wait is visible")
-        waiting.assertForOverFulfill = false
+        let waiting = RetrySignal()
         var config = CompetitionConfiguration()
         config.timeLimitEnabled = timed
         config.timeLimitSeconds = 0.3
@@ -118,10 +117,11 @@ final class ProviderRetryTests: XCTestCase {
         let run = Task {
             try await engine.run(configuration: configuration, problems: [problem], participants: participants) {
                 result in
-                if result.entrants[0].answers[0].retryAt != nil { waiting.fulfill() }
+                if result.entrants[0].answers[0].retryAt != nil { await waiting.send() }
             }
         }
-        await fulfillment(of: [waiting], timeout: 2)
+        defer { run.cancel() }
+        try await waitFor(waiting)
         if !timed { await engine.stop() }
         let result = try await run.value
         XCTAssertEqual(result.status, timed ? .timeLimit : .userStopped)
@@ -134,19 +134,19 @@ final class ProviderRetryTests: XCTestCase {
     func testWaitingEntrantDoesNotBlockOtherModels() async throws {
         let client = RetryClient(failures: [AIHTTPError(status: 429, providerResponse: Self.quotaPayload)])
         let engine = BattlefieldEngine(client: client)
-        let independent = expectation(description: "Healthy entrant finishes while busy entrant waits")
-        independent.assertForOverFulfill = false
+        let independent = RetrySignal()
         let problem = try XCTUnwrap(ProblemCatalog.bundled().first)
         let run = Task {
             try await engine.run(
                 configuration: .init(), problems: [problem], participants: [participant(), participant(model: "ready")]
             ) { result in
                 if result.entrants[0].answers[0].retryAt != nil && result.entrants[1].solved == 1 {
-                    independent.fulfill()
+                    await independent.send()
                 }
             }
         }
-        await fulfillment(of: [independent], timeout: 2)
+        defer { run.cancel() }
+        try await waitFor(independent)
         await engine.stop()
         let result = try await run.value
         XCTAssertEqual(result.entrants[1].answers[0].status, .solved)
@@ -168,6 +168,20 @@ final class ProviderRetryTests: XCTestCase {
                 provider: ProviderConfiguration(kind: .gemini), preset: ModelPreset(model: AIModel(id: model))),
             apiKey: "fixture")
     }
+
+    private func waitFor(_ signal: RetrySignal) async throws {
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while !(await signal.received), ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+        let received = await signal.received
+        XCTAssertTrue(received, "The expected match checkpoint was not published")
+    }
+}
+
+private actor RetrySignal {
+    private(set) var received = false
+    func send() { received = true }
 }
 
 private actor RetryWaits {
