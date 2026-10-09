@@ -2,6 +2,13 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 429 与过载重试等待（10 月 9 日）
+
+- HTTP / JSON / SSE 内的 429 均归为 Overloaded；HTTP 失败码仍优先于正文。等待取 Retry-After 秒数/日期、Gemini RetryInfo 与明确文字延迟的较大值，并与 2 秒起步的指数退避和正向抖动结合；跨题也保留服务商冷却。
+- `scripts/check.sh` 通过：129 项 Swift 测试（44 Core、85 Battlefield）、16 项 Python 检查和严格格式检查。覆盖用户示例的 28s / 28.626942979s、60 秒 HTTP 头、HTTP 200 JSON/SSE 头部提示、异常值、退避上限、同一消息重试、次数上限、跨题冷却、旧历史兼容、其他模型继续答题，以及手动停止 / 时限取消长等待且不再发请求。
+- `.build/provider-retry-ui.xcresult` 两项 Mac UI 回归通过：429 Overloaded、实际等待倒计时、延迟后成功重试、保留 HTTP 429 / 无 Rejected、超时跳题、拒绝访问只停止对应模型，以及正常判题、历史、分享、AI 试运行和返回。使用隔离的确定性客户端，没有调用付费 API。
+- iOS Release 无签名编译通过；工程、课程与三语资源重新生成一致，个人 scheme 未改变。本机没有 iOS Simulator runtime，未声称 iPhone / iPad 真机运行时验证。新增功能已补入真机检查清单。
+
 ## 手动复制题目 AI 提示词（10 月 9 日）
 
 - 新入口位于题目说明 / AI 试运行面板，复制与 Battlefield 初始请求共用的英文规则、两个教学示例和当前棋盘；没有服务商配置、密钥或个人草稿。

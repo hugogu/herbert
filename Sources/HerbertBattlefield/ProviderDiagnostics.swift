@@ -167,7 +167,7 @@ extension ProviderDiagnostics {
                 return .timedout
             }
             return .tempUnavailable
-        case 503: return .overloaded
+        case 429, 503: return .overloaded
         case nil, 200:
             if combined.contains("high demand") || combined.contains("spikes in demand") {
                 return .overloaded

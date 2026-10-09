@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Classify HTTP/in-band 429 as Overloaded. Honor Retry-After and provider retry hints, use exponential backoff with jitter for transient retries, show the wait, and cancel it on Stop or the match deadline.
+
 - Copy a puzzle's complete AI prompt from its details, reusing Battlefield's rules, worked examples and exact board description for manual chat use.
 
 - Compact result headers and move progress tips into contextual help. Adapt short landscape sidebars and playgrounds to keep navigation, board and code visible, with title tags for puzzle/trial details and rules.

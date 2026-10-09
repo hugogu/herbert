@@ -313,6 +313,7 @@ public struct ProblemAnswer: Codable, Identifiable, Equatable, Sendable {
     public let id: Int
     public var status = ProblemAnswerStatus.queued
     public var attempts: [AnswerAttempt] = []
+    public var retryAt: Date?
     public init(problemID: Int) { id = problemID }
     public var acceptedBytes: Int? { attempts.first { $0.evaluation?.accepted == true }?.evaluation?.bytes }
 }
@@ -415,6 +416,7 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
         updatedAt = time
         for e in entrants.indices {
             for p in entrants[e].answers.indices {
+                entrants[e].answers[p].retryAt = nil
                 if [.queued, .requesting, .judging].contains(entrants[e].answers[p].status) {
                     entrants[e].answers[p].status = .cancelled
                     if let a = entrants[e].answers[p].attempts.indices.last,

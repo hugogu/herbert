@@ -285,7 +285,9 @@ struct BattlefieldDashboard: View {
                     Text(score).font(.caption.monospaced().bold())
                 }.foregroundStyle(answer.status.color)
                 HStack(spacing: 6) {
-                    if let program = attempt?.program {
+                    if let retryAt = answer.retryAt {
+                        BattlefieldRetryCountdown(retryAt: retryAt)
+                    } else if let program = attempt?.program {
                         Text(String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")).font(
                             .system(.caption, design: .monospaced)
                         )
@@ -356,6 +358,7 @@ private struct BattlefieldAnswerView: View {
                         return current
                     }()
                     Pill(text: status.title, color: status.color)
+                    if let retryAt = selection.answer.retryAt { BattlefieldRetryCountdown(retryAt: retryAt) }
                     Text(L10n.text(selection.problem.title)).font(.title2.bold())
                     Text(
                         "\(selection.problem.byteLimit) bytes · \(battlefieldScore(selection.scoring.score(selection.answer, problem: selection.problem))) points"

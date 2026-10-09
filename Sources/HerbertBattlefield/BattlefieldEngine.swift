@@ -5,6 +5,7 @@ import HerbertCore
 /// The actor owns all scores, per-problem budgets and cancellation decisions.
 public actor BattlefieldEngine {
     private let client: any AIClient
+    private let retrySleep: @Sendable (TimeInterval) async throws -> Void
     private var result: CompetitionResult?
     private var workers: [UUID: Task<Void, Never>] = [:]
     private var timer: Task<Void, Never>?
@@ -13,7 +14,15 @@ public actor BattlefieldEngine {
     private var observer: (@Sendable (CompetitionResult) async -> Void)?
     private var executing = false
 
-    public init(client: any AIClient) { self.client = client }
+    public init(
+        client: any AIClient,
+        retrySleep: @escaping @Sendable (TimeInterval) async throws -> Void = {
+            try await Task.sleep(for: .seconds($0))
+        }
+    ) {
+        self.client = client
+        self.retrySleep = retrySleep
+    }
 
     public func run(
         configuration: CompetitionConfiguration, problems: [Problem], participants: [CompetitionParticipant],
@@ -141,6 +150,8 @@ public actor BattlefieldEngine {
         guard let e = result?.entrants.firstIndex(where: { $0.id == participant.entrant.id }) else { return }
         let problems = result!.problems
         let maxAttempts = result!.configuration.attemptsPerProblem
+        var cooldown: (problem: Int, delay: TimeInterval)?
+        var consecutiveFailures = 0
         for (p, problem) in problems.enumerated() {
             guard await active() else { break }
             var messages = BattlefieldPrompt.messages(for: problem, rules: result!.systemPrompt)
@@ -151,6 +162,15 @@ public actor BattlefieldEngine {
                     burnOut(entrant: e, problem: p)
                     await publish()
                     break
+                }
+                if let pending = cooldown {
+                    cooldown = nil
+                    do {
+                        try Task.checkCancellation()
+                        try await retrySleep(pending.delay)
+                    } catch { break }
+                    result!.entrants[e].answers[pending.problem].retryAt = nil
+                    guard await active() else { break }
                 }
                 let cap = allowance(model: participant.entrant.preset.model, messages: messages, remaining: remaining)
                 var attempt = AnswerAttempt(number: a + 1)
@@ -198,6 +218,7 @@ public actor BattlefieldEngine {
                                 "Provider ended generation with finish_reason: \(reply.finishReason ?? "error").",
                             partialReply: reply)
                     }
+                    consecutiveFailures = 0
                     result!.entrants[e].answers[p].status = .judging
                     await publish()
                     let program: String
@@ -265,6 +286,13 @@ public actor BattlefieldEngine {
                     let classification = ProviderDiagnostics.classify(
                         error, detail: diagnostic)
                     result!.entrants[e].answers[p].status = classification.status
+                    if classification.isRetriable && (a + 1 < maxAttempts || p + 1 < problems.count) {
+                        consecutiveFailures += 1
+                        let delay = ProviderRetryPolicy.delay(for: error, consecutiveFailure: consecutiveFailures)
+                        let next = a + 1 < maxAttempts ? p : p + 1
+                        cooldown = (next, delay)
+                        result!.entrants[e].answers[next].retryAt = Date.now.addingTimeInterval(delay)
+                    }
 
                     if classification.shouldStopEntrant {
                         result!.entrants[e].error = message + (diagnostic.map { "\n" + String($0.prefix(512)) } ?? "")
@@ -292,6 +320,7 @@ public actor BattlefieldEngine {
         if result?.status == .running {
             result!.entrants[e].finishedAt = .now
             for p in result!.entrants[e].answers.indices {
+                result!.entrants[e].answers[p].retryAt = nil
                 if [.queued, .requesting, .judging].contains(result!.entrants[e].answers[p].status) {
                     result!.entrants[e].answers[p].status = .cancelled
                     if let a = result!.entrants[e].answers[p].attempts.indices.last,

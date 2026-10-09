@@ -49,10 +49,14 @@ public struct AIHTTPError: Error, LocalizedError, Sendable {
     public let status: Int
     public let providerResponse: String?
     public let partialReply: AIReply?
-    public init(status: Int, providerResponse: String? = nil, partialReply: AIReply? = nil) {
+    public let retryAfter: TimeInterval?
+    public init(
+        status: Int, providerResponse: String? = nil, partialReply: AIReply? = nil, retryAfter: TimeInterval? = nil
+    ) {
         self.status = status
         self.providerResponse = providerResponse
         self.partialReply = partialReply
+        self.retryAfter = retryAfter
     }
     public var errorDescription: String? { status == 200 ? "AI response error" : "AI HTTP \(status)" }
 }
@@ -109,7 +113,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         }
         throw AIHTTPError(
             status: http.statusCode,
-            providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey, truncated: truncated))
+            providerResponse: ProviderDiagnostics.response(data, apiKey: apiKey, truncated: truncated),
+            retryAfter: ProviderRetryPolicy.retryAfter(http.value(forHTTPHeaderField: "Retry-After")))
     }
 
     public func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
@@ -234,7 +239,9 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                     data.append(byte)
                     guard data.count <= AIResponseLimits.payloadBytes else { throw BattlefieldError.responseTooLarge }
                 }
-                return try Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
+                do {
+                    return try Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
+                } catch { throw Self.includingRetryHint(error, response: response) }
             }
             var accumulator = ChatStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
             var parser = ServerSentEventParser()
@@ -264,7 +271,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 // Flush text received since the last throttled update before recording a failure.
                 await progress(
                     AIProgress(text: accumulator.text, usage: accumulator.usage, reasoning: accumulator.reasoning))
-                throw error
+                throw Self.includingRetryHint(error, response: response)
             }
             await progress(
                 AIProgress(
@@ -275,6 +282,15 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         } onCancel: {
             bytes.task.cancel()
         }
+    }
+
+    private static func includingRetryHint(_ error: any Error, response: URLResponse) -> any Error {
+        guard let failure = error as? AIHTTPError else { return error }
+        return AIHTTPError(
+            status: failure.status, providerResponse: failure.providerResponse, partialReply: failure.partialReply,
+            retryAfter: failure.retryAfter
+                ?? ProviderRetryPolicy.retryAfter(
+                    (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After")))
     }
 
     public static func decodeReply(_ data: Data, messages: [AIMessage], apiKey: String = "") throws -> AIReply {

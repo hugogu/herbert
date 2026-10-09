@@ -1,6 +1,17 @@
 import HerbertBattlefield
 import SwiftUI
 
+struct BattlefieldRetryCountdown: View {
+    let retryAt: Date
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            Text(L10n.text("等待 %ld 秒后重试", Int(ceil(max(0, retryAt.timeIntervalSince(context.date))))))
+                .font(.caption).foregroundStyle(Palette.amber)
+                .accessibilityIdentifier("battlefieldRetryCountdown")
+        }
+    }
+}
+
 #if os(macOS)
     import AppKit
 #endif

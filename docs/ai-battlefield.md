@@ -110,7 +110,7 @@ and is not judged or sent back as an incorrect program. Old attempts with
 
 Special provider and network conditions receive actionable classifications instead of an ambiguous failure:
 
-- **Overloaded**: 503 high demand or temporary capacity spikes (e.g. Gemini). This error can be retried across problem attempts.
+- **Overloaded**: HTTP/in-band 429 rate limits and 503 high demand or temporary capacity spikes (e.g. Gemini). This error can be retried across problem attempts.
 - **Timed out**: Network request timeouts (`NSURLErrorDomain -1001`) or 502 upstream errors where wall-clock streaming limits are exceeded. The problem is recorded as Timed out and the entrant proceeds to the next problem without stalling.
 - **Temp Unavailable**: 502 network connection lost or transport disconnects. This transient state can be retried across problem attempts.
 - **Access Denied**: 403 authorization failures or Terms of Service violations. The entrant immediately stops and cancels remaining queued problems.
@@ -120,6 +120,19 @@ structured top-level or choice-level error codes are used, including array envel
 Incidental numbers in error prose never act as HTTP statuses. Transient retries reuse
 the existing messages and count toward the same attempt and token budgets; partial
 output, reasoning, usage and each attempt's duration remain available in history.
+
+Overloaded and Temp Unavailable requests wait before another call. The exponential
+backoff starts at 2 seconds, doubles on consecutive transient failures, and caps its
+base at 60 seconds, with up to 25% positive jitter. `Retry-After` seconds/HTTP dates,
+Gemini `RetryInfo.retryDelay`, and explicit “retry in … seconds” error messages can
+extend that minimum; the longest valid hint wins. The example with `28s` and
+`28.626942979s` waits at least 28.626942979 seconds. This follows the
+[Gemini retry guidance](https://ai.google.dev/gemini-api/docs/troubleshooting#retry_strategy)
+and [HTTP Retry-After semantics](https://www.rfc-editor.org/rfc/rfc9110.html#name-retry-after).
+The live table and answer details show the next-request countdown. Stop, backgrounding
+or the match deadline cancels the wait. Other entrants continue, and exhausting a
+problem's attempts still applies the cooldown before the next problem's request.
+Waiting does not create an attempt or add tokens, and completed attempt timers stay fixed.
 
 HTTP 200 can still contain a provider error. Both JSON and SSE replies recognize
 top-level/choice errors and `finish_reason: error` or `content_filter`, preserving partial

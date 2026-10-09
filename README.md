@@ -104,6 +104,8 @@ cancels its remaining retries. Other problems and entrants continue.
 - Model headers show normalized percentages with total points as a reference,
   input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
   live timers advance and finished durations remain fixed in history.
+- Rate limits (429) appear as **Overloaded**. Transient retries honor provider wait
+  hints and use exponential backoff with jitter; the countdown can be cancelled with Stop.
   Provider prefixes and `(free)` are omitted from display names. Select an answer to
   inspect submissions, native feedback and retries, then **Try on board** with code
   prefilled. **Back to match** returns to the results, preserving personal progress.

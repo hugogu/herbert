@@ -63,6 +63,7 @@ final class AITransportTests: XCTestCase {
 
     func testInBandFailuresAreClassifiedRetriedAndPersistedThroughTheHTTPClient() async throws {
         let cases: [(String, ProblemAnswerStatus, Int)] = [
+            (#"{"error":{"code":429,"details":[{"retryDelay":"28s"}],"message":"Quota exceeded"}}"#, .overloaded, 2),
             (#"{"choices":[{"error":{"code":503,"message":"high demand"}}]}"#, .overloaded, 2),
             (
                 #"{"error":{"code":502,"message":"Streaming request exceeded the 900 second wall-clock limit."}}"#,
@@ -80,7 +81,7 @@ final class AITransportTests: XCTestCase {
             BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
             var configuration = CompetitionConfiguration()
             configuration.attemptsPerProblem = 2
-            let result = try await BattlefieldEngine(client: client()).run(
+            let result = try await BattlefieldEngine(client: client(), retrySleep: { _ in }).run(
                 configuration: configuration, problems: Array(try ProblemCatalog.bundled().prefix(2)),
                 participants: [
                     CompetitionParticipant(
@@ -111,6 +112,41 @@ final class AITransportTests: XCTestCase {
         XCTAssertEqual(configuration.timeoutIntervalForResource, resourceDeadline)
         XCTAssertGreaterThan(resourceDeadline, 600)
         XCTAssertEqual(configuration.timeoutIntervalForRequest, 600)
+    }
+
+    func testHTTPAndInBand429RetainRetryAfterHeaderAndGeminiRetryInfo() async throws {
+        for (status, contentType, body) in [
+            (
+                429, "application/json",
+                #"[{"error":{"code":429,"details":[{"retryDelay":"28s"}],"message":"Please retry in 28.626942979s."}}]"#
+            ),
+            (200, "application/json", #"{"error":{"code":429,"message":"Please retry in 28.626942979s."}}"#),
+            (
+                200, "text/event-stream",
+                "data: {\"error\":{\"code\":429,\"message\":\"Please retry in 28.626942979s.\"}}\n\n"
+            ),
+        ] {
+            let provider = provider(kind: .gemini)
+            let stub = HTTPStub(
+                body: body, contentType: contentType,
+                status: status, headers: ["Retry-After": "60"])
+            BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            do {
+                _ = try await client().complete(
+                    AICompletionRequest(
+                        participant: CompetitionParticipant(
+                            entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))),
+                            apiKey: "fixture"),
+                        messages: [], maxOutputTokens: nil)
+                ) { _ in }
+                XCTFail("Expected an HTTP 429")
+            } catch let error as AIHTTPError {
+                XCTAssertEqual(error.retryAfter, 60)
+                XCTAssertEqual(ProviderDiagnostics.classify(error), .overloaded)
+                XCTAssertEqual(ProviderRetryPolicy.delay(for: error, consecutiveFailure: 1, jitter: 0), 60)
+                XCTAssertTrue(error.providerResponse?.contains("28.626942979s") == true)
+            }
+        }
     }
 
     func testInBandStreamErrorsRetainFinishReasonPartialOutputAndUsage() async throws {
@@ -554,6 +590,7 @@ private final class HTTPStub: @unchecked Sendable {
     let contentType: String
     let status: Int
     let staysOpen: Bool
+    let headers: [String: String]
     private let lock = NSLock()
     private var recorded: [URLRequest] = []
     private var recordedBodies: [Data] = []
@@ -561,11 +598,15 @@ private final class HTTPStub: @unchecked Sendable {
     var requests: [URLRequest] { lock.withLock { recorded } }
     var bodies: [Data] { lock.withLock { recordedBodies } }
     var stopped: Bool { lock.withLock { didStop } }
-    init(body: String, contentType: String = "application/json", status: Int = 200, staysOpen: Bool = false) {
+    init(
+        body: String, contentType: String = "application/json", status: Int = 200, staysOpen: Bool = false,
+        headers: [String: String] = [:]
+    ) {
         self.body = body
         self.contentType = contentType
         self.status = status
         self.staysOpen = staysOpen
+        self.headers = headers
     }
     func record(_ request: URLRequest) {
         var body = request.httpBody ?? Data()
@@ -602,7 +643,7 @@ private final class BattlefieldURLProtocol: URLProtocol, @unchecked Sendable {
         guard let url = request.url, let stub = Self.registry.get(url.host ?? ""),
             let response = HTTPURLResponse(
                 url: url, statusCode: stub.status, httpVersion: "HTTP/1.1",
-                headerFields: ["Content-Type": stub.contentType])
+                headerFields: ["Content-Type": stub.contentType].merging(stub.headers) { _, value in value })
         else { return }
         stub.record(request)
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)

@@ -270,7 +270,7 @@ final class SpecialErrorHandlingTests: XCTestCase {
     ) async throws -> CompetitionResult {
         let provider = ProviderConfiguration(kind: .gemini)
         let entrant = Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "models/gemini-2.5-flash")))
-        let engine = BattlefieldEngine(client: client)
+        let engine = BattlefieldEngine(client: client, retrySleep: { _ in })
         let problems = Array(try ProblemCatalog.bundled().prefix(problemCount))
         return try await engine.run(
             configuration: configuration,

@@ -342,7 +342,11 @@ func battlefieldError(_ error: Error) -> String {
                 }
                 if problem.contains("ID 10006") { throw URLError(.timedOut) }
                 if calls[key] == 1 {
-                    throw AIHTTPError(status: 503, providerResponse: "Service overloaded")
+                    throw AIHTTPError(
+                        status: 429,
+                        providerResponse:
+                            #"[{"error":{"code":429,"status":"RESOURCE_EXHAUSTED","details":[{"retryDelay":"12s"}],"message":"Quota exceeded. Please retry in 12s."}}]"#
+                    )
                 }
                 return AIReply(text: "```h\ns\n```", usage: TokenUsage(input: 900, output: 12))
             }
