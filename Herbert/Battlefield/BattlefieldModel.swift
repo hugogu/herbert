@@ -38,7 +38,8 @@ final class BattlefieldModel: ObservableObject {
                 selectedKeys = TestAPIKeyStore()
                 if ProcessInfo.processInfo.arguments.contains("--battlefield-fixture") {
                     selectedClient = BattlefieldFixtureClient(
-                        diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"))
+                        diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"),
+                        streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"))
                 }
             }
         #endif
@@ -307,7 +308,11 @@ func battlefieldError(_ error: Error) -> String {
 #if DEBUG
     actor BattlefieldFixtureClient: AIClient {
         let diagnostics: Bool
-        init(diagnostics: Bool = false) { self.diagnostics = diagnostics }
+        let streamErrors: Bool
+        init(diagnostics: Bool = false, streamErrors: Bool = false) {
+            self.diagnostics = diagnostics
+            self.streamErrors = streamErrors
+        }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
             return [
@@ -320,6 +325,23 @@ func battlefieldError(_ error: Error) -> String {
         ) async throws -> AIReply {
             let problem = request.messages.first { $0.role == "user" }?.content ?? ""
             let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
+            if streamErrors {
+                let reasoning = AIReasoning(
+                    content:
+                        "### Path analysis\n\nI am still planning the route. Check **all targets** before returning the program."
+                )
+                for second in 1...12 {
+                    try await Task.sleep(for: .seconds(1))
+                    await progress(
+                        AIProgress(text: "", usage: TokenUsage(input: 2442, output: second * 100), reasoning: reasoning)
+                    )
+                }
+                if request.participant.entrant.preset.model.id == "fixture-2" {
+                    throw URLError(.networkConnectionLost)
+                }
+                return AIReply(
+                    text: "", usage: TokenUsage(input: 2442, output: 1200), finishReason: "error", reasoning: reasoning)
+            }
             if diagnostics {
                 if request.participant.entrant.preset.model.id == "fixture-2" {
                     try await Task.sleep(for: .seconds(12))

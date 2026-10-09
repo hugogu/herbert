@@ -259,6 +259,9 @@ private struct BattlefieldAnswerView: View {
     @State private var expandedReasoning: Set<Int> = []
     let snapshot: BattlefieldAnswerSelection
     let onTry: (String) -> Void
+    private func providerFailed(_ attempt: AnswerAttempt) -> Bool {
+        ["error", "content_filter"].contains(attempt.finishReason ?? "")
+    }
     private var selection: BattlefieldAnswerSelection {
         guard let live = battlefield.liveResult, live.id == snapshot.resultID,
             let entrant = live.entrants.first(where: { $0.id == snapshot.entrant.id }),
@@ -274,7 +277,10 @@ private struct BattlefieldAnswerView: View {
         ) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Pill(text: selection.answer.status.title, color: selection.answer.status.color)
+                    let status: ProblemAnswerStatus =
+                        selection.answer.attempts.last.map(providerFailed) == true
+                        ? .error : selection.answer.status
+                    Pill(text: status.title, color: status.color)
                     Text(L10n.text(selection.problem.title)).font(.title2.bold())
                     Text(
                         "\(selection.problem.byteLimit) bytes · \(battlefieldScore(selection.scoring.score(selection.answer, problem: selection.problem))) points"
@@ -284,6 +290,24 @@ private struct BattlefieldAnswerView: View {
                     ForEach(selection.answer.attempts) { attempt in
                         VStack(alignment: .leading, spacing: 14) {
                             Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.headline)
+                            if attempt.finishedAt == nil {
+                                HStack(spacing: 8) {
+                                    ProgressView().controlSize(.small)
+                                    Text(
+                                        L10n.text(
+                                            !attempt.response.isEmpty
+                                                ? "正在生成回答…"
+                                                : (attempt.reasoning?.content.isEmpty == false ? "正在思考…" : "正在等待服务商…")
+                                        )
+                                    )
+                                }.foregroundStyle(Palette.mint)
+                                    .accessibilityIdentifier("answer-phase-\(attempt.id)")
+                            } else if attempt.error != nil || providerFailed(attempt) {
+                                BattlefieldNotice(text: L10n.text("请求已结束。下方是中断前收到的部分内容，这些文字不代表仍在生成。"))
+                                    .accessibilityIdentifier("answer-interrupted-\(attempt.id)")
+                            } else if attempt.evaluation == nil && selection.answer.status == .cancelled {
+                                BattlefieldNotice(text: L10n.text("请求已停止，已收到的部分内容已保留。"))
+                            }
                             Text(
                                 (attempt.usage.estimated || attempt.usage.partial ? "≈ " : "")
                                     + "\(attempt.usage.input) input / \(attempt.usage.output) output tokens"
@@ -296,7 +320,7 @@ private struct BattlefieldAnswerView: View {
                             if attempt.finishReason == "length" {
                                 BattlefieldNotice(text: L10n.text("已达到输出上限，推理也占用此额度。可提高模型输出上限，或调整服务商支持的推理参数。"))
                             }
-                            if let evaluation = attempt.evaluation {
+                            if let evaluation = attempt.evaluation, !providerFailed(attempt) {
                                 Label(
                                     evaluation.accepted ? L10n.text("通过") : L10n.text("未通过"),
                                     systemImage: evaluation.accepted ? "checkmark.circle.fill" : "xmark.circle"
@@ -315,6 +339,10 @@ private struct BattlefieldAnswerView: View {
                                 Text(evaluation.feedback).font(.system(.callout, design: .monospaced))
                             }
                             if let error = attempt.error { Text(error).foregroundStyle(Palette.danger) }
+                            if providerFailed(attempt), attempt.error == nil {
+                                Text(L10n.text("服务商终止了生成（finish_reason: %@）。", attempt.finishReason ?? "error"))
+                                    .foregroundStyle(Palette.danger)
+                            }
                             if let program = attempt.program, !program.isEmpty {
                                 Text("程序").font(.subheadline.bold())
                                 Text(program).font(.system(.body, design: .monospaced)).frame(
@@ -368,8 +396,12 @@ private struct BattlefieldAnswerView: View {
                                         }
                                     }
                                     Text("最终回答").font(.subheadline.bold())
-                                    Text(attempt.response.isEmpty ? L10n.text("尚未收到最终回答。") : attempt.response)
-                                        .accessibilityIdentifier("answer-response-\(attempt.id)")
+                                    Text(
+                                        attempt.response.isEmpty
+                                            ? L10n.text(attempt.finishedAt == nil ? "尚未收到最终回答。" : "本次请求未返回最终回答。")
+                                            : attempt.response
+                                    )
+                                    .accessibilityIdentifier("answer-response-\(attempt.id)")
                                     if let diagnostic = attempt.providerResponse {
                                         Text("服务商错误详情").font(.subheadline.bold())
                                         Text(diagnostic).accessibilityIdentifier("answer-provider-error-\(attempt.id)")

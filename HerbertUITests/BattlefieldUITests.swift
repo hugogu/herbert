@@ -2,7 +2,9 @@ import XCTest
 
 final class BattlefieldUITests: XCTestCase {
     @MainActor
-    private func launch(reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false) -> XCUIApplication {
+    private func launch(
+        reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false
+    ) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments =
@@ -10,6 +12,7 @@ final class BattlefieldUITests: XCTestCase {
             + (reset ? ["--reset-progress"] : [])
             + (diagnostics ? ["--battlefield-diagnostics"] : [])
             + (threeModels ? ["--battlefield-three-models"] : [])
+            + (streamErrors ? ["--battlefield-stream-errors"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -266,6 +269,55 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["## Board and movement"].exists)
         capture(app, "ai-rules")
         app.buttons["Close"].battlefieldTap()
+        app.terminate()
+    }
+
+    @MainActor
+    func testLiveReasoningTransitionsToProviderOrNetworkFailureWithoutRejection() {
+        var app = launch(streamErrors: true)
+        openSection("AI Battlefield", in: app)
+        choose("Best Effort", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Thinking…"].waitForExistence(timeout: 5), app.debugDescription)
+        let reasoning = app.buttons["reasoningToggle-1"]
+        XCTAssertTrue(reasoning.waitForExistence(timeout: 5))
+        reasoning.battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Path analysis"].waitForExistence(timeout: 5))
+        capture(app, "ai-thinking")
+        let interruption = app.descendants(matching: .any)["answer-interrupted-1"].firstMatch
+        XCTAssertTrue(interruption.waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["Thinking…"].exists)
+        XCTAssertFalse(app.staticTexts["Rejected"].exists)
+        XCTAssertTrue(app.staticTexts["AI response error"].exists)
+        XCTAssertTrue(app.staticTexts["No final answer was returned."].exists)
+        capture(app, "ai-stream-error")
+        app.buttons["Close"].battlefieldTap()
+        reveal("answer-fixture-2-10001", in: app).battlefieldTap()
+        let error = app.staticTexts["answer-provider-error-1"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue((error.value as? String ?? error.label).contains("NSURLErrorDomain -1005"))
+        XCTAssertFalse(app.staticTexts["Rejected"].exists)
+        app.buttons["reasoningToggle-1"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Path analysis"].exists)
+        capture(app, "ai-network-error")
+        app.buttons["Close"].battlefieldTap()
+        app.terminate()
+        app = launch(reset: false, streamErrors: true)
+        openSection("AI Battlefield", in: app)
+        choose("Match history", in: app)
+        let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10), app.debugDescription)
+        history.battlefieldTap()
+        reveal("answer-fixture-2-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["answer-provider-error-1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["answer-interrupted-1"].firstMatch.exists)
+        XCTAssertFalse(app.staticTexts["Thinking…"].exists)
+        XCTAssertFalse(app.staticTexts["Rejected"].exists)
         app.terminate()
     }
 
