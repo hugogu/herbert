@@ -9,7 +9,7 @@
 - `.build/anthropic-ui.xcresult` 三项 Mac UI 检查通过：Anthropic 类型选择、默认地址、隐藏不适用的输出参数、保存检测模型与重启恢复，以及现有服务商添加/删除、模型参数持久化和刷新。`.build/anthropic-final-ui.xcresult` 两项最终回归通过：并行比赛、重试判题、历史、分享、试运行与返回，以及停止并保存取消结果。
 - [实际英文配置截图](screenshots/en/battlefield/ai-anthropic-provider.png)已检查并链接到两份 README；使用确定性测试客户端与 HTTP 夹具，没有调用付费服务。
 - iOS Release 无签名编译通过；工程、课程、三语资源重复生成一致，个人 scheme 未改变。本机没有 iOS Simulator runtime；真实服务商及 iPhone/iPad 检查列入真机清单。Messages 强制要求 max_tokens，未发现模型额度时使用并记录 65,536 的回退值。
-- 原有重试取消测试在 CI Swift 6.3.3 上发生 task allocator 崩溃；拆分场景与不可变捕获后仍重现。测试等待改为 actor 记录检查点和有界异步轮询，仍使用真实长冷却并验证停止、时限和其他模型独立运行，无生产代码变更。本机九项重试测试通过，旧工具链结果以新的 CI 为准。
+- 原有重试取消测试在 CI Swift 6.3.3 上发生 task allocator 崩溃；拆分场景与不可变捕获未解决。测试仍保留真实长冷却、停止/时限取消和其他模型独立运行检查，并用 actor 记录检查点。按 [Swift #92017](https://github.com/swiftlang/swift/issues/92017) 的已知默认 async 闭包代码生成问题，将默认重试闭包移到模块内初始化器主体，显式注入入口保持不变；未跳过测试或升级 CI 来规避。最终本机完整检查仍为 142 项 Swift / 16 项 Python 通过；`.build/anthropic-retry-default-ui.xcresult` 的原生过载等待、重试与分类回归通过，iOS Release 再编译通过。旧工具链结果以新 CI 为准。
 
 ## 429 与过载重试等待（10 月 9 日）
 

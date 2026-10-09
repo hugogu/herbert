@@ -14,12 +14,15 @@ public actor BattlefieldEngine {
     private var observer: (@Sendable (CompetitionResult) async -> Void)?
     private var executing = false
 
-    public init(
-        client: any AIClient,
-        retrySleep: @escaping @Sendable (TimeInterval) async throws -> Void = {
+    public init(client: any AIClient) {
+        self.client = client
+        // Keep async closure bodies out of public default arguments (swiftlang/swift#92017).
+        retrySleep = {
             try await Task.sleep(for: .seconds($0))
         }
-    ) {
+    }
+
+    public init(client: any AIClient, retrySleep: @escaping @Sendable (TimeInterval) async throws -> Void) {
         self.client = client
         self.retrySleep = retrySleep
     }

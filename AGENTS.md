@@ -48,3 +48,5 @@
 - SwiftUI Toggle identifiers can also match an outer container with no accessibility value. In UI tests, select the native checkbox/switch before asserting or changing its value; use the same lookup after relaunch to verify persistence.
 
 - Keep a popover's presenter unique across adaptive layouts. Binding the same popover to multiple `ViewThatFits` candidates can dismiss it immediately; use `AnyLayout` to rearrange one control tree. Wait for popover disappearance before capturing screenshots.
+
+- Avoid async closure literals in public default arguments: older Swift toolchains can emit conflicting async context layouts across library/client modules (swiftlang/swift#92017). Construct the default inside a library-owned initializer overload. Test real default cooldown cancellation as well as injected sleeps.
