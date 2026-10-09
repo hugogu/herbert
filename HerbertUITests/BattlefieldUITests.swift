@@ -536,6 +536,7 @@ final class BattlefieldUITests: XCTestCase {
             let time = app.descendants(matching: .any)["model-time-\(model)"].firstMatch
             XCTAssertTrue(time.label.hasPrefix("Total time "))
             XCTAssertNotEqual(time.label, "Total time 00:00:00")
+            XCTAssertEqual(time.frame.minY, score.frame.minY, accuracy: 2)
             XCTAssertLessThan(time.frame.maxY, points.frame.minY)
         }
         let modelTime = app.descendants(matching: .any)["model-time-fixture-1"].firstMatch.label

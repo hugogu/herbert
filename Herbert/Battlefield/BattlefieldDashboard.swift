@@ -246,7 +246,7 @@ struct BattlefieldDashboard: View {
             metric(L10n.text("输入缓存率"), battlefieldCache(entrant))
             metric(L10n.text("总 Token"), battlefieldTotalTokens(entrant))
             Divider()
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .top) {
                 Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
                     .system(size: 30, weight: .bold, design: .rounded)
                 )
