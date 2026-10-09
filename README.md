@@ -88,8 +88,9 @@ cancels its remaining retries. Other problems and entrants continue.
 - Choose models and puzzles; models work in parallel with identical Markdown rules
   and board prompts. With limits off, all entrants can finish their selected attempts.
 - Mac setup places entrants and puzzles side by side. Progress uses compact two-line
-  answers and score-sorted model columns. History opens with room for at least three
-  model columns; history and answer dialogs resize. iPhone uses short icon tabs.
+  answers and score-sorted model columns. Saved results open as a full page in the
+  History tab and expand with the main window. A persistent Back action returns to
+  the history list; answer dialogs remain resizable. iPhone uses short icon tabs.
 - Model headers show normalized percentages with total points as a reference,
   input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
   live timers advance and finished durations remain fixed in history.
@@ -151,7 +152,7 @@ The capture predates 0.3.7, so its model names still include provider prefixes.*
 [Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
-[Resizable three-AI history](docs/screenshots/en/battlefield/ai-history.png) ·
+[Full-page three-AI history](docs/screenshots/en/battlefield/ai-history.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
 [Burnout and retained reasoning](docs/screenshots/en/battlefield/ai-burnout.png) ·
 [Provider error details](docs/screenshots/en/battlefield/ai-provider-error.png) ·

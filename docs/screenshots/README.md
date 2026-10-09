@@ -80,6 +80,12 @@ points beside normalized percentages and each attempt's elapsed timer. Fixture r
 take less than one second and display `00:00:00`; the streaming reasoning fixture
 shows a live eight-second attempt. All four images are unmodified English app captures.
 
+Later on October 9, `ai-history.png` was replaced with the full-page History view from
+`.build/full-history-final-ui.xcresult`. The test expands the main window to 1,420 × 910
+points, verifies three model columns and the persistent **Back to match history** action,
+and separately checks that answer dialogs still resize. The image is an unmodified
+English app capture with three deterministic entrants solving L01.
+
 On an interactive Mac desktop, capture the fixture flow with:
 
 ```sh

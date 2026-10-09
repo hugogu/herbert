@@ -2,6 +2,13 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 历史比赛整页展示（10 月 9 日）
+
+- 修改前的 `.build/history-resize-baseline.xcresult` 通过原有历史与答案弹窗宽高调整检查，本机未复现用户报告的历史弹窗无法调整大小。历史结果现改为在 History Tab 内整页展示，固定返回按钮回到列表，直接使用主窗口的可用空间。
+- `scripts/check.sh` 通过：119 项 Swift 测试（44 Core、75 Battlefield）、16 项 Python 检查和严格格式检查；最终视图修改后再次通过严格格式检查。工程与课程重复生成一致，已提交的 scheme 未改变。
+- `.build/full-history-ui.xcresult` 三项原生 Mac UI 用例通过；最终源码的 `.build/full-history-final-ui.xcresult` 两项再次通过。覆盖主窗口双向拉伸后同时显示三个模型、没有历史 sheet、答案弹窗仍可调整大小、切换 Tab 保留历史选择、返回列表与重新打开、试运行返回历史，以及重启后每次尝试的时长与分数不变。
+- iOS Release 无签名编译通过；没有 iPhone/iPad 运行时验证。英文 `ai-history.png` 来自最终通过用例的实际 App，逐图检查布局、语言与窗口边界，未修改图片；参赛模型为确定性测试客户端，没有调用付费 API。
+
 ## PR #3：异常处理复核（10 月 9 日）
 
 - 原 PR 的检查通过；复核补修 HTTP 状态与正文码冲突、普通数字误判、choice 级错误漏读，以及模型推理文字被当作错误诊断的边界。HTTP 200 内嵌错误支持对象、数组和字符串数值码。

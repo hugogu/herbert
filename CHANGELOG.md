@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Open saved match results as a full page in the History tab, with a persistent Back action and main-window resizing. Preserve answer inspection, sharing and trial/back navigation.
+
 - Add a standalone Google Gemini provider with streaming usage reporting and automatic `high` reasoning effort for Gemini 2.5/3 thinking models, while preserving explicit overrides.
 
 - Distinguish overloaded, timed out, temporarily unavailable and access-denied attempts. Retry transient failures within the existing budgets, skip timed-out puzzles, and stop only entrants with terminal errors. Classify structured HTTP/SSE errors without mistaking incidental numbers for status codes.

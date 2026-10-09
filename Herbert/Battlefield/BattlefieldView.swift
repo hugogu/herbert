@@ -37,6 +37,16 @@ struct BattlefieldView: View {
                 if page == .providers {
                     AIProvidersView()
                 } else {
+                    if page == .history, historyResult != nil {
+                        HStack {
+                            Button {
+                                historyResult = nil
+                            } label: {
+                                Label("返回比赛历史", systemImage: "chevron.left")
+                            }.buttonStyle(.bordered).accessibilityIdentifier("backToBattlefieldHistory")
+                            Spacer()
+                        }.padding(.horizontal, 28).padding(.top, 16)
+                    }
                     ScrollView {
                         VStack(alignment: .leading, spacing: 24) {
                             BattlefieldMessages()
@@ -51,11 +61,16 @@ struct BattlefieldView: View {
                                         L10n.text("等待开赛"), systemImage: "flag.checkered",
                                         description: Text("选择模型和题目，开始第一场比赛。"))
                                 }
-                            case .history: history
+                            case .history:
+                                if let result = historyResult {
+                                    BattlefieldDashboard(result: result)
+                                } else {
+                                    history
+                                }
                             }
                         }.padding(28).frame(maxWidth: page == .setup ? 1200 : .infinity, alignment: .leading).frame(
                             maxWidth: .infinity)
-                    }
+                    }.id(page == .history ? historyResult?.id : nil)
                 }
             }
         }.background(Palette.paper).navigationTitle("AI Battlefield")
@@ -94,12 +109,6 @@ struct BattlefieldView: View {
                 .navigationBarTitleDisplayMode(.inline)
             #endif
             .onChange(of: battlefield.busy) { _, busy in if busy { page = .current } }
-            .sheet(item: $historyResult) { result in
-                BattlefieldSheet(title: L10n.text("比赛历史"), layout: .history) {
-                    ScrollView { BattlefieldDashboard(result: result).padding(24) }
-                        .background(Palette.paper)
-                }
-            }
     }
 
     private var history: some View {

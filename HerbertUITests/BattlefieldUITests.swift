@@ -196,7 +196,7 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
-    func testHistoryShowsThreeModelsAndBothDetailSheetsResize() {
+    func testHistoryUsesMainWindowWithThreeModelsAndResizableAnswerDetails() {
         let app = launch(threeModels: true)
         openSection("AI Battlefield", in: app)
 
@@ -210,20 +210,40 @@ final class BattlefieldUITests: XCTestCase {
         let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
         XCTAssertTrue(history.waitForExistence(timeout: 10))
         history.battlefieldTap()
+        XCTAssertTrue(app.buttons["backToBattlefieldHistory"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.sheets.count, 0)
+        #if os(macOS)
+            let window = app.windows.firstMatch
+            let before = window.frame
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: before.width - 2, dy: before.height - 2))
+                .click(
+                    forDuration: 0.1,
+                    thenDragTo: origin.withOffset(CGVector(dx: before.width + 178, dy: before.height + 58)))
+            XCTAssertGreaterThan(window.frame.width, before.width + 100)
+            XCTAssertGreaterThan(window.frame.height, before.height + 30)
+        #endif
         for model in 1...3 {
             XCTAssertTrue(app.buttons["answer-fixture-\(model)-10001"].isHittable)
         }
         capture(app, "ai-history")
-        #if os(macOS)
-            resizeSheet(in: app)
-        #endif
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
         #if os(macOS)
             resizeSheet(in: app)
         #endif
         closeTopSheet(in: app)
-        closeTopSheet(in: app)
+        XCTAssertEqual(app.sheets.count, 0)
+        choose("Current match", in: app)
+        XCTAssertFalse(app.buttons["backToBattlefieldHistory"].exists)
+        choose("Match history", in: app)
+        XCTAssertTrue(app.buttons["backToBattlefieldHistory"].exists)
+        app.buttons["backToBattlefieldHistory"].battlefieldTap()
+        XCTAssertTrue(history.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["shareBattlefield"].exists)
+        history.battlefieldTap()
+        XCTAssertTrue(app.buttons["backToBattlefieldHistory"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.sheets.count, 0)
         app.terminate()
     }
 
@@ -451,7 +471,10 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
         app.buttons["backToBattlefield"].battlefieldTap()
-        app.buttons["Close"].battlefieldTap()
+        XCTAssertTrue(app.buttons["backToBattlefieldHistory"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.sheets.count, 0)
+        app.buttons["backToBattlefieldHistory"].battlefieldTap()
+        XCTAssertTrue(history.waitForExistence(timeout: 5))
         openSection("关卡", in: app)
         app.buttons["continue-problem"].battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))

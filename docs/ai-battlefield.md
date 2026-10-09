@@ -54,8 +54,11 @@ reinterpreted as per-problem limits. Historical files, scores, legacy modes, bud
 actual requested caps remain available in snapshots without being rewritten on load.
 
 On iPhone the four pages use short titles with icons: **Models / New / Live / History**.
-On Mac, history opens wide enough for three model columns; history and answer dialogs
-can be resized in both dimensions. Reasoning is collapsed independently of final text
+Saved results open directly inside the History tab, using the full content area.
+Resize or maximize the Mac main window to see more model columns; no history sheet
+constrains the result. A persistent **Back to match history** action returns to the list.
+Switching Battlefield tabs preserves the selected historical result. Answer dialogs
+remain resizable in both dimensions. Reasoning is collapsed independently of final text
 and rendered with Markdown headings, emphasis, lists, quotes and fenced code.
 
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,

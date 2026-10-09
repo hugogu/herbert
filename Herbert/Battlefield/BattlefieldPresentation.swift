@@ -139,12 +139,11 @@ struct BattlefieldMessages: View {
 }
 
 enum BattlefieldSheetLayout {
-    case standard, history, answer, puzzles
-    var minimumWidth: CGFloat { self == .history ? 1000 : 520 }
+    case standard, answer, puzzles
+    var minimumWidth: CGFloat { 520 }
     var preferredWidth: CGFloat {
         switch self {
         case .standard: 700
-        case .history: 1120
         case .answer, .puzzles: 900
         }
     }
