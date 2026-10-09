@@ -13,6 +13,7 @@ final class HerbertUITests: XCTestCase {
         #if os(macOS)
             if !app.windows.firstMatch.waitForExistence(timeout: 3) {
                 app.typeKey("n", modifierFlags: .command)
+                XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 5))
             }
             if let display = ProcessInfo.processInfo.environment["HERBERT_TEST_DISPLAY"] {
                 app.menuBars.menuBarItems.matching(
@@ -21,7 +22,7 @@ final class HerbertUITests: XCTestCase {
                 let move = app.menuBars.menuItems.matching(
                     NSPredicate(format: "title ENDSWITH %@", display)
                 ).firstMatch
-                if move.exists {
+                if move.waitForExistence(timeout: 3) {
                     // Cache the menu frame: macOS changes the item's identity while hovering it.
                     let frame = move.frame
                     let window = app.windows.firstMatch

@@ -15,7 +15,7 @@
 
 - Native Mac Canvas can expose its descriptive state only through accessibility `label`; use that for board assertions. Rebuild in a fresh DerivedData directory if newly added Swift package localization files are absent from the embedded resource bundle.
 - Match screenshot UI language to its README. The capture script defaults to English (`docs/screenshots/en/`); pass `zh-Hans` for the Chinese assets.
-- macOS can restore the app without an open window. Native UI tests should open New Window with Command-N if no window appears before checking the library.
+- macOS can restore the app without an open window. Native UI tests should open New Window with Command-N if no window appears, then wait for it before choosing the display or checking the library. Window menu targets may not be ready immediately after Command-N.
 - XCTest screenshots can fail to create images on a secondary display. The optional `TEST_RUNNER_HERBERT_TEST_DISPLAY` selects a destination via the native Window menu. Cache the menu item frame and click relative to the window: the item identity changes on hover, and the application frame can be infinite. Avoid relying on restored window placement.
 - `HerbertCore` bundles only the 50 MIT-original lessons; community JSON belongs in optional `HerbertCommunity`. `HerbertAppStore` must never link that module. Audit the final .app with `scripts/check_app_store_bundle.py`, including archives, rather than relying on UI filtering.
 - Original lessons use stable IDs 10001–10050 and display L01–L50. Generate lessons/translations/test references with `scripts/generate_original_problems.py`; reference solutions must stay outside application resources. Preserve community IDs and existing saves.
