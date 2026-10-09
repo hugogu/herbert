@@ -231,7 +231,10 @@ public actor BattlefieldEngine {
                     let program: String
                     let evaluation: JudgeEvaluation
                     do {
-                        program = try BattlefieldJudge.extractProgram(reply.text)
+                        let submission = try BattlefieldJudge.submission(in: reply)
+                        program = submission.program
+                        result!.entrants[e].answers[p].attempts[a].program = program
+                        result!.entrants[e].answers[p].attempts[a].programSource = submission.source
                         let judge = Task.detached(priority: .userInitiated) {
                             try BattlefieldJudge.evaluate(program, problem: problem)
                         }

@@ -302,6 +302,7 @@ public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
     public var contentBlocks: [AnthropicContentBlock]?
     public var providerResponse: String?
     public var program: String?
+    public var programSource: ProgramSubmission.Source?
     public var evaluation: JudgeEvaluation?
     public var usage = TokenUsage()
     public var error: String?

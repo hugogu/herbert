@@ -437,7 +437,11 @@ private struct BattlefieldAnswerView: View {
                                 Text(L10n.text("服务商终止了生成（finish_reason: %@）。", attempt.finishReason ?? "error"))
                                     .foregroundStyle(Palette.danger)
                             }
-                            if let program = attempt.program, !program.isEmpty {
+                            if let submission = attempt.trialSubmission {
+                                let program = submission.program
+                                if submission.source == .reasoning {
+                                    BattlefieldNotice(text: L10n.text("程序从推理中明确标注的最终答案恢复；服务商原始内容保留如下。"))
+                                }
                                 Text("程序").font(.subheadline.bold())
                                 Text(program).font(.system(.body, design: .monospaced)).frame(
                                     maxWidth: .infinity, alignment: .leading
@@ -492,7 +496,9 @@ private struct BattlefieldAnswerView: View {
                                     Text("最终回答").font(.subheadline.bold())
                                     Text(
                                         attempt.response.isEmpty
-                                            ? L10n.text(attempt.finishedAt == nil ? "尚未收到最终回答。" : "本次请求未返回最终回答。")
+                                            ? (attempt.trialSubmission?.source == .reasoning
+                                                ? L10n.text("最终答案位于模型推理中，已恢复为上方的程序。")
+                                                : L10n.text(attempt.finishedAt == nil ? "尚未收到最终回答。" : "本次请求未返回最终回答。"))
                                             : attempt.response
                                     )
                                     .accessibilityIdentifier("answer-response-\(attempt.id)")
