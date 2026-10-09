@@ -23,6 +23,7 @@ struct BattlefieldDashboard: View {
     @State private var selectedAnswer: BattlefieldAnswerSelection?
     @State private var sharing = false
     @State private var inspecting = false
+    @State private var showingProgressHelp = false
     @State private var trial: BattlefieldTrial?
 
     var body: some View {
@@ -67,36 +68,72 @@ struct BattlefieldDashboard: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    Text(result.status.title).font(.largeTitle.bold())
-                    Spacer()
-                    actions
+        ViewThatFits(in: .horizontal) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 16) {
+                    matchTitle.font(.largeTitle.bold()).fixedSize()
+                    matchDate.fixedSize()
+                    Spacer(minLength: 16)
+                    actions.fixedSize()
                 }
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(result.status.title).font(.title.bold())
-                    actions
-                }
-            }
-            HStack(spacing: 12) {
-                Pill(text: result.configuration.settingsDescription)
-                Text(L10n.text("%ld 个 AI · %ld 道题", result.entrants.count, result.problems.count))
-                    .font(.callout).foregroundStyle(Palette.muted)
-            }
-            Text(result.startedAt, format: .dateTime.year().month().day().hour().minute()).font(.caption)
-                .foregroundStyle(Palette.muted)
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                let elapsed = max(0, (result.finishedAt ?? context.date).timeIntervalSince(result.startedAt))
                 HStack(spacing: 16) {
-                    Label(battlefieldDuration(elapsed), systemImage: "clock")
-                    if result.configuration.timeLimitEnabled {
-                        Text(L10n.text("时限 %@", battlefieldDuration(result.configuration.timeLimitSeconds)))
-                    }
-                    Label(result.totalTokens.formatted() + " tokens", systemImage: "sparkles")
-                }.font(.caption.monospaced()).foregroundStyle(Palette.muted)
+                    matchSummary.fixedSize()
+                    Spacer(minLength: 16)
+                    matchMetrics.fixedSize()
+                }
             }
+            VStack(alignment: .leading, spacing: 10) {
+                matchTitle.font(.title.bold())
+                HStack {
+                    matchDate
+                    Spacer(minLength: 8)
+                    actions.labelStyle(.iconOnly)
+                }
+                ViewThatFits(in: .horizontal) {
+                    matchSummary.fixedSize()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Pill(text: result.configuration.settingsDescription)
+                        entrantCount
+                    }
+                }
+                matchMetrics
+            }
+        }
+    }
 
+    private var matchTitle: some View {
+        Text(result.status.title)
+    }
+
+    private var matchDate: some View {
+        Text(result.startedAt, format: .dateTime.year().month().day().hour().minute())
+            .font(.caption).foregroundStyle(Palette.muted).accessibilityIdentifier("battlefieldMatchDate")
+    }
+
+    private var entrantCount: some View {
+        Text(L10n.text("%ld 个 AI · %ld 道题", result.entrants.count, result.problems.count))
+            .font(.callout).foregroundStyle(Palette.muted)
+    }
+
+    private var matchSummary: some View {
+        HStack(spacing: 12) {
+            Pill(text: result.configuration.settingsDescription)
+            entrantCount
+        }
+    }
+
+    private var matchMetrics: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let elapsed = max(0, (result.finishedAt ?? context.date).timeIntervalSince(result.startedAt))
+            HStack(spacing: 16) {
+                Label(battlefieldDuration(elapsed), systemImage: "clock")
+                    .accessibilityIdentifier("battlefieldMatchDuration")
+                if result.configuration.timeLimitEnabled {
+                    Text(L10n.text("时限 %@", battlefieldDuration(result.configuration.timeLimitSeconds)))
+                }
+                Label(result.totalTokens.formatted() + " tokens", systemImage: "sparkles")
+                    .accessibilityIdentifier("battlefieldMatchTokens")
+            }.font(.caption.monospaced()).foregroundStyle(Palette.muted)
         }
     }
 
@@ -132,10 +169,33 @@ struct BattlefieldDashboard: View {
                 (entrant.id, Dictionary(uniqueKeysWithValues: entrant.answers.map { ($0.id, $0) }))
             })
         return VStack(alignment: .leading, spacing: 16) {
-            Text("逐题进度").font(.title2.bold())
-            Text(result.scoringDescription).font(.caption).foregroundStyle(Palette.muted)
-            Text("点击答案查看完整程序、反馈与重试记录，或进入棋盘试运行。")
-                .font(.caption).foregroundStyle(Palette.muted)
+            HStack {
+                Text("逐题进度").font(.title2.bold()).accessibilityIdentifier("battlefieldProgressTitle")
+                Spacer()
+                Button {
+                    showingProgressHelp = true
+                } label: {
+                    Image(systemName: "questionmark.circle").font(.title3).frame(width: 44, height: 44)
+                }
+                .buttonStyle(.plain).foregroundStyle(Palette.muted)
+                .accessibilityLabel("逐题进度说明").accessibilityIdentifier("battlefieldProgressHelp")
+                .popover(isPresented: $showingProgressHelp, arrowEdge: .top) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("逐题进度").font(.headline)
+                            Spacer()
+                            Button("完成") { showingProgressHelp = false }
+                                .accessibilityIdentifier("closeBattlefieldProgressHelp")
+                        }
+                        Text(result.scoringDescription).accessibilityIdentifier("battlefieldScoringHelp")
+                        Text("点击答案查看完整程序、反馈与重试记录，或进入棋盘试运行。")
+                            .accessibilityIdentifier("battlefieldAnswerHelp")
+                    }.font(.callout).foregroundStyle(Palette.muted).padding(20).frame(width: 340)
+                        #if os(iOS)
+                            .presentationCompactAdaptation(.popover)
+                        #endif
+                }
+            }
             ScrollView(.horizontal) {
                 Grid(alignment: .topLeading, horizontalSpacing: 12, verticalSpacing: 12) {
                     GridRow {

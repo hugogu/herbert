@@ -24,6 +24,7 @@ struct GameView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var editor = EditorController()
     @State private var showGuide = false
+    @State private var showProblemInfo = false
     @State private var showBest = false
     @State private var showOriginalBestInfo = false
     @State private var revealedHints = 0
@@ -40,37 +41,40 @@ struct GameView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let wide = geometry.size.width >= 760
+            // Keep narrow portrait layouts stacked when the keyboard reduces their height.
+            let compact =
+                geometry.size.height < 500 && geometry.size.width >= 560
+                && geometry.size.width > geometry.size.height
+            let wide = geometry.size.width >= 760 || compact
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    heading
-                    if model.isTrial {
-                        BattlefieldNotice(text: L10n.text("AI 答案试运行：可以修改和运行，不会更改个人草稿、最短解或比赛成绩。"))
-                    }
-                    if !model.isTrial, let lesson = model.problem.lesson { lessonPanel(lesson) }
-                    stats
+                VStack(alignment: .leading, spacing: compact ? 12 : 20) {
+                    heading(compact: compact, width: geometry.size.width)
+                    if !compact, !model.isTrial, let lesson = model.problem.lesson { lessonPanel(lesson) }
+                    if !compact { stats }
                     if wide {
-                        HStack(alignment: .top, spacing: 20) {
-                            BoardView(model: model).frame(minHeight: 470, idealHeight: 520, maxHeight: 560)
+                        HStack(alignment: .top, spacing: compact ? 12 : 20) {
+                            BoardView(model: model, compact: compact)
+                                .frame(height: compact ? max(200, min(340, geometry.size.height - 80)) : 520)
                                 .frame(maxWidth: .infinity)
-                            VStack(spacing: 18) {
-                                editorPanel
+                            VStack(spacing: compact ? 10 : 18) {
+                                editorPanel(compact: compact)
                                 statusPanel
                                 controls
                             }
-                            .frame(width: min(380, geometry.size.width * 0.40))
+                            .frame(width: min(compact ? 420 : 380, geometry.size.width * (compact ? 0.46 : 0.40)))
                         }
                     } else {
                         BoardView(model: model).frame(height: min(400, max(270, geometry.size.width - 24)))
-                        editorPanel
+                        editorPanel(compact: false)
                         statusPanel
                     }
+                    if compact { stats }
                     if model.isCompleted { completionPanel }
                     if let error = store.storageMessage {
                         Label(error, systemImage: "externaldrive.badge.exclamationmark")
                             .font(.caption).foregroundStyle(Palette.danger).panel()
                     }
-                }.padding(wide ? 28 : 20).frame(maxWidth: 1200).frame(maxWidth: .infinity)
+                }.padding(compact ? 12 : wide ? 28 : 20).frame(maxWidth: 1200).frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
             .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -103,13 +107,6 @@ struct GameView: View {
                             systemName: store.progress(for: model.problem.id).isFavorite ? "bookmark.fill" : "bookmark")
                     }.accessibilityLabel("收藏关卡")
                 }
-                Button {
-                    model.pause()
-                    showGuide = true
-                } label: {
-                    Image(systemName: "questionmark.circle")
-                }
-                .accessibilityLabel("游戏规则")
             }
         }
         .sheet(isPresented: $showGuide) {
@@ -117,7 +114,10 @@ struct GameView: View {
                 GuideView().toolbar {
                     ToolbarItem(placement: .confirmationAction) { Button("完成") { showGuide = false } }
                 }
-            }.frame(minWidth: 320, idealWidth: 600, minHeight: 480)
+            }
+            #if os(macOS)
+                .frame(minWidth: 320, idealWidth: 600, minHeight: 480)
+            #endif
         }
         .onChange(of: model.source) { _, _ in model.edited() }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.pause() } }
@@ -127,17 +127,72 @@ struct GameView: View {
         .sensoryFeedback(.warning, trigger: model.lastEvent == .trap)
     }
 
-    private var heading: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(
-                text: L10n.text(
-                    model.problem.lesson == nil
-                        ? "PROBLEM %@  /  COMMUNITY COLLECTION" : "LESSON %@  /  ORIGINAL COURSE",
-                    model.problem.number))
-            Text(model.problem.displayTitle).font(.system(size: 25, weight: .bold, design: .rounded))
-            Text("由 \(model.problem.author) 创作 · 点亮所有目标，试着把代码再缩短一点。")
-                .font(.system(size: 12)).foregroundStyle(Palette.muted)
+    private func heading(compact: Bool, width: CGFloat) -> some View {
+        let layout =
+            width >= 560
+            ? AnyLayout(HStackLayout(spacing: 12))
+            : AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+        return layout {
+            Text(model.problem.displayTitle).font(.system(size: compact ? 18 : 25, weight: .bold, design: .rounded))
+                .lineLimit(2).frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("problem-title")
+            headingTags(compact: compact)
         }
+    }
+
+    private func headingTags(compact: Bool) -> some View {
+        HStack(spacing: 8) {
+            Button {
+                model.pause()
+                showProblemInfo = true
+            } label: {
+                Label(LocalizedStringKey(model.isTrial ? "AI 试运行" : "题目说明"), systemImage: "info.circle")
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .background(Palette.mintLight.opacity(0.7), in: Capsule()).frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("problem-details")
+            .popover(isPresented: $showProblemInfo, arrowEdge: .top) { problemInfo(compact: compact) }
+            Button {
+                model.pause()
+                showGuide = true
+            } label: {
+                Label("游戏规则", systemImage: "questionmark.circle")
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .background(Palette.mintLight.opacity(0.7), in: Capsule()).frame(minHeight: 44)
+            }.accessibilityIdentifier("game-rules")
+        }.font(.system(size: 11, weight: .semibold)).buttonStyle(.plain).foregroundStyle(Palette.mint).fixedSize()
+    }
+
+    private func problemInfo(compact: Bool) -> some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text(LocalizedStringKey(model.isTrial ? "AI 试运行" : "题目说明")).font(.headline)
+                Spacer()
+                Button("完成") { showProblemInfo = false }.accessibilityIdentifier("close-problem-details")
+            }.padding(16)
+            Divider()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Eyebrow(
+                        text: L10n.text(
+                            model.problem.lesson == nil
+                                ? "PROBLEM %@  /  COMMUNITY COLLECTION" : "LESSON %@  /  ORIGINAL COURSE",
+                            model.problem.number))
+                    Text(model.problem.displayTitle).font(.headline)
+                    Text("由 \(model.problem.author) 创作 · 点亮所有目标，试着把代码再缩短一点。")
+                        .font(.callout).foregroundStyle(Palette.muted).accessibilityIdentifier("problem-credit")
+                    if model.isTrial {
+                        Text("AI 答案试运行：可以修改和运行，不会更改个人草稿、最短解或比赛成绩。")
+                            .font(.callout).foregroundStyle(Palette.muted).accessibilityIdentifier("trial-explanation")
+                    } else if compact, let lesson = model.problem.lesson {
+                        lessonPanel(lesson)
+                    }
+                }.padding(20)
+            }
+        }.frame(width: 340, height: compact ? 280 : 340)
+            #if os(iOS)
+                .presentationCompactAdaptation(.popover)
+            #endif
     }
 
     private func lessonPanel(_ lesson: ProblemLesson) -> some View {
@@ -166,7 +221,7 @@ struct GameView: View {
                 Divider().frame(height: 28)
                 stat(
                     "代码长度", value: "\(model.bytes) / \(model.problem.byteLimit) B",
-                    danger: model.bytes > model.problem.byteLimit)
+                    danger: model.bytes > model.problem.byteLimit, identifier: "game-program-size")
                 Divider().frame(height: 28)
                 stat("执行步数", value: "\(model.session.steps)")
             }.padding(.vertical, 16)
@@ -220,17 +275,18 @@ struct GameView: View {
         model.problem.originalBest.map { "\($0) B" } ?? L10n.text("暂无记录")
     }
 
-    private func stat(_ title: String, value: String, danger: Bool = false) -> some View {
+    private func stat(_ title: String, value: String, danger: Bool = false, identifier: String = "") -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(LocalizedStringKey(title)).font(.system(size: 10)).foregroundStyle(Palette.muted)
             Text(value).font(.system(size: 17, weight: .semibold, design: .monospaced))
                 .foregroundStyle(danger ? Palette.danger : Palette.ink).contentTransition(.numericText()).lineLimit(1)
                 .minimumScaleFactor(0.7)
+                .accessibilityIdentifier(identifier)
         }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 16)
     }
 
-    private var editorPanel: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func editorPanel(compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 8 : 12) {
             HStack {
                 Eyebrow(text: "YOUR PROGRAM")
                 Spacer()
@@ -246,7 +302,8 @@ struct GameView: View {
                         .padding(.top, 14).padding(.leading, 12).allowsHitTesting(false)
                 }
                 CodeEditor(text: $model.source, controller: editor)
-                    .frame(minHeight: 140, idealHeight: 180, maxHeight: 240)
+                    .frame(
+                        minHeight: compact ? 60 : 140, idealHeight: compact ? 80 : 180, maxHeight: compact ? 100 : 240)
             }.background(Palette.paper.opacity(0.6), in: RoundedRectangle(cornerRadius: 12))
             HStack(spacing: 8) {
                 commandKey("s", label: "前进", insertion: "s")
@@ -264,17 +321,21 @@ struct GameView: View {
                 }
                 .menuStyle(.borderlessButton).accessibilityLabel("更多代码符号")
             }
-            HStack {
-                Text("字母和数值各算 1 byte，标点不计。")
-                    .font(.system(size: 10)).foregroundStyle(Palette.muted)
-                Spacer(minLength: 0)
-                if !model.isTrial, store.progress(for: model.problem.id).bestSolution != nil {
-                    Button {
-                        showBest.toggle()
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
+            if !compact || (!model.isTrial && store.progress(for: model.problem.id).bestSolution != nil) {
+                HStack {
+                    if !compact {
+                        Text("字母和数值各算 1 byte，标点不计。")
+                            .font(.system(size: 10)).foregroundStyle(Palette.muted)
                     }
-                    .buttonStyle(.plain).accessibilityLabel("查看我的最短解")
+                    Spacer(minLength: 0)
+                    if !model.isTrial, store.progress(for: model.problem.id).bestSolution != nil {
+                        Button {
+                            showBest.toggle()
+                        } label: {
+                            Image(systemName: "clock.arrow.circlepath")
+                        }
+                        .buttonStyle(.plain).accessibilityLabel("查看我的最短解")
+                    }
                 }
             }
             if showBest, let best = store.progress(for: model.problem.id).bestSolution {
@@ -289,7 +350,7 @@ struct GameView: View {
                 }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(
                     Palette.mintLight, in: RoundedRectangle(cornerRadius: 12))
             }
-        }.panel(padding: 18)
+        }.panel(padding: compact ? 12 : 18)
     }
 
     private func commandKey(_ key: String, label: String, insertion: String) -> some View {

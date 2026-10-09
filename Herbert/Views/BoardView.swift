@@ -208,6 +208,7 @@ struct BoardDrawing: View, Animatable {
 
 struct BoardView: View {
     @ObservedObject var model: GameModel
+    var compact = false
     @AppStorage("board.style") private var style = BoardStyle.modern
     @AppStorage("board.showTrail") private var showTrail = true
     @AppStorage("board.showGridDots") private var showGridDots = true
@@ -221,18 +222,27 @@ struct BoardView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: compact ? 8 : 14) {
             HStack {
-                Eyebrow(text: "THE PLAYGROUND")
+                if compact {
+                    Text("THE PLAYGROUND").font(.system(size: 10, weight: .semibold))
+                } else {
+                    Eyebrow(text: "THE PLAYGROUND")
+                }
                 Spacer()
                 Button {
                     focused.toggle()
                     zoom = 1
                     pan = .zero
                 } label: {
-                    Label(LocalizedStringKey(focused ? "全棋盘" : "聚焦"), systemImage: "viewfinder")
-                        .font(.system(size: 11, weight: .medium)).frame(minHeight: 32)
+                    if compact {
+                        Image(systemName: "viewfinder").frame(width: 32, height: 32)
+                    } else {
+                        Label(LocalizedStringKey(focused ? "全棋盘" : "聚焦"), systemImage: "viewfinder")
+                            .font(.system(size: 11, weight: .medium)).frame(minHeight: 32)
+                    }
                 }.buttonStyle(.plain).foregroundStyle(Palette.mint)
+                    .accessibilityLabel(LocalizedStringKey(focused ? "全棋盘" : "聚焦"))
                 Button {
                     zoom = 1
                     pan = .zero
@@ -305,7 +315,7 @@ struct BoardView: View {
                 Spacer(minLength: 0)
                 Text("25 × 25").font(.system(size: 10, design: .monospaced)).foregroundStyle(Palette.muted)
             }
-        }.panel(padding: 18)
+        }.panel(padding: compact ? 12 : 18)
     }
 
     private func legend(_ text: String, symbol: String, color: Color) -> some View {

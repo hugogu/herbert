@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Compact result headers and move progress tips into contextual help. Adapt short landscape sidebars and playgrounds to keep navigation, board and code visible, with title tags for puzzle/trial details and rules.
+
 - Open saved match results as a full page in the History tab, with a persistent Back action and main-window resizing. Preserve answer inspection, sharing and trial/back navigation.
 
 - Add a standalone Google Gemini provider with streaming usage reporting and automatic `high` reasoning effort for Gemini 2.5/3 thinking models, while preserving explicit overrides.

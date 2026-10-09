@@ -86,6 +86,19 @@ points, verifies three model columns and the persistent **Back to match history*
 and separately checks that answer dialogs still resize. The image is an unmodified
 English app capture with three deterministic entrants solving L01.
 
+The compact-workspace refresh on October 9 updates the match headers, contextual
+progress help and title tags in `ai-history.png`, `ai-battlefield.png` and `ai-trial.png`.
+The history/progress captures use the native fixture suites, with two or three entrants
+solving L01. The history replacement comes from the passing history case in
+`.build/compact-workspaces-final-confirmation.xcresult`. The progress and trial replacements come from the passing
+`testParallelMatchRetryNativeJudgingHistoryAndShareImage` case in
+`.build/compact-workspaces-capture-ui.xcresult`, with popover disappearance checked
+before capture. `en/compact-playground.png` comes from
+`.build/compact-workspaces-popup-final.xcresult`: an actual 932 × 430-point Mac window
+showing all four sidebar destinations, the complete board and code editor, and Run on
+entry. It validates shared short-height SwiftUI layout and is not an iPhone screenshot.
+All replacement images remain unmodified English app captures.
+
 On an interactive Mac desktop, capture the fixture flow with:
 
 ```sh

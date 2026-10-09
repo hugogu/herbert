@@ -2,6 +2,16 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 紧凑比赛摘要与横屏工作区（10 月 9 日）
+
+- 比赛日期与状态标题同行，用时和 Token 右对齐到操作区下方；进度说明移入标题旁的帮助按钮，可打开、关闭且不影响答案操作。题目和 AI 试运行说明改为标题标签，规则入口也移到标题旁。
+- `scripts/check.sh` 通过：119 项 Swift 测试（44 Core、75 Battlefield）、16 项 Python 检查和严格格式检查。工程、课程与三语资源重复生成一致，已提交的 scheme 未改变。
+- `.build/compact-workspaces-final-ui.xcresult` 五项 Mac UI 回归通过，覆盖比赛摘要对齐、帮助开关、三模型历史与答案调整大小、试运行与返回、时长/总分持久化、英日规则标签，以及三语社区参考长度。`.build/compact-workspaces-verified-ui.xcresult` 两项最终复跑通过，新增矮窗口恢复普通窗口后课程目标与统计位置恢复、代码不变的检查。
+- 截图复跑中，试运行流程通过并输出无弹层淡出残影的图片；历史用例在启动断言前失败，界面记录显示搜索框含空格，导致「继续」卡片隐藏。测试启动现在先清空现有搜索；该失败未进入历史或布局检查。
+- `.build/compact-workspaces-final-confirmation.xcresult` 的历史用例通过并生成最终历史截图。同次矮窗口复跑发现题目说明偶发未打开：标题的两个 `ViewThatFits` 候选视图共享弹层绑定。改用 `AnyLayout` 保留唯一控件树后，最终源码的 `.build/compact-workspaces-popup-final.xcresult` 通过，包含连续两次打开/关闭、提示状态保留和恢复普通窗口的检查。
+- 矮窗口用例将真实 Mac 主窗口缩到 932 × 430 点，验证四个导航入口无需滚动即可点击、Logo 顶部对齐、底部进度紧凑、整个棋盘和编辑器都在窗口内、运行按钮可点击，统计位于工作区下方；题目说明仍能展开课程提示。使用 Debug 测试专用开关降低 Mac 最小窗口高度，不改变发布版窗口限制。[实际英文矮窗口截图](screenshots/en/compact-playground.png)用于检查共享 SwiftUI 布局，并非 iPhone 截图。
+- iOS Release 无签名编译通过；已确认本机没有 iOS Simulator runtime，未声称真机横屏、旋转或键盘验证。相应检查已补入 App Store 真机清单。所有 AI 流程使用确定性测试客户端，没有调用付费 API。
+
 ## 历史比赛整页展示（10 月 9 日）
 
 - 修改前的 `.build/history-resize-baseline.xcresult` 通过原有历史与答案弹窗宽高调整检查，本机未复现用户报告的历史弹窗无法调整大小。历史结果现改为在 History Tab 内整页展示，固定返回按钮回到列表，直接使用主窗口的可用空间。

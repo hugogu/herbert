@@ -47,28 +47,46 @@ struct RootView: View {
 
     private var splitView: some View {
         NavigationSplitView {
-            VStack(alignment: .leading, spacing: 28) {
-                HStack(spacing: 12) {
-                    RobotMark()
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("herbert").font(.system(size: 26, weight: .bold, design: .rounded))
-                        Eyebrow(text: "THINK IN PATTERNS")
+            GeometryReader { geometry in
+                let compact = geometry.size.height < 500
+                VStack(alignment: .leading, spacing: compact ? 8 : 28) {
+                    HStack(spacing: 12) {
+                        RobotMark().scaleEffect(compact ? 0.78 : 1)
+                            .frame(width: compact ? 36 : 46, height: compact ? 36 : 46)
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("herbert").font(.system(size: compact ? 22 : 26, weight: .bold, design: .rounded))
+                                .accessibilityIdentifier("sidebar-brand")
+                            if !compact { Eyebrow(text: "THINK IN PATTERNS") }
+                        }
+                    }.padding(.horizontal, 20).padding(.top, compact ? 8 : 30)
+                    List(AppSection.allCases, selection: $selection) { section in
+                        Label(LocalizedStringKey(section.rawValue), systemImage: section.symbol)
+                            .padding(.vertical, compact ? 0 : 9).tag(section)
+                            .accessibilityIdentifier("section-\(section.id)")
                     }
-                }.padding(.horizontal, 20).padding(.top, 30)
-                List(AppSection.allCases, selection: $selection) { section in
-                    Label(LocalizedStringKey(section.rawValue), systemImage: section.symbol).padding(.vertical, 9).tag(
-                        section
-                    )
-                    .accessibilityIdentifier("section-\(section.id)")
-                }.listStyle(.sidebar).scrollContentBackground(.hidden)
-                VStack(alignment: .leading, spacing: 10) {
-                    Eyebrow(text: "YOUR EXPLORATION")
-                    Text("\(store.completedCount) / \(store.problems.count)")
-                        .font(.system(size: 25, weight: .medium, design: .monospaced))
-                    Text("每一段简洁的代码，\n都是一次漂亮的思考。")
-                        .font(.system(size: 12)).foregroundStyle(Palette.muted).lineSpacing(4)
-                    Label("本机保存", systemImage: "internaldrive").font(.caption).foregroundStyle(Palette.mint)
-                }.padding(24)
+                    .listStyle(.sidebar).scrollContentBackground(.hidden)
+                    .environment(\.defaultMinListRowHeight, 44)
+                    if compact {
+                        HStack {
+                            Label("\(store.completedCount) / \(store.problems.count)", systemImage: "checkmark.circle")
+                                .monospacedDigit().accessibilityIdentifier("sidebar-progress")
+                            Spacer(minLength: 4)
+                            Label("本机保存", systemImage: "internaldrive").labelStyle(.iconOnly)
+                                .foregroundStyle(Palette.mint)
+                        }.font(.caption).foregroundStyle(Palette.muted).padding(12)
+                    } else {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Eyebrow(text: "YOUR EXPLORATION")
+                            Text("\(store.completedCount) / \(store.problems.count)")
+                                .font(.system(size: 25, weight: .medium, design: .monospaced))
+                                .accessibilityIdentifier("sidebar-progress")
+                            Text("每一段简洁的代码，\n都是一次漂亮的思考。")
+                                .font(.system(size: 12)).foregroundStyle(Palette.muted).lineSpacing(4)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Label("本机保存", systemImage: "internaldrive").font(.caption).foregroundStyle(Palette.mint)
+                        }.padding(24)
+                    }
+                }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }.background(Palette.paper)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 270)
         } detail: {

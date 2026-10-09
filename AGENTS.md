@@ -46,3 +46,5 @@
 - Streaming providers can return HTTP 200 with `finish_reason: error` or an in-band error. Preserve partial output/usage and stop before judging; retained reasoning does not prove generation is still active. Keep request inactivity timeouts separate from total resource deadlines, which can interrupt streams that still emit data.
 
 - SwiftUI Toggle identifiers can also match an outer container with no accessibility value. In UI tests, select the native checkbox/switch before asserting or changing its value; use the same lookup after relaunch to verify persistence.
+
+- Keep a popover's presenter unique across adaptive layouts. Binding the same popover to multiple `ViewThatFits` candidates can dismiss it immediately; use `AnyLayout` to rearrange one control tree. Wait for popover disappearance before capturing screenshots.

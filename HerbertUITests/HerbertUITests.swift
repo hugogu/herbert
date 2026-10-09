@@ -3,11 +3,13 @@ import XCTest
 
 final class HerbertUITests: XCTestCase {
     @MainActor
-    private func launch(reset: Bool = true, language: String = "zh-Hans") -> XCUIApplication {
+    private func launch(reset: Bool = true, language: String = "zh-Hans", shortWindow: Bool = false) -> XCUIApplication
+    {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments =
             ["--ui-testing", "-AppleLanguages", "(\(language))"] + (reset ? ["--reset-progress"] : [])
+            + (shortWindow ? ["--ui-testing-short-window"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -43,6 +45,80 @@ final class HerbertUITests: XCTestCase {
     private func openFirst(_ app: XCUIApplication) {
         app.buttons["continue-problem"].activateControl()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testShortHeightKeepsNavigationAndPlaygroundVisible() {
+        let app = launch(language: "en", shortWindow: true)
+        #if os(macOS)
+            let window = app.windows.firstMatch
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            let frame = window.frame
+            origin.withOffset(CGVector(dx: frame.width - 2, dy: frame.height - 2))
+                .click(forDuration: 0.1, thenDragTo: origin.withOffset(CGVector(dx: 930, dy: 428)))
+            XCTAssertLessThan(window.frame.height, 460)
+        #else
+            XCUIDevice.shared.orientation = .landscapeLeft
+            defer { XCUIDevice.shared.orientation = .portrait }
+        #endif
+        for section in ["手册", "记录", "AI Battlefield", "关卡"] {
+            let navigation = app.descendants(matching: .any)["section-\(section)"].firstMatch
+            #if os(macOS)
+                XCTAssertTrue(navigation.isHittable, "All sidebar destinations fit without scrolling")
+                navigation.activateControl()
+            #else
+                if navigation.exists { navigation.activateControl() }
+            #endif
+        }
+        #if os(macOS)
+            let brand = app.staticTexts["sidebar-brand"].frame
+            XCTAssertLessThan(brand.minY - window.frame.minY, 90)
+            let footer = app.descendants(matching: .any)["sidebar-progress"].firstMatch.frame
+            XCTAssertLessThan(footer.height, 24)
+        #endif
+        openFirst(app)
+        let board = app.descendants(matching: .any)["game-board"].firstMatch
+        let editor = app.textViews["code-editor"]
+        XCTAssertTrue(board.isHittable)
+        XCTAssertTrue(editor.isHittable)
+        XCTAssertLessThan(board.frame.minX, editor.frame.minX)
+        XCTAssertLessThan(abs(board.frame.minY - editor.frame.minY), 60)
+        #if os(macOS)
+            XCTAssertTrue(window.frame.contains(board.frame), "The entire board is visible on entry")
+            XCTAssertTrue(window.frame.contains(editor.frame), "The editor is visible on entry")
+            XCTAssertTrue(app.buttons["run-program"].isHittable)
+        #endif
+        let size = app.staticTexts["game-program-size"]
+        XCTAssertGreaterThan(size.frame.minY, board.frame.maxY)
+        XCTAssertFalse(app.staticTexts["lesson-objective"].exists)
+        capture(app, name: "compact-playground")
+        app.buttons["problem-details"].activateControl()
+        XCTAssertTrue(app.staticTexts["problem-credit"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["lesson-objective"].exists)
+        app.buttons["reveal-hint"].activateControl()
+        XCTAssertTrue(app.staticTexts["lesson-hint-1"].exists)
+        app.buttons["close-problem-details"].activateControl()
+        XCTAssertTrue(app.staticTexts["problem-credit"].waitForNonExistence(timeout: 5))
+        app.buttons["problem-details"].activateControl()
+        XCTAssertTrue(app.staticTexts["problem-credit"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["lesson-hint-1"].exists)
+        app.buttons["close-problem-details"].activateControl()
+        app.buttons["insert-s"].activateControl()
+        app.buttons["step-program"].activateControl()
+        XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
+        capture(app, name: "compact-completed")
+        #if os(macOS)
+            let short = window.frame
+            let start = window.coordinate(withNormalizedOffset: .zero)
+            start.withOffset(CGVector(dx: short.width - 2, dy: short.height - 2))
+                .click(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 1238, dy: 848)))
+        #else
+            XCUIDevice.shared.orientation = .portrait
+        #endif
+        XCTAssertTrue(app.staticTexts["lesson-objective"].waitForExistence(timeout: 5))
+        XCTAssertLessThan(size.frame.minY, board.frame.minY, "Statistics return above the board in a tall layout")
+        XCTAssertEqual(editor.value as? String, "s", "Resizing preserves the program")
+        app.terminate()
     }
 
     @MainActor
@@ -144,7 +220,9 @@ final class HerbertUITests: XCTestCase {
                 let app = launch(language: language)
                 openProblem(3, in: app)
                 XCTAssertTrue(app.buttons["original-best-reference"].label.hasSuffix(": 8 B"))
-                XCTAssertTrue(app.staticTexts["0 / 19 B"].exists, "The puzzle limit remains independent of Best")
+                XCTAssertEqual(
+                    app.staticTexts["game-program-size"].displayedText, "0 / 19 B",
+                    "The puzzle limit remains independent of Best")
                 app.buttons["original-best-reference"].activateControl()
                 XCTAssertTrue(app.staticTexts["original-best-explanation"].waitForExistence(timeout: 5))
                 XCTAssertTrue(app.staticTexts["original-best-explanation"].displayedText.contains(explanation))

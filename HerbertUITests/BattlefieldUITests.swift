@@ -42,6 +42,7 @@ final class BattlefieldUITests: XCTestCase {
                     .click(forDuration: 0.1, thenDragTo: origin.withOffset(CGVector(dx: 1238, dy: 848)))
             }
         #endif
+        if app.buttons["clear-search"].exists { app.buttons["clear-search"].battlefieldTap() }
         XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 15))
         return app
     }
@@ -212,6 +213,13 @@ final class BattlefieldUITests: XCTestCase {
         history.battlefieldTap()
         XCTAssertTrue(app.buttons["backToBattlefieldHistory"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.sheets.count, 0)
+        XCTAssertFalse(app.staticTexts["battlefieldScoringHelp"].exists)
+        XCTAssertFalse(app.staticTexts["battlefieldAnswerHelp"].exists)
+        app.buttons["battlefieldProgressHelp"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["battlefieldScoringHelp"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["battlefieldAnswerHelp"].exists)
+        app.buttons["closeBattlefieldProgressHelp"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["battlefieldScoringHelp"].waitForNonExistence(timeout: 5))
         #if os(macOS)
             let window = app.windows.firstMatch
             let before = window.frame
@@ -222,6 +230,13 @@ final class BattlefieldUITests: XCTestCase {
                     thenDragTo: origin.withOffset(CGVector(dx: before.width + 178, dy: before.height + 58)))
             XCTAssertGreaterThan(window.frame.width, before.width + 100)
             XCTAssertGreaterThan(window.frame.height, before.height + 30)
+            let title = app.staticTexts["Match complete"].frame
+            let date = app.staticTexts["battlefieldMatchDate"].frame
+            let tokens = app.descendants(matching: .any)["battlefieldMatchTokens"].firstMatch.frame
+            let share = app.buttons["shareBattlefield"].frame
+            XCTAssertLessThan(abs(title.midY - date.midY), 20)
+            XCTAssertGreaterThan(date.minX, title.maxX)
+            XCTAssertLessThan(abs(tokens.maxX - share.maxX), 4)
         #endif
         for model in 1...3 {
             XCTAssertTrue(app.buttons["answer-fixture-\(model)-10001"].isHittable)
@@ -426,6 +441,14 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")
         XCTAssertFalse(app.staticTexts["lesson-objective"].exists)
+        XCTAssertFalse(app.staticTexts["trial-explanation"].exists)
+        app.buttons["problem-details"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["trial-explanation"].waitForExistence(timeout: 5))
+        app.buttons["close-problem-details"].battlefieldTap()
+        #if os(macOS)
+            XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+        #endif
+        XCTAssertTrue(app.staticTexts["trial-explanation"].waitForNonExistence(timeout: 5))
         #if os(macOS)
             XCTAssertTrue(app.buttons["run-program"].isHittable)
         #endif

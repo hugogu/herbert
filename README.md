@@ -49,6 +49,10 @@ return to their starting position and heading before the next pattern can fit.
 The app follows English, Simplified Chinese, or Japanese language preferences; other
 languages fall back to English.*
 
+Short landscape layouts keep the sidebar compact and put the board and code side by
+side, with statistics below. Puzzle details, AI trial notes and rules open from title tags.
+See the [compact workspace capture](docs/screenshots/en/compact-playground.png) from a short Mac window.
+
 ## Small programs, intricate places
 
 The six-chapter [original course](docs/original-course.md) grows from a single `s` to
@@ -90,7 +94,9 @@ cancels its remaining retries. Other problems and entrants continue.
 - Mac setup places entrants and puzzles side by side. Progress uses compact two-line
   answers and score-sorted model columns. Saved results open as a full page in the
   History tab and expand with the main window. A persistent Back action returns to
-  the history list; answer dialogs remain resizable. iPhone uses short icon tabs.
+  the history list; answer dialogs remain resizable. Dates sit beside the match title,
+  elapsed time and tokens align under the actions, and scoring/answer tips open from
+  the progress help button. iPhone uses short icon tabs.
 - Model headers show normalized percentages with total points as a reference,
   input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
   live timers advance and finished durations remain fixed in history.

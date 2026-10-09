@@ -61,6 +61,12 @@ Switching Battlefield tabs preserves the selected historical result. Answer dial
 remain resizable in both dimensions. Reasoning is collapsed independently of final text
 and rendered with Markdown headings, emphasis, lists, quotes and fenced code.
 
+Wide result headers place the date beside the status and align elapsed time and total
+tokens beneath the actions. Narrow headers wrap these groups. The progress title's
+help button contains the scoring formula and answer/trial instructions. In a short
+landscape playground, the board and editor appear first, statistics follow below, and
+the title's **AI trial** tag explains how trial editing preserves personal progress.
+
 Advanced parameters allow `seed`, `top_k`, `min_p`, `frequency_penalty`,
 `presence_penalty`, `reasoning_effort`, `reasoning`, `enable_thinking`, `thinking`, and `thinking_budget`.
 Provider support varies; invalid combinations can return an API error. Model, message,

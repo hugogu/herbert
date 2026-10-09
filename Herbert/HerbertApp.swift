@@ -21,11 +21,21 @@ struct HerbertApp: App {
                     #endif
                 }
                 #if os(macOS)
-                    .frame(minWidth: 850, minHeight: 650)
+                    .frame(minWidth: 850, minHeight: allowsShortTestWindow ? 300 : 650)
                 #endif
         }
         #if os(macOS)
             .defaultSize(width: 1240, height: 850)
+        #endif
+    }
+
+    private var allowsShortTestWindow: Bool {
+        #if DEBUG
+            // Exercise the short-height layout on Mac when no iOS runtime is available.
+            ProcessInfo.processInfo.arguments.contains("--ui-testing")
+                && ProcessInfo.processInfo.arguments.contains("--ui-testing-short-window")
+        #else
+            false
         #endif
     }
 }
