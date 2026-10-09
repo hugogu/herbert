@@ -221,7 +221,7 @@ private struct AIProviderEditor: View {
     }
 }
 
-private struct AIModelEditor: View {
+struct AIModelEditor: View {
     @EnvironmentObject private var battlefield: BattlefieldModel
     @Environment(\.dismiss) private var dismiss
     let providerID: UUID
@@ -236,12 +236,22 @@ private struct AIModelEditor: View {
                 Section {
                     Text(preset.model.name).font(.headline)
                     Toggle("默认参与比赛", isOn: $preset.isDefault)
-                    TextField("单次最大输出 Token", value: $preset.parameters.maxOutputTokens, format: .number)
-                        .accessibilityIdentifier("modelOutputLimit")
+                    LabeledContent("单次最大输出 Token") {
+                        TextField("单次最大输出 Token", value: $preset.parameters.maxOutputTokens, format: .number)
+                            .labelsHidden().accessibilityLabel(L10n.text("单次最大输出 Token"))
+                            .multilineTextAlignment(.trailing).frame(minWidth: 90, maxWidth: 150)
+                            .accessibilityIdentifier("modelOutputLimit")
+                    }
+                    Button("使用 64K 输出上限") {
+                        preset.parameters.maxOutputTokens = ModelParameters.defaultMaxOutputTokens
+                    }.accessibilityIdentifier("use64KOutputLimit")
+                    if let maximum = preset.model.maximumOutputTokens {
+                        Text(L10n.text("服务商声明的模型输出上限：%ld tokens", maximum)).font(.caption)
+                    }
                     TextField("Temperature（留空使用服务商默认值）", text: $temperature)
                     TextField("Top P（留空使用服务商默认值）", text: $topP)
                 } footer: {
-                    Text("输出 Token 包括模型的推理 Token。部分模型不支持采样参数，留空可提高兼容性。")
+                    Text("默认上限为 65,536 tokens，包含推理。实际请求取此设置、服务商声明上限与剩余比赛预算中的较小值。部分模型不支持采样参数，留空可提高兼容性。")
                 }
                 Section("高级参数 JSON") {
                     TextEditor(text: $preset.parameters.extraJSON).font(.system(.body, design: .monospaced)).frame(

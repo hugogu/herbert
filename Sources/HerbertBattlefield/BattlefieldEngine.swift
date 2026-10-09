@@ -238,13 +238,6 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].attempts[a].finishedAt = .now
                     result!.entrants[e].answers[p].status =
                         evaluation.accepted ? .solved : (a + 1 == maxAttempts ? .failed : .requesting)
-                    if result!.configuration.mode == .bestEffort, p == problems.count - 1,
-                        [.solved, .failed].contains(result!.entrants[e].answers[p].status)
-                    {
-                        result!.entrants[e].finishedAt = .now
-                        await stop(reason: .completed)
-                        return
-                    }
                     await publish()
                     if result!.configuration.mode == .tokenLimited && remainingBudget(entrantIndex: e) == 0 {
                         if result!.configuration.tokenBudgetScope == .shared {

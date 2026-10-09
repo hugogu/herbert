@@ -1,6 +1,10 @@
 import HerbertBattlefield
 import SwiftUI
 
+#if os(macOS)
+    import AppKit
+#endif
+
 extension CompetitionMode {
     var title: String {
         switch self {
@@ -60,10 +64,6 @@ extension ProblemAnswerStatus {
     }
 }
 
-func battlefieldProblemID(_ id: Int) -> String {
-    id >= 10_001 ? String(format: "L%02d", id - 10_000) : String(format: "%04d", id)
-}
-
 func battlefieldCache(_ entrant: EntrantResult) -> String {
     entrant.cacheRate.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? L10n.text("未提供")
 }
@@ -109,8 +109,21 @@ struct BattlefieldMessages: View {
     }
 }
 
+enum BattlefieldSheetLayout {
+    case standard, history, answer
+    var minimumWidth: CGFloat { self == .history ? 1000 : 520 }
+    var preferredWidth: CGFloat {
+        switch self {
+        case .standard: 700
+        case .history: 1120
+        case .answer: 900
+        }
+    }
+}
+
 struct BattlefieldSheet<Content: View>: View {
     let title: String
+    var layout: BattlefieldSheetLayout = .standard
     @ViewBuilder let content: Content
     @Environment(\.dismiss) private var dismiss
     var body: some View {
@@ -123,7 +136,43 @@ struct BattlefieldSheet<Content: View>: View {
                 }
         }
         #if os(macOS)
-            .frame(minWidth: 520, idealWidth: 700, minHeight: 550, idealHeight: 740)
+            .frame(
+                minWidth: layout.minimumWidth, idealWidth: layout.preferredWidth, maxWidth: .infinity,
+                minHeight: 550, idealHeight: 740, maxHeight: .infinity
+            )
+            .background(
+                ResizableBattlefieldSheet(minimumWidth: layout.minimumWidth, preferredWidth: layout.preferredWidth))
         #endif
     }
 }
+
+#if os(macOS)
+    private struct ResizableBattlefieldSheet: NSViewRepresentable {
+        let minimumWidth: CGFloat
+        let preferredWidth: CGFloat
+        func makeNSView(context: Context) -> SheetView {
+            let view = SheetView()
+            view.minimumWidth = minimumWidth
+            view.preferredWidth = preferredWidth
+            return view
+        }
+        func updateNSView(_ nsView: SheetView, context: Context) { nsView.minimumWidth = minimumWidth }
+
+        final class SheetView: NSView {
+            var minimumWidth: CGFloat = 520
+            var preferredWidth: CGFloat = 700
+            override func viewDidMoveToWindow() {
+                super.viewDidMoveToWindow()
+                guard let window else { return }
+                let minimum = minimumWidth
+                let preferred = preferredWidth
+                DispatchQueue.main.async { [weak window] in
+                    guard let window else { return }
+                    window.styleMask.insert(.resizable)
+                    window.contentMinSize = NSSize(width: minimum, height: 550)
+                    window.setContentSize(NSSize(width: preferred, height: 740))
+                }
+            }
+        }
+    }
+#endif

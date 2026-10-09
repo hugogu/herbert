@@ -2,13 +2,14 @@ import XCTest
 
 final class BattlefieldUITests: XCTestCase {
     @MainActor
-    private func launch(reset: Bool = true, diagnostics: Bool = false) -> XCUIApplication {
+    private func launch(reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments =
             ["--ui-testing", "--battlefield-fixture", "-AppleLanguages", "(en)"]
             + (reset ? ["--reset-progress"] : [])
             + (diagnostics ? ["--battlefield-diagnostics"] : [])
+            + (threeModels ? ["--battlefield-three-models"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -130,6 +131,84 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testNewMatchOffersPersistent64KModelControl() {
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        reveal("entrantParameters-fixture-1", in: app).battlefieldTap()
+        let cap = app.textFields["modelOutputLimit"]
+        XCTAssertTrue(cap.waitForExistence(timeout: 5))
+        XCTAssertEqual((cap.value as? String ?? "").replacingOccurrences(of: ",", with: ""), "65536")
+        cap.battlefieldTap()
+        #if os(macOS)
+            cap.typeKey("a", modifierFlags: .command)
+        #endif
+        cap.typeText("8192")
+        app.buttons["saveModelParameters"].battlefieldTap()
+        reveal("entrantParameters-fixture-1", in: app).battlefieldTap()
+        XCTAssertEqual((cap.value as? String ?? "").replacingOccurrences(of: ",", with: ""), "8192")
+        app.buttons["use64KOutputLimit"].battlefieldTap()
+        capture(app, "ai-output-limit")
+        app.buttons["saveModelParameters"].battlefieldTap()
+        app.terminate()
+    }
+
+    @MainActor
+    func testHistoryShowsThreeModelsAndBothDetailSheetsResize() {
+        let app = launch(threeModels: true)
+        openSection("AI Battlefield", in: app)
+        choose("Best Effort", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15))
+        choose("Match history", in: app)
+        let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        history.battlefieldTap()
+        for model in 1...3 {
+            XCTAssertTrue(app.buttons["answer-fixture-\(model)-10001"].isHittable)
+        }
+        capture(app, "ai-history")
+        #if os(macOS)
+            resizeSheet(in: app)
+        #endif
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
+        #if os(macOS)
+            resizeSheet(in: app)
+        #endif
+        closeTopSheet(in: app)
+        closeTopSheet(in: app)
+        app.terminate()
+    }
+
+    @MainActor
+    private func closeTopSheet(in app: XCUIApplication) {
+        let close = app.buttons.matching(identifier: "closeBattlefieldSheet").allElementsBoundByIndex.last {
+            $0.isHittable
+        }
+        XCTAssertNotNil(close)
+        close?.battlefieldTap()
+    }
+
+    #if os(macOS)
+        @MainActor
+        private func resizeSheet(in app: XCUIApplication) {
+            let sheet = app.sheets.firstMatch
+            let before = sheet.frame
+            let origin = sheet.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: before.width - 2, dy: before.height - 2))
+                .click(
+                    forDuration: 0.1,
+                    thenDragTo: origin.withOffset(CGVector(dx: before.width - 82, dy: before.height - 52)))
+            XCTAssertLessThan(sheet.frame.width, before.width - 40)
+            XCTAssertLessThan(sheet.frame.height, before.height - 20)
+        }
+    #endif
+
+    @MainActor
     func testCompactSetupAndFormattedSharedPrompt() {
         let app = launch()
         openSection("AI Battlefield", in: app)
@@ -164,14 +243,19 @@ final class BattlefieldUITests: XCTestCase {
         reveal("startBattlefield", in: app).battlefieldTap()
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
-        let reasoning = app.staticTexts["answer-reasoning-1"]
-        XCTAssertTrue(reasoning.waitForExistence(timeout: 20), app.debugDescription)
-        XCTAssertEqual(
-            reasoning.value as? String ?? reasoning.label, "Inspecting the coordinates before producing the H program.")
+        let disclosure = app.buttons["reasoningToggle-1"]
+        XCTAssertTrue(disclosure.waitForExistence(timeout: 20), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["Coordinate check"].exists)
+        disclosure.battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Coordinate check"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["### Coordinate check"].exists)
         XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertFalse(app.buttons["tryBattlefieldAnswer-1"].exists)
-        _ = reveal("answer-reasoning-1", in: app)
+        _ = reveal("Coordinate check", in: app)
         capture(app, "ai-reasoning")
+        disclosure.battlefieldTap()
+        XCTAssertFalse(app.staticTexts["Coordinate check"].exists)
+        XCTAssertTrue(app.staticTexts["answer-response-1"].exists)
         app.buttons["Close"].battlefieldTap()
         reveal("answer-fixture-2-10001", in: app).battlefieldTap()
         let error = app.staticTexts["answer-provider-error-1"]

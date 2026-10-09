@@ -1,18 +1,31 @@
 import Foundation
 
 public struct BattlefieldSettings: Codable, Sendable {
-    public var schemaVersion = 1
+    public var schemaVersion = 2
     public var providers: [ProviderConfiguration] = []
     public var competition = CompetitionConfiguration()
     public init() {}
 
     public func validated() throws -> BattlefieldSettings {
-        guard schemaVersion == 1, providers.count <= 100,
+        guard (1...2).contains(schemaVersion), providers.count <= 100,
             Set(providers.map(\.id)).count == providers.count
         else { throw BattlefieldError.storageCorrupt }
         for provider in providers { _ = try provider.validated() }
         _ = try competition.validated()
         return self
+    }
+
+    public func upgradingOutputDefaults() -> BattlefieldSettings {
+        guard schemaVersion == 1 else { return self }
+        var upgraded = self
+        for p in upgraded.providers.indices {
+            for m in upgraded.providers[p].presets.indices
+            where upgraded.providers[p].presets[m].parameters.maxOutputTokens == 4096 {
+                upgraded.providers[p].presets[m].parameters.maxOutputTokens = ModelParameters.defaultMaxOutputTokens
+            }
+        }
+        upgraded.schemaVersion = 2
+        return upgraded
     }
 }
 
@@ -82,7 +95,8 @@ public struct LocalBattlefieldRepository: BattlefieldRepository {
 
     public func loadSettings() throws -> BattlefieldSettings {
         guard FileManager.default.fileExists(atPath: settingsURL.path) else { return BattlefieldSettings() }
-        return try decode(BattlefieldSettings.self, url: settingsURL, limit: 8 * 1024 * 1024).validated()
+        return try decode(BattlefieldSettings.self, url: settingsURL, limit: 8 * 1024 * 1024)
+            .validated().upgradingOutputDefaults()
     }
 
     public func saveSettings(_ settings: BattlefieldSettings) throws {

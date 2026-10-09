@@ -46,7 +46,8 @@ public enum OutputTokenParameter: String, Codable, CaseIterable, Sendable {
 }
 
 public struct ModelParameters: Codable, Hashable, Sendable {
-    public var maxOutputTokens = 4096
+    public static let defaultMaxOutputTokens = 65_536
+    public var maxOutputTokens = Self.defaultMaxOutputTokens
     public var temperature: Double?
     public var topP: Double?
     public var extraJSON = "{}"

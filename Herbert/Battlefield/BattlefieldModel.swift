@@ -273,9 +273,12 @@ final class BattlefieldModel: ObservableObject {
     #if DEBUG
         private func seedFixtures() {
             if settings.providers.isEmpty {
-                for index in 1...2 {
+                for index in 1...(ProcessInfo.processInfo.arguments.contains("--battlefield-three-models") ? 3 : 2) {
                     var provider = ProviderConfiguration(kind: .compatible, name: "Fixture Provider \(index)")
-                    let model = AIModel(id: "fixture-\(index)", name: "Fixture Model \(index)")
+                    let model = AIModel(
+                        id: "fixture-\(index)", name: "Fixture Model \(index)",
+                        maximumOutputTokens: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics")
+                            ? 4096 : nil)
                     provider.models = [model]
                     provider.presets = [ModelPreset(model: model)]
                     settings.providers.append(provider)
@@ -319,7 +322,7 @@ func battlefieldError(_ error: Error) -> String {
             let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
             if diagnostics {
                 if request.participant.entrant.preset.model.id == "fixture-2" {
-                    try await Task.sleep(for: .seconds(2))
+                    try await Task.sleep(for: .seconds(12))
                     throw AIHTTPError(
                         status: 400,
                         providerResponse:
@@ -328,7 +331,10 @@ func battlefieldError(_ error: Error) -> String {
                 }
                 if firstAttempt {
                     try await Task.sleep(for: .seconds(8))
-                    let reasoning = AIReasoning(content: "Inspecting the coordinates before producing the H program.")
+                    let reasoning = AIReasoning(
+                        content:
+                            "### Coordinate check\n\nInspecting **coordinates** before producing the H program.\n\n- Check the start and heading.\n- Trace each command."
+                    )
                     let usage = TokenUsage(input: 1021, output: 4096, reasoning: 4096, estimated: false)
                     await progress(AIProgress(text: "", usage: usage, reasoning: reasoning))
                     try await Task.sleep(for: .seconds(2))

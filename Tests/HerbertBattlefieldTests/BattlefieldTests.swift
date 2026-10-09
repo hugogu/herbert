@@ -154,7 +154,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(result.score(for: result.entrants[0]), 0)
     }
 
-    func testBestEffortFirstFinishedEntrantCancelsOthersAfterSuccessOrExhaustedAttempts() async throws {
+    func testBestEffortWaitsForEveryEntrantAfterSuccessOrExhaustedAttempts() async throws {
         for behavior in [ScriptedAI.Behavior.race, .raceWrong] {
             let client = ScriptedAI(behavior: behavior)
             let engine = BattlefieldEngine(client: client)
@@ -163,16 +163,21 @@ final class BattlefieldTests: XCTestCase {
             configuration.attemptsPerProblem = 2
             let started = ContinuousClock.now
             let result = try await engine.run(
-                configuration: configuration, problems: first(), participants: participants()
+                configuration: configuration,
+                problems: try first().map {
+                    Problem(id: $0.id, title: $0.title, author: $0.author, byteLimit: 3, rows: $0.rows)
+                },
+                participants: participants()
             ) { _ in }
             XCTAssertLessThan(ContinuousClock.now - started, .seconds(2))
             XCTAssertEqual(result.status, .completed)
             XCTAssertEqual(result.entrants[0].answers[0].status, behavior == .race ? .solved : .failed)
-            XCTAssertEqual(result.score(for: result.entrants[0]), behavior == .race ? 80 : 0)
-            XCTAssertEqual(result.entrants[1].answers[0].status, .cancelled)
-            XCTAssertEqual(result.score(for: result.entrants[1]), 0)
+            XCTAssertEqual(result.score(for: result.entrants[0]), behavior == .race ? 86.67 : 0)
+            XCTAssertEqual(result.entrants[1].answers[0].status, .solved)
+            XCTAssertGreaterThan(result.score(for: result.entrants[1]), result.score(for: result.entrants[0]))
+            XCTAssertTrue(result.entrants.allSatisfy { $0.finishedAt != nil })
             let cancelled = await client.cancelled
-            XCTAssertEqual(cancelled, 1)
+            XCTAssertEqual(cancelled, 0)
         }
     }
 
@@ -299,6 +304,51 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), "corrupt-but-preserve")
     }
 
+    func test64KDefaultsUpgradeLegacySettingsButPreserveCustomCapsAndHistoricalRequests() throws {
+        XCTAssertEqual(ModelParameters().maxOutputTokens, 65_536)
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let repository = LocalBattlefieldRepository(directory: directory)
+        var settings = BattlefieldSettings()
+        settings.schemaVersion = 1
+        var provider = ProviderConfiguration(kind: .compatible)
+        provider.presets = [ModelPreset(model: AIModel(id: "old-default")), ModelPreset(model: AIModel(id: "custom"))]
+        provider.presets[0].parameters.maxOutputTokens = 4096
+        provider.presets[1].parameters.maxOutputTokens = 2048
+        settings.providers = [provider]
+        try repository.saveSettings(settings)
+        let upgraded = try repository.loadSettings()
+        XCTAssertEqual(upgraded.schemaVersion, 2)
+        XCTAssertEqual(upgraded.providers[0].presets.map { $0.parameters.maxOutputTokens }, [65_536, 2048])
+        var custom = upgraded
+        custom.providers[0].presets[0].parameters.maxOutputTokens = 4096
+        try repository.saveSettings(custom)
+        XCTAssertEqual(try repository.loadSettings().providers[0].presets[0].parameters.maxOutputTokens, 4096)
+        let result = CompetitionResult(
+            configuration: settings.competition, problems: try first(),
+            entrants: [Entrant(provider: provider, preset: provider.presets[0])])
+        try repository.saveResult(result)
+        XCTAssertEqual(try repository.loadResult(result.id).entrants[0].entrant.preset.parameters.maxOutputTokens, 4096)
+    }
+
+    func test64KRequestsRespectDeclaredModelLimit() async throws {
+        for maximum in [nil, 8192] as [Int?] {
+            let client = ScriptedAI(behavior: .correct)
+            let engine = BattlefieldEngine(client: client)
+            let participant = CompetitionParticipant(
+                entrant: Entrant(
+                    provider: ProviderConfiguration(kind: .compatible),
+                    preset: ModelPreset(model: AIModel(id: "m", maximumOutputTokens: maximum))), apiKey: "fixture")
+            var configuration = CompetitionConfiguration()
+            configuration.mode = .bestEffort
+            _ = try await engine.run(configuration: configuration, problems: first(), participants: [participant]) {
+                _ in
+            }
+            let requests = await client.requests
+            XCTAssertEqual(requests[0].maxOutputTokens, maximum ?? 65_536)
+        }
+    }
+
     func testOversizedSettingsCannotReplaceReadableSettings() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -333,16 +383,22 @@ actor ScriptedAI: AIClient {
         defer { parallel -= 1 }
         let slowRacer =
             [.race, .raceWrong].contains(behavior) && request.participant.entrant.preset.model.id == "model-1"
-        do { try await Task.sleep(for: behavior == .wait || slowRacer ? .seconds(30) : .milliseconds(20)) } catch {
+        do {
+            try await Task.sleep(
+                for: behavior == .wait ? .seconds(30) : (slowRacer ? .milliseconds(120) : .milliseconds(20)))
+        } catch {
             cancelled += 1
             throw error
         }
         if behavior == .providerFailure && request.participant.entrant.preset.model.id == "model-0" {
             throw AIHTTPError(status: 401)
         }
-        let wrong = behavior == .wrong || behavior == .raceWrong || (behavior == .retry && request.messages.count == 2)
-        let text = wrong ? "z" : "```h\ns\n```"
-        let usage = TokenUsage(input: behavior == .exactBudget ? 7999 : 20, output: 1, cached: 10, estimated: false)
+        let wrong =
+            behavior == .wrong || (behavior == .raceWrong && !slowRacer)
+            || (behavior == .retry && request.messages.count == 2)
+        let text = wrong ? "z" : "```h\n\([.race, .raceWrong].contains(behavior) && !slowRacer ? "ss" : "s")\n```"
+        var usage = TokenUsage(input: behavior == .exactBudget ? 7999 : 20, output: 1, cached: 10, estimated: false)
+        if slowRacer { usage.input = 10 }
         await progress(AIProgress(text: text, usage: usage, isFinal: true))
         return AIReply(text: text, usage: usage)
     }

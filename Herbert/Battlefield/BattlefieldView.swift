@@ -7,6 +7,23 @@ private enum BattlefieldPage: String, CaseIterable {
     case setup = "新比赛"
     case current = "当前比赛"
     case history = "比赛历史"
+
+    var shortTitle: String {
+        switch self {
+        case .providers: "模型"
+        case .setup: "新赛"
+        case .current: "实况"
+        case .history: "历史"
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .providers: "cpu"
+        case .setup: "plus.circle"
+        case .current: "flag.checkered"
+        case .history: "clock.arrow.circlepath"
+        }
+    }
 }
 
 struct BattlefieldView: View {
@@ -44,14 +61,33 @@ struct BattlefieldView: View {
         }.background(Palette.paper).navigationTitle("AI Battlefield")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Picker("AI Battlefield", selection: $page) {
-                        ForEach(BattlefieldPage.allCases, id: \.self) {
-                            Text(LocalizedStringKey($0.rawValue)).tag($0)
+                    #if os(iOS)
+                        HStack(spacing: 2) {
+                            ForEach(BattlefieldPage.allCases, id: \.self) { item in
+                                Button {
+                                    page = item
+                                } label: {
+                                    VStack(spacing: 3) {
+                                        Image(systemName: item.symbol).font(.callout)
+                                        Text(LocalizedStringKey(item.shortTitle)).font(.caption2.weight(.semibold))
+                                    }.frame(minWidth: 54).padding(.vertical, 5)
+                                        .foregroundStyle(page == item ? Palette.mint : Palette.muted)
+                                        .background(
+                                            page == item ? Palette.mintLight : .clear,
+                                            in: RoundedRectangle(cornerRadius: 8))
+                                }.buttonStyle(.plain)
+                                    .accessibilityLabel(L10n.text(item.rawValue))
+                                    .accessibilityAddTraits(page == item ? .isSelected : [])
+                            }
                         }
-                    }.pickerStyle(.segmented).labelsHidden()
-                        #if os(macOS)
+                    #else
+                        Picker("AI Battlefield", selection: $page) {
+                            ForEach(BattlefieldPage.allCases, id: \.self) {
+                                Text(LocalizedStringKey($0.rawValue)).tag($0)
+                            }
+                        }.pickerStyle(.segmented).labelsHidden()
                             .frame(width: 520)
-                        #endif
+                    #endif
                 }
             }
             #if os(iOS)
@@ -59,7 +95,7 @@ struct BattlefieldView: View {
             #endif
             .onChange(of: battlefield.busy) { _, busy in if busy { page = .current } }
             .sheet(item: $historyResult) { result in
-                BattlefieldSheet(title: L10n.text("比赛历史")) {
+                BattlefieldSheet(title: L10n.text("比赛历史"), layout: .history) {
                     ScrollView { BattlefieldDashboard(result: result).padding(24) }
                         .background(Palette.paper)
                 }
@@ -110,6 +146,7 @@ private struct BattlefieldSetupView: View {
     @State private var choosingModels = false
     @State private var showingPrompt = false
     @State private var initialized = false
+    @State private var editingModel: BattlefieldModelOption?
     let wide: Bool
 
     var body: some View {
@@ -145,7 +182,7 @@ private struct BattlefieldSetupView: View {
                     Text("预算包含所有尝试的输入与输出 Token。流式调用中使用估算，响应结束后核对服务商用量；取消时的实际账单可能高于已报告用量。")
                         .font(.caption).foregroundStyle(Palette.muted)
                 } else {
-                    Text("不限比赛时间和总 Token；首个 AI 完成全部所选题目的尝试后，全场立即结束并取消其他调用。也可以随时终止。")
+                    Text("不限比赛时间和总 Token；每个 AI 都会完成全部所选题目的尝试，所有 AI 完成后才结束。也可以随时终止。")
                         .font(.callout).foregroundStyle(Palette.muted)
                 }
                 Stepper(value: $configuration.attemptsPerProblem, in: 1...10) {
@@ -194,6 +231,8 @@ private struct BattlefieldSetupView: View {
             BattlefieldProblemPicker(selected: $selectedProblems)
         }.sheet(isPresented: $choosingModels) {
             BattlefieldModelPicker(selected: $selectedModels)
+        }.sheet(item: $editingModel) { option in
+            AIModelEditor(providerID: option.provider.id, preset: option.preset)
         }.sheet(isPresented: $showingPrompt) {
             BattlefieldSheet(title: L10n.text("统一规则提示词")) {
                 ScrollView {
@@ -215,22 +254,31 @@ private struct BattlefieldSetupView: View {
                 BattlefieldNotice(text: L10n.text("先在 AI 配置中添加服务商并检测模型。"))
             }
             ForEach(battlefield.modelOptions.filter { selectedModels.contains($0.id) }) { option in
-                Toggle(
-                    isOn: Binding(
-                        get: { selectedModels.contains(option.id) },
-                        set: { on in
-                            if on { selectedModels.insert(option.id) } else { selectedModels.remove(option.id) }
-                        })
-                ) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(option.preset.model.name).font(.headline)
-                        Text(
-                            option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
-                                + " max tokens"
-                        )
-                        .font(.caption).foregroundStyle(Palette.muted)
-                    }
-                }.disabled(battlefield.busy).accessibilityIdentifier("entrant-\(option.preset.model.id)")
+                HStack {
+                    Toggle(
+                        isOn: Binding(
+                            get: { selectedModels.contains(option.id) },
+                            set: { on in
+                                if on { selectedModels.insert(option.id) } else { selectedModels.remove(option.id) }
+                            })
+                    ) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(option.preset.model.name).font(.headline)
+                            Text(
+                                option.provider.name + " · " + String(option.preset.parameters.maxOutputTokens)
+                                    + " max tokens"
+                            )
+                            .font(.caption).foregroundStyle(Palette.muted)
+                        }
+                    }.disabled(battlefield.busy).accessibilityIdentifier("entrant-\(option.preset.model.id)")
+                    Button {
+                        editingModel = option
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                    }.accessibilityLabel(L10n.text("模型参数"))
+                        .accessibilityIdentifier("entrantParameters-\(option.preset.model.id)")
+                        .disabled(battlefield.busy)
+                }
             }
         }.panel()
     }
@@ -321,7 +369,7 @@ private struct BattlefieldProblemPicker: View {
                 List(
                     store.problems.filter {
                         (includeCommunity || $0.lesson != nil)
-                            && (search.isEmpty || battlefieldProblemID($0.id).localizedCaseInsensitiveContains(search)
+                            && (search.isEmpty || $0.number.localizedCaseInsensitiveContains(search)
                                 || $0.title.localizedCaseInsensitiveContains(search))
                     }
                 ) { problem in
@@ -333,7 +381,7 @@ private struct BattlefieldProblemPicker: View {
                             })
                     ) {
                         HStack {
-                            Text(battlefieldProblemID(problem.id)).font(.system(.body, design: .monospaced))
+                            Text(problem.number).font(.system(.body, design: .monospaced))
                             Text(L10n.text(problem.title))
                             Spacer()
                             Text("\(problem.byteLimit) bytes").font(.caption).foregroundStyle(Palette.muted)

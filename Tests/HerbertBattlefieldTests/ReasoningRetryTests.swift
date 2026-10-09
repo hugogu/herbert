@@ -22,7 +22,7 @@ final class ReasoningRetryTests: XCTestCase, @unchecked Sendable {
         let requests = await client.requests
         XCTAssertEqual(requests[1].map(\.role), ["system", "user"])
         XCTAssertTrue(requests[1][1].content.contains("Judge feedback:"))
-        XCTAssertTrue(requests[1][1].content.contains("4096"))
+        XCTAssertTrue(requests[1][1].content.contains("65536"))
         XCTAssertEqual(try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result)), result)
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

@@ -150,7 +150,7 @@ struct BattlefieldDashboard: View {
                     ForEach(result.problems) { problem in
                         GridRow {
                             VStack(alignment: .leading, spacing: 6) {
-                                Text(battlefieldProblemID(problem.id)).font(.system(.callout, design: .monospaced))
+                                Text(problem.number).font(.system(.callout, design: .monospaced))
                                 Text("\(problem.byteLimit) bytes").font(.caption2).foregroundStyle(Palette.muted)
                             }.frame(width: 80, alignment: .leading).padding(.top, 12)
                             ForEach(ranking) { entrant in
@@ -232,7 +232,7 @@ struct BattlefieldDashboard: View {
         }.buttonStyle(.plain)
             .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
             .accessibilityLabel(
-                battlefieldProblemID(problem.id) + " " + entrant.entrant.preset.model.name
+                problem.number + " " + entrant.entrant.preset.model.name
                     + " " + answer.status.title + " " + score)
     }
 
@@ -253,6 +253,7 @@ struct BattlefieldDashboard: View {
 private struct BattlefieldAnswerView: View {
     @EnvironmentObject private var battlefield: BattlefieldModel
     @State private var collapsedAttempts: Set<Int> = []
+    @State private var expandedReasoning: Set<Int> = []
     let snapshot: BattlefieldAnswerSelection
     let onTry: (String) -> Void
     private var selection: BattlefieldAnswerSelection {
@@ -265,7 +266,8 @@ private struct BattlefieldAnswerView: View {
     }
     var body: some View {
         BattlefieldSheet(
-            title: battlefieldProblemID(selection.problem.id) + " · " + selection.entrant.entrant.preset.model.name
+            title: selection.problem.number + " · " + selection.entrant.entrant.preset.model.name,
+            layout: .answer
         ) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -338,9 +340,29 @@ private struct BattlefieldAnswerView: View {
                             ) {
                                 VStack(alignment: .leading, spacing: 12) {
                                     if let reasoning = attempt.reasoning {
-                                        Text("模型推理").font(.subheadline.bold())
-                                        Text(reasoning.content.isEmpty ? L10n.text("服务商返回了空的推理内容。") : reasoning.content)
-                                            .accessibilityIdentifier("answer-reasoning-\(attempt.id)")
+                                        let expanded = expandedReasoning.contains(attempt.id)
+                                        Button {
+                                            if expanded {
+                                                expandedReasoning.remove(attempt.id)
+                                            } else {
+                                                expandedReasoning.insert(attempt.id)
+                                            }
+                                        } label: {
+                                            HStack(spacing: 8) {
+                                                Image(systemName: expanded ? "chevron.down" : "chevron.right")
+                                                    .accessibilityHidden(true)
+                                                Text("模型推理").font(.subheadline.bold())
+                                                Spacer()
+                                            }.contentShape(Rectangle()).padding(.vertical, 6)
+                                        }.buttonStyle(.plain)
+                                            .accessibilityIdentifier("reasoningToggle-\(attempt.id)")
+                                            .accessibilityValue(L10n.text(expanded ? "已展开" : "已收起"))
+                                        if expanded {
+                                            BattlefieldRulesView(
+                                                source: reasoning.content.isEmpty
+                                                    ? L10n.text("服务商返回了空的推理内容。") : reasoning.content
+                                            ).padding(.top, 8)
+                                        }
                                     }
                                     Text("最终回答").font(.subheadline.bold())
                                     Text(attempt.response.isEmpty ? L10n.text("尚未收到最终回答。") : attempt.response)
