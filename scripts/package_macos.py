@@ -6,9 +6,12 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALL_NOTES = """Herbert for Mac — open-source preview
@@ -38,7 +41,16 @@ Source, updates, and issues: https://github.com/hugogu/herbert
 
 
 def run(*args):
-    return subprocess.run(args, check=True, stdout=subprocess.PIPE, timeout=180).stdout
+    print(f'+ {shlex.join(args)}', flush=True)
+    try:
+        result = subprocess.run(args, check=True, stdout=subprocess.PIPE, timeout=180)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+        if error.stdout:
+            print(error.stdout.decode(errors='replace'), file=sys.stderr, flush=True)
+        raise
+    if args[0] == 'hdiutil':
+        print(result.stdout.decode(errors='replace'), end='', flush=True)
+    return result.stdout
 
 
 def read_metadata(app):
@@ -89,6 +101,10 @@ def check_app(app):
 
 def verify_dmg(dmg):
     run('hdiutil', 'verify', str(dmg))
+    return audit_dmg(dmg)
+
+
+def audit_dmg(dmg):
     with tempfile.TemporaryDirectory(prefix='herbert-mount-') as directory:
         mount = Path(directory) / 'volume'
         mount.mkdir()
@@ -106,6 +122,31 @@ def verify_dmg(dmg):
             run('hdiutil', 'detach', str(mount))
 
 
+def create_dmg(stage, work):
+    for attempt in range(1, 4):
+        directory = work / f'attempt-{attempt}'
+        directory.mkdir()
+        writable = directory / 'Herbert-rw.dmg'
+        image = directory / 'Herbert.dmg'
+        try:
+            # Finish filesystem creation before compressing, avoiding the combined
+            # create/UDZO path that intermittently produces unreadable CI images.
+            run('hdiutil', 'create', '-volname', 'Herbert', '-srcfolder', str(stage),
+                '-fs', 'HFS+', '-format', 'UDRW', str(writable))
+            run('hdiutil', 'convert', str(writable), '-format', 'UDZO', '-tasks', '1',
+                '-o', str(image))
+            run('hdiutil', 'verify', str(image))
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            if attempt == 3:
+                raise
+            delay = attempt * 2
+            print(f'DMG attempt {attempt}/3 failed: {error}. '
+                  f'Rebuilding a fresh image in {delay}s.', file=sys.stderr, flush=True)
+            time.sleep(delay)
+        else:
+            return image
+
+
 def build_dmg(app, output):
     check_app(app)
     if output.suffix != '.dmg' or output.exists() or output.with_suffix('.dmg.sha256').exists():
@@ -120,10 +161,8 @@ def build_dmg(app, output):
         for name in ['LICENSE', 'NOTICE.md']:
             shutil.copyfile(ROOT / name, stage / name)
         (stage / 'Read Me.txt').write_text(INSTALL_NOTES)
-        image = work / 'Herbert.dmg'
-        run('hdiutil', 'create', '-volname', 'Herbert', '-srcfolder', str(stage),
-            '-fs', 'HFS+', '-format', 'UDZO', str(image))
-        info = verify_dmg(image)
+        image = create_dmg(stage, work)
+        info = audit_dmg(image)
         shutil.move(str(image), output)
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
     output.with_suffix('.dmg.sha256').write_text(f'{digest}  {output.name}\n')

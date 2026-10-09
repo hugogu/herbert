@@ -41,6 +41,12 @@ of test answer files. It then creates a compressed
 read-only HFS+ image with an Applications shortcut, license, attribution and installation
 notes. Finally it verifies and mounts the image read-only and repeats the bundle audit.
 
+Filesystem creation and compression run separately, with one compression worker.
+If `hdiutil` fails during creation, conversion or checksum verification, packaging
+rebuilds in a fresh temporary directory, up to three attempts with a short backoff.
+Each command and its image diagnostics appear in the CI log. A persistent failure
+or a failed mounted-bundle audit stops packaging; only a verified image is uploaded.
+
 ## Build locally
 
 Run from the repository root on a Mac with Xcode:

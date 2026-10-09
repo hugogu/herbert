@@ -1,11 +1,14 @@
+import hashlib
 from pathlib import Path
 import plistlib
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from package_macos import ROOT, build_dmg, check_app, check_resources, read_metadata
+from package_macos import ROOT, build_dmg, check_app, check_resources, create_dmg, read_metadata, run
 
 
 class MacPackageTests(unittest.TestCase):
@@ -87,3 +90,128 @@ class MacPackageTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             build_dmg(self.app, output)
         self.assertEqual(output.read_bytes(), b'keep existing image')
+
+    @patch('package_macos.time.sleep')
+    @patch('package_macos.run')
+    def test_rebuilds_a_fresh_image_after_create_convert_or_verify_failure(self, command, sleep):
+        for failed_verb in ['create', 'convert', 'verify']:
+            with self.subTest(verb=failed_verb):
+                work = Path(self.directory.name) / failed_verb
+                work.mkdir()
+                stage = work / 'stage'
+                stage.mkdir()
+                calls = []
+                failed = False
+
+                def execute(*args):
+                    nonlocal failed
+                    calls.append(args)
+                    if args[1] == 'create':
+                        self.assertEqual(args[args.index('-format') + 1], 'UDRW')
+                        Path(args[-1]).write_bytes(b'writable image')
+                    elif args[1] == 'convert':
+                        self.assertEqual(args[args.index('-tasks') + 1], '1')
+                        self.assertEqual(args[args.index('-format') + 1], 'UDZO')
+                        Path(args[-1]).write_bytes(b'compressed image')
+                    if args[1] == failed_verb and not failed:
+                        failed = True
+                        raise subprocess.CalledProcessError(1, args, output=b'corrupt image')
+                    return b''
+
+                command.side_effect = execute
+                sleep.reset_mock()
+                image = create_dmg(stage, work)
+                self.assertEqual(image.parent.name, 'attempt-2')
+                self.assertEqual(image.read_bytes(), b'compressed image')
+                self.assertEqual([args[1] for args in calls[-3:]], ['create', 'convert', 'verify'])
+                first, second = [Path(args[-1]) for args in calls if args[1] == 'create']
+                self.assertNotEqual(first, second)
+                sleep.assert_called_once_with(2)
+
+    @patch('package_macos.check_app')
+    @patch('package_macos.audit_dmg')
+    @patch('package_macos.time.sleep')
+    @patch('package_macos.run')
+    def test_persistent_command_failures_never_publish_an_image_or_checksum(self, command, sleep, audit, check):
+        for failure in [subprocess.CalledProcessError(1, ['hdiutil', 'create']),
+                        subprocess.TimeoutExpired(['hdiutil', 'create'], 180)]:
+            with self.subTest(error=type(failure).__name__):
+                command.reset_mock()
+                sleep.reset_mock()
+
+                def execute(*args):
+                    if args[0] == 'hdiutil':
+                        raise failure
+                    return b''
+
+                command.side_effect = execute
+                output = Path(self.directory.name) / 'failed.dmg'
+                with self.assertRaises(type(failure)):
+                    build_dmg(self.app, output)
+                self.assertFalse(output.exists())
+                self.assertFalse(output.with_suffix('.dmg.sha256').exists())
+                self.assertEqual(sum(call.args[0] == 'hdiutil' for call in command.call_args_list), 3)
+                self.assertEqual([call.args[0] for call in sleep.call_args_list], [2, 4])
+                audit.assert_not_called()
+
+    @patch('package_macos.check_app')
+    @patch('package_macos.audit_dmg', side_effect=ValueError('Modified puzzle catalog'))
+    @patch('package_macos.create_dmg')
+    @patch('package_macos.run', return_value=b'')
+    def test_bundle_audit_failures_are_not_retried_or_published(self, command, create, audit, check):
+        output = Path(self.directory.name) / 'invalid.dmg'
+        with self.assertRaisesRegex(ValueError, 'Modified puzzle catalog'):
+            build_dmg(self.app, output)
+        create.assert_called_once()
+        audit.assert_called_once_with(create.return_value)
+        self.assertFalse(output.exists())
+        self.assertFalse(output.with_suffix('.dmg.sha256').exists())
+
+    @patch('package_macos.check_app')
+    @patch('package_macos.audit_dmg')
+    @patch('package_macos.run')
+    def test_publishes_only_the_verified_image_and_matching_checksum(self, command, audit, check):
+        output = Path(self.directory.name) / 'verified.dmg'
+        audit.return_value = self.metadata
+
+        def execute(*args):
+            if args[:2] == ('hdiutil', 'convert'):
+                Path(args[-1]).write_bytes(b'verified compressed image')
+            if args[:2] == ('hdiutil', 'verify'):
+                self.assertFalse(output.exists())
+            return b''
+
+        def mounted_audit(image):
+            self.assertEqual(image.read_bytes(), b'verified compressed image')
+            self.assertFalse(output.exists())
+            return self.metadata
+
+        command.side_effect = execute
+        audit.side_effect = mounted_audit
+        self.assertEqual(build_dmg(self.app, output), self.metadata)
+        digest = hashlib.sha256(output.read_bytes()).hexdigest()
+        self.assertEqual(output.with_suffix('.dmg.sha256').read_text(), f'{digest}  {output.name}\n')
+        self.assertTrue(self.app.exists())
+
+
+@unittest.skipUnless(sys.platform == 'darwin' and shutil.which('hdiutil'), 'Requires macOS disk images')
+class MacDiskImageIntegrationTests(unittest.TestCase):
+    def test_real_image_round_trip_retains_files_and_applications_shortcut(self):
+        with tempfile.TemporaryDirectory(prefix='herbert-image-test-') as directory:
+            work = Path(directory)
+            stage = work / 'stage'
+            stage.mkdir()
+            payload = bytes(range(256)) * 1024
+            (stage / 'fixture.bin').write_bytes(payload)
+            (stage / 'Applications').symlink_to('/Applications', target_is_directory=True)
+            image = create_dmg(stage, work)
+            self.assertEqual(run('hdiutil', 'imageinfo', str(image), '-format').strip(), b'UDZO')
+            mount = work / 'mount'
+            mount.mkdir()
+            run('hdiutil', 'attach', str(image), '-readonly', '-nobrowse', '-mountpoint', str(mount))
+            try:
+                self.assertEqual((mount / 'fixture.bin').read_bytes(), payload)
+                self.assertTrue((mount / 'Applications').is_symlink())
+                self.assertEqual((mount / 'Applications').readlink(), Path('/Applications'))
+            finally:
+                run('hdiutil', 'detach', str(mount))
