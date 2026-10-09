@@ -31,6 +31,10 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 
 以下关卡来自默认开源版，App Store 版不包含这些社区题目。
 
+题目面板新增**原站最短参考**，与通关长度限制和「我的最短解」分别显示。数据来自收录题库时[原站 Problems](http://herbert.tealang.info/problems.php) 的 Best 栏，并非实时纪录或已证明的最优解；缺失时显示「暂无记录」。例如 0027 的限制是 39 bytes，原站最短参考为 14 bytes。[查看实际面板（英文界面）](docs/screenshots/en/community-reference.png)。
+
+点击棋盘下方图例，可在 Modern / Classic 下查看三语说明：**墙阻挡前进；陷阱允许踩入，但会熄灭全部已点亮目标**。两者都继续执行程序，踩陷阱不会回到起点。[查看棋盘说明（英文界面）](docs/screenshots/en/community-board-guide.png)。
+
 | 0037 · Flower | 0027 · Shuriken | 0361 · Butterfly |
 | --- | --- | --- |
 | [![Flower 棋盘](docs/screenshots/flower-board.png)](docs/screenshots/flower.png) | [![Shuriken 棋盘](docs/screenshots/shuriken-board.png)](docs/screenshots/shuriken.png) | [![Butterfly 棋盘](docs/screenshots/butterfly-board.png)](docs/screenshots/butterfly.png) |

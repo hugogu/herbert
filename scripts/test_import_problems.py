@@ -9,7 +9,14 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(result['id'], 1)
         self.assertEqual(result['title'], 'A & B')
         self.assertEqual(result['byteLimit'], 4)
+        self.assertEqual(result['originalBest'], 4)
         self.assertEqual(result['author'], 'author')
+
+    def test_best_reference_is_independent_of_limit_and_can_be_missing(self):
+        row = '<tr class="prob_yet problem"><td>0003</td><td>Example</td><td>author</td><td>19</td><td>{best}</td><td>10</td></tr>'
+        result = parse_listing(row.format(best=8))[0]
+        self.assertEqual((result['byteLimit'], result['originalBest']), (19, 8))
+        self.assertIsNone(parse_listing(row.format(best=''))[0]['originalBest'])
 
     def test_validates_original_board_shape_and_start(self):
         source = 'u' + 'o' + '.' * 623 + '\n4'

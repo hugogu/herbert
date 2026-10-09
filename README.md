@@ -167,6 +167,18 @@ Their scores are illustrative, not commercial model results.*
 The default open-source edition also includes the archived community collection.
 These examples are excluded from the App Store edition. Search their IDs in `Herbert`:
 
+The problem panel shows the **original best reference** separately from the byte limit
+and your personal shortest solution. These are archived `Best` lengths from the
+[original problem list](http://herbert.tealang.info/problems.php), not live records
+or proven minima; unavailable entries show **No record**. For example, #0027 allows
+39 bytes and has an archived best of 14 bytes.
+[See the problem panel](docs/screenshots/en/community-reference.png).
+
+Tap the board legend to learn the symbols in either Modern or Classic style:
+**walls block movement**, while **traps can be entered but turn off all lit targets**.
+Both continue the program; traps leave the robot on the trap.
+[See the board guide](docs/screenshots/en/community-board-guide.png).
+
 <table>
   <tr>
     <td align="center" width="33%"><a href="docs/screenshots/en/flower.png"><img src="docs/screenshots/en/flower-board.png" alt="Flower puzzle: four petals inside a square field of traps" width="280"></a></td>

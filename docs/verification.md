@@ -2,6 +2,16 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 题目参考与棋盘说明（10 月 9 日）
+
+- 核对原站当前 Problems 首页的 85 条记录，Best 与已有快照一致；21 页本地原始 HTML 中的 1,769 条记录与打包 JSON 的 Best 全部一致。快照时间为 10 月 7 日，其中 1,759 题有 Best，10 题缺失。未改写题库或自动查询排行榜。
+- `scripts/check.sh`：105 项 Swift 测试（44 Core、61 Battlefield）、16 项 Python 检查和严格格式检查通过。覆盖 Best 与限制独立、缺失值、JSON 往返、原创题不附带原站 Best，以及陷阱熄灯但不重置机器人位置。
+- `.build/problem-reference-ui.xcresult`：12 项原生 Mac 用例中 11 项通过，新增参考长度用例首次因按钮合并子文本而定位失败。给按钮提供包含长度的无障碍标签后，`.build/problem-reference-final-ui.xcresult` 与最终截图复跑 `.build/problem-reference-capture-final.xcresult` 均通过，覆盖中英日 0003 的 19 B 限制 / 8 B 参考、0290 的缺失记录、原站说明与关闭返回。
+- 上述回归包括三语棋盘说明、Modern/Classic 图例、连续墙像素、进阶参考解通关、轨迹/网格持久化、快捷键、草稿及错误重置。`.build/problem-reference-store-ui.xcresult` 在原创版通过三语棋盘说明与不显示社区参考行检查。
+- 开源版与原创版 iOS Release 无签名编译通过；最终无障碍标签修正后开源版再次编译通过。原创版 iOS Release 和 Mac Debug 实际 `.app` 的资源审计均通过：仅 30 道原创题，无社区题库和测试答案。
+- 两张新增文档图来自最终通过用例的实际英文 App：完整 Shuriken 面板及原生棋盘说明弹层。已检查语言、可读性和完整边界，未修改图片。工程与课程重复生成一致，个人 scheme 修改逐字节保留。
+- 没有 iPhone/iPad 运行时验证；真机的弹层尺寸、触摸与 VoiceOver 检查已补到 [App Store 清单](app-store.md)。
+
 ## 0.3.7：统一设置与 Burnout（10 月 9 日）
 
 - `scripts/check.sh`：104 项 Swift 测试（43 项 Core、61 项 Battlefield）、15 项 Python 检查及严格格式检查通过；最终清理未修改变量警告后再次通过。新增可选时限、每模型每题累计输入/输出预算、跨题/跨模型隔离、输出截断无重试、流式超限取消子请求、晚到回调忽略、无上限请求省略 cap、推理默认参数及显式覆盖、旧配置解码/升级和磁盘持久化检查。

@@ -212,6 +212,7 @@ struct BoardView: View {
     @AppStorage("board.showTrail") private var showTrail = true
     @AppStorage("board.showGridDots") private var showGridDots = true
     @State private var showOptions = false
+    @State private var showLegend = false
     @State private var focused = true
     @State private var zoom: CGFloat = 1
     @GestureState private var magnification: CGFloat = 1
@@ -287,9 +288,20 @@ struct BoardView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: style == .classic ? 0 : 16))
             HStack(spacing: 16) {
-                legend("目标", symbol: "circle", color: style == .classic ? .black : Palette.amber)
-                legend("陷阱", symbol: style == .classic ? "circle.fill" : "xmark.circle", color: Palette.muted)
-                legend("墙", symbol: "square.fill", color: Palette.ink)
+                Button {
+                    model.pause()
+                    showLegend = true
+                } label: {
+                    HStack(spacing: 12) {
+                        legend("目标", symbol: "circle", color: style == .classic ? .black : Palette.amber)
+                        legend("陷阱", symbol: style == .classic ? "circle.fill" : "xmark.circle", color: Palette.muted)
+                        legend("墙", symbol: "square.fill", color: Palette.ink)
+                        Image(systemName: "questionmark.circle").font(.system(size: 12)).foregroundStyle(Palette.muted)
+                    }.frame(minHeight: 32).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain).accessibilityLabel("认识棋盘：目标、墙与陷阱")
+                .accessibilityIdentifier("board-legend")
+                .popover(isPresented: $showLegend, arrowEdge: .bottom) { BoardLegendGuide(style: style) }
                 Spacer(minLength: 0)
                 Text("25 × 25").font(.system(size: 10, design: .monospaced)).foregroundStyle(Palette.muted)
             }
@@ -298,5 +310,46 @@ struct BoardView: View {
 
     private func legend(_ text: String, symbol: String, color: Color) -> some View {
         Label(LocalizedStringKey(text), systemImage: symbol).font(.system(size: 10)).foregroundStyle(color)
+    }
+}
+
+private struct BoardLegendGuide: View {
+    let style: BoardStyle
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("认识棋盘").font(.headline)
+                Spacer()
+                Button("完成") { dismiss() }.accessibilityIdentifier("close-board-legend")
+            }
+            item(
+                "目标", symbol: "circle", color: style == .classic ? .black : Palette.amber,
+                detail: "走到圆环上即可点亮。让所有目标同时亮起即可完成。", identifier: "board-target-help")
+            item(
+                "墙", symbol: "square.fill", color: Palette.ink,
+                detail: "挡住去路：撞到墙或棋盘边界时，Herbert 留在原地，接着执行下一条指令。", identifier: "board-wall-help")
+            item(
+                "陷阱", symbol: style == .classic ? "circle.fill" : "xmark.circle", color: Palette.muted,
+                detail: "可以走上去：踩中后，已点亮的所有目标都会熄灭。Herbert 不会回到起点，程序继续执行。", identifier: "board-trap-help")
+        }.padding(20).frame(width: 340)
+            #if os(iOS)
+                .presentationCompactAdaptation(.sheet)
+                .presentationDetents([.height(440), .large])
+                .presentationDragIndicator(.visible)
+            #endif
+    }
+
+    private func item(_ title: String, symbol: String, color: Color, detail: String, identifier: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(color).frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(LocalizedStringKey(title)).font(.system(size: 14, weight: .semibold)).foregroundStyle(Palette.ink)
+                Text(LocalizedStringKey(detail)).font(.system(size: 13)).foregroundStyle(Palette.muted)
+                    .fixedSize(horizontal: false, vertical: true).accessibilityIdentifier(identifier)
+            }
+        }
     }
 }

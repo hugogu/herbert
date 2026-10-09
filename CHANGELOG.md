@@ -5,6 +5,9 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Show archived community Best answer lengths in the problem panel, separate from puzzle limits and personal shortest solutions, with an explanation of the source and missing records.
+- Add a tappable board legend explaining targets, blocking walls and traversable traps in English, Chinese and Japanese, with matching Modern/Classic symbols. Opening the guide pauses execution.
+
 ## [0.3.7] - 2026-10-09
 
 - Replace match modes with unified Match Settings: optional time limit and independent per-model, per-problem input/output token budgets, both off by default, plus three attempts per problem.

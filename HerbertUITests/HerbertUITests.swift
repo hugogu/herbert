@@ -105,6 +105,76 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testBoardGuideExplainsWallsAndTrapsInEveryLanguageAndStyle() {
+        for (language, wall, trap) in [
+            ("en", "stays put", "Herbert stays on the trap"),
+            ("zh-Hans", "留在原地", "不会回到起点"),
+            ("ja", "その場に留まり", "スタート地点には戻らず"),
+        ] {
+            let app = launch(language: language)
+            openFirst(app)
+            XCTAssertFalse(app.buttons["original-best-reference"].exists, "Original lessons have no site reference")
+            for style in language == "en" ? ["modern", "classic"] : ["modern"] {
+                app.buttons["board-options"].activateControl()
+                selectBoardStyle(style, in: app)
+                app.buttons["close-board-options"].activateControl()
+                app.buttons["board-legend"].activateControl()
+                XCTAssertTrue(app.staticTexts["board-wall-help"].waitForExistence(timeout: 5))
+                XCTAssertTrue(app.staticTexts["board-wall-help"].displayedText.contains(wall))
+                XCTAssertTrue(app.staticTexts["board-trap-help"].displayedText.contains(trap))
+                XCTAssertTrue(app.staticTexts["board-target-help"].exists)
+                capture(app, name: "board-guide-\(language)-\(style)")
+                app.buttons["close-board-legend"].activateControl()
+                XCTAssertTrue(app.buttons["insert-s"].isEnabled)
+            }
+            app.terminate()
+        }
+    }
+
+    @MainActor
+    func testCommunityReferenceLengthMissingRecordAndLocalizedHelp() throws {
+        #if APP_STORE
+            throw XCTSkip("The App Store edition excludes community problems and their site records.")
+        #else
+            for (language, explanation, missing, back) in [
+                ("en", "Best column", "No record", "Back"),
+                ("zh-Hans", "Best 栏", "暂无记录", "返回"),
+                ("ja", "Best 欄", "記録なし", "戻る"),
+            ] {
+                let app = launch(language: language)
+                openProblem(3, in: app)
+                XCTAssertTrue(app.buttons["original-best-reference"].label.hasSuffix(": 8 B"))
+                XCTAssertTrue(app.staticTexts["0 / 19 B"].exists, "The puzzle limit remains independent of Best")
+                app.buttons["original-best-reference"].activateControl()
+                XCTAssertTrue(app.staticTexts["original-best-explanation"].waitForExistence(timeout: 5))
+                XCTAssertTrue(app.staticTexts["original-best-explanation"].displayedText.contains(explanation))
+                app.buttons["close-original-best-info"].activateControl()
+                app.buttons[back].activateControl()
+                app.buttons["clear-search"].activateControl()
+                openProblem(290, in: app)
+                XCTAssertTrue(app.buttons["original-best-reference"].label.hasSuffix(": " + missing))
+                if language == "en" {
+                    app.buttons[back].activateControl()
+                    app.buttons["clear-search"].activateControl()
+                    openProblem(27, in: app)
+                    XCTAssertTrue(app.buttons["original-best-reference"].label.hasSuffix(": 14 B"))
+                    capture(app, name: "community-reference")
+                    app.buttons["board-legend"].activateControl()
+                    XCTAssertTrue(app.staticTexts["board-trap-help"].waitForExistence(timeout: 5))
+                    #if os(macOS)
+                        XCTAssertTrue(app.popovers.firstMatch.waitForExistence(timeout: 5))
+                        capture(app, name: "community-board-guide", element: app.popovers.firstMatch)
+                    #else
+                        capture(app, name: "community-board-guide")
+                    #endif
+                    app.buttons["close-board-legend"].activateControl()
+                }
+                app.terminate()
+            }
+        #endif
+    }
+
+    @MainActor
     func testBoardSettingsPersistAndTrailCanBeHiddenWithoutLosingMoves() {
         var app = launch(language: "en")
         openProblem(10012, in: app)
@@ -182,7 +252,7 @@ final class HerbertUITests: XCTestCase {
     private func openProblem(_ id: Int, in app: XCUIApplication) {
         let search = app.textFields["problem-search"]
         search.activateControl()
-        search.typeText(String(id))
+        search.typeText(id < 10000 ? String(format: "%04d", id) : String(id))
         let problem = app.buttons["problem-\(id)"]
         XCTAssertTrue(problem.waitForExistence(timeout: 5))
         problem.activateControl()
@@ -403,10 +473,10 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
-    private func capture(_ app: XCUIApplication, name: String) {
+    private func capture(_ app: XCUIApplication, name: String, element: XCUIElement? = nil) {
         guard ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1" else { return }
         app.activate()
-        let image = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+        let image = XCTAttachment(screenshot: (element ?? app.windows.firstMatch).screenshot())
         image.name = "readme-\(name)"
         image.lifetime = .keepAlways
         add(image)

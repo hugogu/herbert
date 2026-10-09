@@ -25,6 +25,7 @@ struct GameView: View {
     @StateObject private var editor = EditorController()
     @State private var showGuide = false
     @State private var showBest = false
+    @State private var showOriginalBestInfo = false
     @State private var revealedHints = 0
 
     init(model: GameModel) { _model = StateObject(wrappedValue: model) }
@@ -159,16 +160,64 @@ struct GameView: View {
     }
 
     private var stats: some View {
-        HStack(spacing: 0) {
-            stat("已点亮", value: "\(model.session.visitedTargets.count) / \(model.session.board.targets.count)")
-            Divider().frame(height: 28)
-            stat(
-                "代码长度", value: "\(model.bytes) / \(model.problem.byteLimit) B",
-                danger: model.bytes > model.problem.byteLimit)
-            Divider().frame(height: 28)
-            stat("执行步数", value: "\(model.session.steps)")
-        }.padding(.vertical, 16).background(.white, in: RoundedRectangle(cornerRadius: 16))
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                stat("已点亮", value: "\(model.session.visitedTargets.count) / \(model.session.board.targets.count)")
+                Divider().frame(height: 28)
+                stat(
+                    "代码长度", value: "\(model.bytes) / \(model.problem.byteLimit) B",
+                    danger: model.bytes > model.problem.byteLimit)
+                Divider().frame(height: 28)
+                stat("执行步数", value: "\(model.session.steps)")
+            }.padding(.vertical, 16)
+            if model.problem.lesson == nil {
+                Divider().padding(.horizontal, 16)
+                Button {
+                    showOriginalBestInfo = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Label("原站最短参考", systemImage: "trophy")
+                            .foregroundStyle(Palette.muted)
+                        Spacer(minLength: 4)
+                        Text(originalBestValue)
+                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                            .foregroundStyle(Palette.mint)
+                        Image(systemName: "info.circle").foregroundStyle(Palette.muted)
+                    }.font(.system(size: 12)).frame(minHeight: 44).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain).padding(.horizontal, 16)
+                .accessibilityLabel(L10n.text("原站最短参考") + ": " + originalBestValue)
+                .accessibilityIdentifier("original-best-reference")
+                .accessibilityHint("查看原站最短参考的说明")
+                .popover(isPresented: $showOriginalBestInfo, arrowEdge: .top) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("原站最短参考").font(.headline)
+                            Spacer()
+                            Button("完成") { showOriginalBestInfo = false }
+                                .accessibilityIdentifier("close-original-best-info")
+                        }
+                        Text("这是收录题库时原站 Best 栏的答案长度，不会改变本题的通关长度限制。它与「我的最短解」分别记录，原站之后可能已有更短的答案。")
+                            .font(.system(size: 13)).foregroundStyle(Palette.muted).fixedSize(
+                                horizontal: false, vertical: true
+                            )
+                            .accessibilityIdentifier("original-best-explanation")
+                        Link("原版 Problems ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
+                            .font(.system(size: 13))
+                    }.padding(20).frame(width: 340)
+                        #if os(iOS)
+                            .presentationCompactAdaptation(.sheet)
+                            .presentationDetents([.medium])
+                            .presentationDragIndicator(.visible)
+                        #endif
+                }
+            }
+        }.background(.white, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Palette.line, lineWidth: 1))
+    }
+
+    private var originalBestValue: String {
+        model.problem.originalBest.map { "\($0) B" } ?? L10n.text("暂无记录")
     }
 
     private func stat(_ title: String, value: String, danger: Bool = false) -> some View {

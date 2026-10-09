@@ -43,6 +43,21 @@ final class GameAndPersistenceTests: XCTestCase {
         XCTAssertEqual(try repository.load(), ProgressSnapshot(records: [record], lastProblemID: 1))
     }
 
+    func testCommunityBestReferenceIsSeparateFromLimitAndOptional() throws {
+        let catalog = try CommunityProblemCatalog.bundled()
+        let problem = try XCTUnwrap(catalog.first { $0.id == 3 })
+        XCTAssertEqual(problem.byteLimit, 19)
+        XCTAssertEqual(problem.originalBest, 8)
+        let decoded = try ProblemCatalog.decode(JSONEncoder().encode([problem]))
+        XCTAssertEqual(decoded.first?.originalBest, 8)
+        XCTAssertEqual(decoded.first?.byteLimit, 19)
+        var session = try GameSession(problem: problem)
+        try session.prepare(source: String(repeating: "s", count: 19))
+        XCTAssertEqual(session.programBytes, 19, "Best is a reference, not the allowed program length")
+        XCTAssertNil(try XCTUnwrap(catalog.first { $0.id == 290 }).originalBest)
+        XCTAssertTrue(try ProblemCatalog.bundled().allSatisfy { $0.originalBest == nil })
+    }
+
     func testTrapResetsAllPreviouslyPressedTargets() throws {
         let p = problem(cells: [
             GridPoint(x: 1, y: 3): "u", GridPoint(x: 1, y: 2): "o",
@@ -54,6 +69,7 @@ final class GameAndPersistenceTests: XCTestCase {
         XCTAssertEqual(session.visitedTargets.count, 1)
         XCTAssertEqual(session.step(), .trap)
         XCTAssertEqual(session.visitedTargets.count, 0)
+        XCTAssertEqual(session.position, GridPoint(x: 1, y: 1), "Traps reset lights, not the robot's position")
         session.step()
         session.step()
         XCTAssertNotEqual(session.status, .completed)

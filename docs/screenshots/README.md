@@ -21,6 +21,14 @@ starts empty in a dedicated UI-test save file. The root PNGs show Simplified Chi
 the English README. Original problem titles and author names are preserved.
 These are Mac screenshots, not evidence of iPhone/iPad runtime validation.
 
+`en/community-reference.png` and `en/community-board-guide.png` were captured on
+October 9 by `testCommunityReferenceLengthMissingRecordAndLocalizedHelp`. The first
+shows #0027 Shuriken with its independent 39-byte limit and archived 14-byte Best;
+the second captures the complete native popover explaining targets, walls and traps.
+The popover is captured directly because it can extend beyond the main window.
+Both are unmodified English app images; no model responses or personal progress are used.
+The reference lengths come from the October 7 collection snapshot, not a live leaderboard.
+
 Refresh on an interactive Mac desktop:
 
 ```sh
