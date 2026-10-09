@@ -86,6 +86,21 @@ final class GameAndPersistenceTests: XCTestCase {
         XCTAssertEqual(session.step(), .completed)
     }
 
+    func testOverLimitTrialRunsButIsNotAcceptedAndJudgeRemainsStrict() throws {
+        let original = try XCTUnwrap(CommunityProblemCatalog.bundled().first { $0.id == 1 })
+        var session = try GameSession(problem: original)
+        XCTAssertThrowsError(try session.prepare(source: "sssss"))
+        try session.prepare(source: "sssss", enforceByteLimit: false)
+        for _ in 0..<4 { session.step() }
+        XCTAssertEqual(session.status, .completed)
+        XCTAssertEqual(session.programBytes, 5)
+        XCTAssertFalse(session.isAccepted)
+        try session.prepare(source: "ssss")
+        for _ in 0..<4 { session.step() }
+        XCTAssertTrue(session.isAccepted)
+        XCTAssertThrowsError(try session.prepare(source: "bad code", enforceByteLimit: false))
+    }
+
     func testLengthAndExecutionLimits() throws {
         let original = try XCTUnwrap(CommunityProblemCatalog.bundled().first { $0.id == 1 })
         var session = try GameSession(problem: original, stepLimit: 2)

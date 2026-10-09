@@ -474,9 +474,11 @@ struct GameView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("漂亮，全部点亮！").font(.system(size: 20, weight: .bold)).accessibilityIdentifier("completion-title")
                 Text(
-                    model.isTrial
-                        ? L10n.text("%ld byte · AI 答案试运行完成", model.session.programBytes)
-                        : L10n.text("%ld byte · 最短解已保存到本机", model.session.programBytes)
+                    !model.session.isAccepted
+                        ? L10n.text("%ld byte · 超过长度限制，仅供试运行，未保存为解答", model.session.programBytes)
+                        : model.isTrial
+                            ? L10n.text("%ld byte · AI 答案试运行完成", model.session.programBytes)
+                            : L10n.text("%ld byte · 最短解已保存到本机", model.session.programBytes)
                 )
                 .font(.system(size: 12)).foregroundStyle(Palette.muted)
             }

@@ -52,6 +52,36 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testOverLimitProgramRunsWithoutSavingAcceptedProgress() {
+        let app = launch(language: "en")
+        openFirst(app)
+        let editor = app.textViews["code-editor"]
+        editor.activateControl()
+        editor.typeText("ss")
+        app.buttons["run-program"].activateControl()
+        XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.staticTexts.matching(
+                NSPredicate(format: "value CONTAINS %@ OR label CONTAINS %@", "trial only", "trial only")
+            ).firstMatch.exists)
+        app.terminate()
+        let restored = launch(reset: false, language: "en")
+        #if os(macOS)
+            XCTAssertTrue(restored.staticTexts["sidebar-progress"].displayedText.hasPrefix("0 /"))
+        #endif
+        openFirst(restored)
+        XCTAssertEqual(restored.textViews["code-editor"].value as? String, "ss")
+        // The first puzzle remains unsolved, even though trial execution lit its target.
+        restored.buttons["run-program"].activateControl()
+        XCTAssertTrue(restored.staticTexts["completion-title"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            restored.staticTexts.matching(
+                NSPredicate(format: "value CONTAINS %@ OR label CONTAINS %@", "trial only", "trial only")
+            ).firstMatch.exists)
+        restored.terminate()
+    }
+
+    @MainActor
     func testCopyProblemPromptIncludesSharedRulesExamplesAndBoardWithoutChangingDraft() {
         let app = launch(language: "en")
         openFirst(app)

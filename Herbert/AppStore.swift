@@ -82,6 +82,7 @@ final class AppStore: ObservableObject {
     func toggleFavorite(_ id: Int) { update(id) { $0.isFavorite.toggle() } }
 
     func complete(_ problem: Problem, source: String, bytes: Int) {
+        guard bytes <= problem.byteLimit, bytes == HProgram.countBytes(source) else { return }
         update(problem.id) { record in
             if record.bestBytes == nil || bytes < record.bestBytes! {
                 record.bestBytes = bytes

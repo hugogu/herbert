@@ -42,9 +42,11 @@ public struct GameSession {
         self.stepLimit = stepLimit
     }
 
-    public mutating func prepare(source: String) throws {
+    public var isAccepted: Bool { status == .completed && programBytes <= problem.byteLimit }
+
+    public mutating func prepare(source: String, enforceByteLimit: Bool = true) throws {
         let program = try HProgram.compile(source)
-        guard program.byteCount <= problem.byteLimit else {
+        guard !enforceByteLimit || program.byteCount <= problem.byteLimit else {
             throw HError(HerbertStrings.text("代码用了 %ld byte，本关最多 %ld byte。", program.byteCount, problem.byteLimit))
         }
         position = board.start

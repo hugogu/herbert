@@ -39,7 +39,7 @@ final class GameModel: ObservableObject {
     private func prepareIfNeeded() -> Bool {
         if preparedSource == source, session.status == .paused { return true }
         do {
-            try session.prepare(source: source)
+            try session.prepare(source: source, enforceByteLimit: false)
             preparedSource = source
             recordedCompletion = false
             message = nil
@@ -87,7 +87,7 @@ final class GameModel: ObservableObject {
         }
         if isCompleted, !recordedCompletion {
             recordedCompletion = true
-            if !isTrial {
+            if !isTrial && session.isAccepted {
                 store.complete(problem, source: source, bytes: session.programBytes)
                 store.flush()
             }
