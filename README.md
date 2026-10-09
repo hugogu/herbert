@@ -30,7 +30,7 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.3 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.3/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.4 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.4/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -72,8 +72,9 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.3:** 64K output defaults, resizable Mac results and collapsible Markdown reasoning. The app has four
-main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
+**Updated in 0.3.4:** normalized benchmark percentages, a structured puzzle picker, and
+long reasoning streams without counting SSE packaging against the output allowance.
+The app has four main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 
 - Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
   models through `/models`, and set default entrants and model parameters. Keys stay in Keychain. Model output defaults to **65,536 tokens**, including reasoning;
@@ -109,7 +110,10 @@ The platform measures actual board outcomes and code length, with no model actin
 
 **Score per attempt = target coverage × (80 + 20 × code savings)**, where coverage is
 final lit targets / total targets, and code savings is `1 − H bytes / puzzle byte limit`.
-Round to two decimals, keep the best attempt per puzzle, and sum the scores. Compile-invalid
+Round to two decimals, keep the best attempt per puzzle, and sum the scores.
+Display the benchmark as **total points / (100 × selected puzzles) × 100%**:
+160 points over eight puzzles is **20%**. Unsolved puzzles remain in the denominator;
+this measures coverage and code efficiency, rather than the fraction of solved puzzles. Compile-invalid
 and over-limit programs earn zero; incomplete runs can earn partial points. Traps reset
 coverage. A shorter accepted program earns more points. Robot steps do not affect score.
 Rank by **score descending → total input + output tokens ascending → completion time**.
@@ -128,6 +132,7 @@ inspired by the original site's shortest-code ranking. [Scoring and limits](docs
 *Actual English app captures with deterministic test entrants, demonstrating rejection
 and a successful retry. These scores illustrate the app; they are not commercial model results.*
 [New match](docs/screenshots/en/battlefield/ai-new-match.png) ·
+[Puzzle selection](docs/screenshots/en/battlefield/ai-puzzles.png) ·
 [Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·

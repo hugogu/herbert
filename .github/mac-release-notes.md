@@ -6,15 +6,17 @@ This open-source preview includes **30 original lessons + 1,769 archived communi
 problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
 movement trails, grid dots, and local progress with JSON backup import/export.
 
-**Updated in 0.3.3:** Model output defaults to **65,536 tokens**, including reasoning.
-Use the parameter button beside a selected model in **New match** to configure it; the editor
-also offers **Use 64K output limit**. Provider-declared lower limits and token budgets
-still apply. Legacy 4K presets upgrade, while other custom caps and historical requests remain unchanged.
+**Updated in 0.3.4:** Benchmark results now show **total points / (100 × selected puzzles)**
+as a percentage in live progress, history and share images. Solved counts sit beside the
+provider; model display names omit pricing suffixes such as `(free)`.
 
-**Best Effort now waits for all AIs to finish** their attempts. An early finisher does
-not cancel its rivals, so a later answer can still take the lead. Manual Stop remains available.
-Mac history opens with room for three AI columns; history and answer dialogs are resizable.
-Reasoning collapses independently and renders Markdown. iPhone/iPad navigation uses short icon tabs.
+The puzzle picker integrates search, original/community/selected filters, chapter
+groups, board thumbnails, byte budgets and bulk selection actions.
+
+Long reasoning streams no longer fail because repeated SSE metadata exceeds the old
+4 MiB transport limit. Individual events and actual answer/reasoning content remain
+bounded, with partial output preserved on failure. The 64K model output default remains
+configurable. Best Effort waits for every AI; Mac history and answer dialogs are resizable.
 
 The course has continuous **L01–L30** numbers. New L07 “Turning rose” and L08 “Tandem lanterns”
 replace the former L25/L26 with symmetric walled boards. Other boards, saved progress
@@ -51,7 +53,9 @@ The App Store scheme contains only the originals; this DMG is the open-source ed
 中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
 与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
 Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 30 道原创题和 1,769 道社区题。
-0.3.3 默认单次输出上限提高到 65,536 tokens，可从新比赛已选模型旁的参数按钮直接修改。
+0.3.4 将评测成绩显示为总满分百分比，移动通过题数、清理模型名称后缀，并重做题目选择页。修复长推理因 SSE 包装数据达到旧 4 MiB 上限而失败的问题。
+
+默认单次输出上限为 65,536 tokens，可从新比赛已选模型旁的参数按钮直接修改。
 Best Effort 等待所有 AI 完成；Mac 历史默认可见三列模型，历史和答案窗口均可调整大小；推理可折叠并按 Markdown 显示。
 原创课程连续编号 L01–L30，新 L07「旋转玫瑰」和 L08「双灯相映」替换原 L25/L26。
 AI 使用自己的 API 额度，密钥保存在钥匙串中。

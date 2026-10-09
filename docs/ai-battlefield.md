@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.3**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.4**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
@@ -52,9 +52,13 @@ Open an answer in Current match or history. Full response is expanded by default
 updates as the model replies, showing final content, `reasoning_content` / `reasoning`,
 and provider error details. Text received before a stream failure is retained. Error bodies
 are read up to 64 KiB and redact known credential fields, Bearer values and your API key.
-Successful response streams remain bounded to 4 MiB; oversized streams fail with their
-received partial text retained. History files retain the existing 64 MiB storage bound
-and report save failures rather than silently dropping text.
+SSE transport metadata no longer consumes a cumulative 4 MiB allowance. Successful
+streams bound each event to 16 MiB and decoded answer + reasoning text to 8 MiB; JSON
+fallback bodies are bounded to 16 MiB with the same decoded content limit. These are
+local memory safeguards, separate from the model’s output token cap. Oversized content
+retains text received before the limit. Fenced H programs have a separate 64 KiB parsing
+limit; explanatory prose outside the code block does not consume it. History files retain
+the existing 64 MiB storage bound and report save failures rather than silently dropping text.
 Older 0.3.1 histories cannot recover text that the older client discarded.
 
 A `finish_reason: length` reply with reasoning but no final answer means the model used
@@ -118,7 +122,8 @@ coverage = final lit targets / total targets
 code savings = 1 - H program bytes / puzzle byte limit
 attempt score = round(coverage * (80 + 20 * code savings), 2)
 puzzle score = highest evaluated attempt score
-match score = sum of puzzle scores
+match points = sum of puzzle scores
+benchmark percentage = match points / (100 * selected puzzle count) * 100
 ```
 
 Compile-invalid, empty and over-limit programs earn zero. Incomplete programs, including
@@ -146,7 +151,9 @@ do not publish a composite points formula. The above formula is our independent 
 policy, not a claim of identical original-site scoring.
 
 The progress table itself is the live ranking: model columns move with the standings.
-Headers show score, solved count, input/output/total tokens and cache rate, with errors in
+Headers show normalized benchmark percentages, input/output/total tokens and cache rate.
+Solved counts sit alongside provider names. Pricing suffixes such as `(free)` are omitted
+from model display names; request IDs and saved provider metadata remain intact. Errors appear in
 a corner indicator. Two-line cells show status, attempt, points and a program preview.
 Select a cell to inspect every submitted answer and its feedback. **Try on board** opens
 the actual puzzle snapshot with the answer prefilled; **Back to match** returns to the
@@ -194,7 +201,7 @@ Removing a provider removes its key and configuration, while keeping past matche
 Progress JSON backups cover human game progress, not AI credentials or match history.
 
 Completed matches offer **Share result image**: a locally rendered 1080-pixel-wide PNG
-with every entrant's rank, score, solved count, accepted bytes, token usage and cache rate.
+with every entrant's rank, normalized percentage, solved count, accepted bytes, token usage and cache rate.
 It includes model and provider display names; review those before sharing. Images omit
 API keys, endpoint URLs, raw responses and custom prompts. The system share sheet sends
 the image only to the destination you choose. No public leaderboard or upload service exists.
@@ -211,3 +218,13 @@ JSON fallback, usage reconciliation and cancellation after response headers. Nat
 tests use an isolated, deterministic client and in-memory keys; their screenshots are
 real app captures of test data, **not claims about any commercial model's ability**.
 Real OpenRouter/SiliconFlow calls require your own API key and device verification.
+
+## Select match puzzles
+
+The puzzle sheet keeps search, source filters and selection actions together above the
+list. Original lessons are grouped by chapter with board thumbnails and byte budgets.
+Switch to **Community** (open-source edition) or **Selected** to review that source or
+just the current match set. Search accepts puzzle numbers, localized titles and authors.
+**Select visible** adds every filtered result without clearing other choices; **30 original
+puzzles** replaces the selection with the original course, and **Clear selection** resets it.
+Searching or switching filters never silently discards hidden selections.

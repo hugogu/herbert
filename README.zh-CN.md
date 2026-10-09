@@ -11,7 +11,7 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 
 ## 下载 Mac 版
 
-**[下载 0.3.3 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.3/Herbert-macOS-universal.dmg)**
+**[下载 0.3.4 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.4/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
@@ -52,7 +52,9 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 | --- | --- |
 | [![四向对称的折叠花瓣与连续墙](docs/screenshots/course/course-rose-board.png)](docs/screenshots/course/course-rose.png) | [![底部直桥连接的两个方形灯框](docs/screenshots/course/course-lanterns-board.png)](docs/screenshots/course/course-lanterns.png) |
 
-## AI Battlefield · 0.3.3
+## AI Battlefield · 0.3.4
+
+0.3.4 将总成绩显示为满分完成度百分比，将通过题数移到服务商名称旁，并隐藏模型名称的 `(free)` 后缀。题目选择页加入统一搜索、原创／社区／已选筛选、章节分组和棋盘缩略图。修复 SSE 包装数据触发旧 4 MiB 限制导致长推理失败的问题。
 
 默认单次输出上限提高至 **65,536 tokens**（包含推理），可从「新比赛」已选模型旁的参数按钮直接修改，也可在「AI 配置」的模型参数里设置。旧默认 4K 配置升级为 64K，其他自定义值保留；服务商声明的较低上限和比赛预算仍生效。Mac 历史窗口默认并排显示至少三个 AI，历史与答案窗口均可拖动边缘调整大小。推理可独立收起并按 Markdown 显示，iPhone 导航改为短标题加图标。
 
@@ -78,6 +80,8 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 
 **每次得分 = 目标覆盖率 ×（80 + 20 × 代码压缩率）**。覆盖率为最终点亮目标数 / 总目标数，
 代码压缩率为 `1 − H byte 数 / 本题 byte 限制`。每次保留两位小数，每题取最佳尝试，再累加总分。
+界面、历史与分享图统一显示 **总分 /（100 × 所选题数）× 100%**：8 题获得 160 分即 **20%**。
+未完成题目也计入分母；百分比同时反映目标覆盖和代码效率，不等同于通过题数比例。
 编译错误或超出长度限制为零分；未完成的有效运行也有部分分，陷阱会清空目标覆盖。
 同样通过时，代码越短分数越高；步数不参与评分。按**总分降序 → 输入和输出 Token 总量升序 → 完成时间**排名，
 缓存输入和所有重试均计入用量。0.3.0 旧历史保留原来的通过题数计分及排序方式。
@@ -90,7 +94,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 ![Herbert Benchmark 英文实际界面：按分数排序的模型列、Token 表头与紧凑答案行](docs/screenshots/en/battlefield/ai-battlefield.png)
 
 *实际英文 Mac App 截图；确定性测试客户端演示答错后重试，不代表商业模型的能力或真实费用。*
-[新比赛](docs/screenshots/en/battlefield/ai-new-match.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
+[新比赛](docs/screenshots/en/battlefield/ai-new-match.png) · [题目选择](docs/screenshots/en/battlefield/ai-puzzles.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
 [服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
 [原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [推理内容](docs/screenshots/en/battlefield/ai-reasoning.png) ·
 [服务商错误详情](docs/screenshots/en/battlefield/ai-provider-error.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)

@@ -5,6 +5,13 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.4] - 2026-10-09
+
+- Display normalized benchmark percentages in progress, history and share images. Move solved counts beside provider names, and omit `(free)` from displayed model names while preserving provider IDs and raw history metadata.
+- Stop counting cumulative SSE framing against the old 4 MiB response limit. Bound individual events and decoded content instead, preserve partial responses on failures, and apply the H parser limit to extracted code rather than explanatory prose.
+- Redesign puzzle selection with integrated search, original/community/selected filters, chapter groups, board previews, byte budgets and explicit bulk actions. Hidden selections survive searches and source changes.
+- Refresh actual English Battlefield screenshots and benchmark methodology documentation.
+
 ## [0.3.3] - 2026-10-09
 
 - Raise the default model output allowance to 65,536 tokens, including reasoning. Add a persistent model-parameter shortcut to New match, a 64K reset button, and the provider-declared limit in the editor. Legacy 4K defaults upgrade; other custom settings and historical requests are preserved.
@@ -132,6 +139,7 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.3.4]: https://github.com/hugogu/herbert/releases/tag/v0.3.4
 [0.3.3]: https://github.com/hugogu/herbert/releases/tag/v0.3.3
 [0.3.2]: https://github.com/hugogu/herbert/releases/tag/v0.3.2
 [0.3.1]: https://github.com/hugogu/herbert/releases/tag/v0.3.1
