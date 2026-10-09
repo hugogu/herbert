@@ -59,20 +59,26 @@ continuous contours. Earlier L19/L29/L30 captures remain as historical illustrat
 These independently designed original layouts and their captures use MIT.
 They are not iPhone/iPad App Store screenshots.
 
-## Herbert Benchmark · 0.3.3
+## Herbert Benchmark
 
 `en/battlefield/` contains actual English Mac windows captured by `BattlefieldUITests`:
 provider configuration, discovered models, compact match setup, rendered Markdown rules,
 a completed match with ranked model headers and two-line answers, native answer feedback,
-an answer prefilled for board trial with Back to match, and the PNG sharing preview. The two entrants are **deterministic fixtures**, not paid
-models. They deliberately return an invalid program before retrying: both solve L01, while
-Model 1 also solves L02/L03 and Model 2 earns partial or zero points. The benchmark
-capture includes these three puzzles; the detailed trial flow uses L01. Thus
+an answer prefilled for board trial with Back to match, and the PNG sharing preview. The entrants are **deterministic fixtures**, not paid
+models. They deliberately return an invalid program before retrying. The current progress,
+answer and three-model history captures use L01; the separate benchmark gallery uses
+L01/L02/L03, where Model 1 solves all three and Model 2 earns partial or zero points on later puzzles. Thus
 the test verifies parallel requests, retry feedback, native judging, ranking, answer trials/back navigation
-and history. The captured match uses Time limited mode so both fixture entrants finish;
-Best Effort waiting for all entrants is covered by native and engine tests.
+and history. Current captures use unified Match Settings without time or token limits,
+allowing all fixture entrants to finish.
 These images illustrate the application and do not benchmark a commercial model.
 No real API key or personal provider configuration appears in these captures.
+
+On October 9, `ai-battlefield.png`, `ai-answer.png`, `ai-history.png` and
+`ai-thinking.png` were refreshed from `.build/attempt-timing-ui.xcresult` to show total
+points beside normalized percentages and each attempt's elapsed timer. Fixture replies
+take less than one second and display `00:00:00`; the streaming reasoning fixture
+shows a live eight-second attempt. All four images are unmodified English app captures.
 
 On an interactive Mac desktop, capture the fixture flow with:
 

@@ -300,6 +300,10 @@ public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
         id = number
         self.startedAt = startedAt
     }
+
+    public func elapsedTime(at now: Date = .now) -> TimeInterval {
+        max(0, (finishedAt ?? now).timeIntervalSince(startedAt))
+    }
 }
 
 public struct ProblemAnswer: Codable, Identifiable, Equatable, Sendable {
@@ -402,10 +406,10 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
         }
     }
 
-    public mutating func finish(_ reason: CompetitionStatus) {
+    public mutating func finish(_ reason: CompetitionStatus, at time: Date = .now) {
         status = reason
-        finishedAt = .now
-        updatedAt = .now
+        finishedAt = time
+        updatedAt = time
         for e in entrants.indices {
             for p in entrants[e].answers.indices {
                 if [.queued, .requesting, .judging].contains(entrants[e].answers[p].status) {
@@ -414,7 +418,7 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
                         entrants[e].answers[p].attempts[a].finishedAt == nil
                     {
                         entrants[e].answers[p].attempts[a].usage.partial = true
-                        entrants[e].answers[p].attempts[a].finishedAt = .now
+                        entrants[e].answers[p].attempts[a].finishedAt = time
                     }
                 }
             }

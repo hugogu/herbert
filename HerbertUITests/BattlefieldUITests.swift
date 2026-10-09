@@ -288,6 +288,12 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(reasoning.waitForExistence(timeout: 5))
         reasoning.battlefieldTap()
         XCTAssertTrue(app.staticTexts["Path analysis"].waitForExistence(timeout: 5))
+        let timer = app.descendants(matching: .any)["attempt-time-1"].firstMatch
+        XCTAssertTrue(timer.waitForExistence(timeout: 5))
+        let initialTime = timer.label
+        XCTAssertTrue(initialTime.hasPrefix("Elapsed "), timer.debugDescription)
+        let tick = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", initialTime), object: timer)
+        XCTAssertEqual(XCTWaiter.wait(for: [tick], timeout: 4), .completed)
         capture(app, "ai-thinking")
         let interruption = app.descendants(matching: .any)["answer-interrupted-1"].firstMatch
         XCTAssertTrue(interruption.waitForExistence(timeout: 20), app.debugDescription)
@@ -373,12 +379,17 @@ final class BattlefieldUITests: XCTestCase {
         for model in ["fixture-1", "fixture-2"] {
             let score = app.staticTexts["score-\(model)"]
             XCTAssertEqual(score.value as? String ?? score.label, "80%")
+            let points = app.staticTexts["points-\(model)"]
+            XCTAssertEqual(points.value as? String ?? points.label, "80 points")
         }
+        XCTAssertFalse(app.staticTexts["Benchmark score"].exists)
         XCTAssertTrue(app.staticTexts["AI: 2 · Puzzles: 1"].exists)
         capture(app, "ai-battlefield")
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertTrue(app.staticTexts.matching(identifier: "Rejected").firstMatch.exists)
+        let firstDuration = reveal("attempt-time-1", in: app).label
+        XCTAssertTrue(firstDuration.hasPrefix("Elapsed "))
         #if os(macOS)
             app.sheets.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -450)
         #else
@@ -386,6 +397,8 @@ final class BattlefieldUITests: XCTestCase {
         #endif
         XCTAssertTrue(app.staticTexts["Attempt 2"].waitForExistence(timeout: 5), app.debugDescription)
         XCTAssertTrue(app.staticTexts.matching(identifier: "Accepted").firstMatch.exists)
+        let retryDuration = reveal("attempt-time-2", in: app).label
+        XCTAssertTrue(retryDuration.hasPrefix("Elapsed "))
         capture(app, "ai-answer")
         reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5), app.debugDescription)
@@ -427,7 +440,11 @@ final class BattlefieldUITests: XCTestCase {
         history.battlefieldTap()
         XCTAssertTrue(app.buttons["shareBattlefield"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80%")
+        let restoredPoints = app.staticTexts["points-fixture-1"]
+        XCTAssertEqual(restoredPoints.value as? String ?? restoredPoints.label, "80 points")
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertEqual(reveal("attempt-time-1", in: app).label, firstDuration)
+        XCTAssertEqual(reveal("attempt-time-2", in: app).label, retryDuration)
         reveal("tryBattlefieldAnswer-2", in: app).battlefieldTap()
         XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.textViews["code-editor"].value as? String, "s")

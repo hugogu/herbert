@@ -208,7 +208,13 @@ The progress table itself is the live ranking: model columns move with the stand
 Headers show normalized benchmark percentages, input/output/total tokens and cache rate.
 Solved counts sit alongside provider names. Provider prefixes before the first `:` and
 pricing suffixes such as `(free)` are omitted from model display names; request IDs and saved provider metadata remain intact. Errors appear in
-a corner indicator. Two-line cells show status, attempt, points and a program preview.
+a corner indicator. Total points appear beside the primary normalized percentage.
+Two-line cells show status, attempt, points, elapsed time and a program preview.
+While a request is active, the cell follows the current attempt; after completion it
+shows the best-scoring attempt. Answer details give every retry its own elapsed timer.
+Live timers update each second; finished attempts retain their recorded durations in
+history. A recovered interrupted attempt ends at the last saved checkpoint, excluding
+time spent away from the app. Existing start/end timestamps are reused without a save migration.
 Select a cell to inspect every submitted answer and its feedback. **Try on board** opens
 the actual puzzle snapshot with the answer prefilled; **Back to match** returns to the
 results, including from history. Trials can be edited and replayed without modifying

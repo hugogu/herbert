@@ -89,9 +89,9 @@ struct BattlefieldDashboard: View {
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 let elapsed = max(0, (result.finishedAt ?? context.date).timeIntervalSince(result.startedAt))
                 HStack(spacing: 16) {
-                    Label(duration(elapsed), systemImage: "clock")
+                    Label(battlefieldDuration(elapsed), systemImage: "clock")
                     if result.configuration.timeLimitEnabled {
-                        Text(L10n.text("时限 %@", duration(result.configuration.timeLimitSeconds)))
+                        Text(L10n.text("时限 %@", battlefieldDuration(result.configuration.timeLimitSeconds)))
                     }
                     Label(result.totalTokens.formatted() + " tokens", systemImage: "sparkles")
                 }.font(.caption.monospaced()).foregroundStyle(Palette.muted)
@@ -189,7 +189,9 @@ struct BattlefieldDashboard: View {
                 .contentTransition(.numericText()).foregroundStyle(Palette.mint)
                 .accessibilityIdentifier("score-\(entrant.entrant.preset.model.id)")
                 Spacer(minLength: 4)
-                Text("综合得分").font(.caption).foregroundStyle(Palette.muted)
+                Text(L10n.text("%@ 分", battlefieldScore(result.score(for: entrant))))
+                    .font(.caption).foregroundStyle(Palette.muted).monospacedDigit()
+                    .accessibilityIdentifier("points-\(entrant.entrant.preset.model.id)")
             }
 
         }.frame(width: 224, alignment: .leading).padding(12)
@@ -203,7 +205,9 @@ struct BattlefieldDashboard: View {
     }
 
     private func answerCell(_ answer: ProblemAnswer, entrant: EntrantResult, problem: Problem) -> some View {
-        let attempt = result.scoringPolicy.bestAttempt(answer, problem: problem)
+        let attempt =
+            [.requesting, .judging].contains(answer.status)
+            ? answer.attempts.last : result.scoringPolicy.bestAttempt(answer, problem: problem)
         let score = battlefieldScore(result.scoringPolicy.score(answer, problem: problem))
         return Button {
             selectedAnswer = BattlefieldAnswerSelection(
@@ -220,13 +224,17 @@ struct BattlefieldDashboard: View {
                     }
                     Text(score).font(.caption.monospaced().bold())
                 }.foregroundStyle(answer.status.color)
-                if let program = attempt?.program {
-                    Text(String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")).font(
-                        .system(.caption, design: .monospaced)
-                    )
-                    .foregroundStyle(Palette.ink).lineLimit(1)
-                } else {
-                    Text(answer.status.title).font(.caption).foregroundStyle(Palette.muted)
+                HStack(spacing: 6) {
+                    if let program = attempt?.program {
+                        Text(String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")).font(
+                            .system(.caption, design: .monospaced)
+                        )
+                        .foregroundStyle(Palette.ink).lineLimit(1)
+                    } else {
+                        Text(answer.status.title).font(.caption).foregroundStyle(Palette.muted).lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                    if let attempt { BattlefieldAttemptTime(attempt: attempt, compact: true) }
                 }
             }.frame(width: 224, height: 38, alignment: .topLeading).padding(.horizontal, 12).padding(.vertical, 10)
                 .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
@@ -245,10 +253,6 @@ struct BattlefieldDashboard: View {
         }.font(.caption2)
     }
 
-    private func duration(_ seconds: Double) -> String {
-        let seconds = Int(seconds)
-        return String(format: "%02d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60)
-    }
 }
 
 private struct BattlefieldAnswerView: View {
@@ -295,7 +299,11 @@ private struct BattlefieldAnswerView: View {
                     }
                     ForEach(selection.answer.attempts) { attempt in
                         VStack(alignment: .leading, spacing: 14) {
-                            Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.headline)
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.headline)
+                                Spacer(minLength: 8)
+                                BattlefieldAttemptTime(attempt: attempt)
+                            }
                             if attempt.finishedAt == nil {
                                 HStack(spacing: 8) {
                                     ProgressView().controlSize(.small)
@@ -443,6 +451,32 @@ private struct BattlefieldAnswerView: View {
                 }.padding(24).textSelection(.enabled)
             }.background(Palette.paper)
         }
+    }
+}
+
+private struct BattlefieldAttemptTime: View {
+    let attempt: AnswerAttempt
+    var compact = false
+
+    var body: some View {
+        Group {
+            if attempt.finishedAt != nil {
+                timing(at: .now)
+            } else {
+                TimelineView(.periodic(from: .now, by: 1)) { context in timing(at: context.date) }
+            }
+        }.font(.caption2.monospaced()).foregroundStyle(Palette.muted)
+    }
+
+    private func timing(at now: Date) -> some View {
+        let duration = battlefieldDuration(attempt.elapsedTime(at: now))
+        return Label {
+            Text(compact ? duration : L10n.text("用时 %@", duration))
+        } icon: {
+            Image(systemName: "clock")
+        }
+        .fixedSize().accessibilityElement(children: .ignore).accessibilityLabel(L10n.text("用时 %@", duration))
+        .accessibilityIdentifier(compact ? "attempt-cell-time-\(attempt.id)" : "attempt-time-\(attempt.id)")
     }
 }
 

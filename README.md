@@ -90,7 +90,9 @@ cancels its remaining retries. Other problems and entrants continue.
 - Mac setup places entrants and puzzles side by side. Progress uses compact two-line
   answers and score-sorted model columns. History opens with room for at least three
   model columns; history and answer dialogs resize. iPhone uses short icon tabs.
-- Model headers show normalized scores, input/output/total tokens and cache rates.
+- Model headers show normalized percentages with total points as a reference,
+  input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
+  live timers advance and finished durations remain fixed in history.
   Provider prefixes and `(free)` are omitted from display names. Select an answer to
   inspect submissions, native feedback and retries, then **Try on board** with code
   prefilled. **Back to match** returns to the results, preserving personal progress.

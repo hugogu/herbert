@@ -78,6 +78,11 @@ func battlefieldPercentage(_ fraction: Double) -> String {
     fraction.formatted(.percent.precision(.fractionLength(0...2)))
 }
 
+func battlefieldDuration(_ seconds: TimeInterval) -> String {
+    let seconds = Int(max(0, seconds))
+    return String(format: "%02d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60)
+}
+
 extension CompetitionConfiguration {
     var settingsDescription: String {
         if let legacyMode { return L10n.text("旧版比赛设置：%@", legacyMode.title) }

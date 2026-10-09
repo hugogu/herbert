@@ -2,6 +2,14 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 每次尝试计时与参考总分（10 月 9 日）
+
+- `scripts/check.sh`：107 项 Swift 测试（44 Core、63 Battlefield）、16 项 Python 检查和严格格式检查通过。新增独立重试计时、完成后冻结、时钟倒退下限、JSON 与磁盘往返，以及恢复时使用最后检查点而不累计离开 App 时间的检查。
+- `.build/attempt-timing-ui.xcresult`：三项原生 Mac UI 用例通过，覆盖 live timer 实际变化、百分比旁的参考总分、紧凑答案与重试详情、三模型历史及窗口调整、错误详情、试运行与分享。
+- `.build/attempt-timing-history-final.xcresult`：最终重启复跑通过，直接比较两个尝试在重启前后的显示时长，并检查历史表头的总分与百分比。
+- 开源版 iOS Release 无签名编译通过；没有 iPhone/iPad 运行时验证。工程与课程重复生成一致，手动新增三语文案和个人 scheme 修改逐字节保留。
+- 四张文档图来自上述通过用例的实际英文 App，已检查用时、总分、语言和窗口边界。模型为隔离的确定性测试客户端，没有调用付费服务商。
+
 ## 题目参考与棋盘说明（10 月 9 日）
 
 - 核对原站当前 Problems 首页的 85 条记录，Best 与已有快照一致；21 页本地原始 HTML 中的 1,769 条记录与打包 JSON 的 Best 全部一致。快照时间为 10 月 7 日，其中 1,759 题有 Best，10 题缺失。未改写题库或自动查询排行榜。

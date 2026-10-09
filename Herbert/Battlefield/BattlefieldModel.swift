@@ -257,8 +257,7 @@ final class BattlefieldModel: ObservableObject {
             for summary in try await persistence.summaries() where summary.status == .running {
                 var result = try await persistence.load(summary.id)
                 let lastCheckpoint = result.updatedAt
-                result.finish(.interrupted)
-                result.finishedAt = lastCheckpoint
+                result.finish(.interrupted, at: lastCheckpoint)
                 try await persistence.save(result)
             }
             await refreshHistory()

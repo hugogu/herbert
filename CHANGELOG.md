@@ -5,6 +5,9 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Show each attempt's elapsed time in progress and answer details, keeping completed durations in history. Use the last saved checkpoint when closing interrupted attempts on recovery.
+- Keep the normalized percentage as the primary model score and replace its Benchmark score caption with total points.
+
 - Show archived community Best answer lengths in the problem panel, separate from puzzle limits and personal shortest solutions, with an explanation of the source and missing records.
 - Add a tappable board legend explaining targets, blocking walls and traversable traps in English, Chinese and Japanese, with matching Modern/Classic symbols. Opening the guide pauses execution.
 

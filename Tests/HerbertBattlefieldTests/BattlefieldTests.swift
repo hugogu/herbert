@@ -17,6 +17,45 @@ final class BattlefieldTests: XCTestCase {
         }
     }
 
+    func testAttemptTimersAreIndependentAndPersistAfterFinishing() throws {
+        let start = Date(timeIntervalSince1970: 1000)
+        var first = AnswerAttempt(number: 1, startedAt: start)
+        XCTAssertEqual(first.elapsedTime(at: start.addingTimeInterval(12.5)), 12.5)
+        XCTAssertEqual(first.elapsedTime(at: start.addingTimeInterval(-1)), 0)
+        first.finishedAt = start.addingTimeInterval(20)
+        var retry = AnswerAttempt(number: 2, startedAt: start.addingTimeInterval(30))
+        XCTAssertEqual(first.elapsedTime(at: start.addingTimeInterval(35)), 20)
+        XCTAssertEqual(retry.elapsedTime(at: start.addingTimeInterval(35)), 5)
+        retry.finishedAt = start.addingTimeInterval(37)
+        let decoded = try JSONDecoder().decode(
+            [AnswerAttempt].self, from: JSONEncoder().encode([first, retry]))
+        XCTAssertEqual(decoded.map { $0.elapsedTime(at: start.addingTimeInterval(3600)) }, [20, 7])
+    }
+
+    func testInterruptedAttemptTimingStopsAtLastCheckpoint() throws {
+        var result = CompetitionResult(
+            configuration: CompetitionConfiguration(), problems: try first(), entrants: participants(1).map(\.entrant))
+        let start = Date(timeIntervalSince1970: result.startedAt.timeIntervalSince1970.rounded(.up))
+        var firstAttempt = AnswerAttempt(number: 1, startedAt: start)
+        firstAttempt.finishedAt = start.addingTimeInterval(12)
+        result.entrants[0].answers[0].attempts = [
+            firstAttempt, AnswerAttempt(number: 2, startedAt: start.addingTimeInterval(20)),
+        ]
+        result.entrants[0].answers[0].status = .requesting
+        let checkpoint = start.addingTimeInterval(35)
+        result.finish(.interrupted, at: checkpoint)
+        XCTAssertEqual(result.finishedAt, checkpoint)
+        XCTAssertEqual(result.updatedAt, checkpoint)
+        XCTAssertEqual(result.entrants[0].answers[0].status, .cancelled)
+        XCTAssertEqual(result.entrants[0].answers[0].attempts.map { $0.elapsedTime() }, [12, 15])
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let repository = LocalBattlefieldRepository(directory: directory)
+        try repository.saveResult(result)
+        let restored = try repository.loadResult(result.id)
+        XCTAssertEqual(restored.entrants[0].answers[0].attempts.map { $0.elapsedTime() }, [12, 15])
+    }
+
     func testLongExplanationDoesNotPreventExtractingSmallFencedProgram() throws {
         let response = String(repeating: "Detailed reasoning. ", count: 10_000) + "\n```h\ns\n```"
         XCTAssertEqual(try BattlefieldJudge.extractProgram(response), "s")
