@@ -11,7 +11,7 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 
 ## 下载 Mac 版
 
-**[下载 0.3.7 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.7/Herbert-macOS-universal.dmg)**
+**[下载 0.3.8 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.8/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
@@ -56,7 +56,7 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 | --- | --- |
 | [![四向对称的折叠花瓣与连续墙](docs/screenshots/course/course-rose-board.png)](docs/screenshots/course/course-rose.png) | [![底部直桥连接的两个方形灯框](docs/screenshots/course/course-lanterns-board.png)](docs/screenshots/course/course-lanterns.png) |
 
-## AI Battlefield · 0.3.7
+## AI Battlefield · 0.3.8
 
 比赛统一为「比赛设置」，取消模式选择。默认不限时、不限 Token，每题最多 3 次机会。
 可启用统一的**每模型、每题 Token 预算**，累计该题所有尝试的输入与输出（含推理）。

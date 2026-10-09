@@ -3,8 +3,9 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
-## Unreleased
+## [0.3.8] - 2026-10-09
 
+- Align model timing with the top of the percentage score to remove excess header space.
 - Place manual retry beside the progress status on the first line, preserving the full cell width for program previews and timing.
 - Show cumulative attempt time above each model's points, including retries and failed requests, with live updates and preserved history timings.
 - Align share-card input/output and reported total tokens with model headers, omit unavailable cache rates, and include per-model time, points and match duration.
@@ -191,6 +192,7 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.3.8]: https://github.com/hugogu/herbert/releases/tag/v0.3.8
 [0.3.7]: https://github.com/hugogu/herbert/releases/tag/v0.3.7
 [0.3.6]: https://github.com/hugogu/herbert/releases/tag/v0.3.6
 [0.3.5]: https://github.com/hugogu/herbert/releases/tag/v0.3.5

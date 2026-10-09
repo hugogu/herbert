@@ -30,7 +30,7 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.7 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.7/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.8 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.8/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -80,7 +80,11 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.7:** one **Match Settings** panel replaces match modes. Time and
+**Updated in 0.3.8:** Anthropic Messages providers, manual puzzle retries, fuller
+answer recovery, provider-aware retry waits, and consistent timing/token figures in
+progress, history and share cards.
+
+One **Match Settings** panel replaces match modes. Time and
 per-problem token limits are optional and off by default; each problem allows three
 attempts by default. Every model receives the same per-problem budget. Reaching an
 output or token limit marks that problem **Burnout**, retains received reasoning and
