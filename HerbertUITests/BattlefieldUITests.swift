@@ -14,6 +14,7 @@ final class BattlefieldUITests: XCTestCase {
         app.activate()
         #if os(macOS)
             if !app.windows.firstMatch.waitForExistence(timeout: 3) { app.typeKey("n", modifierFlags: .command) }
+            XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 10))
             if let display = ProcessInfo.processInfo.environment["HERBERT_TEST_DISPLAY"] {
                 app.menuBars.menuBarItems["Window"].click()
                 let move = app.menuBars.menuItems.matching(NSPredicate(format: "title ENDSWITH %@", display)).firstMatch
@@ -127,6 +128,43 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertEqual(value.replacingOccurrences(of: ",", with: ""), "2048")
         app.buttons["Close"].battlefieldTap()
         capture(app, "ai-models")
+        app.terminate()
+    }
+
+    @MainActor
+    func testPuzzlePickerSearchBulkSelectionAndReview() {
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        let search = app.textFields["battlefieldPuzzleSearch"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        capture(app, "ai-puzzles")
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        search.battlefieldTap()
+        search.typeText("L03")
+        XCTAssertTrue(app.descendants(matching: .any)["problemChoice-10012"].firstMatch.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.descendants(matching: .any)["problemChoice-10001"].firstMatch.exists)
+        app.buttons["selectVisibleBattlefieldProblems"].battlefieldTap()
+        XCTAssertTrue(
+            app.staticTexts["battlefieldPuzzleSelectionCount"].value as? String == "1 puzzles selected"
+                || app.staticTexts["battlefieldPuzzleSelectionCount"].label.contains("1 puzzles selected"))
+        #if os(macOS)
+            search.battlefieldTap()
+            search.typeKey("a", modifierFlags: .command)
+            search.typeKey(.delete, modifierFlags: [])
+            app.radioButtons["Selected"].battlefieldTap()
+        #else
+            app.buttons["Clear search"].battlefieldTap()
+            app.buttons["Selected"].battlefieldTap()
+        #endif
+        XCTAssertTrue(app.descendants(matching: .any)["problemChoice-10012"].firstMatch.exists)
+        XCTAssertFalse(app.descendants(matching: .any)["problemChoice-10001"].firstMatch.exists)
+        app.descendants(matching: .any)["problemChoice-10012"].firstMatch.battlefieldTap()
+        XCTAssertFalse(app.descendants(matching: .any)["problemChoice-10012"].firstMatch.exists)
+        app.buttons["30 original puzzles"].battlefieldTap()
+        XCTAssertTrue(app.descendants(matching: .any)["problemChoice-10001"].firstMatch.waitForExistence(timeout: 5))
+        app.buttons["Close"].battlefieldTap()
+        XCTAssertTrue(app.buttons["chooseBattlefieldProblems"].label.contains("30 puzzles selected"))
         app.terminate()
     }
 

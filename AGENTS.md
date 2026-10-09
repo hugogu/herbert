@@ -38,3 +38,5 @@
 - Mac Battlefield sheets use an AppKit bridge to enable resizing and set the initial content size once after attachment; SwiftUI min/ideal frames alone can open a scroll-backed sheet at its minimum width. Do not reset size on live result updates. Test both dimensions and three visible model columns.
 
 - SSE wire framing can exceed 4 MiB before a 64K-token completion finishes. Bound individual events and decoded answer/reasoning bytes independently; do not cap cumulative SSE metadata. Apply the judge parser size limit after extracting the fenced H program.
+
+- Add manual UI translations before the `// Original curriculum` marker in each strings file; the course generator replaces everything from that marker onward. Verify regeneration before committing new strings.

@@ -348,48 +348,159 @@ private struct BattlefieldModelPicker: View {
     }
 }
 
+private enum BattlefieldPuzzleSource: String, CaseIterable {
+    case originals = "原创课程"
+    case community = "社区题库"
+    case selected = "已选题目"
+}
+
 private struct BattlefieldProblemPicker: View {
     @EnvironmentObject private var store: AppStore
     @Binding var selected: Set<Int>
     @State private var search = ""
-    @State private var includeCommunity = false
-    var body: some View {
-        BattlefieldSheet(title: L10n.text("比赛题目")) {
-            VStack {
-                HStack {
-                    Button("原创 30 题") {
-                        selected = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
-                    }
-                    Spacer()
-                    Button("清空选择") { selected.removeAll() }.accessibilityIdentifier("clearBattlefieldProblems")
-                }.padding(.horizontal)
-                if store.problems.contains(where: { $0.lesson == nil }) {
-                    Toggle("包括社区题目", isOn: $includeCommunity).padding(.horizontal)
-                }
-                List(
-                    store.problems.filter {
-                        (includeCommunity || $0.lesson != nil)
-                            && (search.isEmpty || $0.number.localizedCaseInsensitiveContains(search)
-                                || $0.title.localizedCaseInsensitiveContains(search))
-                    }
-                ) { problem in
-                    Toggle(
-                        isOn: Binding(
-                            get: { selected.contains(problem.id) },
-                            set: { on in
-                                if on { selected.insert(problem.id) } else { selected.remove(problem.id) }
-                            })
-                    ) {
-                        HStack {
-                            Text(problem.number).font(.system(.body, design: .monospaced))
-                            Text(L10n.text(problem.title))
-                            Spacer()
-                            Text("\(problem.byteLimit) bytes").font(.caption).foregroundStyle(Palette.muted)
-                        }
-                    }.accessibilityIdentifier("problemChoice-\(problem.id)")
-                }.searchable(text: $search, prompt: L10n.text("搜索题目"))
-                Text(L10n.text("已选择 %ld 道", selected.count)).padding(.bottom)
+    @State private var source = BattlefieldPuzzleSource.originals
+
+    private var sources: [BattlefieldPuzzleSource] {
+        store.problems.contains { $0.lesson == nil } ? [.originals, .community, .selected] : [.originals, .selected]
+    }
+    private var filtered: [Problem] {
+        let query = search.trimmingCharacters(in: .whitespacesAndNewlines)
+        return store.problems.filter { problem in
+            let included: Bool
+            switch source {
+            case .originals: included = problem.lesson != nil
+            case .community: included = problem.lesson == nil
+            case .selected: included = selected.contains(problem.id)
             }
+            return included
+                && (query.isEmpty
+                    || "\(problem.number) \(problem.displayTitle) \(problem.title) \(problem.author)"
+                        .localizedCaseInsensitiveContains(query))
         }
+    }
+
+    var body: some View {
+        BattlefieldSheet(title: L10n.text("比赛题目"), layout: .puzzles) {
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(Palette.muted)
+                        TextField("搜索编号、名称或作者", text: $search).textFieldStyle(.plain)
+                            .accessibilityIdentifier("battlefieldPuzzleSearch")
+                        if !search.isEmpty {
+                            Button {
+                                search = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                            }
+                            .buttonStyle(.plain).foregroundStyle(Palette.muted)
+                            .accessibilityLabel("清除搜索")
+                        }
+                    }.padding(12).background(.white, in: RoundedRectangle(cornerRadius: 10))
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Palette.line, lineWidth: 1))
+                    Picker("题库", selection: $source) {
+                        ForEach(sources, id: \.self) { item in
+                            Text(LocalizedStringKey(item.rawValue)).tag(item)
+                        }
+                    }.pickerStyle(.segmented).labelsHidden()
+                    ViewThatFits(in: .horizontal) {
+                        HStack {
+                            selectionCount
+                            Spacer()
+                            selectionActions
+                        }
+                        VStack(alignment: .leading, spacing: 12) {
+                            selectionCount
+                            selectionActions
+                        }
+                    }
+                }.padding(20).background(Palette.paper)
+                Divider()
+                if filtered.isEmpty {
+                    ContentUnavailableView(
+                        L10n.text("这里还没有关卡"), systemImage: "magnifyingglass",
+                        description: Text("试试其他筛选，或搜索关卡编号。"))
+                } else {
+                    List {
+                        if source == .originals {
+                            ForEach(Array(Set(filtered.compactMap { $0.lesson?.chapter })).sorted(), id: \.self) {
+                                chapter in
+                                let problems = filtered.filter { $0.lesson?.chapter == chapter }
+                                Section {
+                                    ForEach(problems) { problem in puzzleRow(problem) }
+                                } header: {
+                                    if let lesson = problems.first?.lesson {
+                                        Text(L10n.text("第 %ld 章 · %@", chapter, L10n.text(lesson.chapterTitle)))
+                                            .font(.caption.weight(.semibold)).foregroundStyle(Palette.muted)
+                                    }
+                                }
+                            }
+                        } else {
+                            ForEach(filtered) { problem in puzzleRow(problem) }
+                        }
+                    }.listStyle(.plain)
+                }
+            }.background(.white).foregroundStyle(Palette.ink)
+        }
+    }
+
+    private var selectionCount: some View {
+        Label(L10n.text("已选择 %ld 道", selected.count), systemImage: "checkmark.circle.fill")
+            .font(.subheadline.weight(.semibold)).foregroundStyle(Palette.mint)
+            .accessibilityIdentifier("battlefieldPuzzleSelectionCount")
+    }
+
+    private var selectionActions: some View {
+        HStack(spacing: 16) {
+            Button("原创 30 题") {
+                selected = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
+            }
+            Button("选择当前列表") { selected.formUnion(filtered.map(\.id)) }
+                .accessibilityIdentifier("selectVisibleBattlefieldProblems").disabled(filtered.isEmpty)
+            Button("清空选择") { selected.removeAll() }
+                .accessibilityIdentifier("clearBattlefieldProblems").disabled(selected.isEmpty)
+        }.buttonStyle(.borderless).font(.caption.weight(.medium)).tint(Palette.mint)
+    }
+
+    private func puzzleRow(_ problem: Problem) -> some View {
+        Toggle(
+            isOn: Binding(
+                get: { selected.contains(problem.id) },
+                set: { on in
+                    if on { selected.insert(problem.id) } else { selected.remove(problem.id) }
+                })
+        ) {
+            HStack(spacing: 12) {
+                if let board = try? Board(problem: problem) {
+                    BoardDrawing(board: board, position: board.start, heading: .north, visited: [], miniature: true)
+                        .frame(width: 46, height: 46).padding(4)
+                        .background(Palette.paper, in: RoundedRectangle(cornerRadius: 8))
+                        .accessibilityHidden(true)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(problem.displayTitle).font(.body.weight(.medium)).lineLimit(1)
+                    Text(problem.number + " · " + (problem.lesson.map { L10n.text($0.chapterTitle) } ?? problem.author))
+                        .font(.caption).foregroundStyle(Palette.muted).lineLimit(1)
+                }
+                Spacer(minLength: 4)
+                Text("≤ \(problem.byteLimit) B").font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(Palette.muted).fixedSize()
+            }.padding(.vertical, 3)
+        }.toggleStyle(BattlefieldPuzzleToggleStyle()).accessibilityIdentifier("problemChoice-\(problem.id)")
+    }
+}
+
+private struct BattlefieldPuzzleToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                    .font(.title3).foregroundStyle(configuration.isOn ? Palette.mint : Palette.muted)
+                configuration.label
+            }.contentShape(Rectangle())
+        }.buttonStyle(.plain).accessibilityValue(configuration.isOn ? L10n.text("已选题目") : L10n.text("选择题目"))
+            .accessibilityAddTraits(configuration.isOn ? .isSelected : [])
     }
 }
