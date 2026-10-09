@@ -126,7 +126,7 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
             for try await byte in bytes {
                 try Task.checkCancellation()
                 data.append(byte)
-                guard data.count <= 8 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
+                guard data.count <= AIResponseLimits.contentBytes else { throw BattlefieldError.responseTooLarge }
             }
             return try Self.decodeModels(data)
         } onCancel: {
@@ -226,19 +226,16 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 for try await byte in bytes {
                     try Task.checkCancellation()
                     data.append(byte)
-                    guard data.count <= 4 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
+                    guard data.count <= AIResponseLimits.payloadBytes else { throw BattlefieldError.responseTooLarge }
                 }
                 return try Self.decodeReply(data, messages: request.messages, apiKey: request.participant.apiKey)
             }
             var accumulator = ChatStreamAccumulator(messages: request.messages, apiKey: request.participant.apiKey)
             var parser = ServerSentEventParser()
-            var received = 0
             var lastUpdate = ContinuousClock.now
             do {
                 for try await byte in bytes {
                     try Task.checkCancellation()
-                    received += 1
-                    guard received <= 4 * 1024 * 1024 else { throw BattlefieldError.responseTooLarge }
                     if let event = try parser.consume(byte) {
                         try accumulator.consume(event)
                         if ContinuousClock.now - lastUpdate >= .milliseconds(150) || accumulator.reportedUsage != nil {
@@ -283,6 +280,9 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
         }
         let text = message["content"] as? String ?? ""
         let reasoning = Self.decodeReasoning(message)
+        guard text.utf8.count + (reasoning?.content.utf8.count ?? 0) <= AIResponseLimits.contentBytes else {
+            throw BattlefieldError.responseTooLarge
+        }
         let fallback = TokenUsage.estimate(
             messages: messages, outputBytes: text.utf8.count + (reasoning?.content.utf8.count ?? 0))
         let usage = (object["usage"] as? [String: Any]).map { decodeUsage($0, fallback: fallback) } ?? fallback
@@ -296,12 +296,20 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
 
 }
 
+// Bound retained model content and individual payloads, independently of repeated SSE framing.
+private enum AIResponseLimits {
+    static let contentBytes = 8 * 1024 * 1024
+    static let payloadBytes = 16 * 1024 * 1024
+}
+
 // AsyncBytes.lines can omit empty lines on Apple platforms. SSE needs those exact
 // boundaries to separate events, including usage-only events at the end of a stream.
 struct ServerSentEventParser {
     private var line: [UInt8] = []
     private var data: [String] = []
     private var skipLF = false
+    private var eventBytes = 0
+    var maximumEventBytes = AIResponseLimits.payloadBytes
 
     mutating func consume(_ byte: UInt8) throws -> String? {
         if skipLF {
@@ -312,6 +320,7 @@ struct ServerSentEventParser {
             skipLF = byte == 13
             return try consumeLine()
         }
+        guard line.count < maximumEventBytes else { throw BattlefieldError.responseTooLarge }
         line.append(byte)
         return nil
     }
@@ -323,11 +332,14 @@ struct ServerSentEventParser {
             guard !data.isEmpty else { return nil }
             let event = data.joined(separator: "\n")
             data.removeAll(keepingCapacity: true)
+            eventBytes = 0
             return event
         }
         if text.hasPrefix("data:") {
             var value = String(text.dropFirst(5))
             if value.hasPrefix(" ") { value.removeFirst() }
+            eventBytes += value.utf8.count + 1
+            guard eventBytes <= maximumEventBytes else { throw BattlefieldError.responseTooLarge }
             data.append(value)
         }
         return nil
@@ -346,6 +358,8 @@ struct ChatStreamAccumulator {
     var text = ""
     var apiKey = ""
     var reasoning: AIReasoning?
+    var maximumContentBytes = AIResponseLimits.contentBytes
+    private(set) var contentBytes = 0
     var reasoningBytes: Int { reasoning?.content.utf8.count ?? 0 }
     var reportedUsage: TokenUsage?
     var finishReason: String?
@@ -367,8 +381,15 @@ struct ChatStreamAccumulator {
         }
         if let choices = object["choices"] as? [[String: Any]], let first = choices.first {
             if let delta = first["delta"] as? [String: Any] {
-                text += delta["content"] as? String ?? ""
-                if let part = OpenAICompatibleClient.decodeReasoning(delta) {
+                let partText = delta["content"] as? String ?? ""
+                let partReasoning = OpenAICompatibleClient.decodeReasoning(delta)
+                let addedBytes = partText.utf8.count + (partReasoning?.content.utf8.count ?? 0)
+                guard addedBytes <= maximumContentBytes - contentBytes else {
+                    throw BattlefieldError.responseTooLarge
+                }
+                contentBytes += addedBytes
+                text += partText
+                if let part = partReasoning {
                     if reasoning == nil { reasoning = AIReasoning(content: "", field: part.field) }
                     reasoning?.content += part.content
                 }

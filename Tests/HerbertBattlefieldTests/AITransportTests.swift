@@ -93,6 +93,55 @@ final class AITransportTests: XCTestCase {
         XCTAssertNil(json["apiKey"])
     }
 
+    func testLargeWireStreamDoesNotCountSSEMetadataAsModelOutput() async throws {
+        let provider = provider()
+        // Providers repeat IDs and usage metadata per token. This is >4 MiB on the wire,
+        // but only 70 KB of actual reasoning, followed by a valid final answer.
+        let chunk =
+            "data: {\"id\":\"" + String(repeating: "metadata", count: 64)
+            + "\",\"choices\":[{\"delta\":{\"reasoning_content\":\"think. \"}}]}\n\n"
+        let body =
+            String(repeating: chunk, count: 10_000)
+            + "data: {\"choices\":[{\"delta\":{\"content\":\"```h\\ns\\n```\"},\"finish_reason\":\"stop\"}]}\n\n"
+            + "data: [DONE]\n\n"
+        XCTAssertGreaterThan(body.utf8.count, 4 * 1024 * 1024)
+        let stub = HTTPStub(body: body, contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let reply = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))), apiKey: "key"),
+                messages: [], maxOutputTokens: 65_536)
+        ) { _ in }
+        XCTAssertEqual(reply.reasoning?.content, String(repeating: "think. ", count: 10_000))
+        XCTAssertEqual(try BattlefieldJudge.extractProgram(reply.text), "s")
+        XCTAssertEqual(reply.finishReason, "stop")
+        XCTAssertTrue(stub.stopped)
+    }
+
+    func testContentAndIndividualEventsRemainBoundedIndependentlyOfWireSize() throws {
+        var accumulator = ChatStreamAccumulator(messages: [], maximumContentBytes: 8)
+        try accumulator.consume(#"{"choices":[{"delta":{"reasoning":"1234","content":"s"}}]}"#)
+        XCTAssertThrowsError(try accumulator.consume(#"{"choices":[{"delta":{"reasoning":"5678"}}]}"#)) {
+            XCTAssertEqual($0 as? BattlefieldError, .responseTooLarge)
+        }
+        XCTAssertEqual(accumulator.text, "s")
+        XCTAssertEqual(accumulator.reasoning?.content, "1234")
+        func feed(_ input: String, into parser: inout ServerSentEventParser) throws {
+            for byte in input.utf8 { _ = try parser.consume(byte) }
+        }
+        var parser = ServerSentEventParser(maximumEventBytes: 16)
+        XCTAssertThrowsError(try feed("data: " + String(repeating: "x", count: 17), into: &parser))
+        var multiline = ServerSentEventParser(maximumEventBytes: 16)
+        XCTAssertThrowsError(try feed("data: 12345678\ndata: 12345678\n\n", into: &multiline))
+        var normal = ServerSentEventParser(maximumEventBytes: 16)
+        var events = 0
+        for byte in String(repeating: "data: 12345678\n\n", count: 100).utf8 {
+            if try normal.consume(byte) != nil { events += 1 }
+        }
+        XCTAssertEqual(events, 100)
+    }
+
     func testJSONFallbackAndMissingUsageRemainEstimated() async throws {
         let provider = provider(kind: .openRouter)
         let stub = HTTPStub(body: #"{"choices":[{"message":{"content":"s"},"finish_reason":"stop"}]}"#)

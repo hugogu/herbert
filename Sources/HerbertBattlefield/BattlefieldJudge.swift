@@ -171,10 +171,10 @@ public struct JudgeEvaluation: Codable, Equatable, Sendable {
 public enum BattlefieldJudge {
     public static func extractProgram(_ response: String) throws -> String {
         let text = response.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard text.utf8.count <= 65_536 else { throw BattlefieldError.responseTooLarge }
         let pieces = text.components(separatedBy: "```")
         if pieces.count == 1 {
             guard !text.isEmpty else { throw BattlefieldError.invalidResponse }
+            guard text.utf8.count <= 65_536 else { throw BattlefieldError.responseTooLarge }
             return text
         }
         guard pieces.count == 3, let newline = pieces[1].firstIndex(of: "\n") else {
@@ -186,6 +186,7 @@ public enum BattlefieldJudge {
         }
         let program = pieces[1][pieces[1].index(after: newline)...].trimmingCharacters(in: .whitespacesAndNewlines)
         guard !program.isEmpty else { throw BattlefieldError.invalidResponse }
+        guard program.utf8.count <= 65_536 else { throw BattlefieldError.responseTooLarge }
         return program
     }
 

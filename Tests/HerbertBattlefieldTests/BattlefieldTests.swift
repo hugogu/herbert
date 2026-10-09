@@ -17,6 +17,13 @@ final class BattlefieldTests: XCTestCase {
         }
     }
 
+    func testLongExplanationDoesNotPreventExtractingSmallFencedProgram() throws {
+        let response = String(repeating: "Detailed reasoning. ", count: 10_000) + "\n```h\ns\n```"
+        XCTAssertEqual(try BattlefieldJudge.extractProgram(response), "s")
+        XCTAssertThrowsError(
+            try BattlefieldJudge.extractProgram("```h\n" + String(repeating: "s", count: 65_537) + "\n```"))
+    }
+
     func testNativeJudgeFormatBytesCollisionsAndFeedback() throws {
         let first = try first()[0]
         XCTAssertEqual(try BattlefieldJudge.extractProgram("```h\ns\n```"), "s")
