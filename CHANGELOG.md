@@ -5,6 +5,7 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Place manual retry beside the progress status on the first line, preserving the full cell width for program previews and timing.
 - Show cumulative attempt time above each model's points, including retries and failed requests, with live updates and preserved history timings.
 - Align share-card input/output and reported total tokens with model headers, omit unavailable cache rates, and include per-model time, points and match duration.
 

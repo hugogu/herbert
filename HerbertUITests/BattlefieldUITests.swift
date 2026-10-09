@@ -98,9 +98,18 @@ final class BattlefieldUITests: XCTestCase {
             app.staticTexts["answer-response-1"].label.contains("recovered")
                 || (app.staticTexts["answer-response-1"].value as? String ?? "").contains("recovered"))
         app.buttons["Close"].battlefieldTap()
+        let failedAnswer = reveal("answer-fixture-2-10001", in: app)
+        failedAnswer.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.75)).tap()
+        XCTAssertTrue(app.staticTexts["AI HTTP 402"].waitForExistence(timeout: 5))
+        app.buttons["Close"].battlefieldTap()
         choose("Match history", in: app)
         app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch.battlefieldTap()
-        reveal("retry-fixture-2-10001", in: app).battlefieldTap()
+        let retry = reveal("retry-fixture-2-10001", in: app)
+        let answerFrame = app.buttons["answer-fixture-2-10001"].frame
+        XCTAssertEqual(answerFrame.width, 248, accuracy: 2)
+        XCTAssertLessThan(retry.frame.midY, answerFrame.midY)
+        XCTAssertLessThan(retry.frame.maxX, answerFrame.midX)
+        retry.battlefieldTap()
         let accepted = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "label CONTAINS %@", "Accepted"),
             object: app.buttons["answer-fixture-2-10001"])

@@ -16,6 +16,13 @@ private struct BattlefieldTrial: Hashable {
     let source: String
 }
 
+private struct BattlefieldRetryAnchor: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? { nil }
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = nextValue() ?? value
+    }
+}
+
 struct BattlefieldDashboard: View {
     @EnvironmentObject private var battlefield: BattlefieldModel
     @EnvironmentObject private var store: AppStore
@@ -276,32 +283,37 @@ struct BattlefieldDashboard: View {
                 battlefield.retryKey(result: result.id, entrant: entrant.id, problem: problem.id)] != nil
         let label =
             problem.number + " " + entrant.entrant.preset.model.displayName + " " + answer.status.title + " " + score
-        HStack(spacing: 0) {
-            Button {
-                selectedAnswer = BattlefieldAnswerSelection(
-                    resultID: result.id, entrant: entrant, answer: answer, problem: problem,
-                    scoring: result.scoringPolicy)
-            } label: {
-                answerSummary(answer, attempt: attempt, score: score)
-                    .contentShape(Rectangle())
-            }.buttonStyle(.plain)
-                .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
-                .accessibilityLabel(Text(label))
-            if ![.solved, .queued, .requesting, .judging].contains(answer.status) {
-                Button {
-                    battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
-                } label: {
-                    Image(systemName: retryPending ? "clock.arrow.circlepath" : "arrow.clockwise").frame(
-                        width: 32, height: 44)
-                }.buttonStyle(.plain).foregroundStyle(Palette.mint)
-                    .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
-                    .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
-                    .accessibilityLabel(
-                        L10n.text("重试 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
-                    )
-                    .accessibilityIdentifier("retry-\(entrant.entrant.preset.model.id)-\(problem.id)")
+        let showsRetry = ![.solved, .queued, .requesting, .judging].contains(answer.status)
+        Button {
+            selectedAnswer = BattlefieldAnswerSelection(
+                resultID: result.id, entrant: entrant, answer: answer, problem: problem,
+                scoring: result.scoringPolicy)
+        } label: {
+            answerSummary(answer, attempt: attempt, score: score, showsRetry: showsRetry)
+                .contentShape(Rectangle())
+        }.buttonStyle(.plain)
+            .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
+            .accessibilityLabel(Text(label))
+            .overlayPreferenceValue(BattlefieldRetryAnchor.self) { anchor in
+                if let anchor {
+                    GeometryReader { geometry in
+                        Button {
+                            battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
+                        } label: {
+                            Image(systemName: retryPending ? "clock.arrow.circlepath" : "arrow.clockwise")
+                                .frame(width: 24, height: 24).contentShape(Rectangle())
+                        }.buttonStyle(.plain).foregroundStyle(Palette.mint)
+                            .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
+                            .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
+                            .accessibilityLabel(
+                                L10n.text("重试 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
+                            )
+                            .accessibilityIdentifier("retry-\(entrant.entrant.preset.model.id)-\(problem.id)")
+                            .position(x: geometry[anchor].midX, y: geometry[anchor].midY)
+                    }
+                }
             }
-        }.frame(width: 248)
+            .frame(width: 248)
             .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
     }
 
@@ -309,11 +321,17 @@ struct BattlefieldDashboard: View {
         String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")
     }
 
-    private func answerSummary(_ answer: ProblemAnswer, attempt: AnswerAttempt?, score: String) -> some View {
+    private func answerSummary(_ answer: ProblemAnswer, attempt: AnswerAttempt?, score: String, showsRetry: Bool)
+        -> some View
+    {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: answer.status.symbol)
-                Text(answer.status.title).font(.caption.bold())
+                Text(answer.status.title).font(.caption.bold()).lineLimit(1)
+                if showsRetry {
+                    Color.clear.frame(width: 24, height: 16).accessibilityHidden(true)
+                        .anchorPreference(key: BattlefieldRetryAnchor.self, value: .bounds) { $0 }
+                }
                 Spacer(minLength: 4)
                 if let attempt {
                     Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.caption2.monospaced()).foregroundStyle(
@@ -338,7 +356,7 @@ struct BattlefieldDashboard: View {
         }.frame(height: 38, alignment: .topLeading).frame(maxWidth: .infinity, alignment: .leading).padding(
             .leading, 12
         ).padding(
-            .trailing, 6
+            .trailing, 12
         ).padding(.vertical, 10)
     }
 
