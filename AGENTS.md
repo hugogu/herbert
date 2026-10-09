@@ -40,3 +40,5 @@
 - SSE wire framing can exceed 4 MiB before a 64K-token completion finishes. Bound individual events and decoded answer/reasoning bytes independently; do not cap cumulative SSE metadata. Apply the judge parser size limit after extracting the fenced H program.
 
 - Add manual UI translations before the `// Original curriculum` marker in each strings file; the course generator replaces everything from that marker onward. Verify regeneration before committing new strings.
+
+- Give parsers with private stored state an explicit initializer when tests customize limits. CI uses an older Swift toolchain than this machine; do not rely on newer synthesized memberwise initializers.

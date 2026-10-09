@@ -309,7 +309,11 @@ struct ServerSentEventParser {
     private var data: [String] = []
     private var skipLF = false
     private var eventBytes = 0
-    var maximumEventBytes = AIResponseLimits.payloadBytes
+    let maximumEventBytes: Int
+
+    init(maximumEventBytes: Int = AIResponseLimits.payloadBytes) {
+        self.maximumEventBytes = maximumEventBytes
+    }
 
     mutating func consume(_ byte: UInt8) throws -> String? {
         if skipLF {
