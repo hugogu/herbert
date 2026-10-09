@@ -6,7 +6,7 @@ This open-source preview includes **30 original lessons + 1,769 archived communi
 problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
 movement trails, grid dots, and local progress with JSON backup import/export.
 
-**Updated in 0.3.4:** Benchmark results now show **total points / (100 × selected puzzles)**
+**Updated in 0.3.5:** Benchmark results now show **total points / (100 × selected puzzles)**
 as a percentage in live progress, history and share images. Solved counts sit beside the
 provider; model display names omit pricing suffixes such as `(free)`.
 
@@ -53,7 +53,7 @@ The App Store scheme contains only the originals; this DMG is the open-source ed
 中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
 与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
 Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 30 道原创题和 1,769 道社区题。
-0.3.4 将评测成绩显示为总满分百分比，移动通过题数、清理模型名称后缀，并重做题目选择页。修复长推理因 SSE 包装数据达到旧 4 MiB 上限而失败的问题。
+0.3.5 将评测成绩显示为总满分百分比，移动通过题数、清理模型名称后缀，并重做题目选择页。修复长推理因 SSE 包装数据达到旧 4 MiB 上限而失败的问题。
 
 默认单次输出上限为 65,536 tokens，可从新比赛已选模型旁的参数按钮直接修改。
 Best Effort 等待所有 AI 完成；Mac 历史默认可见三列模型，历史和答案窗口均可调整大小；推理可折叠并按 Markdown 显示。

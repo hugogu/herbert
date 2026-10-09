@@ -30,7 +30,7 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.4 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.4/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.5 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.5/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -72,7 +72,7 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.4:** normalized benchmark percentages, a structured puzzle picker, and
+**Updated in 0.3.5:** normalized benchmark percentages, a structured puzzle picker, and
 long reasoning streams without counting SSE packaging against the output allowance.
 The app has four main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
 

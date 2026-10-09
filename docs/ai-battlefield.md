@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.4**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.5**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 

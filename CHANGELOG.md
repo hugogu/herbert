@@ -5,6 +5,11 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.5] - 2026-10-09
+
+- Include all 0.3.4 benchmark, streaming and puzzle picker improvements in the published Mac preview.
+- Add an explicit SSE parser initializer for older Swift toolchains. The 0.3.4 GitHub release was blocked by a test compilation error before native builds or publishing; its tag is retained without rewriting history.
+
 ## [0.3.4] - 2026-10-09
 
 - Display normalized benchmark percentages in progress, history and share images. Move solved counts beside provider names, and omit `(free)` from displayed model names while preserving provider IDs and raw history metadata.
@@ -139,7 +144,8 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
-[0.3.4]: https://github.com/hugogu/herbert/releases/tag/v0.3.4
+[0.3.5]: https://github.com/hugogu/herbert/releases/tag/v0.3.5
+[0.3.4]: https://github.com/hugogu/herbert/tree/v0.3.4
 [0.3.3]: https://github.com/hugogu/herbert/releases/tag/v0.3.3
 [0.3.2]: https://github.com/hugogu/herbert/releases/tag/v0.3.2
 [0.3.1]: https://github.com/hugogu/herbert/releases/tag/v0.3.1
