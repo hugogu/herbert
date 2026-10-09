@@ -235,12 +235,9 @@ struct BattlefieldDashboard: View {
                 Spacer(minLength: 4)
                 Text(L10n.text("通过 %ld/%ld", entrant.solved, result.problems.count))
             }.font(.caption).foregroundStyle(Palette.muted)
-            metric(
-                L10n.text("输入 / 输出 Token"),
-                (entrant.hasEstimatedUsage ? "≈ " : "")
-                    + "\(entrant.inputTokens.formatted()) / \(entrant.outputTokens.formatted())")
+            metric(L10n.text("输入 / 输出 Token"), battlefieldInputOutputTokens(entrant))
             metric(L10n.text("输入缓存率"), battlefieldCache(entrant))
-            metric(L10n.text("总 Token"), (entrant.hasEstimatedUsage ? "≈ " : "") + entrant.totalTokens.formatted())
+            metric(L10n.text("总 Token"), battlefieldTotalTokens(entrant))
             Divider()
             HStack(alignment: .firstTextBaseline) {
                 Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
@@ -249,9 +246,13 @@ struct BattlefieldDashboard: View {
                 .contentTransition(.numericText()).foregroundStyle(Palette.mint)
                 .accessibilityIdentifier("score-\(entrant.entrant.preset.model.id)")
                 Spacer(minLength: 4)
-                Text(L10n.text("%@ 分", battlefieldScore(result.score(for: entrant))))
-                    .font(.caption).foregroundStyle(Palette.muted).monospacedDigit()
-                    .accessibilityIdentifier("points-\(entrant.entrant.preset.model.id)")
+                VStack(alignment: .trailing, spacing: 4) {
+                    BattlefieldModelTime(entrant: entrant).font(.caption2)
+                        .accessibilityIdentifier("model-time-\(entrant.entrant.preset.model.id)")
+                    Text(L10n.text("%@ 分", battlefieldScore(result.score(for: entrant))))
+                        .font(.caption).monospacedDigit()
+                        .accessibilityIdentifier("points-\(entrant.entrant.preset.model.id)")
+                }.foregroundStyle(Palette.muted)
             }
 
         }.frame(width: 224, alignment: .leading).padding(12)

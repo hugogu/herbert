@@ -4,7 +4,7 @@ final class BattlefieldUITests: XCTestCase {
     @MainActor
     private func launch(
         reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false,
-        specialErrors: Bool = false, recovery: Bool = false
+        specialErrors: Bool = false, recovery: Bool = false, accounting: Bool = false
     ) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -16,6 +16,7 @@ final class BattlefieldUITests: XCTestCase {
             + (streamErrors ? ["--battlefield-stream-errors"] : [])
             + (specialErrors ? ["--battlefield-special-errors"] : [])
             + (recovery ? ["--battlefield-recovery"] : [])
+            + (accounting ? ["--battlefield-accounting"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -483,8 +484,32 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testModelTotalTimeUpdatesLiveAndStopsOnCancellation() {
+        let app = launch(streamErrors: true)
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        let timer = reveal("model-time-fixture-1", in: app)
+        let initialTime = timer.label
+        XCTAssertTrue(initialTime.hasPrefix("Total time "))
+        let tick = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", initialTime), object: timer)
+        XCTAssertEqual(XCTWaiter.wait(for: [tick], timeout: 4), .completed)
+        app.buttons["stopBattlefield"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Stopped by user"].waitForExistence(timeout: 5))
+        let finishedTime = timer.label
+        XCTAssertNotEqual(finishedTime, "Total time 00:00:00")
+        let frozen = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label != %@", finishedTime), object: timer)
+        XCTAssertEqual(XCTWaiter.wait(for: [frozen], timeout: 2), .timedOut)
+        app.terminate()
+    }
+
+    @MainActor
     func testParallelMatchRetryNativeJudgingHistoryAndShareImage() {
-        var app = launch()
+        var app = launch(accounting: true)
         openSection("AI Battlefield", in: app)
         XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("30 puzzles selected"))
 
@@ -499,7 +524,12 @@ final class BattlefieldUITests: XCTestCase {
             XCTAssertEqual(score.value as? String ?? score.label, "80%")
             let points = app.staticTexts["points-\(model)"]
             XCTAssertEqual(points.value as? String ?? points.label, "80 points")
+            let time = app.descendants(matching: .any)["model-time-\(model)"].firstMatch
+            XCTAssertTrue(time.label.hasPrefix("Total time "))
+            XCTAssertNotEqual(time.label, "Total time 00:00:00")
+            XCTAssertLessThan(time.frame.maxY, points.frame.minY)
         }
+        let modelTime = app.descendants(matching: .any)["model-time-fixture-1"].firstMatch.label
         XCTAssertFalse(app.staticTexts["Benchmark score"].exists)
         XCTAssertTrue(app.staticTexts["AI: 2 · Puzzles: 1"].exists)
         capture(app, "ai-battlefield")
@@ -555,10 +585,22 @@ final class BattlefieldUITests: XCTestCase {
         #endif
         app.buttons["shareBattlefield"].battlefieldTap()
         XCTAssertTrue(app.buttons["shareBattlefieldPNG"].waitForExistence(timeout: 10))
+        for model in ["fixture-1", "fixture-2"] {
+            let inputOutput = app.staticTexts["share-input-output-\(model)"]
+            XCTAssertTrue(inputOutput.waitForExistence(timeout: 5))
+            XCTAssertEqual(inputOutput.value as? String ?? inputOutput.label, "Input / output tokens: 1,800 / 24")
+            let total = app.staticTexts["share-total-tokens-\(model)"]
+            XCTAssertEqual(total.value as? String ?? total.label, "Total tokens: 2,400")
+        }
+        let sharedTime = app.descendants(matching: .any)["share-model-time-fixture-1"].firstMatch
+        XCTAssertEqual(sharedTime.label, modelTime)
+        let cache = app.staticTexts["share-cache-fixture-1"]
+        XCTAssertEqual(cache.value as? String ?? cache.label, "Input cache rate: 50%")
+        XCTAssertFalse(app.staticTexts["share-cache-fixture-2"].exists)
         capture(app, "ai-share")
         app.buttons["Close"].battlefieldTap()
         app.terminate()
-        app = launch(reset: false)
+        app = launch(reset: false, accounting: true)
         openSection("AI Battlefield", in: app)
         choose("Match history", in: app)
         let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
@@ -568,6 +610,7 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertEqual(app.staticTexts["score-fixture-1"].value as? String, "80%")
         let restoredPoints = app.staticTexts["points-fixture-1"]
         XCTAssertEqual(restoredPoints.value as? String ?? restoredPoints.label, "80 points")
+        XCTAssertEqual(app.descendants(matching: .any)["model-time-fixture-1"].firstMatch.label, modelTime)
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertEqual(reveal("attempt-time-1", in: app).label, firstDuration)
         XCTAssertEqual(reveal("attempt-time-2", in: app).label, retryDuration)

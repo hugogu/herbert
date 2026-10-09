@@ -5,6 +5,9 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- Show cumulative attempt time above each model's points, including retries and failed requests, with live updates and preserved history timings.
+- Align share-card input/output and reported total tokens with model headers, omit unavailable cache rates, and include per-model time, points and match duration.
+
 - Allow over-limit programs to run in Playground without recording accepted progress; the benchmark judge still enforces byte limits.
 - Recover explicitly marked final H programs from reasoning and incomplete code fences, preserve raw output and show recovery provenance, including saved history trials.
 - Add per-model, per-puzzle manual retry actions to live and saved results. Append one timed attempt with the original snapshots, cumulative budgets, overload cooldown and best-score retention.

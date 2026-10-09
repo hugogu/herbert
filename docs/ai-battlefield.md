@@ -291,7 +291,7 @@ lighting one target earns **49**; a 3-byte solution lighting both earns **94**; 
 solution earns **92**. A later failed retry or cancellation preserves an earlier judged
 score. Ungraded, interrupted attempts cannot earn points.
 
-- Rank by **score descending**, then **total input + output tokens ascending**, then
+- Rank by **score descending**, then **total tokens ascending**, then
   earlier completion time. Count all retries and cached input. Live estimates can change
   the ordering as usage is reconciled. Equal remaining ties use a stable entrant ID.
 - Default **3 attempts per puzzle**, configurable from 1 to 10. Rejections receive native
@@ -340,7 +340,17 @@ Herbert estimates tokens from UTF-8 bytes and includes prompt/message overhead; 
 means estimated or partial usage. Final reported usage replaces estimates rather than
 being added a second time. Output includes reasoning tokens; they are not double-counted.
 Input cache rate is cached input / total input and appears only when **every attempt**
-reports complete cache usage. Missing data displays **Unavailable**, distinct from 0%.
+reports complete cache usage. Missing data displays **Unavailable** in the dashboard,
+distinct from 0%; share images omit it. Model headers and share images use the same
+input/output and total token figures, including all retries. Total tokens preserve the
+provider-reported total when it exceeds input plus output, rather than recomputing it.
+
+Each model also shows **total attempt time** above its points: the sum of request
+durations across all puzzles, including retries, failures and cancelled attempts. Active
+attempts update live; finished durations remain fixed in history. Cooldowns, queued time
+and idle time before a manual history retry are excluded. This differs from the match
+wall-clock duration, since models run in parallel. Share images include both match
+duration and each model's total attempt time.
 
 A limited request receives an output allowance no larger than its remaining problem
 budget minus estimated input and any known model capacity/context constraints. Each

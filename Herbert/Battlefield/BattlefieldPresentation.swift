@@ -89,6 +89,39 @@ func battlefieldCache(_ entrant: EntrantResult) -> String {
     entrant.cacheRate.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? L10n.text("未提供")
 }
 
+func battlefieldInputOutputTokens(_ entrant: EntrantResult) -> String {
+    (entrant.hasEstimatedUsage ? "≈ " : "")
+        + "\(entrant.inputTokens.formatted()) / \(entrant.outputTokens.formatted())"
+}
+
+func battlefieldTotalTokens(_ entrant: EntrantResult) -> String {
+    (entrant.hasEstimatedUsage ? "≈ " : "") + entrant.totalTokens.formatted()
+}
+
+struct BattlefieldModelTime: View {
+    let entrant: EntrantResult
+    var snapshotAt: Date?
+
+    var body: some View {
+        Group {
+            if let snapshotAt {
+                timing(at: snapshotAt)
+            } else if entrant.answers.contains(where: { $0.attempts.contains { $0.finishedAt == nil } }) {
+                TimelineView(.periodic(from: .now, by: 1)) { context in timing(at: context.date) }
+            } else {
+                timing(at: .now)
+            }
+        }
+    }
+
+    private func timing(at now: Date) -> some View {
+        let duration = battlefieldDuration(entrant.totalAttemptTime(at: now))
+        return Label(duration, systemImage: "clock").fixedSize().monospacedDigit()
+            .accessibilityElement(children: .ignore).accessibilityLabel(L10n.text("总用时 %@", duration))
+            .help(L10n.text("所有尝试的用时之和，包含重试和失败，不包含等待重试或比赛间隔。"))
+    }
+}
+
 func battlefieldScore(_ score: Double) -> String {
     score.formatted(.number.precision(.fractionLength(0...2)))
 }

@@ -54,6 +54,47 @@ final class BattlefieldTests: XCTestCase {
         try repository.saveResult(result)
         let restored = try repository.loadResult(result.id)
         XCTAssertEqual(restored.entrants[0].answers[0].attempts.map { $0.elapsedTime() }, [12, 15])
+        XCTAssertEqual(restored.entrants[0].totalAttemptTime(at: checkpoint.addingTimeInterval(3600)), 27)
+    }
+
+    func testModelTimeIncludesAllAttemptsAndExcludesGaps() throws {
+        let start = Date(timeIntervalSince1970: 1000)
+        var entrant = EntrantResult(entrant: participants(1)[0].entrant, problems: try first(2))
+        XCTAssertEqual(entrant.totalAttemptTime(at: start), 0)
+        var failed = AnswerAttempt(number: 1, startedAt: start)
+        failed.finishedAt = start.addingTimeInterval(10.5)
+        failed.error = "Provider disconnected"
+        var retry = AnswerAttempt(number: 2, startedAt: start.addingTimeInterval(40))
+        retry.finishedAt = start.addingTimeInterval(44)
+        entrant.answers[0].attempts = [failed, retry]
+        entrant.answers[1].attempts = [AnswerAttempt(number: 1, startedAt: start.addingTimeInterval(100))]
+        XCTAssertEqual(entrant.totalAttemptTime(at: start.addingTimeInterval(107)), 21.5)
+        entrant.answers[1].attempts[0].finishedAt = start.addingTimeInterval(107)
+        var manual = AnswerAttempt(number: 3, startedAt: start.addingTimeInterval(1000))
+        manual.manual = true
+        manual.finishedAt = start.addingTimeInterval(1002)
+        entrant.answers[0].attempts.append(manual)
+        let decoded = try JSONDecoder().decode(EntrantResult.self, from: JSONEncoder().encode(entrant))
+        XCTAssertEqual(decoded.totalAttemptTime(at: start.addingTimeInterval(5000)), 23.5)
+    }
+
+    func testModelTokenSummaryPreservesReportedTotalsAndMissingCache() throws {
+        var entrant = EntrantResult(entrant: participants(1)[0].entrant, problems: try first())
+        var first = AnswerAttempt(number: 1)
+        first.usage = TokenUsage(input: 100, output: 20, total: 180, cached: 50, estimated: false)
+        var retry = AnswerAttempt(number: 2)
+        retry.usage = TokenUsage(input: 200, output: 10, total: 300, cached: 0, estimated: false)
+        entrant.answers[0].attempts = [first, retry]
+        XCTAssertEqual(entrant.inputTokens, 300)
+        XCTAssertEqual(entrant.outputTokens, 30)
+        XCTAssertEqual(entrant.totalTokens, 480)
+        XCTAssertEqual(try XCTUnwrap(entrant.cacheRate), 50.0 / 300)
+        XCTAssertFalse(entrant.hasEstimatedUsage)
+        entrant.answers[0].attempts[1].usage.cached = nil
+        XCTAssertNil(entrant.cacheRate)
+        entrant.answers[0].attempts[1].usage.partial = true
+        XCTAssertTrue(entrant.hasEstimatedUsage)
+        XCTAssertEqual(entrant.totalTokens, 480)
     }
 
     func testLongExplanationDoesNotPreventExtractingSmallFencedProgram() throws {

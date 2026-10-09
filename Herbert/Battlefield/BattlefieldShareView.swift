@@ -8,6 +8,7 @@ struct BattlefieldShareView: View {
     @State private var file: URL?
     @State private var preview: CGImage?
     @State private var failed = false
+    @State private var snapshotAt = Date.now
 
     var body: some View {
         BattlefieldSheet(title: L10n.text("分享结果图片")) {
@@ -15,6 +16,9 @@ struct BattlefieldShareView: View {
                 if let preview, let file {
                     ScrollView {
                         Image(decorative: preview, scale: 1).resizable().scaledToFit().padding(20)
+                            .accessibilityRepresentation {
+                                BattlefieldShareCard(result: result, snapshotAt: snapshotAt)
+                            }
                     }.background(Palette.paper)
                     ShareLink(
                         item: file,
@@ -37,7 +41,8 @@ struct BattlefieldShareView: View {
     private func render() {
         failed = false
         do {
-            let rendered = try BattlefieldImageExport.render(result)
+            snapshotAt = .now
+            let rendered = try BattlefieldImageExport.render(result, at: snapshotAt)
             file = rendered.url
             preview = rendered.image
         } catch { failed = true }
@@ -46,8 +51,9 @@ struct BattlefieldShareView: View {
 
 enum BattlefieldImageExport {
     @MainActor
-    static func render(_ result: CompetitionResult) throws -> (url: URL, image: CGImage) {
-        let renderer = ImageRenderer(content: BattlefieldShareCard(result: result).environment(\.colorScheme, .light))
+    static func render(_ result: CompetitionResult, at now: Date = .now) throws -> (url: URL, image: CGImage) {
+        let renderer = ImageRenderer(
+            content: BattlefieldShareCard(result: result, snapshotAt: now).environment(\.colorScheme, .light))
         renderer.scale = 1
         guard let image = renderer.cgImage else { throw BattlefieldError.invalidResponse }
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
@@ -66,6 +72,7 @@ enum BattlefieldImageExport {
 
 private struct BattlefieldShareCard: View {
     let result: CompetitionResult
+    let snapshotAt: Date
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
             HStack(spacing: 16) {
@@ -88,6 +95,8 @@ private struct BattlefieldShareCard: View {
                     Text(result.configuration.settingsDescription).font(.system(size: 24, weight: .semibold))
                     Text(L10n.text("%ld 个 AI · %ld 道题", result.entrants.count, result.problems.count))
                         .font(.system(size: 18)).foregroundStyle(Palette.muted)
+                    Label(battlefieldDuration(result.elapsedTime(at: snapshotAt)), systemImage: "clock")
+                        .font(.system(size: 18)).monospacedDigit().foregroundStyle(Palette.muted)
                 }
             }
             ForEach(Array(result.ranked.enumerated()), id: \.element.id) { rank, entrant in
@@ -105,17 +114,30 @@ private struct BattlefieldShareCard: View {
                         )
                         .font(.system(size: 17, design: .monospaced))
                         Text(
-                            (entrant.hasEstimatedUsage ? "≈ " : "")
-                                + "\(entrant.inputTokens.formatted()) in / \(entrant.outputTokens.formatted()) out · "
-                                + L10n.text("缓存") + " " + battlefieldCache(entrant)
+                            L10n.text("输入 / 输出 Token") + ": " + battlefieldInputOutputTokens(entrant)
                         )
                         .font(.system(size: 16, design: .monospaced)).foregroundStyle(Palette.muted)
+                        .accessibilityIdentifier("share-input-output-\(entrant.entrant.preset.model.id)")
+                        HStack(spacing: 16) {
+                            Text(L10n.text("总 Token") + ": " + battlefieldTotalTokens(entrant))
+                                .accessibilityIdentifier("share-total-tokens-\(entrant.entrant.preset.model.id)")
+                            if entrant.cacheRate != nil {
+                                Text(L10n.text("输入缓存率") + ": " + battlefieldCache(entrant))
+                                    .accessibilityIdentifier("share-cache-\(entrant.entrant.preset.model.id)")
+                            }
+                        }.font(.system(size: 16, design: .monospaced)).foregroundStyle(Palette.muted)
                     }
                     Spacer(minLength: 10)
-                    Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
-                        .system(size: 44, weight: .bold, design: .rounded)
-                    )
-                    .foregroundStyle(Palette.mint)
+                    VStack(alignment: .trailing, spacing: 8) {
+                        Text(battlefieldPercentage(result.scoreFraction(for: entrant))).font(
+                            .system(size: 44, weight: .bold, design: .rounded)
+                        ).foregroundStyle(Palette.mint)
+                        BattlefieldModelTime(entrant: entrant, snapshotAt: snapshotAt)
+                            .font(.system(size: 18)).foregroundStyle(Palette.muted)
+                            .accessibilityIdentifier("share-model-time-\(entrant.entrant.preset.model.id)")
+                        Text(L10n.text("%@ 分", battlefieldScore(result.score(for: entrant))))
+                            .font(.system(size: 17)).monospacedDigit().foregroundStyle(Palette.muted)
+                    }.fixedSize(horizontal: true, vertical: false)
                 }.padding(22).background(.white, in: RoundedRectangle(cornerRadius: 18))
             }
             Text(result.scoringDescription)

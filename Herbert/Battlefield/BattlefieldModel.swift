@@ -42,7 +42,8 @@ final class BattlefieldModel: ObservableObject {
                         diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"),
                         streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"),
                         specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"),
-                        recovery: ProcessInfo.processInfo.arguments.contains("--battlefield-recovery"))
+                        recovery: ProcessInfo.processInfo.arguments.contains("--battlefield-recovery"),
+                        accounting: ProcessInfo.processInfo.arguments.contains("--battlefield-accounting"))
                 }
             }
         #endif
@@ -375,13 +376,17 @@ func battlefieldError(_ error: Error) -> String {
         let streamErrors: Bool
         let specialErrors: Bool
         let recovery: Bool
+        let accounting: Bool
         private var calls: [String: Int] = [:]
-        init(diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false, recovery: Bool = false)
-        {
+        init(
+            diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false,
+            recovery: Bool = false, accounting: Bool = false
+        ) {
             self.diagnostics = diagnostics
             self.streamErrors = streamErrors
             self.specialErrors = specialErrors
             self.recovery = recovery
+            self.accounting = accounting
         }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
@@ -469,13 +474,16 @@ func battlefieldError(_ error: Error) -> String {
                     return AIReply(text: "", usage: usage, finishReason: "length", reasoning: reasoning)
                 }
             }
-            try await Task.sleep(for: .milliseconds(400))
+            try await Task.sleep(for: .milliseconds(accounting ? 1250 : 400))
             let examples = [(10006, "rsslsslss"), (10012, "a:ssssr\naaaa")]
             let program =
                 request.participant.entrant.preset.model.id == "fixture-1"
                 ? examples.first { problem.contains("ID \($0.0)") }?.1 ?? "s" : "s"
             let text = firstAttempt ? "z" : "```h\n\(program)\n```"
-            let usage = TokenUsage(input: 900, output: 12, cached: 450, estimated: false)
+            let usage = TokenUsage(
+                input: 900, output: 12, total: accounting ? 1200 : nil,
+                cached: accounting && request.participant.entrant.preset.model.id == "fixture-2" ? nil : 450,
+                estimated: false)
             await progress(AIProgress(text: text, usage: usage, isFinal: true))
             return AIReply(text: text, usage: usage)
         }

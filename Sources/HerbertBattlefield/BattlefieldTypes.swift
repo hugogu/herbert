@@ -348,6 +348,12 @@ public struct EntrantResult: Codable, Identifiable, Equatable, Sendable {
     public var totalTokens: Int { usages.reduce(0) { $0 + $1.total } }
     public var confirmedTokens: Int { usages.filter { !$0.estimated }.reduce(0) { $0 + $1.total } }
     public var hasEstimatedUsage: Bool { usages.contains { $0.estimated || $0.partial } }
+    /// Active request time across all attempts, excluding cooldowns and idle time between retries.
+    public func totalAttemptTime(at now: Date = .now) -> TimeInterval {
+        answers.reduce(0) { total, answer in
+            total + answer.attempts.reduce(0) { $0 + $1.elapsedTime(at: now) }
+        }
+    }
     public var cacheRate: Double? {
         guard !usages.isEmpty, inputTokens > 0,
             usages.allSatisfy({ !$0.estimated && !$0.partial && $0.cached != nil })
