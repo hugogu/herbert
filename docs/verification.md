@@ -2,6 +2,16 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 0.3.7：统一设置与 Burnout（10 月 9 日）
+
+- `scripts/check.sh`：104 项 Swift 测试（43 项 Core、61 项 Battlefield）、15 项 Python 检查及严格格式检查通过；最终清理未修改变量警告后再次通过。新增可选时限、每模型每题累计输入/输出预算、跨题/跨模型隔离、输出截断无重试、流式超限取消子请求、晚到回调忽略、无上限请求省略 cap、推理默认参数及显式覆盖、旧配置解码/升级和磁盘持久化检查。
+- `.build/battlefield037-ui.xcresult` 中 9 项 Battlefield 用例通过，两项设置检查因通用 identifier 取到无 value 的外层容器而失败。改用原生 checkbox/switch 后，`.build/battlefield037-settings-ui.xcresult` 两项均通过，覆盖默认限制关闭、组合限制、移除模型输出 cap、自动推理开关保存与重启。
+- `.build/battlefield037-final-ui.xcresult` 最终 Burnout/设置复核两项通过，确认输出上限后无 Attempt 2、无 Rejected、推理可展开。`.build/battlefield037-store-ui.xcresult` 同两项在原创版通过。全新构建目录的 `.build/battlefield037-final-settings-capture.xcresult` 额外确认 Model Settings 英文标题，导出最终英文设置图。
+- 社区版和原创版 Mac/iOS Release 构建通过；两份原创版实际 `.app` 均通过资源审计：30 道原创题，无社区目录或参考答案。工程、课程与三语资源重复生成一致；个人未提交的 scheme 修改保持原样。
+- 本地 0.3.7（10）Mac DMG 通过签名、沙盒/出站网络权限、arm64/x86_64、最低 macOS 版本、30 原创 + 1,769 社区目录、无参考答案及只读挂载检查。GitHub tag 发布从源码独立构建。
+- 中英文 README 增加用户提供的六模型截图：十题选择且含 Stopped，仅作为运行示例，不据此宣称完整受控排名。其他 Battlefield 截图来自实际英文 App 的确定性测试客户端；旧 64K 编辑器/拒绝推理图已移除，改为统一设置和 Burnout 界面。
+- 没有调用付费服务商，没有 iOS Simulator runtime；真实服务商参数接受程度、iPhone/iPad 运行时、Apple 签名与公证仍需开发者检查。
+
 ## 0.3.3：输出预算、比赛复盘与连续课程（10 月 9 日）
 
 - `scripts/check.sh`：86 项 Swift 测试（43 项 Core、43 项 Battlefield）、15 项 Python 检查及严格格式检查通过。新增 65,536 默认上限、实际请求与服务商较低上限、旧配置升级、显式自定义值和历史参数不变，以及 Best Effort 中较慢 AI 在首个 AI 成功或耗尽尝试后继续作答并取得更高分的回归。

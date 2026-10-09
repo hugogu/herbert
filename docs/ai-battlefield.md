@@ -1,6 +1,6 @@
 # AI Battlefield
 
-Available in both editions from **0.3.0**, refined in **0.3.6**. The app has four main
+Available in both editions from **0.3.0**, refined in **0.3.7**. The app has four main
 tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current match** and
 **Match history** in its title bar. The ordinary puzzle game remains fully offline.
 
@@ -9,8 +9,8 @@ tabs; **AI Battlefield** contains **AI Providers**, **New match**, **Current mat
 1. In **AI Battlefield → AI Providers**, add OpenRouter, SiliconFlow, or an OpenAI compatible provider.
 2. Enter its HTTPS base URL and your own API key. Saving automatically requests
    `GET /models`; SiliconFlow adds `sub_type=chat` to discover chat models.
-3. Select any default entrants. Configure each model's output cap, optional temperature
-   and top P, and supported advanced JSON parameters. Blank sampling values use provider defaults.
+3. Select any default entrants. Configure each model's optional temperature, top P, automatic thinking
+   and supported advanced JSON parameters. Blank sampling values use provider defaults.
 4. Use **Refresh models** after provider permissions or model availability change.
 
 The base URL ends at the API version, for example `https://openrouter.ai/api/v1` or
@@ -20,15 +20,34 @@ Custom endpoints must support OpenAI-style chat completions. Choose `max_tokens`
 `max_completion_tokens` according to that provider. Authentication uses the Bearer header.
 Redirects are rejected; enter the final URL directly. HTTP endpoints are not accepted.
 
-The default output cap is **65,536 tokens**, including reasoning. **New match → selected
-model → sliders → Maximum output tokens** opens the same persistent editor as the
-provider’s model list. A **Use 64K output limit** button restores the default. The actual
-request uses the lowest of the configured cap, a provider-declared model maximum, and
-available token budget. Unknown provider limits cannot be inferred automatically.
+**Match Settings** controls output allowances for every entrant; there is no per-model
+output-cap editor. With token limits off, requests use the provider-declared maximum
+output capacity, bounded by the remaining context when both limits are known. If no
+maximum is advertised, Herbert omits `max_tokens` / `max_completion_tokens` and lets the
+provider choose its default. “Unlimited” removes the app's arbitrary cap; it cannot
+infer undocumented model capacity or override a provider's limits/defaults.
 
-Settings schema 2 upgrades legacy 4,096-token presets to 65,536 on load. Other custom
-caps remain unchanged; an explicit 4,096 cap saved in schema 2 is preserved. Historical
-match parameters and actual requested caps are never rewritten.
+Automatic thinking is **enabled by default** in Model Settings. OpenRouter uses
+`reasoning: {enabled: true, effort: ...}` for models advertising reasoning support,
+choosing the first/highest `reasoning.supported_efforts` value or `max` when the model
+advertises reasoning without listing levels. SiliconFlow defaults to
+`enable_thinking: true`, with `reasoning_effort: max` for its documented DeepSeek V4 /
+GLM-5.2 models or models advertising effort control. Compatible providers receive only
+advertised thinking fields; an effort field without advertised levels uses `high`.
+Unsupported/undiscovered reasoning capabilities are not guessed for arbitrary endpoints.
+The editor previews the automatic JSON. Explicit reasoning-family values in advanced
+JSON replace the automatic reasoning defaults as a group, so you can use a provider's
+specific settings without conflicting injected fields. Support varies by model:
+SiliconFlow effort defaults are limited to models with advertised or documented support;
+other models receive the thinking switch. Override defaults if your endpoint needs different options. See
+[OpenRouter reasoning](https://openrouter.ai/docs/guides/best-practices/reasoning-tokens)
+and [SiliconFlow parameters](https://api-docs.siliconflow.cn/docs/api/chat-completions-post).
+
+Settings schema 3 retires saved per-model caps and old aggregate budgets for new matches.
+Sampling, explicit advanced JSON, chosen entrants and attempt counts remain; an old timed
+setting keeps its deadline enabled. Old shared/per-model aggregate budgets are not silently
+reinterpreted as per-problem limits. Historical files, scores, legacy modes, budgets and
+actual requested caps remain available in snapshots without being rewritten on load.
 
 On iPhone the four pages use short titles with icons: **Models / New / Live / History**.
 On Mac, history opens wide enough for three model columns; history and answer dialogs
@@ -78,11 +97,13 @@ finish reason or `[DONE]` is reported as an incomplete stream. Provider/transpor
 stop that entrant, without spending further paid requests on an automatic retry; other
 entrants continue. Historical generic errors cannot recover missing network diagnostics.
 
-A `finish_reason: length` reply with reasoning but no final answer means the model used
-its output allowance without returning H. Reasoning counts toward the output cap.
-Increase that model's cap or adjust reasoning parameters supported by your provider.
-For Kimi, `thinking` is now allowed in advanced JSON; use only options supported by the
-specific endpoint/model. A larger allowance consumes more credits and is not a correctness guarantee.
+A `finish_reason: length` reply means the provider exhausted the request's output
+allowance. That problem becomes **Burnout**, with no second request or invalid-program
+judgment for the truncated response. Received text, reasoning, usage and finish reason
+remain inspectable. A local per-problem budget also cancels the active request and
+remaining retries for that problem. The same entrant continues with a fresh budget on
+the next problem, while other entrants proceed independently. Earlier judged attempts
+retain their best score. Burnout is not an automatic paid retry.
 
 Retries now replay the original reasoning field with a nonempty assistant answer. If
 there was no final answer, judge feedback is merged into the last user message instead
@@ -112,17 +133,26 @@ Models run concurrently, with one request at a time per model. Each model works 
 the same puzzles in catalog order, using the exact same English rules and board prompt.
 Optional additional instructions are identical for every entrant.
 
-| Mode | End condition |
-| --- | --- |
-| Time limited | A monotonic deadline cancels all requests and local judging. Default: 600 seconds. |
-| Token limited | Input + output tokens across all attempts reach the budget, or the next prompt cannot fit. Default: 100,000, shared across the match. An equal independent budget per model is also available. |
-| Best Effort | No match time or aggregate token limit. Every entrant can solve or exhaust its attempts on all selected puzzles. The match completes after all entrants finish; an early finisher does not cancel others. |
+There are no separate modes. **Match Settings** combines:
 
-Every mode can finish naturally or be stopped by the user. Completion requests keep a
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| Limit match time | Off | If enabled, a monotonic deadline cancels all requests and local judging. Editable starting value: 600 seconds. |
+| Limit tokens per problem | Off | If enabled, each model gets the same independent budget per problem, across all attempts, including input, output and reasoning. Editable starting value: 100,000 tokens. |
+| Maximum attempts per problem | 3 | From 1 to 10. Completed, rejected H answers receive native feedback and another attempt while budget remains; Burnout cancels the remaining attempts for that problem. |
+
+Both limits can be enabled together. Budgets are not shared across models or problems.
+If the next prompt cannot fit the remaining problem budget, no request is sent and the
+problem becomes Burnout. At exactly the limit, an already completed answer may still be
+judged; incomplete or over-budget output is not judged. Without limits, every entrant
+can solve or exhaust its attempts on all selected puzzles; an early finisher does not
+cancel others. Every match can finish naturally or be stopped by the user.
+
+Completion requests keep a
 600-second **inactivity** timeout, reset by incoming data, and use Foundation's default
 multi-day total resource timeout. The previous independent 600-second total transfer
 deadline could interrupt a model still streaming reasoning; 0.3.6 removes that override.
-Match time/token limits and Stop continue to cancel active requests. Model discovery
+The optional time limit, per-problem budget and Stop cancel the corresponding active requests. Model discovery
 has a 30-second inactivity timeout. See Apple's
 [request timeout](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/timeoutintervalforrequest)
 and [resource timeout](https://developer.apple.com/documentation/foundation/urlsessionconfiguration/timeoutintervalforresource).
@@ -176,8 +206,8 @@ policy, not a claim of identical original-site scoring.
 
 The progress table itself is the live ranking: model columns move with the standings.
 Headers show normalized benchmark percentages, input/output/total tokens and cache rate.
-Solved counts sit alongside provider names. Pricing suffixes such as `(free)` are omitted
-from model display names; request IDs and saved provider metadata remain intact. Errors appear in
+Solved counts sit alongside provider names. Provider prefixes before the first `:` and
+pricing suffixes such as `(free)` are omitted from model display names; request IDs and saved provider metadata remain intact. Errors appear in
 a corner indicator. Two-line cells show status, attempt, points and a program preview.
 Select a cell to inspect every submitted answer and its feedback. **Try on board** opens
 the actual puzzle snapshot with the answer prefilled; **Back to match** returns to the
@@ -185,13 +215,14 @@ results, including from history. Trials can be edited and replayed without modif
 personal drafts, shortest solutions or stored competition results. The table fills the
 available window width, with horizontal scrolling for additional models.
 
-For comparable measurements, keep puzzle sets, attempts, output caps and shared prompts
-fixed; record sampling/reasoning parameters. Per-model token budgets suit equal resource
-comparisons. **Best Effort waits for every entrant** to finish its selected attempts.
-A slower entrant can still overtake an early finisher on points or token efficiency.
-Provider failures stop only the affected entrant; other entrants continue. Histories retain boards, the full shared prompt, model parameters and scoring
-policy. Remote model versions and provider routing can still change; snapshots do not
-make a third-party model deterministic.
+For comparable measurements, keep puzzle sets, attempts, Match Settings and shared
+prompts fixed; record sampling/reasoning parameters. Equal per-model, per-problem token
+budgets suit resource comparisons. With limits off, every entrant can finish its selected
+attempts. A slower entrant can still overtake an early finisher on points or token efficiency.
+Provider failures stop only the affected entrant; other entrants continue. Histories retain
+boards, the full shared prompt, model parameters, match limits and scoring policy. Remote
+model versions and provider routing can still change; snapshots do not make a third-party
+model deterministic.
 
 ## Understand token accounting
 
@@ -202,12 +233,19 @@ being added a second time. Output includes reasoning tokens; they are not double
 Input cache rate is cached input / total input and appears only when **every attempt**
 reports complete cache usage. Missing data displays **Unavailable**, distinct from 0%.
 
-Shared budgets reserve output capacity across concurrent requests and cap each request's
-output. Estimates are reconciled with provider usage. Stopping cancels the underlying
-URLSession tasks and prevents late answers from receiving points. **A token budget is
-not a billing guarantee**: tokenizers differ, an aborted request may lack final usage,
-and a remote provider can continue processing after local cancellation. Check provider
-usage and use provider-side spending limits for a hard financial cap.
+A limited request receives an output allowance no larger than its remaining problem
+budget minus estimated input and any known model capacity/context constraints. Each
+entrant's attempts are tracked separately; retries spend the same problem budget. Live
+usage reaching the budget cancels that request and marks Burnout. Provider token-cap
+semantics vary: reasoning may share the output cap or use a separate provider budget.
+Reported final usage takes precedence over local estimates. The accounting note appears
+below the progress table.
+
+Stopping cancels underlying URLSession tasks and prevents late answers from receiving
+points. **A token budget is not a billing guarantee**: tokenizers differ, an aborted
+request may lack final usage, and a remote provider can continue processing after local
+cancellation. Check provider usage and use provider-side spending limits for a hard
+financial cap.
 
 ## Local data and sharing
 
@@ -235,8 +273,9 @@ Worker and explicit consent; no client D1 credentials or cloud sync are included
 
 ## Verification
 
-Unit tests exercise native judging, bounded retries, parallelism, deadlines, shared and
-per-model budgets, cancellation, persistence and corrupt data. HTTP integration tests use
+Unit tests exercise native judging, bounded retries, parallelism, optional deadlines,
+independent cumulative per-problem budgets, Burnout cancellation, unlimited output,
+reasoning defaults, legacy migration, persistence and corrupt data. HTTP integration tests use
 URLProtocol fixtures to exercise authenticated discovery, actual SSE byte parsing,
 JSON fallback, usage reconciliation and cancellation after response headers. Native UI
 tests use an isolated, deterministic client and in-memory keys; their screenshots are

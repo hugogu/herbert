@@ -1,45 +1,41 @@
 Download **Herbert-macOS-universal.dmg** below, open it, and drag **Herbert.app** to
-**Applications**. No Xcode is needed. Requires **macOS 14 or later**; the same app
-supports **Apple Silicon and Intel**.
+**Applications**. Requires **macOS 14+**; supports **Apple Silicon and Intel**. No Xcode needed.
 
-This open-source preview includes **30 original lessons + 1,769 archived community
-problems**, automatic English/Chinese/Japanese UI, Modern and Classic boards,
-movement trails, grid dots, and local progress with JSON backup import/export.
+**Updated in 0.3.7:**
 
-**Updated in 0.3.6:** Live attempts distinguish waiting, thinking and answer generation.
-Interrupted requests explicitly mark retained partial output and preserve network error
-domains/codes. Provider `finish_reason: error` / `content_filter` and HTTP 200 error
-payloads are request failures, not rejected H programs. The independent ten-minute
-total transfer timeout is removed; inactivity timeout, match limits and Stop remain.
+- One **Match Settings** panel replaces modes: optional time limit, optional independent
+  token budget per model and problem, and three attempts per problem by default.
+  Both limits start off. Budgets include input and output across retries, including reasoning.
+- Reaching an output or problem token limit marks that problem **Burnout**, retains
+  received reasoning, and cancels its remaining retries. Other problems and models continue.
+- Remove per-model output caps. Unlimited requests use advertised model capacity or
+  omit the cap for provider defaults; known provider limits still apply. Historical
+  parameters remain readable, while active settings migrate to the new policy.
+- **Model Settings** enables automatic thinking and the highest supported reasoning
+  effort by default, with provider-aware parameters, a JSON preview and explicit overrides.
+- Shorten model display names by removing provider prefixes before `:` and pricing
+  suffixes. Move token accounting notes below progress. Both READMEs include the
+  user-provided six-model example and refreshed English app captures.
 
-Benchmark results show **total points / (100 × selected puzzles)**
-as a percentage in live progress, history and share images. Solved counts sit beside the
-provider; model display names omit pricing suffixes such as `(free)`.
+The preview includes **30 original lessons + 1,769 archived community problems**,
+automatic English/Chinese/Japanese UI, Modern and Classic boards, movement trails,
+grid dots and local progress with JSON backups. Original lessons are numbered L01–L30.
 
-The puzzle picker integrates search, original/community/selected filters, chapter
-groups, board thumbnails, byte budgets and bulk selection actions.
+Herbert Benchmark judges actual H programs in the native engine. Progress, history
+and share images show normalized coverage/code-efficiency scores, token usage and cache
+rates. Mac history opens with three model columns; history and answer dialogs resize.
+Reasoning collapses independently and renders as Markdown. Puzzle selection includes
+search, source filters, chapter groups, board previews and bulk actions.
 
-Long reasoning streams no longer fail because repeated SSE metadata exceeds the old
-4 MiB transport limit. Individual events and actual answer/reasoning content remain
-bounded, with partial output preserved on failure. The 64K model output default remains
-configurable. Best Effort waits for every AI; Mac history and answer dialogs are resizable.
-
-The course has continuous **L01–L30** numbers. New L07 “Turning rose” and L08 “Tandem lanterns”
-replace the former L25/L26 with symmetric walled boards. Other boards, saved progress
-identities and historical snapshots are retained. Both editions contain 30 originals;
-this open-source preview also contains the 1,769 community puzzles. Prompt v4 retains
-the verified public examples and refers to the course finale by its current identity.
-README screenshots are actual app captures; English documentation uses English UI.
-
-AI is optional and requires your own API key/credits. Keys stay in Keychain; settings
-and history stay local. Streaming estimates and cancellation cannot guarantee final
+AI is optional and requires your API key/credits. Keys stay in Keychain; settings and
+history stay local. Provider failures retain partial output and diagnostics, and are
+not treated as rejected H programs. Streaming estimates and cancellation cannot guarantee
 provider billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/main/docs/ai-battlefield.md)
 and [privacy](https://github.com/hugogu/herbert/blob/main/PRIVACY.md).
 
 **Signing:** this preview is ad-hoc signed and has not been notarized by Apple.
 If macOS blocks the first launch, follow [Apple's instructions](https://support.apple.com/en-us/102445)
 for **System Settings → Privacy & Security → Open Anyway** after trying to open it.
-Developer ID signing and notarization remain future release work.
 
 **Integrity:** download the accompanying `.sha256` file into the same directory and run:
 
@@ -47,25 +43,24 @@ Developer ID signing and notarization remain future release work.
 shasum -a 256 -c Herbert-macOS-universal.dmg.sha256
 ```
 
-GitHub Actions builds both architectures, checks the signature, sandbox and bundled
-catalogs, mounts the DMG read-only to verify it, and publishes it only after the tests
-and Mac/iOS builds pass. iPhone/iPad runtime testing is still pending.
+GitHub Actions tests, builds both architectures, audits the signature, sandbox and
+bundled catalogs, mounts the DMG read-only to verify it, and publishes after Mac/iOS
+builds pass. Native Mac UI tests use deterministic fixtures; paid provider calls and
+iPhone/iPad runtime checks remain device verification work.
 
-Code and the 30 original lessons are MIT licensed. Archived community content has
-separate, unconfirmed redistribution rights; it is not relicensed under MIT.
-See [NOTICE.md](https://github.com/hugogu/herbert/blob/main/NOTICE.md).
-The App Store scheme contains only the originals; this DMG is the open-source edition.
+Code and the 30 originals are MIT licensed. Community content has separate, unconfirmed
+redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/main/NOTICE.md).
+The App Store scheme contains only originals; this DMG is the open-source edition.
 
-中文：下载下方 DMG，打开后将 Herbert 拖到“应用程序”。支持 macOS 14+ 的 Apple Silicon
-与 Intel Mac，无需 Xcode。此预览版尚未经过 Apple 公证；如首次启动被阻止，可按上方
-Apple 指引在“系统设置 → 隐私与安全”中确认打开。含 30 道原创题和 1,769 道社区题。
-0.3.6 区分正在思考和请求中断，保留网络错误码，服务商流错误不再误标为 Rejected；取消独立的 10 分钟传输总时长限制，比赛限制与手动停止仍有效。
-评测成绩显示为总满分百分比，移动通过题数、清理模型名称后缀，并重做题目选择页。修复长推理因 SSE 包装数据达到旧 4 MiB 上限而失败的问题。
+中文：0.3.7 取消比赛模式，统一为比赛设置：默认不限时、不限 Token，每题最多 3 次机会。
+可对每个模型每道题设置相同的独立预算，累计输入、输出与推理及重试用量。
+达到输出或每题预算上限后标记 Burnout，保留内容、不再重试此题，后续题目和其他模型继续。
+移除模型单独输出上限，默认启用服务商支持的思考与最高推理等级，允许高级 JSON 覆盖。
+清理模型名服务商前缀，将用量提示移到表格下方，README 增加用户提供的六模型示例。
 
-默认单次输出上限为 65,536 tokens，可从新比赛已选模型旁的参数按钮直接修改。
-Best Effort 等待所有 AI 完成；Mac 历史默认可见三列模型，历史和答案窗口均可调整大小；推理可折叠并按 Markdown 显示。
-原创课程连续编号 L01–L30，新 L07「旋转玫瑰」和 L08「双灯相映」替换原 L25/L26。
-AI 使用自己的 API 额度，密钥保存在钥匙串中。
+下载下方 DMG 后将 Herbert 拖入“应用程序”。支持 macOS 14+，包含 30 道原创和 1,769 道社区题，
+中英日界面、连续墙、轨迹与网格、本地历史和 PNG 分享。预览版尚未经过 Apple 公证。
+AI 使用自己的 API 额度；密钥留在钥匙串，本地预算与取消请求无法保证最终账单。
 
-See the [changelog](https://github.com/hugogu/herbert/blob/main/CHANGELOG.md) for changes
-and the [README](https://github.com/hugogu/herbert#readme) for screenshots and controls.
+See the [changelog](https://github.com/hugogu/herbert/blob/main/CHANGELOG.md)
+and [README](https://github.com/hugogu/herbert#readme) for screenshots and controls.

@@ -30,7 +30,7 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.6 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.6/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.7 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.7/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
@@ -72,35 +72,36 @@ The course is included in the Mac preview.*
 
 ## AI Battlefield
 
-**Updated in 0.3.6:** distinguish live thinking from interrupted requests, retain specific
-network diagnostics, and treat provider stream errors as request failures. Remove the
-independent ten-minute total transfer cap that could interrupt active reasoning streams.
-Benchmark percentages, structured puzzle selection and 64K output settings remain available.
-The app has four main tabs; **AI Battlefield** contains **AI Providers → New match → Current match → Match history**.
+**Updated in 0.3.7:** one **Match Settings** panel replaces match modes. Time and
+per-problem token limits are optional and off by default; each problem allows three
+attempts by default. Every model receives the same per-problem budget. Reaching an
+output or token limit marks that problem **Burnout**, retains received reasoning and
+cancels its remaining retries. Other problems and entrants continue.
 
-- Connect multiple OpenRouter, SiliconFlow or OpenAI compatible providers, discover
-  models through `/models`, and set default entrants and model parameters. Keys stay in Keychain. Model output defaults to **65,536 tokens**, including reasoning;
-  edit it directly from a selected model’s parameter button in **New match**, or from AI Providers.
-- Choose models and puzzles, then run time-limited, token-limited or Best Effort matches.
-  Models work in parallel with identical Markdown rules and board prompts.
-- The Mac setup places entrants and puzzles side by side. Progress uses compact two-line
-  answers and score-sorted model columns. Mac history opens with room for at least three
-  model columns; both history and answer dialogs can be resized. iPhone uses short icon tabs.
-- Model headers show scores, input/output/total tokens and cache rates. Select an answer
-  to inspect every submission, native feedback and retry, then **Try on board** with the
-  submitted code prefilled. **Back to match** returns to the results. Trials preserve
-  personal drafts, shortest solutions and match scores.
-- Full response shows received final text, independently collapsible Markdown reasoning and credential-redacted provider
-  error details, updating live and remaining available in history. Reasoning-only output
-  explains output-cap exhaustion. Retry requests preserve reasoning and avoid empty assistant turns.
-- Live answers show **Thinking**, **Generating answer** or **Waiting for provider**.
-  Interrupted requests mark retained output explicitly. Provider `finish_reason: error`
-  is not judged as a rejected program; network errors show their diagnostic code.
+- Add multiple OpenRouter, SiliconFlow or OpenAI compatible providers. Discover models
+  through `/models`, choose default entrants, and save settings locally. API keys stay
+  in the system Keychain.
+- **Model Settings** covers sampling and advanced parameters. Automatic thinking is on
+  by default, using the highest advertised reasoning effort for supported models.
+  Explicit advanced JSON overrides these defaults. Output allowances come from the
+  shared match policy and provider capabilities, without a separate model cap.
+- Choose models and puzzles; models work in parallel with identical Markdown rules
+  and board prompts. With limits off, all entrants can finish their selected attempts.
+- Mac setup places entrants and puzzles side by side. Progress uses compact two-line
+  answers and score-sorted model columns. History opens with room for at least three
+  model columns; history and answer dialogs resize. iPhone uses short icon tabs.
+- Model headers show normalized scores, input/output/total tokens and cache rates.
+  Provider prefixes and `(free)` are omitted from display names. Select an answer to
+  inspect submissions, native feedback and retries, then **Try on board** with code
+  prefilled. **Back to match** returns to the results, preserving personal progress.
+- Full response retains final text, independently collapsible Markdown reasoning and
+  credential-redacted errors. Live attempts show **Thinking**, **Generating answer**
+  or **Waiting for provider**. Provider and network failures are distinct from rejected
+  H programs; retained reasoning is explicitly marked when generation has ended.
 - Shared prompt `herbert-h-v4` includes coordinate rulers, target coordinates and two
   native-verified worked boards, including a recursive pinwheel separate from scored L30.
-- Stop cancels active calls. Matches are saved locally and can be shared as PNG cards.
-  **Best Effort waits for every AI to finish its selected puzzle set**, including exhausted
-  retries. An early finisher does not cancel other entrants; a later result can still win.
+- Stop cancels active calls. Matches save locally and can be shared as PNG cards.
+  Token accounting notes sit below puzzle progress.
 
 AI is optional and uses **your own API credits**. Streaming usage can be estimated or
 partial; token budgets cannot guarantee a provider's final bill. iPhone/iPad matches end
@@ -125,32 +126,41 @@ Rank by **score descending → total input + output tokens ascending → complet
 Cached input and all retries count toward token consumption. Older 0.3.0 histories retain
 their original 100-per-solved-puzzle scoring and tie-breaks.
 
-For repeatable comparisons, use the same puzzle set, attempt limit, output caps and shared
-prompt, and record sampling/reasoning parameters. Equal **per-model token budgets** suit
-resource comparisons; **Best Effort lets every entrant finish** without a match deadline or aggregate token limit.
+For repeatable comparisons, use the same puzzle set, attempts, Match Settings and shared
+prompt, and record sampling/reasoning parameters. The optional **per-model, per-problem
+token budget** covers input and output across retries. With both limits off, every entrant
+can finish without a match deadline or app-imposed output cap. Known provider output
+limits still apply; unknown limits use provider defaults.
 History snapshots preserve the full shared prompt and its version, boards, parameters, received answers and the scoring policy;
 provider model versions can still change. This composite score is our benchmark policy,
 inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
 
-![English Mac Herbert Benchmark: score-ranked model columns with token usage and compact answers](docs/screenshots/en/battlefield/ai-battlefield.png)
+![User-provided Herbert Benchmark run showing six LLMs side by side](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 
-*Actual English app captures with deterministic test entrants, demonstrating rejection
-and a successful retry. These scores illustrate the app; they are not commercial model results.*
+*User-provided English app capture of six models over a ten-puzzle selection. Several
+answers were stopped; this is an illustrative run, not a completed controlled comparison.
+The capture predates 0.3.7, so its model names still include provider prefixes.*
+
+[Current progress UI](docs/screenshots/en/battlefield/ai-battlefield.png) ·
 [New match](docs/screenshots/en/battlefield/ai-new-match.png) ·
+[Match Settings](docs/screenshots/en/battlefield/ai-match-settings.png) ·
+[Model Settings](docs/screenshots/en/battlefield/ai-model-settings.png) ·
 [Puzzle selection](docs/screenshots/en/battlefield/ai-puzzles.png) ·
 [Readable rules](docs/screenshots/en/battlefield/ai-rules.png) ·
 [Providers](docs/screenshots/en/battlefield/ai-providers.png) ·
 [Models](docs/screenshots/en/battlefield/ai-models.png) ·
-[64K output settings](docs/screenshots/en/battlefield/ai-output-limit.png) ·
 [Resizable three-AI history](docs/screenshots/en/battlefield/ai-history.png) ·
 [Native feedback](docs/screenshots/en/battlefield/ai-answer.png) ·
-[Reasoning-only response](docs/screenshots/en/battlefield/ai-reasoning.png) ·
+[Burnout and retained reasoning](docs/screenshots/en/battlefield/ai-burnout.png) ·
 [Provider error details](docs/screenshots/en/battlefield/ai-provider-error.png) ·
 [Live thinking](docs/screenshots/en/battlefield/ai-thinking.png) ·
 [Interrupted provider stream](docs/screenshots/en/battlefield/ai-stream-error.png) ·
 [Network diagnostics](docs/screenshots/en/battlefield/ai-network-error.png) ·
 [Board trial](docs/screenshots/en/battlefield/ai-trial.png) ·
 [PNG share preview](docs/screenshots/en/battlefield/ai-share.png)
+
+*Linked UI captures use deterministic test entrants and demonstrate the current app.
+Their scores are illustrative, not commercial model results.*
 
 ## Community patterns
 

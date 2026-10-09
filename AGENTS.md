@@ -44,3 +44,5 @@
 - Give parsers with private stored state an explicit initializer when tests customize limits. CI uses an older Swift toolchain than this machine; do not rely on newer synthesized memberwise initializers.
 
 - Streaming providers can return HTTP 200 with `finish_reason: error` or an in-band error. Preserve partial output/usage and stop before judging; retained reasoning does not prove generation is still active. Keep request inactivity timeouts separate from total resource deadlines, which can interrupt streams that still emit data.
+
+- SwiftUI Toggle identifiers can also match an outer container with no accessibility value. In UI tests, select the native checkbox/switch before asserting or changing its value; use the same lookup after relaunch to verify persistence.

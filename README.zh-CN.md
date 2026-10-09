@@ -11,7 +11,7 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 
 ## 下载 Mac 版
 
-**[下载 0.3.6 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.6/Herbert-macOS-universal.dmg)**
+**[下载 0.3.7 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.7/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
@@ -52,25 +52,19 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 | --- | --- |
 | [![四向对称的折叠花瓣与连续墙](docs/screenshots/course/course-rose-board.png)](docs/screenshots/course/course-rose.png) | [![底部直桥连接的两个方形灯框](docs/screenshots/course/course-lanterns-board.png)](docs/screenshots/course/course-lanterns.png) |
 
-## AI Battlefield · 0.3.6
+## AI Battlefield · 0.3.7
 
-0.3.6 区分「正在思考」和「请求已中断」，保留具体网络错误码；服务商 `finish_reason: error` 不再误标为程序 Rejected。取消独立的 10 分钟传输总时长覆盖，避免持续返回推理的请求到点被切断。比赛限时、Token 预算和手动停止仍生效。
+比赛统一为「比赛设置」，取消模式选择。默认不限时、不限 Token，每题最多 3 次机会。
+可启用统一的**每模型、每题 Token 预算**，累计该题所有尝试的输入与输出（含推理）。
+达到输出上限或用尽该题预算时标记 **Burnout**，保留已收到的推理，并取消该题剩余重试；其他题目和模型继续。
 
-总成绩按满分完成度显示百分比，通过题数位于服务商名称旁，模型名称隐藏 `(free)` 后缀。题目选择页包含统一搜索、原创／社区／已选筛选、章节分组和棋盘缩略图。长推理不会因 SSE 包装数据达到旧 4 MiB 限制而失败。
-
-默认单次输出上限提高至 **65,536 tokens**（包含推理），可从「新比赛」已选模型旁的参数按钮直接修改，也可在「AI 配置」的模型参数里设置。旧默认 4K 配置升级为 64K，其他自定义值保留；服务商声明的较低上限和比赛预算仍生效。Mac 历史窗口默认并排显示至少三个 AI，历史与答案窗口均可拖动边缘调整大小。推理可独立收起并按 Markdown 显示，iPhone 导航改为短标题加图标。
-
-手机端保留四个主 Tab。**AI 配置 → 新比赛 → 当前比赛 → 比赛历史**合并在 AI Battlefield 标题栏中。
-普通游戏继续支持完全离线。
-
-0.3.3 支持实时查看并保存最终回答、模型推理、部分输出和脱敏后的服务商错误详情；推理耗尽输出额度时会给出明确提示。重试保留推理字段并避免空 assistant 消息。共享提示词 `herbert-h-v4` 添加坐标尺、目标坐标与两道经过原生判题验证的完整棋盘示例，其中递归风车独立于计分题 L30。
-
-- 配置多个 OpenRouter、SiliconFlow 或 OpenAI 兼容服务商，通过 `/models` 自动发现模型，选择默认参赛模型及参数；密钥保存在系统钥匙串。
-- 默认选中 30 道原创题，可自选题目与模型。限时、限 Token 和 Best Effort 三种模式；Token 预算可全场共享或每个 AI 独立。
-- Mac 新比赛的模型和题目并排显示；统一规则按 Markdown 排版。AI 使用相同规则和棋盘提示词并行解答，每题默认 3 次机会，可设为 1–10 次。
-- 逐题进度用紧凑两行展示状态、尝试次数、分数和程序摘要；模型列动态按成绩排序，表头显示输入/输出/总 Token 与缓存率，拉宽窗口可显示更多 AI。
-- 点击答案查看完整提交、反馈和重试记录；**在棋盘中试运行**会预填答案，可编辑、运行并**返回比赛**，不修改个人草稿、最短解或比赛成绩。
-- **Best Effort 等待全部 AI 完成所有所选题目的尝试**，包括用完重试机会；先完成者不会取消其他 AI，后来者仍可能取得更高分。各模式均可手动终止；本地历史可回顾，可生成 PNG 分享图片。
+- 添加多个 OpenRouter、SiliconFlow 或兼容服务商，通过 `/models` 自动检测模型并选择默认参赛者。配置本地保存，API Key 留在系统钥匙串。
+- 「模型设置」保留采样和高级 JSON，默认启用思考并选择服务商声明的最高推理等级；显式 JSON 可覆盖自动值。输出额度统一由比赛设置和服务商能力决定，不再单独配置每个模型的上限。
+- 默认选中 30 道原创题，可自选题目与模型。各模型并行、逐题作答，使用相同的 Markdown 规则和棋盘提示；关闭限制时等待全部模型完成。
+- Mac 新比赛将模型与题目并排；进度用紧凑两行展示状态、尝试次数、分数和程序摘要，模型列按成绩排序，表头显示归一化分数、输入/输出/总 Token 与缓存率。显示名称去掉冒号前的服务商前缀和 `(free)`。
+- Mac 历史窗口默认并排显示至少三个 AI，历史与答案窗口均可调整大小。推理可独立折叠并按 Markdown 渲染，iPhone 使用短标题加图标导航。
+- 点击答案查看提交、判题反馈和完整推理，再到实际棋盘试运行并返回；不改个人草稿、最短解或比赛成绩。正在思考与保留的中断推理明确区分，服务商错误不标成程序 Rejected。
+- 比赛保存在本机，可生成 PNG 分享图；手动停止取消活动请求。Token 用量说明移到进度表下方。
 
 AI 使用自己的 API 额度，可能产生费用。流式用量会标明估算或不完整数据；本地 Token 限制无法保证服务商最终账单。
 iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说明](docs/ai-battlefield.md)和[隐私说明](PRIVACY.md)。
@@ -88,19 +82,25 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 同样通过时，代码越短分数越高；步数不参与评分。按**总分降序 → 输入和输出 Token 总量升序 → 完成时间**排名，
 缓存输入和所有重试均计入用量。0.3.0 旧历史保留原来的通过题数计分及排序方式。
 
-比较时保持题目、重试次数、输出上限和提示词一致，并记录采样与推理参数。
-**每个 AI 独立 Token 预算**适合比较资源效率；**Best Effort 允许每个 AI 完成**，没有比赛时限或累计 Token 上限。
+比较时保持题目、机会数、比赛设置和提示词一致，并记录采样与推理参数。
+统一的**每模型每题 Token 预算**覆盖所有重试；关闭两项限制时，全部模型可以完成各自作答，
+使用服务商声明的最大输出能力，未知能力则由服务商决定。
 历史保存完整共享提示词及其版本、棋盘、模型参数、收到的答案与计分版本，但服务商的模型版本仍可能变化。
 这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
 
-![Herbert Benchmark 英文实际界面：按分数排序的模型列、Token 表头与紧凑答案行](docs/screenshots/en/battlefield/ai-battlefield.png)
+![用户提供的六模型 Herbert Benchmark 运行截图](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 
-*实际英文 Mac App 截图；确定性测试客户端演示答错后重试，不代表商业模型的能力或真实费用。*
-[新比赛](docs/screenshots/en/battlefield/ai-new-match.png) · [题目选择](docs/screenshots/en/battlefield/ai-puzzles.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
+*用户提供的英文 App 截图：六个模型、所选十题，部分回答已停止，仅演示实际运行，不代表完整的受控模型比较。截图早于 0.3.7，因此仍显示模型名称的服务商前缀。*
+
+[当前进度界面](docs/screenshots/en/battlefield/ai-battlefield.png) · [新比赛](docs/screenshots/en/battlefield/ai-new-match.png) ·
+[比赛设置](docs/screenshots/en/battlefield/ai-match-settings.png) · [模型设置](docs/screenshots/en/battlefield/ai-model-settings.png) ·
+[题目选择](docs/screenshots/en/battlefield/ai-puzzles.png) · [格式化规则](docs/screenshots/en/battlefield/ai-rules.png) ·
 [服务商](docs/screenshots/en/battlefield/ai-providers.png) · [模型](docs/screenshots/en/battlefield/ai-models.png) ·
-[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [推理内容](docs/screenshots/en/battlefield/ai-reasoning.png) ·
+[原生判题反馈](docs/screenshots/en/battlefield/ai-answer.png) · [Burnout 与保留推理](docs/screenshots/en/battlefield/ai-burnout.png) ·
 [正在思考](docs/screenshots/en/battlefield/ai-thinking.png) · [服务商流错误](docs/screenshots/en/battlefield/ai-stream-error.png) · [网络中断详情](docs/screenshots/en/battlefield/ai-network-error.png) ·
 [服务商错误详情](docs/screenshots/en/battlefield/ai-provider-error.png) · [棋盘试运行](docs/screenshots/en/battlefield/ai-trial.png) · [分享预览](docs/screenshots/en/battlefield/ai-share.png)
+
+*以上链接为当前版本的确定性测试客户端截图，用于演示界面，不代表商业模型能力或真实费用。*
 
 ## 运行
 

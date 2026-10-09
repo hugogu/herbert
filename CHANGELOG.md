@@ -5,6 +5,15 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+## [0.3.7] - 2026-10-09
+
+- Replace match modes with unified Match Settings: optional time limit and independent per-model, per-problem input/output token budgets, both off by default, plus three attempts per problem.
+- Mark output-cap exhaustion and per-problem budget exhaustion as Burnout. Retain partial responses/reasoning, cancel the current request and remaining retries for that problem, then continue other problems and entrants with fresh budgets.
+- Retire per-model output caps. Unlimited requests use advertised output capacity or omit the cap for provider defaults; limited requests share the same match policy. Preserve legacy settings in historical snapshots and migrate active settings to schema 3.
+- Enable provider-aware automatic thinking and the highest advertised reasoning effort by default, with a JSON preview and explicit advanced overrides. Keep unknown compatible-provider capabilities uninferred.
+- Strip provider prefixes before `:` from displayed model names and move usage notes below puzzle progress. Add the user-provided six-model run and refreshed English screenshots to both READMEs.
+- Add transport, engine, settings migration and native Mac UI coverage for unified settings, reasoning defaults and Burnout cancellation.
+
 ## [0.3.6] - 2026-10-09
 
 - Treat HTTP 200 in-band provider errors, including `finish_reason: error` / `content_filter`, as request failures instead of invalid H submissions. Preserve partial text, reasoning, finish reasons, usage and credential-redacted error details; do not judge or retry these as incorrect programs.
