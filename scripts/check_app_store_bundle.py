@@ -21,9 +21,11 @@ def check_bundle(app):
     if len(originals) != 1:
         raise ValueError('Expected exactly one original-problems.json in the app.')
     catalog = originals[0]
-    retained_numbers = [1, 6, 12, 17, 22, 24, 25, 26, 27, 30] + list(range(31, 51))
-    if [item.get('id') for item in catalog] != [10000 + n for n in retained_numbers]:
+    retained_ids = [10001, 10006, 10012, 10017, 10022, 10024, 10051, 10052, 10027, 10030] + list(range(10031, 10051))
+    if [item.get('id') for item in catalog] != retained_ids:
         raise ValueError('Expected the 30 retained curriculum IDs only.')
+    if [item['lesson']['order'] for item in catalog] != list(range(1, 31)):
+        raise ValueError('Expected continuous L01–L30 display numbers.')
     if any(not item.get('lesson') or item.get('sourceURL') for item in catalog):
         raise ValueError('Every puzzle must be an original curriculum lesson.')
     canonical = Path(__file__).resolve().parents[1] / 'Sources/HerbertCore/Resources/original-problems.json'

@@ -26,7 +26,7 @@ public struct AIMessage: Codable, Equatable, Sendable {
 }
 
 public enum BattlefieldPrompt {
-    public static let version = "herbert-h-v3"
+    public static let version = "herbert-h-v4"
     public static let rules =
         baseRules
         + examples.enumerated().map { index, example in
@@ -116,7 +116,7 @@ public enum BattlefieldPrompt {
         JavaScript, loops, if-statements, prose, or code execution tools: submit only H.
         The output token allowance includes reasoning tokens. Leave room for the final H program.
         The worked examples below are public teaching boards, outside the scored catalog.
-        Prompt version: **herbert-h-v3**. All entrants receive the same rules and puzzles.
+        Prompt version: **herbert-h-v4**. All entrants receive the same rules and puzzles.
         """
 
     public static func retryMessages(_ messages: [AIMessage], reply: AIReply, feedback: String) -> [AIMessage] {

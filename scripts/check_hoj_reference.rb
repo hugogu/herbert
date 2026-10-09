@@ -45,7 +45,7 @@ Dir.chdir(File.join(reference, 'judge')) do
     abort "Rejected lesson #{problem['id']}" unless HCode.parse(solution.fetch('source'))
     field = problem.fetch('rows').join("\n") + "\n" + problem.fetch('byteLimit').to_s
     result = HJudge.new(field, solution.fetch('source')).judge
-    abort "Failed L#{problem['id'] - 10_000}: #{result.status}" unless result.status == 'Passed System Test'
+    abort "Failed L#{problem.fetch('lesson').fetch('order')}: #{result.status}" unless result.status == 'Passed System Test'
   end
   community = JSON.parse(File.read(File.join(root, 'Sources/HerbertCommunity/Resources/problems.json')))
   study.each do |solution|

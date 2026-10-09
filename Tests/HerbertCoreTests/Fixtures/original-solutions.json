@@ -72,28 +72,28 @@
     "endHeading": 0
   },
   {
-    "id": 10025,
-    "source": "a(X):XrrXla(Xs)\na(s)",
-    "steps": 85,
+    "id": 10051,
+    "source": "a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)",
+    "steps": 297,
     "blocked": 0,
     "traps": 0,
     "endPosition": [
       4,
-      12
+      8
     ],
     "endHeading": 3
   },
   {
-    "id": 10026,
-    "source": "a(X,Y):Ya(X-1,Y)\nb:a(10,s)\nbrrbla(8,s)lb",
-    "steps": 42,
+    "id": 10052,
+    "source": "b(N):sb(N-1)\nq(P):PPPP\nw:q(b(6)r)\nwrb(11)lw",
+    "steps": 67,
     "blocked": 0,
     "traps": 0,
     "endPosition": [
       16,
-      11
+      15
     ],
-    "endHeading": 0
+    "endHeading": 3
   },
   {
     "id": 10027,

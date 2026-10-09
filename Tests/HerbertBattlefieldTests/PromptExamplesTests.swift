@@ -32,6 +32,6 @@ final class PromptExamplesTests: XCTestCase {
         XCTAssertTrue(prompt.contains("0123456789012345678901234"))
         XCTAssertTrue(BattlefieldPrompt.rules.contains("BEFORE its body runs"))
         XCTAssertTrue(BattlefieldPrompt.rules.contains("s4` does NOT mean four steps"))
-        XCTAssertEqual(BattlefieldPrompt.version, "herbert-h-v3")
+        XCTAssertEqual(BattlefieldPrompt.version, "herbert-h-v4")
     }
 }

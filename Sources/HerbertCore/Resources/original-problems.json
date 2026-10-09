@@ -79,7 +79,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 6,
+      "order": 2,
       "chapter": 1,
       "chapterTitle": "Movement, reuse and recursion",
       "objective": "Plan a detour around a wall; blocked moves stay in place.",
@@ -124,7 +124,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 12,
+      "order": 3,
       "chapter": 1,
       "chapterTitle": "Movement, reuse and recursion",
       "objective": "Reuse a side-and-turn procedure four times.",
@@ -169,7 +169,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 17,
+      "order": 4,
       "chapter": 1,
       "chapterTitle": "Movement, reuse and recursion",
       "objective": "Use a numeric parameter to walk two different distances.",
@@ -214,7 +214,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 22,
+      "order": 5,
       "chapter": 1,
       "chapterTitle": "Movement, reuse and recursion",
       "objective": "Combine a repetition count with an instruction parameter.",
@@ -259,7 +259,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 24,
+      "order": 6,
       "chapter": 2,
       "chapterTitle": "Instructions and composition",
       "objective": "Grow an instruction parameter by appending two steps.",
@@ -270,55 +270,55 @@
     }
   },
   {
-    "id": 10025,
-    "title": "Expanding compass",
+    "id": 10051,
+    "title": "Turning rose",
     "author": "Herbert",
-    "byteLimit": 12,
+    "byteLimit": 34,
     "sourceURL": "",
     "sourceSHA256": "",
     "rows": [
       ".........................",
       ".........................",
       ".........................",
-      ".........................",
-      ".........................",
-      ".........................",
-      ".........................",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      "....oooooooouoooooo......",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      "............o............",
-      ".........................",
-      ".........................",
+      "................x........",
+      "...............xox.......",
+      "...............xox.......",
+      "..............xoox.......",
+      "....xxxxx...xxxoox.......",
+      "...xooooox.xooooox.......",
+      "....xxooooxxoooox........",
+      "......xxoooxooox.........",
+      ".......xoooxoxxxx........",
+      ".......xoooouoooox.......",
+      "........xxxxoxooox.......",
+      ".........xoooxoooxx......",
+      "........xooooxxooooxx....",
+      ".......xooooox.xooooox...",
+      ".......xooxxx...xxxxx....",
+      ".......xoox..............",
+      ".......xox...............",
+      ".......xox...............",
+      "........x................",
       ".........................",
       ".........................",
       "........................."
     ],
     "lesson": {
-      "order": 25,
+      "order": 7,
       "chapter": 2,
       "chapterTitle": "Instructions and composition",
-      "objective": "Reuse a growing instruction sequence for both outward and return travel.",
+      "objective": "Grow a folded out-and-back instruction and rotate three sizes into four petals.",
       "hints": [
-        "Return to the center before exploring the next direction.",
-        "Execute X twice with a half turn between them, then grow X."
+        "Each folded branch returns to the center with its original heading.",
+        "Reuse X six times around the turns, grow X by one step, and rotate the complete three-size motif."
       ]
     }
   },
   {
-    "id": 10026,
-    "title": "Twin towers",
+    "id": 10052,
+    "title": "Tandem lanterns",
     "author": "Herbert",
-    "byteLimit": 22,
+    "byteLimit": 23,
     "sourceURL": "",
     "sourceSHA256": "",
     "rows": [
@@ -330,32 +330,32 @@
       ".........................",
       ".........................",
       ".........................",
+      "....xxxxxxx....xxxxxxx...",
+      "...xooooooox..xooooooox..",
+      "...xoxxxxxox..xoxxxxxox..",
+      "...xox...xox..xox...xox..",
+      "...xox...xox..xox...xox..",
+      "...xox...xox..xox...xox..",
+      "...xoxxxxxoxxxxoxxxxxox..",
+      "...xuooooooooooooooooox..",
+      "....xxxxxxxxxxxxxxxxxx...",
       ".........................",
       ".........................",
       ".........................",
-      "........o.......o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........o*******o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........o.......o........",
-      "........uoooooooo........",
+      ".........................",
+      ".........................",
       ".........................",
       ".........................",
       "........................."
     ],
     "lesson": {
-      "order": 26,
+      "order": 8,
       "chapter": 2,
       "chapterTitle": "Instructions and composition",
-      "objective": "Combine a counted walk, a return trip and a connecting bridge.",
+      "objective": "Compose a counted walk, a fourfold repeater, two lantern frames and their bridge.",
       "hints": [
-        "The trap row makes crossing between the towers unsafe.",
-        "Finish one tower, return to the bottom, then cross to the other."
+        "The two square frames have six-cell sides and share a straight lower bridge.",
+        "Make the frame return to its starting pose, then use the counted walker to cross to its twin."
       ]
     }
   },
@@ -394,7 +394,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 27,
+      "order": 9,
       "chapter": 2,
       "chapterTitle": "Instructions and composition",
       "objective": "Use a finite row count and alternate the connector’s turn direction.",
@@ -439,7 +439,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 30,
+      "order": 10,
       "chapter": 2,
       "chapterTitle": "Instructions and composition",
       "objective": "Combine counted repetition, shrinking squares and fourfold rotation.",
@@ -484,7 +484,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 31,
+      "order": 11,
       "chapter": 3,
       "chapterTitle": "Let walls do the counting",
       "objective": "Synchronize unequal lanes against walls, with a finite count and alternating turns.",
@@ -529,7 +529,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 32,
+      "order": 12,
       "chapter": 3,
       "chapterTitle": "Let walls do the counting",
       "objective": "Reuse one out-and-back routine in six unequal walled pipes.",
@@ -574,7 +574,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 33,
+      "order": 13,
       "chapter": 3,
       "chapterTitle": "Let walls do the counting",
       "objective": "Track two dimensions while a rectangular route contracts inward.",
@@ -619,7 +619,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 34,
+      "order": 14,
       "chapter": 3,
       "chapterTitle": "Let walls do the counting",
       "objective": "Grow branches while alternating chirality and preserving a shared spine.",
@@ -664,7 +664,7 @@
       ".........x..............."
     ],
     "lesson": {
-      "order": 35,
+      "order": 15,
       "chapter": 3,
       "chapterTitle": "Let walls do the counting",
       "objective": "Compose a bent arm that returns home facing the next rotated arm.",
@@ -709,7 +709,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 36,
+      "order": 16,
       "chapter": 4,
       "chapterTitle": "Reason about recursive state",
       "objective": "Swap two instruction arguments while the horizontal reach shrinks.",
@@ -754,7 +754,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 37,
+      "order": 17,
       "chapter": 4,
       "chapterTitle": "Reason about recursive state",
       "objective": "Change two numeric parameters in opposite directions, retrace the stair and rotate it four ways.",
@@ -799,7 +799,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 38,
+      "order": 18,
       "chapter": 4,
       "chapterTitle": "Reason about recursive state",
       "objective": "Use work after a recursive call to retrace a nested arm, then rotate it.",
@@ -844,7 +844,7 @@
       "............x............"
     ],
     "lesson": {
-      "order": 39,
+      "order": 19,
       "chapter": 4,
       "chapterTitle": "Reason about recursive state",
       "objective": "Visit both recursive children and restore the parent’s position and heading.",
@@ -889,7 +889,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 40,
+      "order": 20,
       "chapter": 4,
       "chapterTitle": "Reason about recursive state",
       "objective": "Use mutually recursive procedures that exchange dimensions and turn direction.",
@@ -934,7 +934,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 41,
+      "order": 21,
       "chapter": 5,
       "chapterTitle": "Build patterns within patterns",
       "objective": "Nest a fourfold instruction repeater inside finite rows of reusable window tiles.",
@@ -979,7 +979,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 42,
+      "order": 22,
       "chapter": 5,
       "chapterTitle": "Build patterns within patterns",
       "objective": "Exchange two numeric roles while alternating the connector’s turn.",
@@ -1024,7 +1024,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 43,
+      "order": 23,
       "chapter": 5,
       "chapterTitle": "Build patterns within patterns",
       "objective": "Assemble four rotated subcurves by swapping two turn parameters at each level.",
@@ -1069,7 +1069,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 44,
+      "order": 24,
       "chapter": 5,
       "chapterTitle": "Build patterns within patterns",
       "objective": "Grow an instruction motif recursively, then execute only the selected expansion level.",
@@ -1114,7 +1114,7 @@
       "ooox.xxxooox.xooox.xxxooo"
     ],
     "lesson": {
-      "order": 45,
+      "order": 25,
       "chapter": 5,
       "chapterTitle": "Build patterns within patterns",
       "objective": "Place four recursive copies at offsets, using depth and spacing as independent parameters.",
@@ -1159,7 +1159,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 46,
+      "order": 26,
       "chapter": 6,
       "chapterTitle": "Compose recursive systems",
       "objective": "Use two mutually recursive turns to generate a folding curve rather than a repeated tile.",
@@ -1204,7 +1204,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 47,
+      "order": 27,
       "chapter": 6,
       "chapterTitle": "Compose recursive systems",
       "objective": "Construct inverse recursive procedures so a folded curve returns before its next rotation.",
@@ -1249,7 +1249,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 48,
+      "order": 28,
       "chapter": 6,
       "chapterTitle": "Compose recursive systems",
       "objective": "Combine a branching return invariant with chirality passed through four recursive levels.",
@@ -1294,7 +1294,7 @@
       "...........xoxxx........."
     ],
     "lesson": {
-      "order": 49,
+      "order": 29,
       "chapter": 6,
       "chapterTitle": "Compose recursive systems",
       "objective": "Nest window, row, shrinking tier and rotation routines, each with its own return invariant.",
@@ -1339,7 +1339,7 @@
       "........................."
     ],
     "lesson": {
-      "order": 50,
+      "order": 30,
       "chapter": 6,
       "chapterTitle": "Compose recursive systems",
       "objective": "Compose a window generator with a chiral branching tree and a higher-order rotation routine.",

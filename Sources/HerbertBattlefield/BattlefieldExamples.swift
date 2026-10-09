@@ -94,7 +94,7 @@ extension BattlefieldPrompt {
                 recursive call is skipped; execution continues with Tb(D)rr, restoring the caller's
                 position and heading. This work AFTER recursion is essential. The final q rotates
                 the entire motif four ways. Walls fill unused space and reveal the route's shape.
-                This is a separate teaching board, not L50 or another scored benchmark puzzle.
+                This is a separate teaching board, not the course finale or another scored benchmark puzzle.
                 """),
     ]
 }

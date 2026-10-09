@@ -158,7 +158,7 @@ final class HerbertUITests: XCTestCase {
                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
             context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
             let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
-            // L06 has three horizontal walls centered in its focused 7 × 7 region.
+            // L02 has three horizontal walls centered in its focused 7 × 7 region.
             let cell = Double(min(image.width, image.height)) / 7
             let y = image.height / 2
             // Sample away from a grid dot, which is faintly visible beneath Modern opacity.
@@ -231,6 +231,8 @@ final class HerbertUITests: XCTestCase {
     func testAdvancedWallCountingAndRecursiveCompositionComplete() {
         let app = launch(language: "en")
         for (id, source) in [
+            (10051, "a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)"),
+            (10052, "b(N):sb(N-1)\nq(P):PPPP\nw:q(b(6)r)\nwrb(11)lw"),
             (10031, "b(N):sb(N-1)\na(N,T):b(24)Tb(3)Ta(N-1,rrT)\nra(6,r)"),
             (
                 10050,
@@ -288,7 +290,10 @@ final class HerbertUITests: XCTestCase {
             XCTAssertGreaterThanOrEqual(window.frame.height, 1000)
         #endif
         capture(app, name: "course-library")
-        for (id, name) in [(10038, "rosette"), (10044, "seal"), (10049, "mosaic"), (10050, "cathedral")] {
+        for (id, name) in [
+            (10051, "rose"), (10052, "lanterns"), (10038, "rosette"), (10044, "seal"), (10049, "mosaic"),
+            (10050, "cathedral"),
+        ] {
             openProblem(id, in: app)
             capture(app, name: "course-\(name)")
             app.activate()
