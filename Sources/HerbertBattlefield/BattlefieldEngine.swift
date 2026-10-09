@@ -13,6 +13,8 @@ public actor BattlefieldEngine {
     private var requests: [UUID: Task<AIReply, any Error>] = [:]
     private var observer: (@Sendable (CompetitionResult) async -> Void)?
     private var executing = false
+    private var participants: [UUID: CompetitionParticipant] = [:]
+    private var pendingRetries: [UUID: [Int]] = [:]
 
     public init(client: any AIClient) {
         self.client = client
@@ -46,7 +48,13 @@ public actor BattlefieldEngine {
             guard !participant.apiKey.isEmpty else { throw BattlefieldError.missingKey }
         }
         executing = true
-        defer { executing = false }
+        self.participants = Dictionary(uniqueKeysWithValues: participants.map { ($0.entrant.id, $0) })
+        pendingRetries = [:]
+        defer {
+            executing = false
+            self.participants = [:]
+            pendingRetries = [:]
+        }
         result = CompetitionResult(
             configuration: configuration, problems: problems, entrants: participants.map(\.entrant))
         observer = update
@@ -62,11 +70,13 @@ public actor BattlefieldEngine {
             }
         }
         for participant in participants {
-            workers[participant.entrant.id] = Task { await self.solve(participant) }
+            launchWorker(participant)
         }
-        let tasks = Array(workers.values)
         await withTaskCancellationHandler {
-            for task in tasks { await task.value }
+            while !workers.isEmpty {
+                let tasks = Array(workers.values)
+                for task in tasks { await task.value }
+            }
         } onCancel: {
             Task { await self.stop(reason: .userStopped) }
         }
@@ -79,6 +89,93 @@ public actor BattlefieldEngine {
         }
         observer = nil
         return result!
+    }
+
+    /// Queue one extra attempt. A model finishes its current puzzle before taking queued retries.
+    public func enqueueRetry(entrantID: UUID, problemID: Int) async throws {
+        guard executing, await active(), let participant = participants[entrantID],
+            let result, result.canRetry(entrantID: entrantID, problemID: problemID),
+            let p = result.problems.firstIndex(where: { $0.id == problemID }),
+            !(pendingRetries[entrantID] ?? []).contains(p)
+        else { throw BattlefieldError.invalidConfiguration }
+        pendingRetries[entrantID, default: []].append(p)
+        if workers[entrantID] == nil { launchWorker(participant, retriesOnly: true) }
+    }
+
+    /// Resume a saved result with one extra attempt, retaining snapshots, scores and cumulative budgets.
+    public func retry(
+        _ saved: CompetitionResult, participant: CompetitionParticipant, problemID: Int,
+        update: @escaping @Sendable (CompetitionResult) async -> Void
+    ) async throws -> CompetitionResult {
+        guard !executing else { throw BattlefieldError.alreadyRunning }
+        _ = try saved.configuration.validated()
+        guard saved.status != .running,
+            saved.canRetry(entrantID: participant.entrant.id, problemID: problemID),
+            saved.entrants.contains(where: { $0.entrant == participant.entrant }),
+            Set(saved.problems.map(\.id)).count == saved.problems.count,
+            Set(saved.entrants.map(\.id)).count == saved.entrants.count,
+            saved.entrants.allSatisfy({ $0.answers.map(\.id) == saved.problems.map(\.id) }),
+            let p = saved.problems.firstIndex(where: { $0.id == problemID })
+        else { throw BattlefieldError.invalidConfiguration }
+        _ = try Board(problem: saved.problems[p])
+        _ = try participant.entrant.provider.validated()
+        _ = try participant.entrant.preset.parameters.validated()
+        guard !participant.apiKey.isEmpty else { throw BattlefieldError.missingKey }
+        executing = true
+        defer {
+            executing = false
+            participants = [:]
+            pendingRetries = [:]
+            observer = nil
+        }
+        result = saved
+        result!.resume()
+        observer = update
+        participants = [participant.entrant.id: participant]
+        pendingRetries = [participant.entrant.id: [p]]
+        deadline =
+            saved.configuration.timeLimitEnabled
+            ? .now.advanced(by: .seconds(saved.configuration.timeLimitSeconds - saved.elapsedTime())) : nil
+        await publish()
+        if let deadline {
+            timer = Task { [weak self] in
+                do {
+                    try await Task.sleep(until: deadline, clock: .continuous)
+                    await self?.stop(reason: .timeLimit)
+                } catch {}
+            }
+        }
+        launchWorker(participant, retriesOnly: true)
+        await withTaskCancellationHandler {
+            while !workers.isEmpty {
+                let tasks = Array(workers.values)
+                for task in tasks { await task.value }
+            }
+        } onCancel: {
+            Task { await self.stop() }
+        }
+        timer?.cancel()
+        timer = nil
+        if result?.status == .running {
+            result?.finish(.completed)
+            await publish()
+        }
+        return result!
+    }
+
+    private func launchWorker(_ participant: CompetitionParticipant, retriesOnly: Bool = false) {
+        workers[participant.entrant.id] = Task {
+            if !retriesOnly { await self.solve(participant) }
+            await self.drainRetries(participant)
+            self.workers[participant.entrant.id] = nil
+        }
+    }
+
+    private func drainRetries(_ participant: CompetitionParticipant) async {
+        while await active(), let p = pendingRetries[participant.entrant.id]?.first {
+            pendingRetries[participant.entrant.id]?.removeFirst()
+            await solve(participant, only: p)
+        }
     }
 
     public func stop(reason: CompetitionStatus = .userStopped) async {
@@ -152,16 +249,36 @@ public actor BattlefieldEngine {
         await publish()
     }
 
-    private func solve(_ participant: CompetitionParticipant) async {
+    private func solve(_ participant: CompetitionParticipant, only: Int? = nil) async {
         guard let e = result?.entrants.firstIndex(where: { $0.id == participant.entrant.id }) else { return }
         let problems = result!.problems
-        let maxAttempts = result!.configuration.attemptsPerProblem
         var cooldown: (problem: Int, delay: TimeInterval)?
         var consecutiveFailures = 0
-        for (p, problem) in problems.enumerated() {
+        for (p, problem) in problems.enumerated() where only == nil || only == p {
             guard await active() else { break }
             var messages = BattlefieldPrompt.messages(for: problem, rules: result!.systemPrompt)
-            for a in 0..<maxAttempts {
+            let previous = result!.entrants[e].answers[p].attempts
+            let base = previous.count
+            let maxAttempts = base + (only == nil ? result!.configuration.attemptsPerProblem : 1)
+            if only != nil {
+                if let retryAfter = previous.last?.retryAfter, retryAfter > .now {
+                    cooldown = (p, retryAfter.timeIntervalSinceNow)
+                    result!.entrants[e].answers[p].retryAt = retryAfter
+                    await publish()
+                }
+                result!.entrants[e].finishedAt = nil
+                result!.entrants[e].error = nil
+                for attempt in previous {
+                    guard let evaluation = attempt.evaluation else { continue }
+                    messages = BattlefieldPrompt.retryMessages(
+                        messages,
+                        reply: AIReply(
+                            text: attempt.response, usage: attempt.usage,
+                            reasoning: attempt.reasoning, contentBlocks: attempt.contentBlocks),
+                        feedback: evaluation.feedback)
+                }
+            }
+            for a in base..<maxAttempts {
                 guard await active() else { break }
                 let remaining = remainingBudget(entrant: e, problem: p)
                 if let remaining, remaining <= TokenUsage.estimate(messages: messages).input {
@@ -179,7 +296,8 @@ public actor BattlefieldEngine {
                     guard await active() else { break }
                 }
                 let cap = allowance(entrant: participant.entrant, messages: messages, remaining: remaining)
-                var attempt = AnswerAttempt(number: a + 1)
+                var attempt = AnswerAttempt(number: (previous.last?.id ?? 0) + a - base + 1)
+                if only != nil { attempt.manual = true }
                 attempt.requestedMaxOutputTokens = cap
                 attempt.usage = .estimate(messages: messages)
                 result!.entrants[e].answers[p].attempts.append(attempt)
@@ -297,12 +415,16 @@ public actor BattlefieldEngine {
                     let classification = ProviderDiagnostics.classify(
                         error, detail: diagnostic)
                     result!.entrants[e].answers[p].status = classification.status
-                    if classification.isRetriable && (a + 1 < maxAttempts || p + 1 < problems.count) {
+                    if classification.isRetriable {
                         consecutiveFailures += 1
                         let delay = ProviderRetryPolicy.delay(for: error, consecutiveFailure: consecutiveFailures)
-                        let next = a + 1 < maxAttempts ? p : p + 1
-                        cooldown = (next, delay)
-                        result!.entrants[e].answers[next].retryAt = Date.now.addingTimeInterval(delay)
+                        let retryAfter = Date.now.addingTimeInterval(delay)
+                        result!.entrants[e].answers[p].attempts[a].retryAfter = retryAfter
+                        if a + 1 < maxAttempts || (only == nil && p + 1 < problems.count) {
+                            let next = a + 1 < maxAttempts ? p : p + 1
+                            cooldown = (next, delay)
+                            result!.entrants[e].answers[next].retryAt = retryAfter
+                        }
                     }
 
                     if classification.shouldStopEntrant {
@@ -326,11 +448,12 @@ public actor BattlefieldEngine {
                     }
                 }
             }
+            if only == nil { await drainRetries(participant) }
         }
         requests[participant.entrant.id] = nil
         if result?.status == .running {
             result!.entrants[e].finishedAt = .now
-            for p in result!.entrants[e].answers.indices {
+            for p in result!.entrants[e].answers.indices where only == nil || only == p {
                 result!.entrants[e].answers[p].retryAt = nil
                 if [.queued, .requesting, .judging].contains(result!.entrants[e].answers[p].status) {
                     result!.entrants[e].answers[p].status = .cancelled

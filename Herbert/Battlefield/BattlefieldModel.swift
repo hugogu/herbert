@@ -15,6 +15,7 @@ final class BattlefieldModel: ObservableObject {
     @Published private(set) var history: [CompetitionSummary] = []
     @Published private(set) var liveResult: CompetitionResult?
     @Published private(set) var busy = false
+    @Published private(set) var pendingRetries: [String: Int] = [:]
     @Published private(set) var initializing = true
     @Published private(set) var discovering: UUID?
     @Published var message: String?
@@ -40,7 +41,8 @@ final class BattlefieldModel: ObservableObject {
                     selectedClient = BattlefieldFixtureClient(
                         diagnostics: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics"),
                         streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"),
-                        specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"))
+                        specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"),
+                        recovery: ProcessInfo.processInfo.arguments.contains("--battlefield-recovery"))
                 }
             }
         #endif
@@ -207,9 +209,70 @@ final class BattlefieldModel: ObservableObject {
 
     func stop(reason: CompetitionStatus = .userStopped) async { await engine?.stop(reason: reason) }
 
+    func retryKey(result: UUID, entrant: UUID, problem: Int) -> String { "\(result)/\(entrant)/\(problem)" }
+
+    func canRetry(_ result: CompetitionResult, entrant: UUID, problem: Int) -> Bool {
+        !initializing && (!busy || (liveResult?.id == result.id && liveResult?.status == .running))
+            && pendingRetries[retryKey(result: result.id, entrant: entrant, problem: problem)] == nil
+            && result.canRetry(entrantID: entrant, problemID: problem)
+    }
+
+    func retry(_ snapshot: CompetitionResult, entrantID: UUID, problemID: Int) {
+        let result = liveResult?.id == snapshot.id ? liveResult! : snapshot
+        guard canRetry(result, entrant: entrantID, problem: problemID),
+            let entrant = result.entrants.first(where: { $0.id == entrantID })
+        else { return }
+        let key = retryKey(result: result.id, entrant: entrantID, problem: problemID)
+        do {
+            // Keys are current, but the endpoint and all model/puzzle settings remain the saved snapshot.
+            guard let provider = settings.providers.first(where: { $0.id == entrant.entrant.provider.id }),
+                provider.baseURL == entrant.entrant.provider.baseURL, provider.kind == entrant.entrant.kind
+            else { throw BattlefieldError.invalidEndpoint }
+            guard let apiKey = try keys.key(for: provider.id), !apiKey.isEmpty else {
+                throw BattlefieldError.missingKey
+            }
+            let participant = CompetitionParticipant(entrant: entrant.entrant, apiKey: apiKey)
+            pendingRetries[key] = entrant.answers.first { $0.id == problemID }?.attempts.count ?? 0
+            message = nil
+            if busy, let engine {
+                Task {
+                    do { try await engine.enqueueRetry(entrantID: entrantID, problemID: problemID) } catch {
+                        pendingRetries[key] = nil
+                        message = battlefieldError(error)
+                    }
+                }
+            } else {
+                let engine = BattlefieldEngine(client: client)
+                self.engine = engine
+                busy = true
+                runTask = Task { [weak self] in
+                    guard let self else { return }
+                    do {
+                        let final = try await engine.retry(result, participant: participant, problemID: problemID) {
+                            [weak self] update in await self?.receive(update, engine: engine)
+                        }
+                        await receive(final, engine: engine)
+                    } catch { message = battlefieldError(error) }
+                    pendingRetries[key] = nil
+                    busy = false
+                    runTask = nil
+                    await refreshHistory()
+                }
+            }
+        } catch { message = battlefieldError(error) }
+    }
+
     private func receive(_ result: CompetitionResult, engine: BattlefieldEngine) async {
         guard self.engine === engine else { return }
         liveResult = result
+        for entrant in result.entrants {
+            for answer in entrant.answers {
+                let key = retryKey(result: result.id, entrant: entrant.id, problem: answer.id)
+                if let count = pendingRetries[key], answer.attempts.count > count || result.status != .running {
+                    pendingRetries[key] = nil
+                }
+            }
+        }
         if result.status != .running || checkpointedID != result.id {
             checkpointTask?.cancel()
             checkpointTask = nil
@@ -311,11 +374,14 @@ func battlefieldError(_ error: Error) -> String {
         let diagnostics: Bool
         let streamErrors: Bool
         let specialErrors: Bool
+        let recovery: Bool
         private var calls: [String: Int] = [:]
-        init(diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false) {
+        init(diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false, recovery: Bool = false)
+        {
             self.diagnostics = diagnostics
             self.streamErrors = streamErrors
             self.specialErrors = specialErrors
+            self.recovery = recovery
         }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
@@ -332,6 +398,21 @@ func battlefieldError(_ error: Error) -> String {
         ) async throws -> AIReply {
             let problem = request.messages.first { $0.role == "user" }?.content ?? ""
             let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
+            if recovery {
+                let model = request.participant.entrant.preset.model.id
+                calls[model, default: 0] += 1
+                try await Task.sleep(for: .milliseconds(500))
+                if model == "fixture-2", calls[model] == 1 {
+                    throw AIHTTPError(
+                        status: 402,
+                        providerResponse:
+                            #"{"error":{"code":402,"message":"This request requires more credits, or fewer max_tokens."}}"#
+                    )
+                }
+                return AIReply(
+                    text: "", usage: TokenUsage(input: 900, output: 12, estimated: false),
+                    reasoning: AIReasoning(content: "I checked the target.\n\nFinal answer:\n\n```h\ns\n```"))
+            }
             if specialErrors {
                 let model = request.participant.entrant.preset.model.id
                 let key = model + problem

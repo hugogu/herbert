@@ -63,7 +63,9 @@ struct BattlefieldView: View {
                                 }
                             case .history:
                                 if let result = historyResult {
-                                    BattlefieldDashboard(result: result)
+                                    BattlefieldDashboard(
+                                        result: battlefield.liveResult?.id == result.id
+                                            ? battlefield.liveResult! : result)
                                 } else {
                                     history
                                 }

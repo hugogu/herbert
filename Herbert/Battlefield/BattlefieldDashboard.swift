@@ -124,7 +124,7 @@ struct BattlefieldDashboard: View {
 
     private var matchMetrics: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
-            let elapsed = max(0, (result.finishedAt ?? context.date).timeIntervalSince(result.startedAt))
+            let elapsed = result.elapsedTime(at: context.date)
             HStack(spacing: 16) {
                 Label(battlefieldDuration(elapsed), systemImage: "clock")
                     .accessibilityIdentifier("battlefieldMatchDuration")
@@ -264,47 +264,81 @@ struct BattlefieldDashboard: View {
             .help(entrant.entrant.providerName + " / " + entrant.entrant.preset.model.id)
     }
 
+    @ViewBuilder
     private func answerCell(_ answer: ProblemAnswer, entrant: EntrantResult, problem: Problem) -> some View {
-        let attempt =
+        let attempt: AnswerAttempt? =
             [.requesting, .judging].contains(answer.status)
             ? answer.attempts.last : result.scoringPolicy.bestAttempt(answer, problem: problem)
         let score = battlefieldScore(result.scoringPolicy.score(answer, problem: problem))
-        return Button {
-            selectedAnswer = BattlefieldAnswerSelection(
-                resultID: result.id, entrant: entrant, answer: answer, problem: problem, scoring: result.scoringPolicy)
-        } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: answer.status.symbol)
-                    Text(answer.status.title).font(.caption.bold())
-                    Spacer(minLength: 4)
-                    if let attempt {
-                        Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.caption2.monospaced()).foregroundStyle(
-                            Palette.muted)
-                    }
-                    Text(score).font(.caption.monospaced().bold())
-                }.foregroundStyle(answer.status.color)
-                HStack(spacing: 6) {
-                    if let retryAt = answer.retryAt {
-                        BattlefieldRetryCountdown(retryAt: retryAt)
-                    } else if let program = attempt?.program {
-                        Text(String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")).font(
-                            .system(.caption, design: .monospaced)
-                        )
-                        .foregroundStyle(Palette.ink).lineLimit(1)
-                    } else {
-                        Text(answer.status.title).font(.caption).foregroundStyle(Palette.muted).lineLimit(1)
-                    }
-                    Spacer(minLength: 0)
-                    if let attempt { BattlefieldAttemptTime(attempt: attempt, compact: true) }
+        let retryPending =
+            battlefield.pendingRetries[
+                battlefield.retryKey(result: result.id, entrant: entrant.id, problem: problem.id)] != nil
+        let label =
+            problem.number + " " + entrant.entrant.preset.model.displayName + " " + answer.status.title + " " + score
+        HStack(spacing: 0) {
+            Button {
+                selectedAnswer = BattlefieldAnswerSelection(
+                    resultID: result.id, entrant: entrant, answer: answer, problem: problem,
+                    scoring: result.scoringPolicy)
+            } label: {
+                answerSummary(answer, attempt: attempt, score: score)
+                    .contentShape(Rectangle())
+            }.buttonStyle(.plain)
+                .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
+                .accessibilityLabel(Text(label))
+            if ![.solved, .queued, .requesting, .judging].contains(answer.status) {
+                Button {
+                    battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
+                } label: {
+                    Image(systemName: retryPending ? "clock.arrow.circlepath" : "arrow.clockwise").frame(
+                        width: 32, height: 44)
+                }.buttonStyle(.plain).foregroundStyle(Palette.mint)
+                    .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
+                    .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
+                    .accessibilityLabel(
+                        L10n.text("重试 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
+                    )
+                    .accessibilityIdentifier("retry-\(entrant.entrant.preset.model.id)-\(problem.id)")
+            }
+        }.frame(width: 248)
+            .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func preview(_ program: String) -> String {
+        String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")
+    }
+
+    private func answerSummary(_ answer: ProblemAnswer, attempt: AnswerAttempt?, score: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: answer.status.symbol)
+                Text(answer.status.title).font(.caption.bold())
+                Spacer(minLength: 4)
+                if let attempt {
+                    Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.caption2.monospaced()).foregroundStyle(
+                        Palette.muted)
                 }
-            }.frame(width: 224, height: 38, alignment: .topLeading).padding(.horizontal, 12).padding(.vertical, 10)
-                .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
-        }.buttonStyle(.plain)
-            .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
-            .accessibilityLabel(
-                problem.number + " " + entrant.entrant.preset.model.displayName
-                    + " " + answer.status.title + " " + score)
+                Text(score).font(.caption.monospaced().bold())
+            }.foregroundStyle(answer.status.color)
+            HStack(spacing: 6) {
+                if let retryAt = answer.retryAt {
+                    BattlefieldRetryCountdown(retryAt: retryAt)
+                } else if let program = attempt?.program {
+                    Text(preview(program)).font(
+                        .system(.caption, design: .monospaced)
+                    )
+                    .foregroundStyle(Palette.ink).lineLimit(1)
+                } else {
+                    Text(answer.status.title).font(.caption).foregroundStyle(Palette.muted).lineLimit(1)
+                }
+                Spacer(minLength: 0)
+                if let attempt { BattlefieldAttemptTime(attempt: attempt, compact: true) }
+            }
+        }.frame(height: 38, alignment: .topLeading).frame(maxWidth: .infinity, alignment: .leading).padding(
+            .leading, 12
+        ).padding(
+            .trailing, 6
+        ).padding(.vertical, 10)
     }
 
     private func metric(_ name: String, _ value: String) -> some View {
@@ -375,6 +409,7 @@ private struct BattlefieldAnswerView: View {
                         VStack(alignment: .leading, spacing: 14) {
                             HStack(alignment: .firstTextBaseline) {
                                 Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.headline)
+                                if attempt.manual == true { Text("手动重试").font(.caption).foregroundStyle(Palette.muted) }
                                 Spacer(minLength: 8)
                                 BattlefieldAttemptTime(attempt: attempt)
                             }
@@ -407,7 +442,7 @@ private struct BattlefieldAnswerView: View {
                             .font(.caption.monospaced())
                             if attempt.finishReason == "length" {
                                 BattlefieldNotice(text: L10n.text("Burnout：已达到输出上限（包含推理），不再重试此题。已收到的内容已保留。"))
-                            } else if selection.answer.status == .burnout,
+                            } else if selection.answer.status == .burnout, attempt.error == nil,
                                 attempt.id == selection.answer.attempts.last?.id
                             {
                                 BattlefieldNotice(text: L10n.text("Burnout：已用完此题的 Token 预算，不再重试此题。其他题目继续。"))

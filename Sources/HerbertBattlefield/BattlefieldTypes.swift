@@ -303,6 +303,8 @@ public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {
     public var providerResponse: String?
     public var program: String?
     public var programSource: ProgramSubmission.Source?
+    public var manual: Bool?
+    public var retryAfter: Date?
     public var evaluation: JudgeEvaluation?
     public var usage = TokenUsage()
     public var error: String?
@@ -370,6 +372,8 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
     public let systemPrompt: String
     public var scoring: BattlefieldScoring?
     public var entrants: [EntrantResult]
+    public var resumedAt: Date?
+    public var elapsedBeforeResume: TimeInterval?
 
     public init(configuration: CompetitionConfiguration, problems: [Problem], entrants: [Entrant]) {
         id = UUID()
@@ -386,6 +390,30 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
     }
 
     public var totalTokens: Int { entrants.reduce(0) { $0 + $1.totalTokens } }
+    public func elapsedTime(at now: Date = .now) -> TimeInterval {
+        (elapsedBeforeResume ?? 0) + max(0, (finishedAt ?? now).timeIntervalSince(resumedAt ?? startedAt))
+    }
+
+    public func canRetry(entrantID: UUID, problemID: Int) -> Bool {
+        guard let entrant = entrants.first(where: { $0.id == entrantID }),
+            let answer = entrant.answers.first(where: { $0.id == problemID }),
+            ![.solved, .requesting, .judging, .queued].contains(answer.status), answer.retryAt == nil
+        else { return false }
+        if configuration.timeLimitEnabled && elapsedTime() >= configuration.timeLimitSeconds { return false }
+        if configuration.problemTokenLimitEnabled,
+            answer.attempts.reduce(0, { $0 + $1.usage.total }) >= configuration.problemTokenLimit
+        {
+            return false
+        }
+        return true
+    }
+
+    public mutating func resume(at time: Date = .now) {
+        elapsedBeforeResume = elapsedTime(at: time)
+        resumedAt = time
+        finishedAt = nil
+        status = .running
+    }
     public var scoringPolicy: BattlefieldScoring { scoring ?? .legacyAccepted }
     public func score(for answer: ProblemAnswer) -> Double {
         guard let problem = problems.first(where: { $0.id == answer.id }) else { return 0 }

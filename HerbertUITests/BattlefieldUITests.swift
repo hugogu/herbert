@@ -4,7 +4,7 @@ final class BattlefieldUITests: XCTestCase {
     @MainActor
     private func launch(
         reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false,
-        specialErrors: Bool = false
+        specialErrors: Bool = false, recovery: Bool = false
     ) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -15,6 +15,7 @@ final class BattlefieldUITests: XCTestCase {
             + (threeModels ? ["--battlefield-three-models"] : [])
             + (streamErrors ? ["--battlefield-stream-errors"] : [])
             + (specialErrors ? ["--battlefield-special-errors"] : [])
+            + (recovery ? ["--battlefield-recovery"] : [])
         app.launch()
         app.activate()
         #if os(macOS)
@@ -75,6 +76,51 @@ final class BattlefieldUITests: XCTestCase {
         #else
             app.buttons[title].tap()
         #endif
+    }
+
+    @MainActor
+    func testReasoningFinalRecoveryCreditBurnoutAndManualHistoryRetry() {
+        var app = launch(recovery: true)
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15))
+        XCTAssertTrue(reveal("answer-fixture-1-10001", in: app).label.contains("Accepted"))
+        XCTAssertTrue(reveal("answer-fixture-2-10001", in: app).label.contains("Burnout"))
+        XCTAssertFalse(app.buttons["retry-fixture-1-10001"].exists)
+        reveal("answer-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(reveal("tryBattlefieldAnswer-1", in: app).exists)
+        XCTAssertTrue(
+            app.staticTexts["answer-response-1"].label.contains("recovered")
+                || (app.staticTexts["answer-response-1"].value as? String ?? "").contains("recovered"))
+        app.buttons["Close"].battlefieldTap()
+        choose("Match history", in: app)
+        app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch.battlefieldTap()
+        reveal("retry-fixture-2-10001", in: app).battlefieldTap()
+        let accepted = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label CONTAINS %@", "Accepted"),
+            object: app.buttons["answer-fixture-2-10001"])
+        XCTAssertEqual(XCTWaiter.wait(for: [accepted], timeout: 15), .completed)
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15))
+        XCTAssertFalse(app.buttons["retry-fixture-2-10001"].exists)
+        reveal("answer-fixture-2-10001", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["AI HTTP 402"].waitForExistence(timeout: 5))
+        XCTAssertTrue(reveal("tryBattlefieldAnswer-2", in: app).exists)
+        XCTAssertTrue(app.staticTexts["Manual retry"].exists)
+        capture(app, "ai-manual-retry")
+        app.terminate()
+        app = launch(reset: false, recovery: true)
+        openSection("AI Battlefield", in: app)
+        choose("Match history", in: app)
+        let history = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).firstMatch
+        XCTAssertTrue(history.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "history-")).count, 1)
+        history.battlefieldTap()
+        XCTAssertTrue(reveal("answer-fixture-2-10001", in: app).label.contains("Accepted"))
+        app.terminate()
     }
 
     @MainActor
