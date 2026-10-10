@@ -1,7 +1,8 @@
 """Independent advanced course: explicit geometric oracles, never community layouts."""
+from open_course import LESSONS as OPEN_LESSONS, designs as open_designs, late_obstacles
 
 CHAPTERS = [
-    ('Let walls do the counting', '让墙参与计数', '壁に歩数を任せる'),
+    ('Landmarks and geometric patterns', '地标与几何规律', '目印と幾何模様'),
     ('Reason about recursive state', '推理递归状态', '再帰の状態を考える'),
     ('Build patterns within patterns', '图案中的图案', '模様の中の模様'),
     ('Compose recursive systems', '组合递归系统', '再帰を組み合わせる'),
@@ -12,58 +13,10 @@ def lesson(title, goal, observation, strategy):
     return (title, goal, [observation, strategy])
 
 
-LESSONS = [
-    lesson(('Tidal locks', '潮汐船闸', '潮の水門'),
-           ('Synchronize unequal lanes against walls, with a finite count and alternating turns.', '用墙对齐长短不同的通道，同时控制次数和交替转向。', '壁で長さの違う通路をそろえ、回数と交互の回転を制御しよう。'),
-           ('The right banks retreat every two lanes; the left bank stays fixed.', '右岸每两行退进一次，左岸始终不变。', '右岸は二列ごとに後退し、左岸は変わりません。'),
-           ('A long walk stops at each bank. Pass the turn as an instruction and reverse it for the next lane.', '足够长的前进会停在岸边。把转向作为指令参数，下一行反转它。', '長い前進は岸で止まります。回転を命令引数にして、次の列で反転させましょう。')),
-    lesson(('Resonant organ', '共鸣管风琴', '共鳴するパイプ'),
-           ('Reuse one out-and-back routine in six unequal walled pipes.', '让同一个往返过程适应六根长短不同的墙管。', '同じ往復手続きを、長さの違う六本の通路に使おう。'),
-           ('Each pipe has a cap above and a shared stop below.', '每根管道上方有端盖，下方有共同的停止线。', '各通路には上の蓋と、下の共通の停止線があります。'),
-           ('Overrun in both directions, then move four cells sideways and restore the heading.', '出发和返回都可以多走；然后横移四格，恢复朝向。', '往路も復路も長めに進み、横へ四マス移って向きを戻しましょう。')),
-    lesson(('Stepped cloister', '层退回廊', '段々の回廊'),
-           ('Track two dimensions while a rectangular route contracts inward.', '用两个尺寸参数跟踪逐层向内收缩的长方形路径。', '二つの寸法を追いながら、長方形の道筋を内側へ縮めよう。'),
-           ('Opposite legs differ by two cells; a complete layer consumes four of each dimension.', '相对的两段相差两格；完整一层让两个尺寸各减四。', '向かい合う区間の差は二マス。一周で両寸法が四ずつ減ります。'),
-           ('Separate the counted walk from a layer procedure with height and width parameters.', '把计步前进独立出来，再用高度、宽度两个参数定义一层。', '歩数指定を独立させ、高さと幅を引数に持つ一層の手続きを作りましょう。')),
-    lesson(('Counterpoise', '交错悬臂', '交互の腕木'),
-           ('Grow branches while alternating chirality and preserving a shared spine.', '让分支逐渐增长、左右交替，同时保持共用主干。', '枝を伸ばし、左右を交互に変えながら、共通の幹を保とう。'),
-           ('Five arms grow by two cells; their roots rise four cells each time.', '五根悬臂每次增长两格，根部每次上移四格。', '五本の腕は二マスずつ伸び、根元は四マスずつ上がります。'),
-           ('Use count, length and turn parameters. Return to the spine before advancing its root.', '分别传递次数、长度和转向。先回到主干，再移动根部。', '回数、長さ、回転を渡し、幹に戻ってから根元を進めましょう。')),
-    lesson(('Gated pinwheel', '闸门风车', '水門の風車'),
-           ('Compose a bent arm that returns home facing the next rotated arm.', '组合弯折分支，让它回到中心时朝向下一条旋转分支。', '曲がった腕を組み合わせ、中心に戻る時に次の腕の方向を向こう。'),
-           ('Each arm has a long stem, a sideways gate and a short terminal passage.', '每条分支都有长主干、侧向闸门和末端短通道。', '各腕には長い幹、横の水門、短い末端通路があります。'),
-           ('Name the counted walk and the complete arm separately; verify its final heading before fourfold reuse.', '分别命名计步和整条分支；重复四次之前，先检查结束朝向。', '歩数指定と腕全体を別々に名付け、四回使う前に最後の向きを確かめましょう。')),
-    lesson(('Braided stair', '双线编阶', '編み込む階段'),
-           ('Swap two instruction arguments while the horizontal reach shrinks.', '水平跨度逐渐缩短时，交换两个指令参数。', '横の長さを縮めながら、二つの命令引数を交換しよう。'),
-           ('Each rise is three cells; horizontal legs are 10, 8, 6, 4 and 2.', '每段上升三格，横段依次长 10、8、6、4、2。', '縦は三マス、横は 10、8、6、4、2 マスです。'),
-           ('Pass left and right turns separately, then exchange their parameter positions at the recursive call.', '把左右转分别传入，在递归调用时交换参数位置。', '左右の回転を別々に渡し、再帰呼び出しで引数の位置を交換しましょう。')),
-    lesson(('Counterweight stair', '此消彼长', '釣り合う階段'),
-           ('Change two numeric parameters in opposite directions, retrace the stair and rotate it four ways.', '让两个数值参数反向变化，原路折返阶梯后再做四向旋转。', '二つの数値引数を逆方向に変え、階段を引き返して四方向へ回転させよう。'),
-           ('Vertical legs shrink from four to one; horizontal legs grow from one to four. Four stairs share the center.', '纵段从四缩到一，横段从一增到四；四条阶梯共用中心。', '縦は四から一へ縮み、横は一から四へ伸びます。四つの階段は中心を共有します。'),
-           ('Recurse with X-1 and Y+1, then undo the horizontal and vertical legs after the child returns.', '以 X-1、Y+1 递归；子调用返回后，依次撤销横段和纵段。', 'X-1 と Y+1 で再帰し、子から戻ったら横と縦の区間を逆にたどりましょう。')),
-    lesson(('Hinged rosette', '折页花窗', '折り重なる花窓'),
-           ('Use work after a recursive call to retrace a nested arm, then rotate it.', '用递归返回后的动作折返嵌套分支，再整体旋转。', '再帰から戻った後の動きで、入れ子の腕を引き返して回転させよう。'),
-           ('The hooks shrink by two cells. Every nested call must return to its own starting pose.', '弯钩逐层缩短两格；每层调用都必须回到自己的起点和朝向。', '曲がりは二マスずつ縮み、各呼び出しは元の位置と向きに戻ります。'),
-           ('Walk outward, turn into a smaller hook, then undo the turn and return before rotating the whole arm.', '先向外走，转进较小弯钩；返回后撤销转向、回到中心，再旋转整条分支。', '外へ進み、小さな曲がりへ回転し、戻ったら回転を戻して中心へ引き返しましょう。')),
-    lesson(('Lantern boughs', '灯树分杈', '灯りの枝分かれ'),
-           ('Visit both recursive children and restore the parent’s position and heading.', '依次遍历两个递归子分支，并恢复父分支的位置和朝向。', '二つの再帰の枝を訪ね、親の位置と向きを復元しよう。'),
-           ('Each junction splits left and right; lengths fall 7, 5, 3, 1.', '每个节点向左右分杈，长度依次是 7、5、3、1。', '各節で左右に分かれ、長さは 7、5、3、1 です。'),
-           ('A child routine must return home. Between children use a half turn, then retrace the parent stem.', '子过程必须原路返回；两次子调用之间掉头，最后折返父主干。', '子は元へ戻る必要があります。二つの子の間で半回転し、最後に親の幹を引き返しましょう。')),
-    lesson(('Contrary courts', '相向庭院', '逆向きの中庭'),
-           ('Use mutually recursive procedures that exchange dimensions and turn direction.', '用相互递归的过程，交换尺寸并改变环绕方向。', '相互再帰で寸法と周回方向を交換しよう。'),
-           ('Clockwise and counterclockwise rectangles share a corner, but exchange their long and short axes.', '顺、逆时针长方形共用角点，却交替交换长短轴。', '順回りと逆回りの長方形は角を共有し、長短の軸を交換します。'),
-           ('Make two layer procedures call each other with the dimensions exchanged and reduced by two.', '写两个互相调用的层过程，传入交换后各减二的尺寸。', '二つの層の手続きを互いに呼び、交換して二ずつ減らした寸法を渡しましょう。')),
-    lesson(('Lattice atelier', '格窗工坊', '格子窓の工房'),
-           ('Nest a fourfold instruction repeater inside finite rows of reusable window tiles.', '把四次指令重复嵌入有限行数，复用整块窗格。', '四回の命令反復を有限の列に入れ、窓の単位全体を再利用しよう。'),
-           ('Sixteen windows form a four-by-four arrangement, linked along each lower edge.', '十六扇窗排成四行四列，沿每行下沿连接。', '十六の窓が四行四列に並び、各行の下辺でつながります。'),
-           ('Separate walking, repetition, one window and one row. A row must return left before rising.', '区分计步、重复、单窗和整行；每行结束先返回左端，再上移。', '歩数、反復、窓、行を分けましょう。行の後は左へ戻ってから上がります。')),
-    lesson(('Shifting registers', '换位寄存', '入れ替わる数値'),
-           ('Exchange two numeric roles while alternating the connector’s turn.', '让两个数值参数交换职责，同时交替连接处转向。', '二つの数値引数の役割を交換し、接続の回転も交互に変えよう。'),
-           ('Widths are 8, 4, 6, 2; gaps are 4, 6, 2, 4. Neither sequence changes monotonically.', '横宽为 8、4、6、2，间距为 4、6、2、4；两列都不是单调变化。', '幅は 8、4、6、2、間隔は 4、6、2、4。どちらも単調には変わりません。'),
-           ('After a lane of X and a gap of Y, recurse with Y and X-2, plus the opposite turn.', '走完 X 长的横段和 Y 长的间隔后，用 Y、X-2 和反向转向递归。', '幅 X と間隔 Y の後、Y、X-2 と逆の回転で再帰しましょう。')),
+LESSONS = OPEN_LESSONS + [
     lesson(('Recursive lantern', '递归灯宫', '再帰の灯宮'),
            ('Assemble four rotated subcurves by swapping two turn parameters at each level.', '每层交换两个转向参数，把四条旋转子曲线拼成整体。', '各段で二つの回転引数を交換し、四つの回転した曲線をつなごう。'),
-           ('The passage has four similar quarters, each made from four smaller quarters.', '通道分成四个相似区域，每个区域又由四个更小区域组成。', '通路には似た四区画があり、それぞれも小さな四区画でできています。'),
+           ('The pattern has four similar quarters, each made from four smaller quarters.', '图案分成四个相似区域，每个区域又由四个更小区域组成。', '模様には似た四区画があり、それぞれも小さな四区画でできています。'),
            ('Use depth and two opposite turns. The first and fourth subcalls exchange the turns; three two-cell links join them.', '传递深度和两个反向转向；第一、第四次子调用交换转向，用三段两格连接线拼合。', '深さと逆向きの二回転を渡し、一つ目と四つ目の子で回転を交換。二マスの三本の線で結びましょう。')),
     lesson(('Snowmelt seal', '融雪方印', '雪解けの印'),
            ('Grow an instruction motif recursively, then execute only the selected expansion level.', '递归增长指令图案，但只执行指定层的展开结果。', '命令の模様を再帰で育て、選んだ段階の展開だけを実行しよう。'),
@@ -116,79 +69,12 @@ def outline(path):
 
 
 def advanced_designs(trace):
-    result = []
+    result = open_designs(trace)
 
     def add(start, commands, source, geometry=None, traps=()):
-        # Geometry is expressed independently of the H source. Long walks may intentionally
-        # overrun its end caps, so replay those attempted steps against the generated walls.
         safe = {start, *trace(start, geometry or commands)}
-        assert not (safe & set(traps))
-        walls = sorted(set(outline(safe)) - set(traps))
-        result.append((start, commands, source, sorted(safe - {start}), walls, list(traps)))
-
-    widths = [18, 18, 14, 14, 10, 10]
-    geometry = 'r' + ''.join(walk(width)+turn+walk(3)+turn
-                             for width, turn in zip(widths, ['r', 'l']*3))
-    commands = 'r' + ''.join(walk(24)+turn+walk(3)+turn for turn in ['rr'*i+'r' for i in range(6)])
-    add((3, 3), commands, WALK+'a(N,T):b(24)Tb(3)Ta(N-1,rrT)\nra(6,r)', geometry)
-
-    lengths = [5, 9, 13, 17, 13, 9]
-    geometry = ''.join(walk(n)+'rr'+walk(n)+('lssssl' if i < 5 else '')
-                       for i, n in enumerate(lengths))
-    commands = ''.join(walk(24)+'rr'+walk(24)+('lssssl' if i < 5 else '') for i in range(6))
-    add((2, 22), commands, WALK+'a(N):b(24)rrb(24)lb(4)la(N-1)\na(6)', geometry)
-
-    commands = ''.join(walk(h)+'r'+walk(w)+'r'+walk(h-2)+'r'+walk(w-2)+'r'
-                       for h, w in [(18, 14), (14, 10), (10, 6), (6, 2)])
-    add((5, 21), commands, WALK+'a(H,W):b(H)rb(W)rb(H-2)rb(W-2)ra(H-4,W-4)\na(18,14)')
-
-    commands = ''.join(turn+walk(n)+'rr'+walk(n)+turn+walk(4)
-                       for n, turn in zip([2, 4, 6, 8, 10], ['rr'*i+'r' for i in range(5)]))
-    add((12, 22), commands, WALK+'a(K,N,T):Tb(N)rrb(N)Tb(4)a(K-1,N+2,rrT)\na(5,2,r)')
-
-    arm = walk(9)+'r'+walk(3)+'lssrrssr'+walk(3)+'l'+walk(9)+'r'
-    add((12, 12), arm*4, WALK+'a:b(9)rb(3)lb(2)rrb(2)rb(3)lb(9)r\naaaa')
-
-    commands = ''.join(walk(3)+turn+walk(n)+other
-                       for n, turn, other in zip([10, 8, 6, 4, 2], ['r', 'l', 'r', 'l', 'r'], ['l', 'r', 'l', 'r', 'l']))
-    add((5, 21), commands, WALK+'a(N,X,Y):b(3)Xb(N)Ya(N-2,Y,X)\na(10,r,l)')
-
-    def counterweight(x, y):
-        if x <= 0:
-            return ''
-        return walk(x)+'r'+walk(y)+'l'+counterweight(x-1, y+1)+'l'+walk(y)+'l'+walk(x)+'rr'
-
-    add((12, 12), (counterweight(4, 1)+'r')*4, WALK+FOUR+
-        'a(X,Y):b(X)rb(Y)la(X-1,Y+1)lb(Y)lb(X)rr\nq(a(4,1)r)')
-
-    def hook(n):
-        return '' if n <= 0 else walk(n)+'r'+hook(n-2)+'lrr'+walk(n)+'rr'
-
-    add((12, 12), (hook(10)+'r')*4, WALK+'a(N):b(N)ra(N-2)lrrb(N)rr\nc:a(10)r\ncccc')
-
-    def tree(n):
-        return '' if n <= 0 else walk(n)+'l'+tree(n-2)+'rr'+tree(n-2)+'r'+walk(n)+'rr'
-
-    add((12, 23), tree(7), WALK+'a(N):b(N)la(N-2)rra(N-2)rb(N)rr\na(7)')
-
-    def courts(w, h, turn):
-        if min(w, h) <= 0:
-            return ''
-        other = 'l' if turn == 'r' else 'r'
-        return (walk(w)+turn+walk(h)+turn)*2+turn+courts(h-2, w-2, other)
-
-    add((12, 12), courts(8, 10, 'r'), WALK+
-        'a(W,H):b(W)rb(H)rb(W)rb(H)rrc(H-2,W-2)\n'
-        'c(W,H):b(W)lb(H)lb(W)lb(H)lla(H-2,W-2)\na(8,10)')
-
-    row = (square(2)+'rssssl')*4+'l'+walk(16)+'r'
-    commands = ''.join(row+(walk(5) if i < 3 else '') for i in range(4))
-    add((3, 22), commands, WALK+FOUR+
-        'd(N):q(b(N)r)\ne:d(2)rb(4)l\na(N):q(e)lb(16)rb(5)a(N-1)\na(4)')
-
-    commands = 'r'+''.join(walk(x)+turn+walk(y)+turn
-                           for x, y, turn in [(8, 4, 'r'), (4, 6, 'rrr'), (6, 2, 'rrrrr'), (2, 4, 'rrrrrrr')])
-    add((3, 3), commands, WALK+'a(K,X,Y,T):b(X)Tb(Y)Ta(K-1,Y,X-2,rrT)\nra(4,8,4,r)')
+        walls, traps = late_obstacles(safe, len(result)-12, traps)
+        result.append((start, commands, source, sorted(safe - {start}), walls, traps))
 
     def hilbert(n, x='r', y='l'):
         if n == 0:

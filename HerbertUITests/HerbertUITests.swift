@@ -441,9 +441,17 @@ final class HerbertUITests: XCTestCase {
         for (id, source) in [
             (10051, "a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)"),
             (10052, "b(N):sb(N-1)\nq(P):PPPP\nw:q(b(6)r)\nwrb(11)lw"),
-            (10031, "b(N):sb(N-1)\na(N,T):b(24)Tb(3)Ta(N-1,rrT)\nra(6,r)"),
             (
-                10050,
+                10054,
+                "b(N):sb(N-1)\nq(P):PPPP\na(N):b(24)rq(b(2)r)rb(N)rrr\na(6)a(9)a(6)a(9)"
+            ),
+            (
+                10060,
+                "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\nw:q(d(2)r)\ne:wrb(6)l\n"
+                    + "a(N):eeelb(18)rb(6)a(N-1)\nlb(8)lb(6)rra(3)"
+            ),
+            (
+                10073,
                 "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\n"
                     + "a(N,D,T):d(D)b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(3,6,r)r)"
             ),
@@ -499,8 +507,8 @@ final class HerbertUITests: XCTestCase {
         #endif
         capture(app, name: "course-library")
         for (id, name) in [
-            (10051, "rose"), (10052, "lanterns"), (10038, "rosette"), (10044, "seal"), (10049, "mosaic"),
-            (10050, "cathedral"),
+            (10051, "rose"), (10052, "lanterns"), (10061, "rosette"), (10067, "seal"), (10072, "mosaic"),
+            (10073, "cathedral"),
         ] {
             openProblem(id, in: app)
             capture(app, name: "course-\(name)")
@@ -513,7 +521,7 @@ final class HerbertUITests: XCTestCase {
             image.name = "readme-course-\(name)-board"
             image.lifetime = .keepAlways
             add(image)
-            if id == 10049 {
+            if id == 10072 {
                 app.textViews["code-editor"].activateControl()
                 app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(3)")
                 for _ in 0..<3 { app.buttons["step-program"].activateControl() }

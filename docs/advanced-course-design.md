@@ -52,3 +52,7 @@ traps, alternating turns and nested composition. See the [current course](origin
 ## Current numbering in 0.3.3
 
 The historical design discussion above uses its original numbers. The advanced boards are now **L11–L30** (former L31–L50), with unchanged layouts and reference programs. The ten introductory lessons are L01–L10; new L07 Turning rose and L08 Tandem lanterns replace the former L25/L26. Current labels, goals and budgets are listed in [the course](original-course.md).
+
+## Open geometry revision
+
+The sections above describe the historical curriculum. The current revision rebuilds L11–L22, opens the route-border walls in L10–L30, and preserves the target/start geometry in L23–L30. See the [current design notes](open-course-design.zh-CN.md) for authored landmarks, traps, alternative solutions and save compatibility. README screenshots await player review.

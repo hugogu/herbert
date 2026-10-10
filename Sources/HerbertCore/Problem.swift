@@ -128,7 +128,8 @@ public struct Board: Sendable {
 public enum ProblemCatalog {
     /// Reserved IDs from the previous course revisions; retain their inert backup records, never reuse them.
     public static let retiredLessonIDs: Set<Int> = Set(
-        [2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 18, 19, 20, 21, 23, 25, 26, 28, 29].map { 10000 + $0 })
+        [2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 18, 19, 20, 21, 23, 25, 26, 28, 29, 30].map { 10000 + $0 }
+    ).union(10031...10050)
 
     public static func bundled() throws -> [Problem] {
         guard let url = Bundle.module.url(forResource: "original-problems", withExtension: "json") else {

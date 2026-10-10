@@ -3,6 +3,12 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## Unreleased
+
+- Redesign L11–L22 as distinct open geometric puzzles, with local wall stops, islands and trap accents instead of enclosing the reference route. Open L10 and retain the target geometry and starting positions of L23–L30.
+- Verify alternative budget-compliant traversals for L10–L23, including counted returns, inside-out diamonds and a grid sweep alongside recursive subdivision. Preserve retired completions and historical match snapshots using fresh internal IDs for changed boards.
+- Add an offline before/after board review generator. README screenshots await design review.
+
 ## [0.3.8] - 2026-10-09
 
 - Align model timing with the top of the percentage score to remove excess header space.

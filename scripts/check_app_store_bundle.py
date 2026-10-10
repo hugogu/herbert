@@ -21,7 +21,7 @@ def check_bundle(app):
     if len(originals) != 1:
         raise ValueError('Expected exactly one original-problems.json in the app.')
     catalog = originals[0]
-    retained_ids = [10001, 10006, 10012, 10017, 10022, 10024, 10051, 10052, 10027, 10030] + list(range(10031, 10051))
+    retained_ids = [10001, 10006, 10012, 10017, 10022, 10024, 10051, 10052, 10027] + list(range(10053, 10074))
     if [item.get('id') for item in catalog] != retained_ids:
         raise ValueError('Expected the 30 retained curriculum IDs only.')
     if [item['lesson']['order'] for item in catalog] != list(range(1, 31)):
