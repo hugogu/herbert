@@ -20,12 +20,14 @@ and keep making your solution smaller.
 Start with **10 introductory lessons**, then explore **20 advanced challenges** in
 wall-assisted counting, parameter swaps, recursive returns, mutual recursion and
 composition. All **30 original puzzles** have English, Chinese and Japanese goals
-and two optional hints, with reference programs verified by the native and HOJ engines.
+and two optional hints. Reference programs are verified by the native engine;
+H language behavior is also audited against the HOJ reference implementation.
 The default open-source edition also includes **1,769 community problems**, preserving
 their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
 The course uses continuous **L01–L30** numbers: ten introductory lessons followed
 by twenty advanced challenges. Only the first two fit a direct sequence of commands.
-L07 “Turning rose” and L08 “Tandem lanterns” are newly designed symmetric, walled boards.
+L04–L06 introduce reusable patterns; L11–L22 explore open geometric compositions.
+Broken wall landmarks and trap motifs guide the route while leaving alternative traversals.
 Display numbers are separate from internal save IDs; retired records remain importable.
 
 ## Download for Mac
@@ -34,12 +36,16 @@ Display numbers are separate from internal save IDs; retired records remain impo
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
+Screenshots below show the latest source revision. The redesigned course and button
+fixes are available in [main-branch CI build artifacts](https://github.com/hugogu/herbert/actions/workflows/ci.yml);
+the 0.3.8 release contains the earlier course layouts.
+
 This preview is ad-hoc signed and **not Apple notarized**. macOS may block its first
 launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
 **System Settings → Privacy & Security → Open Anyway** if you trust the download.
 See [checksums, installation and build details](docs/macos-distribution.md).
 
-[Explore the original curriculum](docs/original-course.md) · [Design and community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md)
+[Explore the original curriculum](docs/original-course.md) · [Open geometry design](docs/open-course-design.zh-CN.md) · [Community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md)
 
 ![Herbert original course in the English Mac app: Vaulted mosaic](docs/screenshots/en/course/course-mosaic.png)
 
@@ -60,19 +66,19 @@ the selected board, ready to paste as one message.
 ## Small programs, intricate places
 
 The six-chapter [original course](docs/original-course.md) grows from a single `s` to
-layered recursive systems. Walls reveal rooms, folds and rotational units while
-constraining the route. These are three of the new challenges; click a board for its
+layered recursive systems. Partial walls and trap ribbons reveal folds and rotational
+units while keeping multiple approaches open. These are three challenges; click a board for its
 full game screen:
 
-| L18 · Hinged rosette | L24 · Snowmelt seal | L30 · Astral cathedral |
+| L18 · Folding shells | L24 · Snowmelt seal | L30 · Astral cathedral |
 | --- | --- | --- |
-| [![Hinged rosette board with four walled spiral arms](docs/screenshots/en/course/course-rosette-board.png)](docs/screenshots/en/course/course-rosette.png) | [![Snowmelt seal board with recursive folds and four trap caps](docs/screenshots/en/course/course-seal-board.png)](docs/screenshots/en/course/course-seal.png) | [![Astral cathedral board with branching square courtyards](docs/screenshots/en/course/course-cathedral-board.png)](docs/screenshots/en/course/course-cathedral.png) |
-| Recursive return · ≤ 29 bytes | Selective instruction expansion · ≤ 34 bytes | Chiral branching + composition · ≤ 56 bytes |
+| [![Folding shells board with four recursive hooks and broken wall landmarks](docs/screenshots/en/course/course-rosette-board.png)](docs/screenshots/en/course/course-rosette.png) | [![Snowmelt seal board with recursive folds, wall brackets and trap accents](docs/screenshots/en/course/course-seal-board.png)](docs/screenshots/en/course/course-seal.png) | [![Astral cathedral board with branching square courtyards](docs/screenshots/en/course/course-cathedral-board.png)](docs/screenshots/en/course/course-cathedral.png) |
+| Recursive return · ≤ 33 bytes | Selective instruction expansion · ≤ 34 bytes | Chiral branching + composition · ≤ 56 bytes |
 
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The course is included in the Mac preview.*
+The redesigned course is available in the latest main-branch builds.*
 
 | L07 · Turning rose | L08 · Tandem lanterns |
 | --- | --- |

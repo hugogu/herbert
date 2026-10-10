@@ -4,15 +4,17 @@
 
 先从 **10 道入门课程关卡**学习移动、避障、过程、递归与指令参数，再挑战 **20 道进阶题**：
 让墙参与计数、交换参数、递归折返、互递归及多层子程序组合。
-全部 **30 道原创题** 都有中英日目标与两级提示，参考解通过原生引擎和 HOJ 参考引擎验证。
+全部 **30 道原创题** 都有中英日目标与两级提示，参考解通过原生引擎验证，H 语言行为另与 HOJ 参考实现核对。
 默认开源版另含 1,769 道社区题，共 **1,799 题**；`HerbertAppStore` 仅打包原创的 30 题。
 课程连续编号为 **L01–L30**：前十题入门，后二十题进阶。仅前两题可直接逐步写出路线。
-L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续墙的图案。显示编号与内部存档 ID 分开，退役记录仍可导入。
+L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙面和陷阱纹样提供引导，也为不同走法留出空间。显示编号与内部存档 ID 分开，退役记录仍可导入。
 
 ## 下载 Mac 版
 
 **[下载 0.3.8 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.8/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
+
+下方截图来自最新源码。新版课程与按钮修复可在 [main 分支的 CI 构建产物](https://github.com/hugogu/herbert/actions/workflows/ci.yml)中获取；0.3.8 发布包仍使用改版前的课程布局。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
 
@@ -20,12 +22,12 @@ L07「旋转玫瑰」和 L08「双灯相映」重新设计为对称、带连续�
 
 *实际原生 Mac App 的中文截图。L29「穹顶镶嵌」组合收缩层、窗格与四向旋转；每层子过程都要恢复自己的位置和朝向，整体图案才接得起来。*
 
-| L18 · 折页花窗 | L24 · 融雪方印 | L30 · 星穹圣殿 |
+| L18 · 折叠海螺 | L24 · 融雪方印 | L30 · 星穹圣殿 |
 | --- | --- | --- |
-| [![折页花窗的四向连续墙与递归分支](docs/screenshots/course/course-rosette-board.png)](docs/screenshots/course/course-rosette.png) | [![融雪方印的递归弯折与四个陷阱端点](docs/screenshots/course/course-seal-board.png)](docs/screenshots/course/course-seal.png) | [![星穹圣殿的方形庭院与分杈结构](docs/screenshots/course/course-cathedral-board.png)](docs/screenshots/course/course-cathedral.png) |
-| 递归折返 · ≤ 29 bytes | 指令展开层选择 · ≤ 34 bytes | 旋向分杈与组合 · ≤ 56 bytes |
+| [![折叠海螺的四向递进折钩与断续墙面](docs/screenshots/course/course-rosette-board.png)](docs/screenshots/course/course-rosette.png) | [![融雪方印的递归弯折、墙面折角与陷阱纹样](docs/screenshots/course/course-seal-board.png)](docs/screenshots/course/course-seal.png) | [![星穹圣殿的方形庭院与分杈结构](docs/screenshots/course/course-cathedral-board.png)](docs/screenshots/course/course-cathedral.png) |
+| 递归折返 · ≤ 33 bytes | 指令展开层选择 · ≤ 34 bytes | 旋向分杈与组合 · ≤ 56 bytes |
 
-原创题目与这些截图均使用 MIT。预算已验证可达，不宣称最优解。难度来源、社区试解和去掉过于简单解法的过程见[设计说明](docs/advanced-course-design.zh-CN.md)。
+原创题目与这些截图均使用 MIT。预算已验证可达，不宣称最优解。难度来源、社区试解和去掉过于简单解法的过程见[开放几何设计](docs/open-course-design.zh-CN.md)和[社区试解](docs/advanced-course-design.zh-CN.md)。
 
 ## 社区题库示例
 
