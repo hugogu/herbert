@@ -27,7 +27,7 @@ struct AIProvidersView: View {
                     } label: {
                         Label("添加服务商", systemImage: "plus")
                     }
-                    .buttonStyle(.borderedProminent).accessibilityIdentifier("addAIProvider")
+                    .prominentButtonStyle().accessibilityIdentifier("addAIProvider")
                 }
                 if battlefield.settings.providers.isEmpty {
                     ContentUnavailableView(

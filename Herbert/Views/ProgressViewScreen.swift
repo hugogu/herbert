@@ -33,15 +33,15 @@ struct ProgressViewScreen: View {
                                 exporting = true
                             } catch { message = error.localizedDescription }
                         } label: {
-                            Label("导出备份", systemImage: "square.and.arrow.up").frame(minHeight: 36)
+                            Label("导出", systemImage: "square.and.arrow.up").frame(minHeight: 36)
                         }
-                        .buttonStyle(.borderedProminent).accessibilityIdentifier("export-backup")
+                        .prominentButtonStyle().accessibilityIdentifier("export-backup")
                         Button {
                             importing = true
                         } label: {
-                            Label("导入备份", systemImage: "square.and.arrow.down").frame(minHeight: 36)
+                            Label("导入", systemImage: "square.and.arrow.down").frame(minHeight: 36)
                         }
-                        .buttonStyle(.bordered).accessibilityIdentifier("import-backup")
+                        .secondaryButtonStyle().accessibilityIdentifier("import-backup")
                     }.disabled(busy)
                     if busy { SwiftUI.ProgressView("正在验证并合并备份…").font(.caption) }
                     if let message {

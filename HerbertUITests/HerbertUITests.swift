@@ -82,13 +82,14 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
-    func testCopyProblemPromptIncludesSharedRulesExamplesAndBoardWithoutChangingDraft() {
+    func testCopyProblemPromptIncludesSharedRulesExamplesAndBoardWithoutChangingDraft() throws {
         let app = launch(language: "en")
         openFirst(app)
         app.buttons["insert-r"].activateControl()
         app.buttons["problem-details"].activateControl()
         let copy = app.buttons["copy-ai-prompt"]
         XCTAssertTrue(copy.waitForExistence(timeout: 5))
+        try assertButtonInk(copy, white: true)
         copy.activateControl()
         XCTAssertTrue(copy.label.contains("copied"))
         #if os(macOS)
@@ -104,6 +105,53 @@ final class HerbertUITests: XCTestCase {
         app.buttons["close-problem-details"].activateControl()
         XCTAssertEqual(app.textViews["code-editor"].value as? String, "r")
         app.terminate()
+    }
+
+    @MainActor
+    func testProgressActionsHaveCompactLabelsAndVisibleColors() throws {
+        let app = launch(language: "en")
+        #if os(macOS)
+            app.descendants(matching: .any)["section-记录"].firstMatch.activateControl()
+        #else
+            app.buttons["Progress"].activateControl()
+        #endif
+        let export = app.buttons["export-backup"]
+        let importButton = app.buttons["import-backup"]
+        XCTAssertTrue(export.waitForExistence(timeout: 5))
+        XCTAssertEqual(export.label, "Export")
+        XCTAssertEqual(importButton.label, "Import")
+        try assertButtonInk(export, white: true)
+        try assertButtonInk(importButton, white: false)
+        capture(app, name: "progress-actions")
+        app.terminate()
+    }
+
+    @MainActor
+    private func assertButtonInk(_ button: XCUIElement, white: Bool) throws {
+        XCUIApplication().activate()
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(button.screenshot().pngRepresentation as CFData, nil))
+        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let context = try XCTUnwrap(
+            CGContext(
+                data: nil, width: image.width, height: image.height, bitsPerComponent: 8,
+                bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        var inkPixels = 0
+        // Ignore the native border, corners and shadow; inspect the label's interior.
+        for y in (image.height / 3)..<(image.height * 2 / 3) {
+            for x in (image.width / 5)..<(image.width * 4 / 5) {
+                let offset = (y * image.width + x) * 4
+                let r = Int(pixels[offset])
+                let g = Int(pixels[offset + 1])
+                let b = Int(pixels[offset + 2])
+                if white ? (r > 235 && g > 235 && b > 235) : (g > r + 35 && g > b + 8 && g < 170) {
+                    inkPixels += 1
+                }
+            }
+        }
+        XCTAssertGreaterThan(inkPixels, 20, "Button text and icon must remain visible in the action color")
     }
 
     @MainActor

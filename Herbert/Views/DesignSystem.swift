@@ -55,6 +55,15 @@ struct RobotMark: View {
 }
 
 extension View {
+    // Explicit foregrounds prevent page/popover colors from overriding native button contrast on iOS.
+    func prominentButtonStyle() -> some View {
+        buttonStyle(.borderedProminent).tint(Palette.mint).foregroundStyle(.white)
+    }
+
+    func secondaryButtonStyle(color: Color = Palette.mint) -> some View {
+        buttonStyle(.bordered).tint(color).foregroundStyle(color)
+    }
+
     func panel(padding: CGFloat = 20) -> some View {
         self.padding(padding).background(.white, in: RoundedRectangle(cornerRadius: 20))
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line.opacity(0.7), lineWidth: 1))

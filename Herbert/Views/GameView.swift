@@ -196,7 +196,7 @@ struct GameView: View {
                         systemImage: promptCopied ? "checkmark" : "doc.on.doc"
                     )
                     .frame(maxWidth: .infinity, minHeight: 32)
-                }.buttonStyle(.borderedProminent).accessibilityIdentifier("copy-ai-prompt")
+                }.prominentButtonStyle().accessibilityIdentifier("copy-ai-prompt")
                 Text("包含规则、示例与当前棋盘，与 AI Battlefield 使用相同的提示词。")
                     .font(.caption).foregroundStyle(Palette.muted)
             }.padding(16)
@@ -376,7 +376,7 @@ struct GameView: View {
                         model.source = best
                         showBest = false
                     }
-                    .font(.caption).buttonStyle(.bordered)
+                    .font(.caption).secondaryButtonStyle()
                 }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(
                     Palette.mintLight, in: RoundedRectangle(cornerRadius: 12))
             }

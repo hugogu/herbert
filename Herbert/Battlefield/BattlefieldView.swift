@@ -43,7 +43,7 @@ struct BattlefieldView: View {
                                 historyResult = nil
                             } label: {
                                 Label("返回比赛历史", systemImage: "chevron.left")
-                            }.buttonStyle(.bordered).accessibilityIdentifier("backToBattlefieldHistory")
+                            }.secondaryButtonStyle().accessibilityIdentifier("backToBattlefieldHistory")
                             Spacer()
                         }.padding(.horizontal, 28).padding(.top, 16)
                     }

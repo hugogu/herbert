@@ -157,14 +157,14 @@ struct BattlefieldDashboard: View {
                     Task { await battlefield.stop() }
                 } label: {
                     Label("终止比赛", systemImage: "stop.fill")
-                }.buttonStyle(.bordered).accessibilityIdentifier("stopBattlefield")
+                }.secondaryButtonStyle(color: Palette.danger).accessibilityIdentifier("stopBattlefield")
             } else {
                 Button {
                     sharing = true
                 } label: {
                     Label("分享结果图片", systemImage: "square.and.arrow.up")
                 }
-                .buttonStyle(.borderedProminent).accessibilityIdentifier("shareBattlefield")
+                .prominentButtonStyle().accessibilityIdentifier("shareBattlefield")
             }
         }
     }
@@ -505,7 +505,7 @@ private struct BattlefieldAnswerView: View {
                                     onTry(program)
                                 } label: {
                                     Label("在棋盘中试运行", systemImage: "play.rectangle")
-                                }.buttonStyle(.borderedProminent)
+                                }.prominentButtonStyle()
                                     .accessibilityIdentifier("tryBattlefieldAnswer-\(attempt.id)")
                             }
                             DisclosureGroup(

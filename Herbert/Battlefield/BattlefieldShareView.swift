@@ -25,7 +25,7 @@ struct BattlefieldShareView: View {
                         preview: SharePreview("Herbert AI Battlefield", image: Image(decorative: preview, scale: 1))
                     ) {
                         Label("分享 PNG 图片", systemImage: "square.and.arrow.up")
-                    }.buttonStyle(.borderedProminent).padding(.bottom, 20).accessibilityIdentifier(
+                    }.prominentButtonStyle().padding(.bottom, 20).accessibilityIdentifier(
                         "shareBattlefieldPNG")
                 } else if failed {
                     BattlefieldNotice(text: L10n.text("图片生成失败，请重试。"))
