@@ -781,6 +781,8 @@ final class AITransportTests: XCTestCase {
             XCTAssertLessThan(try XCTUnwrap(error.providerResponse).utf8.count, 66_000)
             XCTAssertTrue(error.providerResponse?.contains("truncated") == true)
         }
+        // URLSession delivers stopLoading on its callback queue after cancellation.
+        for _ in 0..<100 where !stub.stopped { try await Task.sleep(for: .milliseconds(10)) }
         XCTAssertTrue(stub.stopped)
     }
 
