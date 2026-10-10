@@ -7,6 +7,7 @@ save or API formats through documented migrations.
 
 - Redesign L11–L22 as distinct open geometric puzzles, with local wall stops, islands and trap accents instead of enclosing the reference route. Open L10 and retain the target geometry and starting positions of L23–L30.
 - Verify alternative budget-compliant traversals for L10–L23, including counted returns, inside-out diamonds and a grid sweep alongside recursive subdivision. Preserve retired completions and historical match snapshots using fresh internal IDs for changed boards.
+- Enrich L04–L06 and L10–L30 with authored broken brackets and trap ribbons: each obstacle type uses 15–30% of the enclosing-border cell count. Rebuild L04–L06 as Sunlit courtyard, Diamond stair and Growing spiral, with localized teaching hints and protected legacy saves.
 - Add an offline before/after board review generator. README screenshots await design review.
 
 ## [0.3.8] - 2026-10-09

@@ -36,38 +36,44 @@
     "endHeading": 3
   },
   {
-    "id": 10017,
-    "source": "a(X):sa(X-1)\na(7)ra(4)",
-    "steps": 12,
+    "id": 10074,
+    "source": "a(N):sa(N-1)\na(6)ra(10)ra(6)ra(10)",
+    "steps": 34,
     "blocked": 0,
     "traps": 0,
     "endPosition": [
-      12,
+      8,
+      15
+    ],
+    "endHeading": 3,
+    "alternateSources": [
+      "a(N):sa(N-1)\nra(10)la(6)la(10)la(6)"
+    ]
+  },
+  {
+    "id": 10075,
+    "source": "a(N,P):Pa(N-1,P)\nb:a(6,srsl)r\nbbbb",
+    "steps": 96,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      6,
       13
     ],
-    "endHeading": 1
+    "endHeading": 3,
+    "alternateSources": [
+      "a(N,P):Pa(N-1,P)\nb:a(6,slsr)l\nrrbbbb"
+    ]
   },
   {
-    "id": 10022,
-    "source": "a(X,Y):Ya(X-1,Y)\na(6,ssrssl)",
-    "steps": 35,
-    "blocked": 0,
-    "traps": 0,
-    "endPosition": [
-      18,
-      9
-    ],
-    "endHeading": 1
-  },
-  {
-    "id": 10024,
+    "id": 10076,
     "source": "a(X):Xla(Xss)\na(ss)",
     "steps": 98,
     "blocked": 0,
     "traps": 0,
     "endPosition": [
       20,
-      2
+      3
     ],
     "endHeading": 0
   },
@@ -108,7 +114,7 @@
     "endHeading": 1
   },
   {
-    "id": 10053,
+    "id": 10077,
     "source": "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\ndddd",
     "steps": 238,
     "blocked": 0,
@@ -123,7 +129,7 @@
     ]
   },
   {
-    "id": 10054,
+    "id": 10078,
     "source": "b(N):sb(N-1)\nq(P):PPPP\na(N):b(24)rq(b(2)r)rb(N)rrr\na(6)a(9)a(6)a(9)",
     "steps": 176,
     "blocked": 66,
@@ -139,7 +145,7 @@
     ]
   },
   {
-    "id": 10055,
+    "id": 10079,
     "source": "b(N):sb(N-1)\nd(N):srsld(N-1)\na:b(24)rrb(8)rrd(4)rrd(4)rrr\naaaa",
     "steps": 282,
     "blocked": 64,
@@ -155,7 +161,7 @@
     ]
   },
   {
-    "id": 10056,
+    "id": 10080,
     "source": "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\na(N):q(d(N)r)rb(3)la(N-3)\nlb(9)ra(9)",
     "steps": 317,
     "blocked": 0,
@@ -171,7 +177,7 @@
     ]
   },
   {
-    "id": 10057,
+    "id": 10081,
     "source": "b(N):sb(N-1)\nd(N):lb(N)rrb(N+N)rrb(N)r\na(N):d(N)b(3)a(N-2)\nc(K,N):d(N)b(3)c(K-1,N+2)\nrrb(9)rra(8)c(3,4)",
     "steps": 214,
     "blocked": 0,
@@ -186,7 +192,7 @@
     ]
   },
   {
-    "id": 10058,
+    "id": 10082,
     "source": "b(N):sb(N-1)\nq(P):PPPP\na:b(8)rq(b(4)r)lrrb(8)rrr\naaaa",
     "steps": 151,
     "blocked": 0,
@@ -201,7 +207,7 @@
     ]
   },
   {
-    "id": 10059,
+    "id": 10083,
     "source": "b(N):sb(N-1)\nq(P):PPPP\na(N,T,U):b(2)Tb(N)Ua(N-2,U,T)rrTb(N)Ub(2)rr\nq(a(8,r,l)r)",
     "steps": 302,
     "blocked": 0,
@@ -216,7 +222,7 @@
     ]
   },
   {
-    "id": 10060,
+    "id": 10084,
     "source": "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\nw:q(d(2)r)\ne:wrb(6)l\na(N):eeelb(18)rb(6)a(N-1)\nlb(8)lb(6)rra(3)",
     "steps": 454,
     "blocked": 0,
@@ -231,7 +237,7 @@
     ]
   },
   {
-    "id": 10061,
+    "id": 10085,
     "source": "b(N):sb(N-1)\nq(P):PPPP\na(N):b(N)ra(N-3)lrrb(N)rr\nq(a(11)r)",
     "steps": 260,
     "blocked": 0,
@@ -246,7 +252,7 @@
     ]
   },
   {
-    "id": 10062,
+    "id": 10086,
     "source": "b(N):sb(N-1)\na(N):b(N)la(N-2)rra(N-2)rb(N)rr\nc:a(8)rr\ncc",
     "steps": 355,
     "blocked": 0,
@@ -261,7 +267,7 @@
     ]
   },
   {
-    "id": 10063,
+    "id": 10087,
     "source": "b(N):sb(N-1)\nq(P):PPPP\na(W,H):b(W)rb(H)rb(W)rb(H)rrc(H-2,W-2)\nc(W,H):b(W)lb(H)lb(W)lb(H)lla(H-2,W-2)\nq(a(6,8))",
     "steps": 292,
     "blocked": 0,
@@ -276,7 +282,7 @@
     ]
   },
   {
-    "id": 10064,
+    "id": 10088,
     "source": "b(N):sb(N-1)\nq(P):PPPP\nw:lb(2)lb(2)rrq(b(4)r)b(2)rb(2)l\na:b(7)wrb(7)wrb(7)rb(7)rr\naaaa",
     "steps": 378,
     "blocked": 0,
@@ -291,7 +297,7 @@
     ]
   },
   {
-    "id": 10065,
+    "id": 10089,
     "source": "b(N):sb(N-1)\nq(P):PPPP\nc(N):sc(N-2)\na(K,X,Y,T):b(X)Tc(Y)Ta(K-1,Y,X-2,rrT)Tc(Y)rrTb(X)rr\nq(a(4,8,4,r)r)",
     "steps": 464,
     "blocked": 0,
@@ -306,7 +312,7 @@
     ]
   },
   {
-    "id": 10066,
+    "id": 10090,
     "source": "b(N):sb(N-1)\na(N,X,Y):Xa(N-1,Y,X)b(2)Ya(N-1,X,Y)b(2)a(N-1,X,Y)Yb(2)a(N-1,Y,X)X\na(3,r,l)",
     "steps": 207,
     "blocked": 0,
@@ -321,7 +327,7 @@
     ]
   },
   {
-    "id": 10067,
+    "id": 10091,
     "source": "a(N,X):a(N-1,XrXlXlXrX)c(2-N,X)\nc(N,X):XrXrXrXr\na(3,ss)",
     "steps": 298,
     "blocked": 0,
@@ -333,7 +339,7 @@
     "endHeading": 3
   },
   {
-    "id": 10068,
+    "id": 10092,
     "source": "b(N):sb(N-1)\nq(X):XXXX\nc(N,S):b(S)lb(S)ra(N-1,S-3)rb(S)rb(S)r\na(N,S):q(c(N,S))\na(3,7)",
     "steps": 1010,
     "blocked": 0,
@@ -345,7 +351,7 @@
     "endHeading": 2
   },
   {
-    "id": 10069,
+    "id": 10093,
     "source": "a(N):a(N-1)rc(N-1)ssr\nc(N):lssa(N-1)lc(N-1)\nssa(6)",
     "steps": 253,
     "blocked": 0,
@@ -357,7 +363,7 @@
     "endHeading": 1
   },
   {
-    "id": 10070,
+    "id": 10094,
     "source": "a(N):a(N-1)rc(N-1)sr\nc(N):lsa(N-1)lc(N-1)\nd(N):lsf(N-1)ld(N-1)\nf(N):f(N-1)rd(N-1)sr\ne:sa(5)rrd(5)srrr\neeee",
     "steps": 672,
     "blocked": 0,
@@ -369,7 +375,7 @@
     "endHeading": 0
   },
   {
-    "id": 10071,
+    "id": 10095,
     "source": "b(N):sb(N-1)\nq(X):XXXX\na(N,D,T):b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(4,7,r)r)",
     "steps": 996,
     "blocked": 0,
@@ -381,7 +387,7 @@
     "endHeading": 2
   },
   {
-    "id": 10072,
+    "id": 10096,
     "source": "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\nc(N,W):d(W)rb(W+1)lc(N-1,W)lb(W+1)r\na(N,W):c(N,W)b(W+2)a(N-1,W-1)rrb(W+2)rr\nq(a(3,3)r)",
     "steps": 691,
     "blocked": 0,
@@ -393,7 +399,7 @@
     "endHeading": 0
   },
   {
-    "id": 10073,
+    "id": 10097,
     "source": "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\na(N,D,T):d(D)b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(3,6,r)r)",
     "steps": 904,
     "blocked": 0,

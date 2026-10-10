@@ -30,7 +30,7 @@ final class OriginalCurriculumTests: XCTestCase {
         XCTAssertEqual(community.count, 1769)
         XCTAssertEqual(
             originals.map(\.id),
-            [10001, 10006, 10012, 10017, 10022, 10024, 10051, 10052, 10027] + Array(10053...10073))
+            [10001, 10006, 10012, 10074, 10075, 10076, 10051, 10052, 10027] + Array(10077...10097))
         XCTAssertTrue(Set(originals.map(\.id)).isDisjoint(with: community.map(\.id)))
         XCTAssertEqual(Set(originals.map(\.rows)).count, 30)
         let archivedBoards = Set(community.map(\.rows))
@@ -117,13 +117,12 @@ final class OriginalCurriculumTests: XCTestCase {
             let board = try Board(problem: problem)
             XCTAssertFalse(board.walls.isEmpty, problem.title)
             XCTAssertFalse(board.traps.isEmpty, problem.title)
-            XCTAssertLessThanOrEqual(board.walls.count, 40, problem.title)
             XCTAssertTrue(board.targets.isDisjoint(with: board.walls), problem.title)
             XCTAssertGreaterThan(board.wallContours.count, 0, problem.title)
         }
         let url = try XCTUnwrap(Bundle.module.url(forResource: "original-solutions", withExtension: "json"))
         let references = try JSONDecoder().decode([Reference].self, from: Data(contentsOf: url))
-        for id in [10054, 10055] {
+        for id in [10078, 10079] {
             let problem = try XCTUnwrap(problems.first { $0.id == id })
             let reference = try XCTUnwrap(references.first { $0.id == id })
             XCTAssertGreaterThan(reference.blocked, 0)
@@ -143,8 +142,10 @@ final class OriginalCurriculumTests: XCTestCase {
     func testRebuiltLessonsHaveDifferentValidTraversalOrdersWithinBudget() throws {
         let url = try XCTUnwrap(Bundle.module.url(forResource: "original-solutions", withExtension: "json"))
         let references = try JSONDecoder().decode([Reference].self, from: Data(contentsOf: url))
-        let problems = try ProblemCatalog.bundled().filter { (10...23).contains($0.lesson?.order ?? 0) }
-        XCTAssertEqual(problems.count, 14)
+        let problems = try ProblemCatalog.bundled().filter {
+            [4, 5].contains($0.lesson?.order ?? 0) || (10...23).contains($0.lesson?.order ?? 0)
+        }
+        XCTAssertEqual(problems.count, 16)
         for problem in problems {
             let reference = try XCTUnwrap(references.first { $0.id == problem.id })
             let alternatives = try XCTUnwrap(reference.alternateSources)
@@ -179,13 +180,13 @@ final class OriginalCurriculumTests: XCTestCase {
             catalog: catalog)
         XCTAssertEqual(restored.records, [old])
         XCTAssertFalse(catalog.contains { $0.id == old.problemID })
-        XCTAssertTrue(catalog.contains { $0.id == 10054 && $0.lesson?.order == 11 })
-        XCTAssertFalse(restored.records.contains { $0.problemID == 10054 })
+        XCTAssertTrue(catalog.contains { $0.id == 10078 && $0.lesson?.order == 11 })
+        XCTAssertFalse(restored.records.contains { $0.problemID == 10078 })
     }
 
     func testDiscoveredShortcutsCannotSolveRevisedAdvancedLessons() throws {
         let problems = try ProblemCatalog.bundled()
-        for (id, tile) in [(10060, "srsl"), (10067, "ssslslsl")] {
+        for (id, tile) in [(10084, "srsl"), (10091, "ssslslsl")] {
             let problem = try XCTUnwrap(problems.first { $0.id == id })
             var session = try GameSession(problem: problem)
             try session.prepare(source: "a:\(tile)a\na")
@@ -214,12 +215,12 @@ final class OriginalCurriculumTests: XCTestCase {
             completedAt: date, updatedAt: date)
         let backup = ProgressSnapshot(records: [retired], lastProblemID: retired.problemID)
         let catalog = try ProblemCatalog.bundled()
-        XCTAssertEqual(ProblemCatalog.retiredLessonIDs.count, 43)
+        XCTAssertEqual(ProblemCatalog.retiredLessonIDs.count, 67)
         XCTAssertTrue(ProblemCatalog.retiredLessonIDs.isDisjoint(with: catalog.map(\.id)))
-        XCTAssertEqual(Set(catalog.map(\.id)).union(ProblemCatalog.retiredLessonIDs), Set(10001...10073))
+        XCTAssertEqual(Set(catalog.map(\.id)).union(ProblemCatalog.retiredLessonIDs), Set(10001...10097))
         let restored = try ProgressTransfer.merge(current: ProgressSnapshot(), incoming: backup, catalog: catalog)
         XCTAssertEqual(restored, backup)
-        let unknown = ProgressSnapshot(records: [ProblemProgress(problemID: 10074)], lastProblemID: 10074)
+        let unknown = ProgressSnapshot(records: [ProblemProgress(problemID: 10098)], lastProblemID: 10098)
         XCTAssertThrowsError(try ProgressTransfer.validate(unknown, catalog: catalog))
         let activeInvalid = ProgressSnapshot(records: [
             ProblemProgress(

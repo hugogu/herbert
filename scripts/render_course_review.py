@@ -37,7 +37,7 @@ def board_svg(rows):
 def render(current, previous):
     old = {p['lesson']['order']: p for p in previous}
     data = []
-    for problem in current[9:]:
+    for problem in [p for p in current if p['lesson']['order'] in (4, 5, 6) or p['lesson']['order'] >= 10]:
         order = problem['lesson']['order']
         before = old[order]
         title, goal, _ = (LESSONS + ADVANCED_LESSONS)[order-1]
@@ -67,11 +67,11 @@ select{flex:1;min-width:240px}.comparison{display:grid;grid-template-columns:1fr
 .notice{font-size:13px;color:#617773;border-top:1px solid #dce3db;margin-top:32px;padding-top:16px}
 @media(max-width:650px){main{padding:20px 14px}.comparison{grid-template-columns:1fr}.panel{padding:12px}}
 </style><main><h1>Herbert · 开放几何关卡</h1>
-<p>L11–L22 重构形态；L23–L30 保留目标与起点，调整局部墙和陷阱。点击缩略图查看改版前后。</p>
+<p>L04–L06 重构；L10–L30 加强断续墙段和陷阱带，L23–L30 保留目标与起点。点击缩略图查看改版前后。</p>
 <div class="bar"><button id="prev" aria-label="上一关">←</button><select id="select" aria-label="选择关卡"></select><button id="next" aria-label="下一关">→</button></div>
 <div class="legend"><span><i class="dot"></i>目标</span><span><i class="dot wall"></i>墙：挡住移动</span><span><i class="dot trap"></i>陷阱：可进入，但会熄灭已亮目标</span></div>
 <h2 id="name"></h2><p id="goal"></p><div class="comparison">
-<section class="panel"><div class="caption"><b>改版前 · v0.3.8</b><span id="oldStats"></span></div><div id="before"></div></section>
+<section class="panel"><div class="caption"><b>上一轮设计</b><span id="oldStats"></span></div><div id="before"></div></section>
 <section class="panel"><div class="caption"><b>本次改版</b><span id="stats"></span></div><div id="after"></div></section></div>
 <div class="gallery">''' + cards + '''</div>
 <p class="notice">这是按实际关卡数据绘制的棋盘审阅图，并非 App 截图。参考答案仅存于测试目录；此页面不含答案。README 截图未更新。</p>
@@ -86,20 +86,20 @@ document.getElementById('oldStats').textContent=`墙 ${p.oldCounts.x} · 陷阱 
 document.getElementById('stats').textContent=`墙 ${p.counts.x} · 陷阱 ${p.counts['*']} · 目标 ${p.counts.o}`;}
 select.onchange=()=>show(+select.value);document.getElementById('prev').onclick=()=>show(+select.value-1);
 document.getElementById('next').onclick=()=>show(+select.value+1);
-for(const b of document.querySelectorAll('.thumb'))b.onclick=()=>{show(+b.dataset.index);window.scrollTo({top:0,behavior:'smooth'})};show(1);
+for(const b of document.querySelectorAll('.thumb'))b.onclick=()=>{show(+b.dataset.index);window.scrollTo({top:0,behavior:'smooth'})};show(0);
 </script></html>'''
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--baseline', default='v0.3.8')
+    parser.add_argument('--baseline', default='8057f15')
     parser.add_argument('--output', type=Path, default=Path('outputs/course-review/index.html'))
     args = parser.parse_args()
     current = json.loads((ROOT / CATALOG).read_text())
     previous = json.loads(subprocess.check_output(['git', 'show', f'{args.baseline}:{CATALOG}'], cwd=ROOT))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(render(current, previous))
-    print(f'Wrote {args.output}: L10–L30, offline before/after review, no answers or app screenshots.')
+    print(f'Wrote {args.output}: L04–L06 and L10–L30, offline before/after review, no answers or app screenshots.')
 
 
 if __name__ == '__main__':

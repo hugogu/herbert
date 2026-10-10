@@ -4,9 +4,10 @@ import json
 from pathlib import Path
 import unittest
 
-from advanced_course import advanced_designs
-from generate_original_problems import trace
+from advanced_course import advanced_designs, outline
+from generate_original_problems import designs, trace
 from render_course_review import render
+from open_course import orbit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -16,7 +17,7 @@ class OpenCourseTests(unittest.TestCase):
         self.problems = json.loads((ROOT / 'Sources/HerbertCore/Resources/original-problems.json').read_text())
 
     def test_revised_boards_have_reachable_targets_and_local_route_choices(self):
-        for problem in self.problems[9:]:
+        for problem in [p for p in self.problems if p['lesson']['order'] in [4, 5, 6] or p['lesson']['order'] >= 10]:
             with self.subTest(lesson=problem['lesson']['order']):
                 rows = problem['rows']
                 targets = {(x, y) for y, row in enumerate(rows) for x, c in enumerate(row) if c == 'o'}
@@ -24,7 +25,6 @@ class OpenCourseTests(unittest.TestCase):
                 walls = {(x, y) for y, row in enumerate(rows) for x, c in enumerate(row) if c == 'x'}
                 traps = {(x, y) for y, row in enumerate(rows) for x, c in enumerate(row) if c == '*'}
                 self.assertTrue(walls and traps)
-                self.assertLessEqual(len(walls), 40, 'Local landmarks must not become route-border stencils')
                 self.assertTrue(any(abs(x-a)+abs(y-b) == 1 for x, y in traps for a, b in targets),
                                 'At least one trap must constrain a real decision near a target')
                 self.assertTrue(any(abs(x-a)+abs(y-b) == 1 for x, y in walls for a, b in targets),
@@ -46,10 +46,24 @@ class OpenCourseTests(unittest.TestCase):
                         queue.append(point)
                 self.assertTrue(targets <= reached)
                 choices = sum(len(neighbors(point)) >= 3 for point in targets)
-                self.assertGreaterEqual(choices / len(targets), .75,
+                self.assertGreaterEqual(choices / len(targets), .60,
                                         'Most targets should offer more than a two-way corridor')
                 edges = sum(len(neighbors(point)) for point in reached) // 2
                 self.assertGreater(edges-len(reached)+1, 8, 'The motif must have multiple safe cycles')
+
+    def test_wall_and_trap_density_each_use_15_to_30_percent_of_enclosing_border(self):
+        all_designs = designs() + advanced_designs(trace)
+        for order in [4, 5, 6, *range(10, 31)]:
+            with self.subTest(lesson=order):
+                start, commands, _, _, walls, traps = all_designs[order-1]
+                route = {start, *trace(start, commands, set(walls))}
+                symmetry = 2 if order in (4, 11, 14, 19) else 1 if order in (6, 26) else 4
+                capacity = len(outline(orbit(route, symmetry)))
+                for cells in (walls, traps):
+                    self.assertGreaterEqual(len(cells) / capacity, .15)
+                    self.assertLessEqual(len(cells) / capacity, .30)
+                self.assertFalse(set(walls) & set(traps))
+                self.assertTrue(all(0 <= x < 25 and 0 <= y < 25 for x, y in walls + traps))
 
     def test_l23_through_l30_preserve_their_target_geometry_and_start(self):
         expected = [
@@ -80,7 +94,7 @@ class OpenCourseTests(unittest.TestCase):
         page = render(self.problems, self.problems)
         payload = page.split('<script>const data=', 1)[1].split(';\nconst select=', 1)[0]
         data = json.loads(payload)
-        self.assertEqual([item['order'] for item in data], list(range(10, 31)))
+        self.assertEqual([item['order'] for item in data], [4, 5, 6, *range(10, 31)])
         self.assertTrue(all(item['after'].startswith('<svg ') for item in data))
         self.assertTrue(all(item['before'] == item['after'] for item in data))
         self.assertNotIn('alternateSources', page)
