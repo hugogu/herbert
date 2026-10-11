@@ -11,10 +11,10 @@ L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙
 
 ## 下载 Mac 版
 
-**[下载 0.3.8 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.8/Herbert-macOS-universal.dmg)**
+**[下载 0.3.9 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.9/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
-下方截图来自最新源码。新版课程与按钮修复可在 [main 分支的 CI 构建产物](https://github.com/hugogu/herbert/actions/workflows/ci.yml)中获取；0.3.8 发布包仍使用改版前的课程布局。
+下方截图与 0.3.9 源码一致。本版已包含新版课程和更清晰的操作按钮标签。
 
 此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
 
@@ -128,7 +128,7 @@ open Herbert.xcodeproj
 | Scheme | 题库 | 用途 |
 | --- | --- | --- |
 | `Herbert`（默认） | 30 道原创题 + 1,769 道社区题 | 开源版 |
-| `HerbertAppStore` | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
+| `HerbertAppStore`（商店显示名 **Herbot Bot**） | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
 
 社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
 CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。

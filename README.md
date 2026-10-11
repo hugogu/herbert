@@ -32,13 +32,12 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.8 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.8/Herbert-macOS-universal.dmg)**
+**[Download the 0.3.9 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.9/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
-Screenshots below show the latest source revision. The redesigned course and button
-fixes are available in [main-branch CI build artifacts](https://github.com/hugogu/herbert/actions/workflows/ci.yml);
-the 0.3.8 release contains the earlier course layouts.
+Screenshots below match the 0.3.9 source. This release includes the redesigned course
+and clearer action-button labels.
 
 This preview is ad-hoc signed and **not Apple notarized**. macOS may block its first
 launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
@@ -78,7 +77,7 @@ full game screen:
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The redesigned course is available in the latest main-branch builds.*
+The redesigned course is included in the 0.3.9 preview.*
 
 | L07 · Turning rose | L08 · Tandem lanterns |
 | --- | --- |
@@ -316,7 +315,7 @@ No developer account is configured in the repository.
 | Scheme | Included content | Intended use |
 | --- | --- | --- |
 | `Herbert` (default) | 30 original lessons + 1,769 archived community puzzles | Open-source edition |
-| `HerbertAppStore` | 30 original lessons only | TestFlight / App Store candidate |
+| `HerbertAppStore` (**Herbot Bot**) | 30 original lessons only | TestFlight / App Store candidate |
 
 The community archive is a separate optional Swift package target, not a runtime-hidden
 file in the store app. CI audits built iOS and Mac store apps for content isolation.

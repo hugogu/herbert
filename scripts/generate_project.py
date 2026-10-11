@@ -90,7 +90,7 @@ common = {'SDKROOT': 'auto', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator ma
           'CODE_SIGN_STYLE': 'Automatic', 'SWIFT_STRICT_CONCURRENCY': 'complete',
           'ENABLE_USER_SCRIPT_SANDBOXING': 'YES'}
 app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'PRODUCT_NAME': 'Herbert',
-                'CURRENT_PROJECT_VERSION': '11', 'MARKETING_VERSION': '0.3.8',
+                'CURRENT_PROJECT_VERSION': '12', 'MARKETING_VERSION': '0.3.9',
                 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
                 'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert',
                 'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.puzzle-games',
@@ -128,7 +128,9 @@ obj('app', 'PBXNativeTarget', buildConfigurationList=configs('app', app_settings
 obj('uitests', 'PBXNativeTarget', buildConfigurationList=configs('tests', test_settings),
     buildPhases=[phase('test-sources', 'PBXSourcesBuildPhase', test_sources), phase('test-frameworks', 'PBXFrameworksBuildPhase', [])],
     buildRules=[], dependencies=[dependency], name='HerbertUITests', productName='HerbertUITests', productReference=test_product, productType='com.apple.product-type.bundle.ui-testing')
-store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore', 'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
+store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore',
+                  'INFOPLIST_KEY_CFBundleDisplayName': 'Herbot Bot',
+                  'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
     buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
     buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')

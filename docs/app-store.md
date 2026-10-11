@@ -3,7 +3,7 @@
 ## 选择正确版本
 
 - `Herbert`：默认开源版，先显示原创 L01–L30，再显示社区题；总数 1,799。
-- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；只有连续编号 L01–L30 的原创课程，总数 30。
+- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；商店显示名为 **Herbot Bot**，只有连续编号 L01–L30 的原创课程，总数 30。
 
 社区资源在 `Sources/HerbertCommunity/`，App Store target 链接 `HerbertCore` 与不含社区资源的 `HerbertBattlefield`。
 `APP_STORE` 编译条件还会移除社区筛选和原站 Problems 链接。参考解位于测试 target，两个应用均不打包答案。
