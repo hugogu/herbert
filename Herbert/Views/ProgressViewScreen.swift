@@ -50,6 +50,13 @@ struct ProgressViewScreen: View {
                     }
                     if let error = store.storageMessage { Text(error).font(.caption).foregroundStyle(Palette.danger) }
                 }.panel()
+                #if APP_STORE && !LOCAL_LEARNING
+                    NavigationLink {
+                        LeaderboardView()
+                    } label: {
+                        Label("全球排行榜", systemImage: "globe").frame(maxWidth: .infinity, alignment: .leading)
+                    }.secondaryButtonStyle().accessibilityIdentifier("cloud-leaderboard")
+                #endif
                 HStack {
                     Text("已完成的关卡").font(.system(size: 20, weight: .bold))
                     Spacer()
