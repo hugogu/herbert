@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local --env= --persist-to .wrangler/state",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:production": "wrangler deploy --env production",
     "check": "prettier --check . && tsc --noEmit",
-    "test": "node --test scripts/check-runtime.mjs && vitest run",
-    "migrate:local": "wrangler d1 migrations apply DB --local",
-    "migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "test": "node --test scripts/check-*.mjs && vitest run",
+    "migrate:local": "wrangler d1 migrations apply DB --local --env= --persist-to .wrangler/state",
+    "migrate:staging": "wrangler d1 migrations apply DB --remote --env staging",
+    "migrate:production": "wrangler d1 migrations apply DB --remote --env production",
     "format": "prettier --write ."
   },
   "dependencies": {
