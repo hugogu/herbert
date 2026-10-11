@@ -364,7 +364,7 @@ final class HerbertUITests: XCTestCase {
             app.textViews["code-editor"].typeText("z")
             app.buttons["run-program"].activateControl()
             XCTAssertEqual(app.staticTexts["game-status"].displayedText, error)
-            app.buttons[language == "en" ? "Game rules" : "ゲームのルール"].activateControl()
+            app.buttons["game-rules"].activateControl()
             XCTAssertTrue(app.staticTexts[guideTitle].waitForExistence(timeout: 5))
             capture(app, name: "localization-\(language)")
             app.terminate()

@@ -61,6 +61,36 @@ public struct LeaderboardEntry: Codable, Identifiable, Sendable {
         case points, percentage, solved
     }
 }
+/// Minimum accepted sizes across all visible results, independently of score rankings.
+public struct ProblemBests: Codable, Sendable {
+    public let rulesVersion: String
+    public let entries: [ProblemBest]
+    enum CodingKeys: String, CodingKey {
+        case rulesVersion = "rules_version"
+        case entries
+    }
+    public func references(for problems: [Problem]) -> [Int: Int] {
+        guard rulesVersion == CloudPuzzle.rulesVersion else { return [:] }
+        let versions = Dictionary(
+            uniqueKeysWithValues: problems.filter { $0.lesson != nil }.map {
+                ($0.id, CloudPuzzle.version($0))
+            })
+        return entries.reduce(into: [:]) { result, entry in
+            guard versions[entry.problemID] == entry.puzzleVersion, entry.bytes >= 0 else { return }
+            result[entry.problemID] = min(result[entry.problemID] ?? entry.bytes, entry.bytes)
+        }
+    }
+}
+public struct ProblemBest: Codable, Sendable {
+    public let problemID: Int
+    public let puzzleVersion: String
+    public let bytes: Int
+    enum CodingKeys: String, CodingKey {
+        case problemID = "problem_id"
+        case puzzleVersion = "puzzle_version"
+        case bytes
+    }
+}
 public struct ProblemLeaderboard: Codable, Sendable {
     public let problemID: Int
     public let puzzleVersion: String
@@ -80,9 +110,10 @@ public struct ProblemLeaderboardEntry: Codable, Identifiable, Sendable {
     public let accepted: Int
     public let litTargets: Int
     public let targetCount: Int
+    public let steps: Int?
     public var id: String { userID }
     enum CodingKeys: String, CodingKey {
-        case rank, points, bytes, accepted
+        case rank, points, bytes, accepted, steps
         case userID = "user_id"
         case displayName = "display_name"
         case litTargets = "lit_targets"
