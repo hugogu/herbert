@@ -55,6 +55,15 @@ test(
 
             const ranking = await worker.fetch("/v1/leaderboard");
             assert.equal(ranking.status, 200);
+            const problemRanking = await worker.fetch(
+                `/v1/problems/${catalog.problems[0].problem_id}/leaderboard`,
+            );
+            assert.equal(problemRanking.status, 200);
+            assert.equal(
+                problemRanking.headers.get("Cache-Control"),
+                "no-store",
+            );
+            assert.deepEqual((await problemRanking.json()).entries, []);
             const challenge = await worker.fetch("/v1/auth/challenge", {
                 method: "POST",
             });
