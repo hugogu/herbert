@@ -1,20 +1,35 @@
 # Privacy
 
-Last updated October 12, 2026; unchanged for version 1.1.0. This policy covers **Herbert**, the open-source
-app, and **Herbot Bot**, its App Store edition, on iPhone, iPad and Mac. Both editions handle data
-the same way.
-
-The developer does not collect personal data. There is no account, analytics, advertising,
-tracking, third-party SDK, crash reporting or developer server, and the developer receives no
-copy of anything you do in the app. If you allow your device to share analytics with app
-developers, Apple may provide aggregated App Store statistics and crash reports under Apple's
-privacy policy.
+Herbert supports offline use, optional user-configured AI providers, and an optional
+verified leaderboard in configured App Store builds. No analytics or advertising
+service is integrated. Deployments must publish their operator, retention policy
+and data-processing locations before enabling cloud accounts.
 
 ## Offline game
 
 Puzzles, human-written programs, favorites, progress and preferences stay in local app
 storage. The game requires no network connection. JSON progress export/import occurs
 only when requested. Opening an external link uses your browser and that site's policy.
+
+## Optional cloud leaderboard (App Store builds)
+
+Opening the leaderboard contacts its configured HTTPS service and exposes normal
+connection information. Uploading solutions requires an explicit Apple login and
+confirmation. The service receives an Apple account subject identifier, a generated
+nickname, original exercise IDs and H solutions, and computes scores itself. It
+does not request your Apple email address or real name. Your generated nickname,
+score and completion count are public; submitted programs are private to you and
+authorized operators. Drafts, community solutions, AI histories and API keys are
+not uploaded. IP-derived hashes are retained briefly for rate limits.
+
+Session credentials stay in device-only Keychain. The service runs on Cloudflare
+Workers/D1; the operator controls its configured database location and retention.
+Authentication uses Apple. In **Progress → Global leaderboard**, you can sign out
+or delete your cloud account. Deletion revokes Apple authorization, removes the
+Apple identifier/credential, blanks uploaded programs, hides scores and revokes
+sessions. Internal numerical tombstones and operator audit records remain subject
+to the published retention policy. Local progress and backups are preserved.
+Unconfigured builds and **HerbertLearning** have no cloud account service.
 
 ## Optional AI Battlefield
 
@@ -35,12 +50,12 @@ API keys are stored in the system Keychain with synchronization disabled and dev
 accessibility. They are sent only in authentication headers to the configured HTTPS
 endpoint. Changing endpoints requires re-entering the key; redirects are rejected.
 Settings and match history are local JSON files. History contains full AI responses,
-programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters
-and usage. It also retains received model reasoning and bounded provider error details (up to
-64 KiB). Known credential fields, Bearer values and the configured API key are redacted from
-error details. Review provider text before sharing it; providers control the contents of their
-responses. App data may be included in operating-system device backups according to your
-settings; Herbert implements no cloud synchronization.
+programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters and usage. From 0.3.2 it also
+retains received model reasoning and bounded provider error details (up to 64 KiB). Known
+credential fields, Bearer values and the configured API key are redacted from error details.
+Review provider text before sharing it; providers control the contents of their responses.
+App data may be included in operating-system device backups according to your settings;
+Herbert implements no automatic progress synchronization; the leaderboard is a separate, opt-in upload service.
 
 Removing a provider in AI Providers deletes its configuration and Keychain entry.
 Existing match histories remain for review. Match histories are retained locally until
@@ -79,9 +94,15 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 开发者不代理请求，不收集副本。密钥保存在关闭同步的系统钥匙串中，配置和完整比赛历史保存在本机。
 分享图片仅通过你选择的系统分享目标发送，图片不包含密钥、端点或原始对话。移除服务商会删除其密钥与配置，但保留比赛历史。
 
-日本語：本ポリシーはオープンソース版 Herbert と App Store 版 Herbot Bot に適用されます。開発者は個人データを収集せず、
-アカウント、解析、広告、トラッキング、開発者のサーバーはありません。通常のゲームは完全にオフラインです。
-AI Battlefield では利用者がサービスと API キーを指定します。
+中文（可选排行榜）：App Store 构建在配置服务后，用户可使用 Apple 登录并主动上传原创题的最短解。
+服务端重新验题；匿名昵称、分数和完成数公开，程序只供本人及授权管理员访问。可在排行榜页删除云账号，
+撤销授权、移除已上传程序和排名；本地记录保留。HerbertLearning 不含云账号或在线功能。
+
+日本語：通常のゲームは完全にオフラインです。AI Battlefield では利用者がサービスと API キーを指定します。
 保存・更新時はモデル一覧、同意して開始するとルール、問題、追加プロンプト、今回の問題の会話を直接サービスに送信します。
 サービスがリクエストを保存し、料金を請求する場合があります。開発者はリクエストを中継・収集しません。
 キーは同期しないシステムのキーチェーン、設定と試合履歴は本機に保存します。共有画像は選択した共有先にだけ送信します。
+
+任意のランキング：設定済み App Store 版では、Apple でサインインし、明示的な同意後にオリジナル問題の最短解を送信できます。
+サーバーが再実行し、匿名名・得点・完了数のみ公開します。クラウドアカウントの削除で認証と送信済みプログラム・順位を除去し、
+ローカル記録は残します。HerbertLearning にはクラウドアカウントやオンライン機能はありません。
