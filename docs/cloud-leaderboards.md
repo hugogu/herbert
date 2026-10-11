@@ -43,15 +43,18 @@ do not establish whether a human or AI authored a solution.
 
 ## Local development
 
-Use Node 24 and Xcode/Swift 6. No Docker or external server is needed.
+Use Node 24 and Xcode/Swift 6. No Cloudflare account, remote D1 database, Apple
+credentials, Docker or external server is needed for automated tests.
+See the [development guide](development.md) for a complete local walkthrough,
+separate staging/production databases, secrets and native app build controls.
 
 ```sh
 cd worker
 npm ci
-npm run migrate:local
-npm run dev
 npm run check
 npm test
+npm run migrate:local
+npm run dev
 ```
 
 Tests use the real Workers runtime and D1 bindings, with mocked Apple/Access HTTP
@@ -69,25 +72,27 @@ The executable/tool and reference solutions are never linked into an app.
 
 This PR does not create cloud resources or enroll/configure an Apple account.
 
-1. Create a D1 database with `npx wrangler d1 create herbert-leaderboard`. Replace
-   the zero placeholder `database_id` in `worker/wrangler.jsonc` with its ID.
-   Keep production and preview/test databases separate.
+1. First validate the separate staging setup in the development guide. Create
+   production D1 with `npx wrangler d1 create herbert-leaderboard-production`.
+   Put its ID in **`env.production.d1_databases[0].database_id`** in
+   `worker/wrangler.jsonc`; keep staging and the local root binding separate.
 2. Enable Sign in with Apple for `info.hugogu.Herbert` in Apple Developer and
    create an associated private key. Register `https://your-api-domain/v1/auth/apple/notifications`
    as the primary App ID's server-to-server notification endpoint. Configure `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`
-   and `APPLE_KEY_ID` in Wrangler variables. Register the App ID for the target
+   and `APPLE_KEY_ID` in `env.production.vars`. Register the App ID for the target
    you actually distribute; native login does not use a website Services ID.
-3. Set Worker secrets using `npx wrangler secret put NAME`: `APPLE_PRIVATE_KEY`
+3. Set Worker secrets using `npx wrangler secret put NAME --env production`: `APPLE_PRIVATE_KEY`
    (the P8 PEM), `SESSION_SECRET` (at least 32 random bytes as text) and
    `TOKEN_ENCRYPTION_KEY` (base64 of exactly 32 random bytes). Never commit these.
-4. Apply migrations using `npm run migrate:remote`, then `npm run deploy`.
+4. Apply migrations using `npm run migrate:production`, then `npm run deploy:production`.
    Assign an HTTPS API domain. All API responses use `Cache-Control: no-store`;
    do not add a CDN rule that overrides this. There is no browser CORS API:
    the native app calls HTTPS directly.
 5. In ignored `Config/Local.xcconfig`, configure the signing team and
-   `HERBERT_CLOUD_URL = https:/$()/api.example.com`. Xcode uses `$()` to avoid
+   `HERBERT_CLOUD_PRODUCTION_URL = https:/$()/api.example.com`. Xcode uses `$()` to avoid
    interpreting `//` as a comment. An unset URL leaves online features disabled.
-   Build/archive **HerbertAppStore** and use its Apple login entitlement.
+   Build/archive **HerbertAppStore** with **Release** and its Apple login
+   entitlement. Debug uses the separate staging URL and staging App ID.
 6. Update the public privacy policy and App Store privacy declarations to cover
    the account ID, uploaded H programs and scores. The App Store target includes
    a matching privacy manifest. Configure retention and an operator contact.
