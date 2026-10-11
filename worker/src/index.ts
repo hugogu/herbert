@@ -280,6 +280,25 @@ async function route(request: Request, env: Env): Promise<Response> {
             expires_at: now() + 900,
         });
     }
+    if (method === "GET" && path === "/v1/problems/bests") {
+        const puzzles = await catalog;
+        const valid = puzzles.map(() => "(?,?)").join(",");
+        const data = await env.DB.prepare(
+            `WITH current_puzzles(problem_id,puzzle_version) AS (VALUES ${valid})
+            SELECT s.problem_id,s.puzzle_version,MIN(s.bytes) bytes
+            FROM submissions s JOIN current_puzzles p
+              ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version
+              JOIN users u ON u.user_id=s.user_id
+            WHERE s.accepted=1 AND s.hidden_at IS NULL AND s.rules_version=? AND u.status='active'
+            GROUP BY s.problem_id,s.puzzle_version ORDER BY s.problem_id`,
+        )
+            .bind(
+                ...puzzles.flatMap((p) => [p.id, p.puzzle_version]),
+                RULES_VERSION,
+            )
+            .all();
+        return json({ rules_version: RULES_VERSION, entries: data.results });
+    }
     const problemRanking = path.match(/^\/v1\/problems\/(\d+)\/leaderboard$/);
     if (method === "GET" && problemRanking) {
         const puzzle = (await catalog).find(
@@ -294,12 +313,12 @@ async function route(request: Request, env: Env): Promise<Response> {
         );
         const data = await env.DB.prepare(
             `WITH attempts AS (
-              SELECT s.user_id,u.display_name,s.points,s.bytes,s.accepted,s.lit_targets,s.target_count,
+              SELECT s.user_id,u.display_name,s.points,s.bytes,s.accepted,s.lit_targets,s.target_count,s.steps,
                 ROW_NUMBER() OVER(PARTITION BY s.user_id ORDER BY s.points DESC,s.bytes,s.steps,s.created_at,s.submission_id) attempt
               FROM submissions s JOIN users u ON u.user_id=s.user_id
               WHERE s.problem_id=? AND s.puzzle_version=? AND s.rules_version=? AND s.hidden_at IS NULL AND u.status='active')
             SELECT ROW_NUMBER() OVER(ORDER BY points DESC,bytes,user_id) rank,
-              user_id,display_name,points,bytes,accepted,lit_targets,target_count
+              user_id,display_name,points,bytes,accepted,lit_targets,target_count,steps
             FROM attempts WHERE attempt=1 ORDER BY points DESC,bytes,user_id LIMIT ?`,
         )
             .bind(puzzle.id, puzzle.puzzle_version, RULES_VERSION, limit)

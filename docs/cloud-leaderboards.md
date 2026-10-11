@@ -42,8 +42,17 @@ signed out, Apple sign-in opens and the requested upload resumes after login;
 canceling login cancels the pending upload. Editing or resetting the program
 hides its upload action until another run finishes. AI trial pages and community
 puzzles do not offer this upload action. Opening a ranking never requires login.
-**Puzzle ranking** opens that puzzle's leaderboard; **My → Progress → Global
+**Ranking**, next to **Details** and **Rules** in the game header, opens that puzzle's leaderboard; **My → Progress → Global
 leaderboard** opens the overall ranking, with a selector for individual puzzles.
+Puzzle pages show the shortest accepted online answer size in the same reference
+row used for archived community records. Per-puzzle rankings include lit targets,
+size and executed instructions. **My → Progress → Best solutions** counts locally
+saved accepted answers whose size matches or improves a known shortest record,
+including ties; score and instructions do not affect this count. Original records
+come from all visible, active, current-version accepted submissions, independently
+of ranking position or page limits. Community references are the archived site
+records, not live records. Unknown records are excluded; a failed initial online
+load shows an unavailable count rather than zero. Uploads refresh online references.
 Community solutions and AI provider keys are never uploaded. Failed uploads leave the local solutions intact; the
 user can retry. Uploads are sequential and limited to 60 per user per minute, enough for the full course. Public results contain
 only a public nickname, scores and completion/answer-length metrics; source programs are
@@ -192,21 +201,22 @@ operations under this contract as the separate admin product needs them.
 JSON request/response fields use snake_case. Authenticated calls use
 `Authorization: Bearer <Herbert access token>`.
 
-| Method/path | Authentication | Purpose |
-| --- | --- | --- |
-| `GET /v1/problems` | Public | Current original IDs, versions, limits and rules version |
-| `GET /v1/leaderboard?limit=50` | Public | Top 1–100 current aggregate scores |
-| `GET /v1/problems/{problem_id}/leaderboard?limit=50` | Public | Top 1–100 best per-user attempts for a current original puzzle |
-| `POST /v1/auth/challenge` | Public, throttled | `{ challenge_id, nonce }`, valid for 5 minutes |
-| `POST /v1/auth/apple` | Apple proof | `{ challenge_id, nonce, identity_token, authorization_code }` → session and user |
-| `POST /v1/auth/apple/notifications` | Signed Apple event | Revoke sessions or remove a deleted Apple account |
-| `POST /v1/auth/refresh` | Refresh token | `{ refresh_token }` → rotated session credentials |
-| `GET /v1/me` | Session | Current profile |
-| `PATCH /v1/me` | Session | Save the current user's public `display_name` |
-| `POST /v1/auth/logout` | Session | Revoke current session |
-| `DELETE /v1/me` | Session | Revoke Apple authorization and delete cloud account |
-| `GET /v1/me/submissions` | Session | Last 100 own judge results |
-| `POST /v1/submissions` | Session, throttled | `{ request_id, problem_id, puzzle_version, source }` → trusted judge result |
+| Method/path                                          | Authentication     | Purpose                                                                                                         |
+| ---------------------------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `GET /v1/problems`                                   | Public             | Current original IDs, versions, limits and rules version                                                        |
+| `GET /v1/problems/bests`                             | Public             | Minimum accepted size per current puzzle, across active visible submissions; rules and puzzle versions included |
+| `GET /v1/leaderboard?limit=50`                       | Public             | Top 1–100 current aggregate scores                                                                              |
+| `GET /v1/problems/{problem_id}/leaderboard?limit=50` | Public             | Top 1–100 best per-user attempts for a current original puzzle                                                  |
+| `POST /v1/auth/challenge`                            | Public, throttled  | `{ challenge_id, nonce }`, valid for 5 minutes                                                                  |
+| `POST /v1/auth/apple`                                | Apple proof        | `{ challenge_id, nonce, identity_token, authorization_code }` → session and user                                |
+| `POST /v1/auth/apple/notifications`                  | Signed Apple event | Revoke sessions or remove a deleted Apple account                                                               |
+| `POST /v1/auth/refresh`                              | Refresh token      | `{ refresh_token }` → rotated session credentials                                                               |
+| `GET /v1/me`                                         | Session            | Current profile                                                                                                 |
+| `PATCH /v1/me`                                       | Session            | Save the current user's public `display_name`                                                                   |
+| `POST /v1/auth/logout`                               | Session            | Revoke current session                                                                                          |
+| `DELETE /v1/me`                                      | Session            | Revoke Apple authorization and delete cloud account                                                             |
+| `GET /v1/me/submissions`                             | Session            | Last 100 own judge results                                                                                      |
+| `POST /v1/submissions`                               | Session, throttled | `{ request_id, problem_id, puzzle_version, source }` → trusted judge result                                     |
 
 Errors return `{ "error": "…" }`; 401 means reauthenticate, 403 means forbidden,
 409 means stale puzzle/reused request ID, 413 means body too large, and 429 includes

@@ -130,6 +130,20 @@ final class CloudUITests: XCTestCase {
                 } else {
                     app.typeKey(.escape, modifierFlags: [])
                 }
+                if let screen = NSScreen.screens.first(where: { $0.localizedName == display }),
+                    screen.frame.origin == .zero
+                {
+                    let window = app.windows.firstMatch
+                    let frame = window.frame
+                    if !CGRect(origin: .zero, size: screen.frame.size).contains(frame) {
+                        let origin = window.coordinate(withNormalizedOffset: .zero)
+                        origin.withOffset(CGVector(dx: frame.width / 2, dy: 20))
+                            .click(
+                                forDuration: 0.1,
+                                thenDragTo: origin.withOffset(
+                                    CGVector(dx: screen.frame.width / 2 - frame.minX, dy: 80 - frame.minY)))
+                    }
+                }
             }
         #endif
     }
@@ -171,6 +185,17 @@ final class CloudUITests: XCTestCase {
             activate(first)
             XCTAssertTrue(app.textViews["code-editor"].waitForExistence(timeout: 5))
             XCTAssertFalse(app.buttons["cloud-upload-answer"].exists)
+            let details = app.buttons["problem-details"]
+            let rules = app.buttons["game-rules"]
+            let ranking = app.buttons["cloud-problem-ranking"]
+            XCTAssertEqual(details.label, "Details")
+            XCTAssertEqual(rules.label, "Rules")
+            XCTAssertEqual(ranking.label, "Ranking")
+            XCTAssertEqual(details.frame.midY, ranking.frame.midY, accuracy: 2)
+            XCTAssertEqual(rules.frame.midY, ranking.frame.midY, accuracy: 2)
+            let reference = app.buttons["puzzle-best-reference"]
+            XCTAssertTrue(reference.waitForExistence(timeout: 5))
+            XCTAssertTrue(reference.label.hasSuffix(": 1 B"))
             activate(app.buttons["insert-s"])
             activate(app.buttons["run-program"])
             XCTAssertTrue(app.buttons["cloud-upload-answer"].waitForExistence(timeout: 8))
@@ -194,8 +219,29 @@ final class CloudUITests: XCTestCase {
                     .firstMatch.waitForExistence(timeout: 5))
             XCTAssertTrue(
                 app.staticTexts.matching(
-                    NSPredicate(format: "value == %@ OR label == %@", "Lit 1/1 · 1 B", "Lit 1/1 · 1 B")
+                    NSPredicate(
+                        format: "value == %@ OR label == %@", "Lit 1/1 · 1 B · 1 instr.",
+                        "Lit 1/1 · 1 B · 1 instr.")
                 ).firstMatch.exists)
+            let rankingCapture = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+            rankingCapture.name = "cloud-ranking-instructions-en"
+            rankingCapture.lifetime = .keepAlways
+            add(rankingCapture)
+            #if os(macOS)
+                activate(app.descendants(matching: .any)["section-我的"].firstMatch)
+            #else
+                // The game hides the tab bar until returning to the library.
+                activate(app.buttons["Back"])
+                activate(app.buttons["Back"])
+                app.tabBars.buttons["My"].tap()
+            #endif
+            let best = app.buttons["progress-best-count"]
+            XCTAssertTrue(best.waitForExistence(timeout: 5))
+            XCTAssertTrue(best.label.contains("1"), best.debugDescription)
+            let progressCapture = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+            progressCapture.name = "cloud-progress-best-en"
+            progressCapture.lifetime = .keepAlways
+            add(progressCapture)
             app.terminate()
         #else
             throw XCTSkip("Cloud UI is available only in the App Store target.")
