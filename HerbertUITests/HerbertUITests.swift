@@ -228,7 +228,7 @@ final class HerbertUITests: XCTestCase {
             XCUIDevice.shared.orientation = .landscapeLeft
             defer { XCUIDevice.shared.orientation = .portrait }
         #endif
-        for section in ["手册", "记录", "AI Battlefield", "关卡"] {
+        for section in ["手册", "AI Battlefield", "我的", "关卡"] {
             let navigation = app.descendants(matching: .any)["section-\(section)"].firstMatch
             #if os(macOS)
                 XCTAssertTrue(navigation.isHittable, "All sidebar destinations fit without scrolling")

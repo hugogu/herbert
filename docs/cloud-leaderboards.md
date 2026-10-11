@@ -26,9 +26,15 @@ of Herbert refresh tokens. Apple's refresh credential is encrypted using AES-GCM
 so the service can revoke Apple authorization when an account is deleted. No
 Cloudflare credential or Apple private key belongs in an app, save file or repo.
 
-The **My** tab has separate **Progress** and **Account** sections. Account owns
+The **My** tab follows AI Battlefield and has separate **Progress** and **Account**
+sections. Progress contains backups, local completion records and the global
+leaderboard entry. Account owns
 Apple sign-in, public nickname editing, sign-out/deletion and batch upload of
-saved shortest solutions. This account state is shared with puzzle pages.
+saved solutions through **Upload & Share my Solutions**. The upload area shows
+how many original puzzles have a saved answer; it sends one locally retained
+solution per puzzle, excluding drafts and community puzzles. This account state
+is shared with puzzle pages. Leaderboard uploads publish scores, not a backup or
+cross-device synchronization of practice records.
 
 After an original puzzle's program finishes, **Upload this answer** uploads
 that executed source snapshot (including incomplete attempts). If
@@ -36,7 +42,7 @@ signed out, Apple sign-in opens and the requested upload resumes after login;
 canceling login cancels the pending upload. Editing or resetting the program
 hides its upload action until another run finishes. AI trial pages and community
 puzzles do not offer this upload action. Opening a ranking never requires login.
-**Puzzle ranking** opens that puzzle's leaderboard; **My → Account → Global
+**Puzzle ranking** opens that puzzle's leaderboard; **My → Progress → Global
 leaderboard** opens the overall ranking, with a selector for individual puzzles.
 Community solutions and AI provider keys are never uploaded. Failed uploads leave the local solutions intact; the
 user can retry. Uploads are sequential and limited to 60 per user per minute, enough for the full course. Public results contain

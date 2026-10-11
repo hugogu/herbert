@@ -118,22 +118,13 @@
         var body: some View {
             VStack(alignment: .leading, spacing: 20) {
                 Text("账号").font(.title2.bold())
-                Text("自愿上传原创练习的最短解；服务器会重新运行程序并计算成绩。本地游玩无需登录。")
+                Text("选择分享已保存的原创题解答，服务器会重新运行程序并计算成绩。只有昵称和成绩会公开，程序不公开。本地练习无需登录。")
                     .font(.callout).foregroundStyle(Palette.muted)
                 if model.configured {
                     account
                 } else {
                     Label("此构建尚未配置排行榜服务。", systemImage: "network.slash").panel()
                 }
-                NavigationLink {
-                    LeaderboardView()
-                } label: {
-                    HStack {
-                        Label("全球排行榜", systemImage: "globe")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }.frame(minHeight: 32)
-                }.secondaryButtonStyle().accessibilityIdentifier("cloud-leaderboard")
                 if model.busy { SwiftUI.ProgressView() }
                 if let message = model.message {
                     Text(message).font(.callout).textSelection(.enabled).accessibilityIdentifier("cloud-message")
@@ -147,7 +138,7 @@
             .onChange(of: model.suggestedName) { _, suggestion in
                 if let suggestion { nicknameDraft = NicknameDraft(name: suggestion) }
             }
-            .confirmationDialog("上传原创练习的最短解？", isPresented: $confirmUpload, titleVisibility: .visible) {
+            .confirmationDialog("上传并分享我的解答？", isPresented: $confirmUpload, titleVisibility: .visible) {
                 Button("上传并验证") {
                     Task {
                         model.message = nil
@@ -162,6 +153,11 @@
             } message: {
                 Text("这会撤销 Apple 授权并移除排行榜成绩和已上传的程序。本地记录不受影响。")
             }
+        }
+        private var savedSolutionsCount: Int {
+            store.visibleRecords.filter { record in
+                record.bestSolution != nil && store.problems.contains { $0.id == record.problemID && $0.lesson != nil }
+            }.count
         }
         private var account: some View {
             VStack(alignment: .leading, spacing: 16) {
@@ -182,9 +178,12 @@
                     Button {
                         confirmUpload = true
                     } label: {
-                        Label("上传最短解", systemImage: "arrow.up.circle")
+                        Label("上传并分享我的解答", systemImage: "arrow.up.circle")
                     }
-                    .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("cloud-upload")
+                    .buttonStyle(PrimaryButtonStyle()).disabled(savedSolutionsCount == 0).accessibilityIdentifier(
+                        "cloud-upload")
+                    Text(L10n.text("将上传 %ld 道原创题的已保存解答，每题一份；不包含草稿或社区题。", savedSolutionsCount))
+                        .font(.caption).foregroundStyle(Palette.muted).accessibilityIdentifier("cloud-upload-scope")
                     HStack {
                         Button("退出登录") { Task { await model.signOut() } }.secondaryButtonStyle()
                         Spacer()
