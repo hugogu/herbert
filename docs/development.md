@@ -221,7 +221,7 @@ HERBERT_CLOUD_STAGING_URL = https:/$()/YOUR-TUNNEL.trycloudflare.com
 
 Replace the hostname with the actual tunnel hostname, without `/v1/problems`.
 Rebuild and run the **HerbertAppStore** scheme in **Debug**, then open
-**My → Account → Global leaderboard**. An HTTP URL can appear correctly in Xcode's
+**My → Progress → Global leaderboard**. An HTTP URL can appear correctly in Xcode's
 Build Settings while still being rejected by the native client. A tunnel restart
 can change the hostname, requiring another configuration update and rebuild.
 Keep both processes running. The tunnel makes the local API publicly reachable;

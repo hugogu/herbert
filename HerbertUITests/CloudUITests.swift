@@ -23,12 +23,25 @@ final class CloudUITests: XCTestCase {
             #else
                 app.tabBars.buttons["My"].tap()
             #endif
+            #if os(macOS)
+                XCTAssertGreaterThan(
+                    app.descendants(matching: .any)["section-我的"].firstMatch.frame.minY,
+                    app.descendants(matching: .any)["section-AI Battlefield"].firstMatch.frame.minY)
+            #else
+                XCTAssertGreaterThan(
+                    app.tabBars.buttons["My"].frame.minX, app.tabBars.buttons["AI Battlefield"].frame.minX)
+            #endif
+            XCTAssertTrue(app.staticTexts["progress-storage-explanation"].exists)
+            XCTAssertTrue(app.buttons["cloud-leaderboard"].exists)
             XCTAssertTrue(app.buttons["export-backup"].waitForExistence(timeout: 5))
             XCTAssertTrue(app.buttons["import-backup"].exists)
             selectAccount(app)
             let upload = app.buttons["cloud-upload"]
             XCTAssertTrue(upload.waitForExistence(timeout: 5))
-            XCTAssertTrue(upload.isEnabled)
+            XCTAssertFalse(upload.isEnabled)
+            XCTAssertEqual(upload.label, "Upload & Share my Solutions")
+            XCTAssertTrue(app.staticTexts["cloud-upload-scope"].exists)
+            XCTAssertFalse(app.buttons["cloud-leaderboard"].exists)
             let account = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
             account.name = "cloud-account-actions-en"
             account.lifetime = .keepAlways
@@ -50,6 +63,7 @@ final class CloudUITests: XCTestCase {
             editor.lifetime = .keepAlways
             add(editor)
             activate(app.buttons["Cancel"])
+            selectProgress(app)
             activate(app.buttons["cloud-leaderboard"])
             XCTAssertTrue(
                 app.staticTexts.matching(NSPredicate(format: "value == %@ OR label == %@", "80 points", "80 points"))
@@ -83,7 +97,6 @@ final class CloudUITests: XCTestCase {
             #else
                 app.tabBars.buttons["My"].tap()
             #endif
-            selectAccount(app)
             let link = app.buttons["cloud-leaderboard"]
             if !link.isHittable { app.swipeUp() }
             XCTAssertTrue(link.waitForExistence(timeout: 5))
@@ -118,6 +131,15 @@ final class CloudUITests: XCTestCase {
                     app.typeKey(.escape, modifierFlags: [])
                 }
             }
+        #endif
+    }
+
+    @MainActor
+    private func selectProgress(_ app: XCUIApplication) {
+        #if os(macOS)
+            app.radioButtons["Progress"].click()
+        #else
+            app.segmentedControls.buttons["Progress"].tap()
         #endif
     }
 

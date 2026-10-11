@@ -88,9 +88,9 @@ The redesigned course is included in the 1.1.0 release.*
 ## Optional verified leaderboard
 
 The **HerbertAppStore** build can use Sign in with Apple and a Cloudflare Workers +
-D1 leaderboard from **My → Account**, with overall and per-puzzle score rankings.
+D1 leaderboard from **My → Progress**, with overall and per-puzzle score rankings.
 Original puzzle pages offer **Upload this answer** after a run, opening Apple
-sign-in when needed. Account also supports batch upload of saved shortest solutions
+sign-in when needed. Account also supports **Upload & Share my Solutions** for saved answers
 and public nickname editing. Uploads are opt-in; the server replays each H program
 against versioned boards and computes its score.
 Sessions stay in Keychain. Local play and backups still work without an account.
