@@ -36,6 +36,9 @@ public struct CloudClient: Sendable {
         try await send("v1/auth/refresh", method: "POST", body: ["refresh_token": token])
     }
     public func me(token: String) async throws -> CloudUser { try await send("v1/me", token: token) }
+    public func updateDisplayName(_ name: String, token: String) async throws -> CloudUser {
+        try await send("v1/me", method: "PATCH", body: ["display_name": name], token: token)
+    }
     public func logout(token: String) async throws {
         let _: Acknowledgment = try await send("v1/auth/logout", method: "POST", token: token)
     }

@@ -105,6 +105,54 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 describe("Worker + real D1 bindings", () => {
+    it("updates only the authenticated user's public nickname, preserving scores and sessions", async () => {
+        const alice = await user();
+        const bob = await user("bob");
+        await submit(alice);
+        const result = await request(
+            "/v1/me",
+            "PATCH",
+            { display_name: "  学习者 Alice  ", user_id: "bob" },
+            alice,
+        );
+        expect(result.status).toBe(200);
+        expect(result.headers.get("Cache-Control")).toBe("no-store");
+        expect(await result.json()).toEqual({
+            user_id: "alice",
+            display_name: "学习者 Alice",
+        });
+        expect(
+            await (await request("/v1/me", "GET", undefined, bob)).json(),
+        ).toEqual({ user_id: "bob", display_name: "bob" });
+        const ranking = await (
+            await request("/v1/leaderboard")
+        ).json<{ entries: { display_name: string }[] }>();
+        expect(ranking.entries[0].display_name).toBe("学习者 Alice");
+        expect(
+            (await request("/v1/me", "PATCH", { display_name: "forged" }))
+                .status,
+        ).toBe(401);
+        for (const display_name of [
+            " ",
+            "a".repeat(33),
+            "bad\nname",
+            "bad\u202Ename",
+        ])
+            expect(
+                (await request("/v1/me", "PATCH", { display_name }, alice))
+                    .status,
+            ).toBe(400);
+        const canonical = await request(
+            "/v1/me",
+            "PATCH",
+            { display_name: "Cafe\u0301" },
+            alice,
+        );
+        expect(await canonical.json()).toEqual({
+            user_id: "alice",
+            display_name: "Café",
+        });
+    });
     it("public reads and private writes have no cache", async () => {
         const response = await request("/v1/leaderboard");
         expect(response.status).toBe(200);
