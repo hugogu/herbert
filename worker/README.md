@@ -17,6 +17,13 @@ npm run migrate:local
 npm run dev
 ```
 
+The default listener is `localhost:8787`. For LAN HTTP connectivity tests, stop
+the server and use `npm run dev -- --ip 0.0.0.0`; access it using your Mac's LAN
+IP, not the phone's `127.0.0.1`. Native App integration requires HTTPS, even when
+an HTTP URL is visible in Xcode Build Settings. See the development guide's
+[phone access](../docs/development.md#access-the-local-api-from-a-phone-or-another-computer)
+and [HTTPS tunnel setup](../docs/development.md#local-secrets-and-real-apple-login).
+
 Production deployment needs your own D1 ID, Apple configuration and Worker secrets.
 Select `npm run migrate:staging` / `deploy:staging` or
 `npm run migrate:production` / `deploy:production` explicitly. Each environment

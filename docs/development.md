@@ -94,6 +94,35 @@ The checked-in dummy database IDs are sufficient locally. These commands neither
 create nor access a Cloudflare database. Schema changes belong in new numbered
 files under `worker/migrations/`; apply them with the matching migration script.
 
+### Access the local API from a phone or another computer
+
+`npm run dev` uses Wrangler's default `localhost` listener. A successful request
+to `127.0.0.1:8787` on your Mac does not mean the server accepts LAN connections.
+Stop the existing dev server with Ctrl-C, then run this from `worker/`:
+
+```sh
+npm run dev -- --ip 0.0.0.0
+```
+
+This keeps the same local database and environment, but listens on all network
+interfaces. `0.0.0.0` is a listening address, not an address to enter on a phone.
+Use your Mac's current LAN IP instead, for example:
+
+```sh
+curl -i http://192.168.1.42:8787/v1/problems
+```
+
+Replace the example IP with your Mac's address from System Settings → Network.
+Test from the Mac first, then open the same URL in Safari on your phone. Both
+devices must have a network route to each other (normally the same Wi-Fi).
+If loopback works but LAN access still fails, check macOS Firewall, Wi-Fi client
+isolation, and VPN routing. A phone's `127.0.0.1` refers to the phone itself.
+Only expose the dev server on a trusted network; it serves your local test data.
+
+**This HTTP check verifies connectivity, not native App login.** The native
+client requires HTTPS; follow the tunnel instructions below or use staging.
+See [Wrangler's `--ip` option](https://developers.cloudflare.com/workers/wrangler/commands/workers/).
+
 ### Local secrets and real Apple login
 
 Public reads and login challenges work without secrets. For a manual real-login
@@ -116,6 +145,33 @@ HTTPS tunnel and set `HERBERT_CLOUD_STAGING_URL` to that origin. A tunnel still
 uses your local D1; it does not require a remote database. A phone's `localhost`
 refers to the phone, not your Mac. Do not bypass certificate validation or relax
 App Transport Security; Wrangler's self-signed local HTTPS alone is insufficient.
+
+For a concrete HTTPS tunnel setup, install
+[cloudflared](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/),
+leave `npm run dev` running, and start a second terminal:
+
+```sh
+cloudflared tunnel --url http://127.0.0.1:8787
+```
+
+Cloudflared runs on your Mac, so this setup works with the default loopback
+listener; `--ip 0.0.0.0` is unnecessary for the tunnel. It prints a temporary
+`https://...trycloudflare.com` URL. Check that URL's `/v1/problems` endpoint on
+your phone, then put its origin in ignored `Config/Local.xcconfig`:
+
+```xcconfig
+HERBERT_CLOUD_STAGING_URL = https:/$()/YOUR-TUNNEL.trycloudflare.com
+```
+
+Replace the hostname with the actual tunnel hostname, without `/v1/problems`.
+Rebuild and run the **HerbertAppStore** scheme in **Debug**, then open
+**Progress → Global leaderboard**. An HTTP URL can appear correctly in Xcode's
+Build Settings while still being rejected by the native client. A tunnel restart
+can change the hostname, requiring another configuration update and rebuild.
+Keep both processes running. The tunnel makes the local API publicly reachable;
+use test data and secrets. It still uses local D1, and authenticated submissions
+still require the real Apple login configuration described above.
+
 
 ## Create a remote staging environment
 
