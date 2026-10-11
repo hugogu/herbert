@@ -11,7 +11,8 @@ import {
     vi,
 } from "vitest";
 import { exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
-import worker, { puzzleIdentity } from "../src/index";
+import worker from "../src/index";
+import { puzzleIdentity } from "../src/puzzles";
 import { accessToken, Env, hash, now, seal, unseal } from "../src/auth";
 import puzzles from "../../Sources/HerbertCore/Resources/original-problems.json";
 const bindings = env as unknown as Env & { TEST_MIGRATIONS: D1Migration[] };
