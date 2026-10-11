@@ -1,0 +1,8 @@
+// Copy to Local.xcconfig only if it does not exist; otherwise merge these settings.
+DEVELOPMENT_TEAM =
+
+// HerbertAppStore: Debug uses staging; Release/Archive uses production.
+// Write HTTPS as https:/$()/ to prevent // from starting an xcconfig comment.
+// For example: HERBERT_CLOUD_STAGING_URL = https:/$()/staging-api.example.com
+HERBERT_CLOUD_STAGING_URL =
+HERBERT_CLOUD_PRODUCTION_URL =
