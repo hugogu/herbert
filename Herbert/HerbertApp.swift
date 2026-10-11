@@ -3,20 +3,24 @@ import SwiftUI
 @main
 struct HerbertApp: App {
     @StateObject private var store = AppStore()
-    @StateObject private var battlefield = BattlefieldModel()
+    #if !LOCAL_LEARNING
+        @StateObject private var battlefield = BattlefieldModel()
+    #endif
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environmentObject(store)
-                .environmentObject(battlefield)
+                #if !LOCAL_LEARNING
+                    .environmentObject(battlefield)
+                #endif
                 .defaultAppStorage(store.preferences)
                 .tint(Palette.mint)
                 .preferredColorScheme(.light)
                 .onChange(of: scenePhase) { _, phase in
                     if phase != .active { store.flush() }
-                    #if os(iOS)
+                    #if os(iOS) && !LOCAL_LEARNING
                         if phase == .background { Task { await battlefield.stop(reason: .backgrounded) } }
                     #endif
                 }

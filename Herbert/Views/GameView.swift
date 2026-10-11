@@ -1,6 +1,9 @@
-import HerbertBattlefield
 import HerbertCore
 import SwiftUI
+
+#if !LOCAL_LEARNING
+    import HerbertBattlefield
+#endif
 
 #if os(macOS)
     import AppKit
@@ -180,27 +183,29 @@ struct GameView: View {
                 Button("完成") { showProblemInfo = false }.accessibilityIdentifier("close-problem-details")
             }.padding(16)
             Divider()
-            VStack(alignment: .leading, spacing: 8) {
-                Button {
-                    let prompt = BattlefieldPrompt.manual(model.problem)
-                    #if os(macOS)
-                        NSPasteboard.general.clearContents()
-                        promptCopied = NSPasteboard.general.setString(prompt, forType: .string)
-                    #else
-                        UIPasteboard.general.string = prompt
-                        promptCopied = true
-                    #endif
-                } label: {
-                    Label(
-                        LocalizedStringKey(promptCopied ? "已复制 AI 提示词" : "复制 AI 提示词"),
-                        systemImage: promptCopied ? "checkmark" : "doc.on.doc"
-                    )
-                    .frame(maxWidth: .infinity, minHeight: 32)
-                }.prominentButtonStyle().accessibilityIdentifier("copy-ai-prompt")
-                Text("包含规则、示例与当前棋盘，与 AI Battlefield 使用相同的提示词。")
-                    .font(.caption).foregroundStyle(Palette.muted)
-            }.padding(16)
-            Divider()
+            #if !LOCAL_LEARNING
+                VStack(alignment: .leading, spacing: 8) {
+                    Button {
+                        let prompt = BattlefieldPrompt.manual(model.problem)
+                        #if os(macOS)
+                            NSPasteboard.general.clearContents()
+                            promptCopied = NSPasteboard.general.setString(prompt, forType: .string)
+                        #else
+                            UIPasteboard.general.string = prompt
+                            promptCopied = true
+                        #endif
+                    } label: {
+                        Label(
+                            LocalizedStringKey(promptCopied ? "已复制 AI 提示词" : "复制 AI 提示词"),
+                            systemImage: promptCopied ? "checkmark" : "doc.on.doc"
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                    }.prominentButtonStyle().accessibilityIdentifier("copy-ai-prompt")
+                    Text("包含规则、示例与当前棋盘，与 AI Battlefield 使用相同的提示词。")
+                        .font(.caption).foregroundStyle(Palette.muted)
+                }.padding(16)
+                Divider()
+            #endif
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Eyebrow(
