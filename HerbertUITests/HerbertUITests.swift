@@ -14,6 +14,9 @@ final class HerbertUITests: XCTestCase {
         app.launchArguments =
             ["--ui-testing", "-AppleLanguages", "(\(language))"] + (reset ? ["--reset-progress"] : [])
             + (shortWindow ? ["--ui-testing-short-window"] : [])
+        #if APP_STORE
+            app.launchArguments.append("--ui-testing-cloud-offline")
+        #endif
         app.launch()
         app.activate()
         #if os(macOS)
@@ -38,6 +41,21 @@ final class HerbertUITests: XCTestCase {
                     ).click()
                 } else {
                     app.typeKey(.escape, modifierFlags: [])
+                }
+                if let screen = NSScreen.screens.first(where: { $0.localizedName == display }),
+                    screen.frame.origin == .zero
+                {
+                    let window = app.windows.firstMatch
+                    let frame = window.frame
+                    if !CGRect(origin: .zero, size: screen.frame.size).contains(frame) {
+                        // Moving through Window can restore an old position on another display.
+                        let origin = window.coordinate(withNormalizedOffset: .zero)
+                        origin.withOffset(CGVector(dx: frame.width / 2, dy: 20))
+                            .click(
+                                forDuration: 0.1,
+                                thenDragTo: origin.withOffset(
+                                    CGVector(dx: screen.frame.width / 2 - frame.minX, dy: 80 - frame.minY)))
+                    }
                 }
             }
         #endif
@@ -112,6 +130,13 @@ final class HerbertUITests: XCTestCase {
         let app = launch(language: "en")
         #if os(macOS)
             app.descendants(matching: .any)["section-我的"].firstMatch.activateControl()
+            let window = app.windows.firstMatch
+            let frame = window.frame
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            origin.withOffset(CGVector(dx: frame.width / 2, dy: 20))
+                .click(
+                    forDuration: 0.1,
+                    thenDragTo: origin.withOffset(CGVector(dx: frame.width / 2, dy: 80 - frame.minY)))
         #else
             app.buttons["My"].activateControl()
         #endif
@@ -123,14 +148,42 @@ final class HerbertUITests: XCTestCase {
         try assertButtonInk(export, white: true)
         try assertButtonInk(importButton, white: false)
         capture(app, name: "progress-actions")
+        #if os(macOS)
+            let finder = XCUIApplication(bundleIdentifier: "com.apple.finder")
+            finder.activate()
+            XCTAssertEqual(NSWorkspace.shared.frontmostApplication?.bundleIdentifier, "com.apple.finder")
+            for finderWindow in finder.windows.allElementsBoundByIndex {
+                XCTAssertFalse(finderWindow.frame.intersects(export.frame), "Keep Finder clear of the tested actions")
+                XCTAssertFalse(
+                    finderWindow.frame.intersects(importButton.frame), "Keep Finder clear of the tested actions")
+            }
+            try assertButtonInk(export, white: true, activateApp: false)
+            try assertButtonInk(importButton, white: false, activateApp: false)
+            let inactive = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+            inactive.name = "progress-actions-inactive"
+            inactive.lifetime = .keepAlways
+            add(inactive)
+            app.activate()
+        #endif
         app.terminate()
     }
 
     @MainActor
-    private func assertButtonInk(_ button: XCUIElement, white: Bool) throws {
-        XCUIApplication().activate()
-        let source = try XCTUnwrap(CGImageSourceCreateWithData(button.screenshot().pngRepresentation as CFData, nil))
-        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+    private func assertButtonInk(_ button: XCUIElement, white: Bool, activateApp: Bool = true) throws {
+        let app = XCUIApplication()
+        if activateApp { app.activate() }
+        // Crop one window capture so active and inactive assertions use the same pixel coordinates.
+        let window = app.windows.firstMatch
+        let source = try XCTUnwrap(
+            CGImageSourceCreateWithData(window.screenshot().pngRepresentation as CFData, nil))
+        let full = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let scaleX = CGFloat(full.width) / window.frame.width
+        let scaleY = CGFloat(full.height) / window.frame.height
+        let crop = CGRect(
+            x: (button.frame.minX - window.frame.minX) * scaleX,
+            y: (button.frame.minY - window.frame.minY) * scaleY,
+            width: button.frame.width * scaleX, height: button.frame.height * scaleY)
+        let image = try XCTUnwrap(full.cropping(to: crop))
         let context = try XCTUnwrap(
             CGContext(
                 data: nil, width: image.width, height: image.height, bitsPerComponent: 8,
@@ -139,6 +192,7 @@ final class HerbertUITests: XCTestCase {
         context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
         let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
         var inkPixels = 0
+        var mintPixels = 0
         // Ignore the native border, corners and shadow; inspect the label's interior.
         for y in (image.height / 3)..<(image.height * 2 / 3) {
             for x in (image.width / 5)..<(image.width * 4 / 5) {
@@ -146,12 +200,18 @@ final class HerbertUITests: XCTestCase {
                 let r = Int(pixels[offset])
                 let g = Int(pixels[offset + 1])
                 let b = Int(pixels[offset + 2])
+                if g > r + 35 && g > b + 8 && g < 170 { mintPixels += 1 }
                 if white ? (r > 235 && g > 235 && b > 235) : (g > r + 35 && g > b + 8 && g < 170) {
                     inkPixels += 1
                 }
             }
         }
         XCTAssertGreaterThan(inkPixels, 20, "Button text and icon must remain visible in the action color")
+        if white {
+            XCTAssertGreaterThan(
+                mintPixels, (image.height / 3) * (image.width * 3 / 5) / 3,
+                "White labels need a contrasting mint background even when the window is inactive")
+        }
     }
 
     @MainActor

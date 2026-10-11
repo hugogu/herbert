@@ -32,10 +32,35 @@ struct Pill: View {
 }
 
 struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.system(size: 15, weight: .semibold))
             .frame(minHeight: 48).frame(maxWidth: .infinity)
-            .foregroundStyle(.white).background(Palette.mint, in: RoundedRectangle(cornerRadius: 14))
+            .foregroundStyle(.white).background(
+                isEnabled ? Palette.mint : Palette.muted, in: RoundedRectangle(cornerRadius: 14)
+            )
+            .opacity(configuration.isPressed ? 0.75 : 1)
+    }
+}
+
+private struct ActionButtonStyle: ButtonStyle {
+    let prominent: Bool
+    let color: Color
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        let ink = isEnabled ? color : Palette.muted
+        configuration.label
+            .fontWeight(.medium)
+            .foregroundStyle(prominent ? Color.white : ink)
+            .padding(.horizontal, 12).padding(.vertical, 6)
+            #if os(iOS)
+                .frame(minHeight: 44)
+            #else
+                .frame(minHeight: 28)
+            #endif
+            .background(prominent ? ink : ink.opacity(0.10), in: RoundedRectangle(cornerRadius: 8))
+            .contentShape(RoundedRectangle(cornerRadius: 8))
             .opacity(configuration.isPressed ? 0.75 : 1)
     }
 }
@@ -55,13 +80,13 @@ struct RobotMark: View {
 }
 
 extension View {
-    // Explicit foregrounds prevent page/popover colors from overriding native button contrast on iOS.
+    // Own both foreground and background: native prominent fills disappear in inactive Mac windows.
     func prominentButtonStyle() -> some View {
-        buttonStyle(.borderedProminent).tint(Palette.mint).foregroundStyle(.white)
+        buttonStyle(ActionButtonStyle(prominent: true, color: Palette.mint))
     }
 
     func secondaryButtonStyle(color: Color = Palette.mint) -> some View {
-        buttonStyle(.bordered).tint(color).foregroundStyle(color)
+        buttonStyle(ActionButtonStyle(prominent: false, color: color))
     }
 
     func panel(padding: CGFloat = 20) -> some View {
