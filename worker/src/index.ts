@@ -1,5 +1,6 @@
 import originals from "../../Sources/HerbertCore/Resources/original-problems.json";
 import { evaluate } from "./judge";
+import { puzzleIdentity, RULES_VERSION } from "./puzzles";
 import {
     accessToken,
     appleNotification,
@@ -15,14 +16,6 @@ import {
     seal,
     verifyApple,
 } from "./auth";
-export const RULES_VERSION = "herbert-h-v1";
-export function puzzleIdentity(p: {
-    id: number;
-    byteLimit: number;
-    rows: string[];
-}) {
-    return `${RULES_VERSION}\n${p.id}\n${p.byteLimit}\n${p.rows.join("\n")}`;
-}
 const catalog = Promise.all(
     originals.map(async (p) => ({
         ...p,
