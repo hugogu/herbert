@@ -27,6 +27,11 @@ environment explicitly. Do not add `remote: true` to a development D1 binding.
 Use **Node 24** for the Worker and Xcode 16+/Swift 6 for the native app.
 From the repository root:
 
+The Node project and its committed lockfile are in **`worker/`**, not the
+repository root. Run the npm commands after `cd worker`. If `npm ci` reports
+that no lockfile exists, check `pwd`; do not generate a new root lockfile with
+`npm install`. Alternatively, run `npm --prefix worker ci` from the repository root.
+
 ```sh
 scripts/check.sh
 cd worker

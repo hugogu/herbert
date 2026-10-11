@@ -7,6 +7,8 @@ Use Node 24. Local testing needs no Cloudflare account, remote D1 database or
 Apple credentials. See the [development guide](../docs/development.md) for
 staging/production setup and native app environment selection.
 
+Run these commands inside `worker/`, not at the repository root:
+
 ```sh
 npm ci
 npm run check
