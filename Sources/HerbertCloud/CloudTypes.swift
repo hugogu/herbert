@@ -61,6 +61,34 @@ public struct LeaderboardEntry: Codable, Identifiable, Sendable {
         case points, percentage, solved
     }
 }
+public struct ProblemLeaderboard: Codable, Sendable {
+    public let problemID: Int
+    public let puzzleVersion: String
+    public let entries: [ProblemLeaderboardEntry]
+    enum CodingKeys: String, CodingKey {
+        case problemID = "problem_id"
+        case puzzleVersion = "puzzle_version"
+        case entries
+    }
+}
+public struct ProblemLeaderboardEntry: Codable, Identifiable, Sendable {
+    public let rank: Int
+    public let userID: String
+    public let displayName: String
+    public let points: Double
+    public let bytes: Int
+    public let accepted: Int
+    public let litTargets: Int
+    public let targetCount: Int
+    public var id: String { userID }
+    enum CodingKeys: String, CodingKey {
+        case rank, points, bytes, accepted
+        case userID = "user_id"
+        case displayName = "display_name"
+        case litTargets = "lit_targets"
+        case targetCount = "target_count"
+    }
+}
 public struct SubmissionResult: Codable, Sendable {
     public let accepted: Bool
     public let bytes: Int

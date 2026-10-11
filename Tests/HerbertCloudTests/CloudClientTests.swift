@@ -45,6 +45,17 @@ final class CloudClientTests: XCTestCase {
         XCTAssertTrue(result.accepted)
         XCTAssertEqual(result.points, 80)
     }
+    func testPublicProblemLeaderboardDecodesScoresAndDoesNotSendCredentials() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockProtocol.self]
+        let client = try CloudClient(
+            endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
+        let ranking = try await client.problemLeaderboard(10001)
+        XCTAssertEqual(ranking.problemID, 10001)
+        XCTAssertEqual(ranking.entries.first?.points, 80)
+        XCTAssertEqual(ranking.entries.first?.litTargets, 1)
+        XCTAssertEqual(ranking.entries.first?.bytes, 1)
+    }
     func testNicknameUpdateUsesAuthenticatedPatchWithoutClaimedUserID() async throws {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [MockProtocol.self]
@@ -59,7 +70,12 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-session")
+        let isRanking = request.url?.path == "/v1/problems/10001/leaderboard"
+        if isRanking {
+            XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+        } else {
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-session")
+        }
         var bytes = request.httpBody ?? Data()
         if bytes.isEmpty, let stream = request.httpBodyStream {
             stream.open()
@@ -73,7 +89,12 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
         }
         let body = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any]
         let reply: String
-        if request.url?.path == "/v1/me" {
+        if isRanking {
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.cachePolicy, .reloadIgnoringLocalCacheData)
+            reply =
+                #"{"problem_id":10001,"puzzle_version":"current","entries":[{"rank":1,"user_id":"alice","display_name":"Alice","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1}]}"#
+        } else if request.url?.path == "/v1/me" {
             XCTAssertEqual(request.httpMethod, "PATCH")
             XCTAssertEqual(Set(body?.keys.map { $0 } ?? []), Set(["display_name"]))
             XCTAssertEqual(body?["display_name"] as? String, "小机器人")
