@@ -1,0 +1,25 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "herbert-leaderboard",
+    "main": "src/index.ts",
+    "compatibility_date": "2026-10-10",
+    "compatibility_flags": ["nodejs_compat"],
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "herbert-leaderboard",
+            "database_id": "00000000-0000-0000-0000-000000000000",
+            "migrations_dir": "migrations",
+        },
+    ],
+    "vars": {
+        "APPLE_CLIENT_ID": "info.hugogu.Herbert",
+        "APPLE_TEAM_ID": "",
+        "APPLE_KEY_ID": "",
+        "TOKEN_ISSUER": "herbert-leaderboard",
+        "ADMIN_ISSUER": "",
+        "ADMIN_AUDIENCE": "",
+        "ADMIN_EMAILS": "",
+    },
+    "triggers": { "crons": ["17 3 * * *"] },
+}

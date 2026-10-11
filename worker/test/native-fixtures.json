@@ -1,0 +1,1114 @@
+[
+  {
+    "accepted" : true,
+    "bytes" : 1,
+    "id" : 10001,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : true,
+    "bytes" : 1,
+    "id" : 10001,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10001,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10001,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 9,
+    "id" : 10006,
+    "litTargets" : 1,
+    "source" : "rsslsslss",
+    "steps" : 9
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10006,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10006,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10006,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 10,
+    "id" : 10012,
+    "litTargets" : 15,
+    "source" : "a:ssssr\naaaa",
+    "steps" : 18
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10012,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10012,
+    "litTargets" : 4,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10012,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 17,
+    "id" : 10074,
+    "litTargets" : 31,
+    "source" : "a(N):sa(N-1)\na(6)ra(10)ra(6)ra(10)",
+    "steps" : 34
+  },
+  {
+    "accepted" : true,
+    "bytes" : 18,
+    "id" : 10074,
+    "litTargets" : 31,
+    "source" : "a(N):sa(N-1)\nra(10)la(6)la(10)la(6)",
+    "steps" : 35
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10074,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10074,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10074,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 20,
+    "id" : 10075,
+    "litTargets" : 47,
+    "source" : "a(N,P):Pa(N-1,P)\nb:a(6,srsl)r\nbbbb",
+    "steps" : 96
+  },
+  {
+    "accepted" : true,
+    "bytes" : 22,
+    "id" : 10075,
+    "litTargets" : 47,
+    "source" : "a(N,P):Pa(N-1,P)\nb:a(6,slsr)l\nrrbbbb",
+    "steps" : 98
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10075,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10075,
+    "litTargets" : 1,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10075,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 11,
+    "id" : 10076,
+    "litTargets" : 90,
+    "source" : "a(X):Xla(Xss)\na(ss)",
+    "steps" : 98
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10076,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10076,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10076,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 34,
+    "id" : 10051,
+    "litTargets" : 76,
+    "source" : "a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)",
+    "steps" : 297
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10051,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10051,
+    "litTargets" : 4,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10051,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 23,
+    "id" : 10052,
+    "litTargets" : 51,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nw:q(b(6)r)\nwrb(11)lw",
+    "steps" : 67
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10052,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10052,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10052,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 25,
+    "id" : 10027,
+    "litTargets" : 48,
+    "source" : "b(X):sb(X-1)\na(X,Y):b(8)Yb(2)Ya(X-1,rrY)\nra(5,r)",
+    "steps" : 81
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10027,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10027,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10027,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 31,
+    "id" : 10077,
+    "litTargets" : 108,
+    "source" : "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\ndddd",
+    "steps" : 238
+  },
+  {
+    "accepted" : true,
+    "bytes" : 32,
+    "id" : 10077,
+    "litTargets" : 108,
+    "source" : "a(X,Y):Ya(X-1,Y)\nb(X):a(4,a(X,s)r)\nc(X):b(X)c(X-2)\nd:c(6)r\nrdddd",
+    "steps" : 239
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10077,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10077,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10077,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 35,
+    "id" : 10078,
+    "litTargets" : 50,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N):b(24)rq(b(2)r)rb(N)rrr\na(6)a(9)a(6)a(9)",
+    "steps" : 176
+  },
+  {
+    "accepted" : true,
+    "bytes" : 37,
+    "id" : 10078,
+    "litTargets" : 50,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N):b(24)rq(b(2)r)rb(N)rrr\nrra(6)a(9)a(6)a(9)",
+    "steps" : 178
+  },
+  {
+    "accepted" : true,
+    "bytes" : 35,
+    "id" : 10078,
+    "litTargets" : 50,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N):b(N)rq(b(2)r)rb(N)rrr\na(6)a(9)a(6)a(9)",
+    "steps" : 110
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10078,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10078,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10078,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 37,
+    "id" : 10079,
+    "litTargets" : 72,
+    "source" : "b(N):sb(N-1)\nd(N):srsld(N-1)\na:b(24)rrb(8)rrd(4)rrd(4)rrr\naaaa",
+    "steps" : 282
+  },
+  {
+    "accepted" : true,
+    "bytes" : 38,
+    "id" : 10079,
+    "litTargets" : 72,
+    "source" : "b(N):sb(N-1)\nd(N):srsld(N-1)\na:b(24)rrb(8)rrd(4)rrd(4)rrr\nraaaa",
+    "steps" : 283
+  },
+  {
+    "accepted" : true,
+    "bytes" : 37,
+    "id" : 10079,
+    "litTargets" : 72,
+    "source" : "b(N):sb(N-1)\nd(N):srsld(N-1)\na:b(8)rrb(8)rrd(4)rrd(4)rrr\naaaa",
+    "steps" : 218
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10079,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10079,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10079,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 40,
+    "id" : 10080,
+    "litTargets" : 144,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\na(N):q(d(N)r)rb(3)la(N-3)\nlb(9)ra(9)",
+    "steps" : 317
+  },
+  {
+    "accepted" : true,
+    "bytes" : 41,
+    "id" : 10080,
+    "litTargets" : 144,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\na(N):q(d(N)r)rb(3)la(N-3)\nrlb(9)ra(9)",
+    "steps" : 318
+  },
+  {
+    "accepted" : true,
+    "bytes" : 41,
+    "id" : 10080,
+    "litTargets" : 144,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\nc(N):q(d(N)r)lb(3)r\nlb(3)rc(3)c(6)c(9)",
+    "steps" : 311
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10080,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10080,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10080,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 53,
+    "id" : 10081,
+    "litTargets" : 44,
+    "source" : "b(N):sb(N-1)\nd(N):lb(N)rrb(N+N)rrb(N)r\na(N):d(N)b(3)a(N-2)\nc(K,N):d(N)b(3)c(K-1,N+2)\nrrb(9)rra(8)c(3,4)",
+    "steps" : 214
+  },
+  {
+    "accepted" : true,
+    "bytes" : 55,
+    "id" : 10081,
+    "litTargets" : 44,
+    "source" : "b(N):sb(N-1)\nd(N):lb(N)rrb(N+N)rrb(N)r\na(N):d(N)b(3)a(N-2)\nc(K,N):d(N)b(3)c(K-1,N+2)\nrrrrb(9)rra(8)c(3,4)",
+    "steps" : 216
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10081,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10081,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10081,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 32,
+    "id" : 10082,
+    "litTargets" : 76,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na:b(8)rq(b(4)r)lrrb(8)rrr\naaaa",
+    "steps" : 151
+  },
+  {
+    "accepted" : true,
+    "bytes" : 33,
+    "id" : 10082,
+    "litTargets" : 76,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na:b(8)rq(b(4)r)lrrb(8)rrr\nraaaa",
+    "steps" : 152
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10082,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10082,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10082,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 43,
+    "id" : 10083,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N,T,U):b(2)Tb(N)Ua(N-2,U,T)rrTb(N)Ub(2)rr\nq(a(8,r,l)r)",
+    "steps" : 302
+  },
+  {
+    "accepted" : true,
+    "bytes" : 44,
+    "id" : 10083,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N,T,U):b(2)Tb(N)Ua(N-2,U,T)rrTb(N)Ub(2)rr\nrq(a(8,r,l)r)",
+    "steps" : 303
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10083,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10083,
+    "litTargets" : 2,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10083,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 56,
+    "id" : 10084,
+    "litTargets" : 144,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\nw:q(d(2)r)\ne:wrb(6)l\na(N):eeelb(18)rb(6)a(N-1)\nlb(8)lb(6)rra(3)",
+    "steps" : 454
+  },
+  {
+    "accepted" : true,
+    "bytes" : 57,
+    "id" : 10084,
+    "litTargets" : 144,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nd(N):srsld(N-1)\nw:q(d(2)r)\ne:wrb(6)l\na(N):eeelb(18)rb(6)a(N-1)\nrlb(8)lb(6)rra(3)",
+    "steps" : 455
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10084,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10084,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10084,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 31,
+    "id" : 10085,
+    "litTargets" : 104,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N):b(N)ra(N-3)lrrb(N)rr\nq(a(11)r)",
+    "steps" : 260
+  },
+  {
+    "accepted" : true,
+    "bytes" : 32,
+    "id" : 10085,
+    "litTargets" : 104,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(N):b(N)ra(N-3)lrrb(N)rr\nrq(a(11)r)",
+    "steps" : 261
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10085,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10085,
+    "litTargets" : 11,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10085,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 31,
+    "id" : 10086,
+    "litTargets" : 104,
+    "source" : "b(N):sb(N-1)\na(N):b(N)la(N-2)rra(N-2)rb(N)rr\nc:a(8)rr\ncc",
+    "steps" : 355
+  },
+  {
+    "accepted" : true,
+    "bytes" : 33,
+    "id" : 10086,
+    "litTargets" : 104,
+    "source" : "b(N):sb(N-1)\na(N):b(N)la(N-2)rra(N-2)rb(N)rr\nc:a(8)rr\nrrcc",
+    "steps" : 357
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10086,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10086,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10086,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 58,
+    "id" : 10087,
+    "litTargets" : 140,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(W,H):b(W)rb(H)rb(W)rb(H)rrc(H-2,W-2)\nc(W,H):b(W)lb(H)lb(W)lb(H)lla(H-2,W-2)\nq(a(6,8))",
+    "steps" : 292
+  },
+  {
+    "accepted" : true,
+    "bytes" : 59,
+    "id" : 10087,
+    "litTargets" : 140,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\na(W,H):b(W)rb(H)rb(W)rb(H)rrc(H-2,W-2)\nc(W,H):b(W)lb(H)lb(W)lb(H)lla(H-2,W-2)\nrq(a(6,8))",
+    "steps" : 293
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10087,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10087,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10087,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 51,
+    "id" : 10088,
+    "litTargets" : 128,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nw:lb(2)lb(2)rrq(b(4)r)b(2)rb(2)l\na:b(7)wrb(7)wrb(7)rb(7)rr\naaaa",
+    "steps" : 378
+  },
+  {
+    "accepted" : true,
+    "bytes" : 52,
+    "id" : 10088,
+    "litTargets" : 128,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nw:lb(2)lb(2)rrq(b(4)r)b(2)rb(2)l\na:b(7)wrb(7)wrb(7)rb(7)rr\nraaaa",
+    "steps" : 379
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10088,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10088,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10088,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 55,
+    "id" : 10089,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nc(N):sc(N-2)\na(K,X,Y,T):b(X)Tc(Y)Ta(K-1,Y,X-2,rrT)Tc(Y)rrTb(X)rr\nq(a(4,8,4,r)r)",
+    "steps" : 464
+  },
+  {
+    "accepted" : true,
+    "bytes" : 56,
+    "id" : 10089,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(P):PPPP\nc(N):sc(N-2)\na(K,X,Y,T):b(X)Tc(Y)Ta(K-1,Y,X-2,rrT)Tc(Y)rrTb(X)rr\nrq(a(4,8,4,r)r)",
+    "steps" : 465
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10089,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10089,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10089,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 44,
+    "id" : 10090,
+    "litTargets" : 126,
+    "source" : "b(N):sb(N-1)\na(N,X,Y):Xa(N-1,Y,X)b(2)Ya(N-1,X,Y)b(2)a(N-1,X,Y)Yb(2)a(N-1,Y,X)X\na(3,r,l)",
+    "steps" : 207
+  },
+  {
+    "accepted" : true,
+    "bytes" : 35,
+    "id" : 10090,
+    "litTargets" : 126,
+    "source" : "b(N):sb(N-1)\na(N,T):b(14)c(N-1,T)\nc(N,T):TssTa(N,rrT)\nra(8,l)la(8,l)",
+    "steps" : 405
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10090,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10090,
+    "litTargets" : 11,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10090,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 34,
+    "id" : 10091,
+    "litTargets" : 175,
+    "source" : "a(N,X):a(N-1,XrXlXlXrX)c(2-N,X)\nc(N,X):XrXrXrXr\na(3,ss)",
+    "steps" : 298
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10091,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10091,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10091,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 43,
+    "id" : 10092,
+    "litTargets" : 280,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(N,S):b(S)lb(S)ra(N-1,S-3)rb(S)rb(S)r\na(N,S):q(c(N,S))\na(3,7)",
+    "steps" : 1010
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10092,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10092,
+    "litTargets" : 7,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10092,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 28,
+    "id" : 10093,
+    "litTargets" : 117,
+    "source" : "a(N):a(N-1)rc(N-1)ssr\nc(N):lssa(N-1)lc(N-1)\nssa(6)",
+    "steps" : 253
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10093,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10093,
+    "litTargets" : 2,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10093,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 60,
+    "id" : 10094,
+    "litTargets" : 88,
+    "source" : "a(N):a(N-1)rc(N-1)sr\nc(N):lsa(N-1)lc(N-1)\nd(N):lsf(N-1)ld(N-1)\nf(N):f(N-1)rd(N-1)sr\ne:sa(5)rrd(5)srrr\neeee",
+    "steps" : 672
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10094,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10094,
+    "litTargets" : 5,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10094,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 48,
+    "id" : 10095,
+    "litTargets" : 140,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\na(N,D,T):b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(4,7,r)r)",
+    "steps" : 996
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10095,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10095,
+    "litTargets" : 7,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10095,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 63,
+    "id" : 10096,
+    "litTargets" : 200,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\nc(N,W):d(W)rb(W+1)lc(N-1,W)lb(W+1)r\na(N,W):c(N,W)b(W+2)a(N-1,W-1)rrb(W+2)rr\nq(a(3,3)r)",
+    "steps" : 691
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10096,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10096,
+    "litTargets" : 12,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10096,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 56,
+    "id" : 10097,
+    "litTargets" : 188,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nd(W):q(b(W)r)\na(N,D,T):d(D)b(D)Ta(N-1,D-2,rrT)rra(N-1,D-2,T)Trrb(D)rr\nq(a(3,6,r)r)",
+    "steps" : 904
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10097,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10097,
+    "litTargets" : 10,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10097,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  }
+]

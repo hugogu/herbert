@@ -1,0 +1,77 @@
+import Foundation
+import HerbertCore
+import XCTest
+
+@testable import HerbertCloud
+
+final class CloudClientTests: XCTestCase {
+    func testRejectsUnsafeOrAmbiguousEndpoints() throws {
+        for value in [
+            "http://example.com", "https://user:pass@example.com", "https://example.com?token=secret",
+            "https://example.com/path", "https://example.com#fragment",
+        ] {
+            XCTAssertThrowsError(try CloudClient(endpoint: XCTUnwrap(URL(string: value))))
+        }
+        XCTAssertNoThrow(try CloudClient(endpoint: XCTUnwrap(URL(string: "https://api.example.com"))))
+    }
+    func testPuzzleIdentityIncludesBoardLimitAndID() throws {
+        let puzzle = try XCTUnwrap(ProblemCatalog.bundled().first)
+        let version = CloudPuzzle.version(puzzle)
+        XCTAssertEqual(version.count, 64)
+        let changed = Problem(
+            id: puzzle.id, title: puzzle.title, author: puzzle.author, byteLimit: puzzle.byteLimit + 1,
+            rows: puzzle.rows)
+        XCTAssertNotEqual(version, CloudPuzzle.version(changed))
+    }
+    func testRedirectsCannotForwardCredentialsToAnotherHost() throws {
+        let url = try XCTUnwrap(URL(string: "https://untrusted.example.com"))
+        var request = URLRequest(url: url)
+        request.setValue("Bearer sensitive", forHTTPHeaderField: "Authorization")
+        let response = try XCTUnwrap(HTTPURLResponse(url: url, statusCode: 307, httpVersion: nil, headerFields: nil))
+        CloudNoRedirects().urlSession(
+            .shared, task: URLSession.shared.dataTask(with: request),
+            willPerformHTTPRedirection: response, newRequest: request
+        ) { redirected in
+            XCTAssertNil(redirected)
+        }
+    }
+    func testTransportSubmitsProgramWithoutClaimedScoreOrIdentity() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockProtocol.self]
+        let client = try CloudClient(
+            endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
+        let puzzle = try XCTUnwrap(ProblemCatalog.bundled().first)
+        let result = try await client.submit(problem: puzzle, source: "s", requestID: UUID(), token: "test-session")
+        XCTAssertTrue(result.accepted)
+        XCTAssertEqual(result.points, 80)
+    }
+}
+private final class MockProtocol: URLProtocol, @unchecked Sendable {
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.url?.path, "/v1/submissions")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-session")
+        var bytes = request.httpBody ?? Data()
+        if bytes.isEmpty, let stream = request.httpBodyStream {
+            stream.open()
+            defer { stream.close() }
+            var buffer = [UInt8](repeating: 0, count: 1024)
+            while stream.hasBytesAvailable {
+                let n = stream.read(&buffer, maxLength: buffer.count)
+                if n <= 0 { break }
+                bytes.append(contentsOf: buffer.prefix(n))
+            }
+        }
+        let body = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any]
+        XCTAssertEqual(Set(body?.keys.map { $0 } ?? []), Set(["source", "problem_id", "puzzle_version", "request_id"]))
+        XCTAssertEqual(body?["source"] as? String, "s")
+        let response = HTTPURLResponse(
+            url: request.url!, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(#"{"accepted":true,"bytes":1,"points":80,"feedback":"Accepted"}"#.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}

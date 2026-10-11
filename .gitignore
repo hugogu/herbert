@@ -10,3 +10,7 @@ outputs/
 __pycache__/
 *.pyc
 Config/Local.xcconfig
+node_modules/
+worker/.wrangler/
+worker/.dev.vars
+worker/.env*
