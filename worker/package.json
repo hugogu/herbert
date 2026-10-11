@@ -7,7 +7,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "check": "prettier --check . && tsc --noEmit",
-    "test": "vitest run",
+    "test": "node --test scripts/check-runtime.mjs && vitest run",
     "migrate:local": "wrangler d1 migrations apply DB --local",
     "migrate:remote": "wrangler d1 migrations apply DB --remote",
     "format": "prettier --write ."
