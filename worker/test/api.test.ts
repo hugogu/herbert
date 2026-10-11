@@ -105,6 +105,106 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 describe("Worker + real D1 bindings", () => {
+    it("ranks each player's best verified attempt for one problem without exposing programs", async () => {
+        const alice = await user(),
+            bob = await user("bob");
+        await submit(alice, { source: "r" });
+        await submit(alice, { request_id: "better", source: "s" });
+        await submit(alice, { request_id: "duplicate", source: "s" });
+        await submit(bob, { source: "r" });
+        const response = await request(
+            `/v1/problems/${puzzles[0].id}/leaderboard`,
+        );
+        expect(response.status).toBe(200);
+        expect(response.headers.get("Cache-Control")).toBe("no-store");
+        expect(await response.json()).toEqual({
+            problem_id: puzzles[0].id,
+            puzzle_version: await hash(puzzleIdentity(puzzles[0])),
+            entries: [
+                {
+                    rank: 1,
+                    user_id: "alice",
+                    display_name: "alice",
+                    points: 80,
+                    bytes: 1,
+                    accepted: 1,
+                    lit_targets: 1,
+                    target_count: 1,
+                },
+                {
+                    rank: 2,
+                    user_id: "bob",
+                    display_name: "bob",
+                    points: 0,
+                    bytes: 1,
+                    accepted: 0,
+                    lit_targets: 0,
+                    target_count: 1,
+                },
+            ],
+        });
+        const limited = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard?limit=1`)
+        ).json<{ entries: unknown[] }>();
+        expect(limited.entries).toHaveLength(1);
+        expect((await request("/v1/problems/999999/leaderboard")).status).toBe(
+            404,
+        );
+        const empty = await (
+            await request(`/v1/problems/${puzzles[1].id}/leaderboard`)
+        ).json<{ entries: unknown[] }>();
+        expect(empty.entries).toEqual([]);
+    });
+    it("excludes hidden, stale, moderated and obsolete-rule results from problem rankings", async () => {
+        for (const name of [
+            "visible",
+            "hidden",
+            "stale",
+            "blocked",
+            "deleted",
+            "oldrules",
+        ]) {
+            await submit(await user(name));
+        }
+        await bindings.DB.batch([
+            bindings.DB.prepare(
+                "UPDATE submissions SET hidden_at=? WHERE user_id='hidden'",
+            ).bind(now()),
+            bindings.DB.prepare(
+                "UPDATE submissions SET puzzle_version='retired' WHERE user_id='stale'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE users SET status='blocked' WHERE user_id='blocked'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE users SET status='deleted' WHERE user_id='deleted'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE submissions SET rules_version='retired' WHERE user_id='oldrules'",
+            ),
+        ]);
+        const board = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+        ).json<{ entries: { user_id: string }[] }>();
+        expect(board.entries.map((entry) => entry.user_id)).toEqual([
+            "visible",
+        ]);
+    });
+    it("breaks problem ranking ties by answer length and stable user ID", async () => {
+        for (const name of ["c", "b", "a"]) await submit(await user(name));
+        // Equal-score length ties can occur at zero and after score rounding.
+        await bindings.DB.prepare(
+            "UPDATE submissions SET bytes=2 WHERE user_id='a'",
+        ).run();
+        const board = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+        ).json<{ entries: { user_id: string }[] }>();
+        expect(board.entries.map((entry) => entry.user_id)).toEqual([
+            "b",
+            "c",
+            "a",
+        ]);
+    });
     it("updates only the authenticated user's public nickname, preserving scores and sessions", async () => {
         const alice = await user();
         const bob = await user("bob");

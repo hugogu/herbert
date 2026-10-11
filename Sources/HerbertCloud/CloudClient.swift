@@ -21,6 +21,9 @@ public struct CloudClient: Sendable {
         }
     }
     public func leaderboard() async throws -> Leaderboard { try await send("v1/leaderboard") }
+    public func problemLeaderboard(_ problemID: Int) async throws -> ProblemLeaderboard {
+        try await send("v1/problems/\(problemID)/leaderboard")
+    }
     public func challenge() async throws -> LoginChallenge { try await send("v1/auth/challenge", method: "POST") }
     public func signIn(challenge: LoginChallenge, identityToken: String, authorizationCode: String) async throws
         -> CloudSession
