@@ -22,6 +22,9 @@ See the [development guide](docs/development.md) for local testing, Apple login,
 database migrations and staging/production setup. Local Worker/D1 tests need
 **no Cloudflare account, remote database or Apple credentials**:
 
+The npm project and lockfile live in **`worker/`**. Start from the repository
+root and include the `cd worker` below; running `npm ci` at the root fails.
+
 ```sh
 cd worker
 npm ci                 # Node 24
