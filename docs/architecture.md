@@ -33,15 +33,24 @@
 
 备份先完成解码、schema 检查、题号检查与解法重放，再一次写入合并结果。解法验证在后台任务进行，保持界面可响应。草稿/收藏取更新时间较新的记录；解法取更小 byte 数，平手保留本机解法和日期。输入大小限制 32 MiB。所有处理成功后才更新内存快照和本地文件，失败不修改已有记录。
 
-这里的本地 `Codable` JSON 沿用 Swift 命名。未来数据库表和列一律 `snake_case`，无需把 DB 命名暴露给 Swift 模型。
+这里的本地 `Codable` JSON 沿用 Swift 命名。云端数据库表、列和 HTTP JSON 使用 `snake_case`，Swift 模型通过 CodingKeys 映射。
 
 ## AI Battlefield
 
 AI 配置与比赛由独立的 `HerbertBattlefield` 模块负责：actor 调度并行参赛者、预算与取消，复用 `HerbertCore` 验题；`BattlefieldRepository` 隔离本地历史存储。UI 负责 Keychain 和 PNG 渲染，运行时密钥不可编码。完整数据流与用量边界见 [AI Battlefield](ai-battlefield.md)。AI 历史与人类进度分别保存，现有进度备份格式保持不变。
 
-## Cloudflare 的后续接入
+## 可选排行榜与后续同步
 
-这次没有创建云资源、部署 Worker、添加数据库或引入账号。以下是未来可实现的演进路径：
+`HerbertCloud` 负责 HTTPS 传输和棋盘版本标识；App Store UI 用 Apple 登录，设备 Keychain 保存会话。
+`worker/` 使用 Workers + D1，独立执行 H 程序后才保存分数；客户端不传可信成绩。
+用户主动确认后仅上传原创题的已保存最短解，本地 `ProgressRepository` 与备份格式不变。
+账号、会话、提交及管理审计通过编号 migration 管理，未来独立后台调用版本化管理 API。
+部署、账号生命周期、限流、管理权限和测试见 [云排行榜](cloud-leaderboards.md)。当前没有创建或部署生产云资源。
+
+`HerbertLearning` 是独立的本地学习构建，不链接云服务、AI Battlefield 或社区题库；资源与二进制隔离由产物检查验证。
+产品分类和大陆发行要求见 [发行评估](china-distribution.md)，分类不能仅由编译目标名称决定。
+
+排行榜上传与多设备进度同步是不同功能。未来同步可沿以下路径演进：
 
 1. 保留本地 repository 作为离线真相来源，新增异步 SyncCoordinator 和 outbox。不要用同步 HTTP 替换每次按键后的本地写入。
 2. App 通过认证后的 Worker HTTP API 同步；Worker 校验用户身份、记录归属、输入上限和程序结果，再用 D1 prepared statements 读写。API 返回 `Cache-Control: no-store`，不缓存用户数据。

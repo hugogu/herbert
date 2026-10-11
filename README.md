@@ -85,6 +85,20 @@ The redesigned course is included in the 1.1.0 release.*
 | --- | --- |
 | [![Four symmetric folded petals with continuous walls](docs/screenshots/en/course/course-rose-board.png)](docs/screenshots/en/course/course-rose.png) | [![Paired square lanterns joined by a lower bridge](docs/screenshots/en/course/course-lanterns-board.png)](docs/screenshots/en/course/course-lanterns.png) |
 
+## Optional verified leaderboard
+
+The **HerbertAppStore** build can use Sign in with Apple and a Cloudflare Workers +
+D1 leaderboard from **Progress**. Uploading saved original solutions is opt-in;
+the server replays each H program against versioned boards and computes its score.
+Sessions stay in Keychain. Local play and backups still work without an account.
+The service is disabled until its deployment URL and Apple credentials are configured.
+[Deployment, security and independent admin API](docs/cloud-leaderboards.md).
+
+A separate **HerbertLearning** scheme provides original exercises, the editor and
+local progress without cloud accounts, rankings or AI competition. It is a product
+option for evaluating local learning distribution, **not a confirmed licensing
+exemption**. [Mainland China assessment](docs/china-distribution.md).
+
 ## AI Battlefield
 
 **Updated in 0.3.8:** Anthropic Messages providers, manual puzzle retries, fuller
@@ -346,7 +360,8 @@ No developer account is configured in the repository.
 | Scheme | Included content | Intended use |
 | --- | --- | --- |
 | `Herbert` (default) | 50 original lessons + 1,769 archived community puzzles | Open-source edition |
-| `HerbertAppStore` (**Herbot Bot**) | 50 original lessons only | TestFlight / App Store candidate |
+| `HerbertAppStore` (**Herbot Bot**) | 50 original lessons; optional verified leaderboard | TestFlight / App Store candidate |
+| `HerbertLearning` | 50 original lessons; fully local; no AI/cloud/Game Center | Offline learning candidate; classification must be confirmed |
 
 The community archive is a separate optional Swift package target, not a runtime-hidden
 file in the store app. CI audits built iOS and Mac store apps for content isolation.
@@ -381,6 +396,7 @@ still to come. See [verification details](docs/verification.md).
 | --- | --- |
 | `Herbert/` | SwiftUI screens, native editors, animation, app state |
 | `Sources/HerbertCore/` | UI-independent H parser, VM, board, session, progress storage |
+| `Sources/HerbertCloud/`, `worker/` | HTTPS client, Apple identity verification, D1 and server judge |
 | `Sources/HerbertCommunity/` | Optional community archive, excluded from App Store targets |
 | `Sources/HerbertBattlefield/` | Provider protocol, streaming client, parallel competition engine, judging and local history |
 | `Tests/HerbertCoreTests/` | Language unit tests and game/save/backup integration tests |
