@@ -58,6 +58,17 @@ L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙
 | --- | --- |
 | [![四向对称的折叠花瓣与连续墙](docs/screenshots/course/course-rose-board.png)](docs/screenshots/course/course-rose.png) | [![底部直桥连接的两个方形灯框](docs/screenshots/course/course-lanterns-board.png)](docs/screenshots/course/course-lanterns.png) |
 
+## 可选的服务端验证排行榜
+
+**HerbertAppStore** 构建可从「记录」进入全球排行榜，使用 Apple 登录。
+用户确认后上传原创练习的最短解，Cloudflare Worker 按版本化棋盘重新运行并计算成绩，
+D1 保存结果，会话留在 Keychain。本地练习和备份无需账号；未配置服务地址与 Apple 凭证时不会启用服务。
+详见[部署、安全设计及独立管理后台接口](docs/cloud-leaderboards.md)。
+
+另有 **HerbertLearning** scheme，仅保留原创练习、编辑器与本地记录，不含云账号、排行榜或 AI 比赛。
+它用于评估真正的本地学习产品，**不能据此认定免除版号或备案要求**。
+[中国大陆发行评估](docs/china-distribution.md)。
+
 ## AI Battlefield · 0.3.8
 
 比赛统一为「比赛设置」，取消模式选择。默认不限时、不限 Token，每题最多 3 次机会。
@@ -128,7 +139,8 @@ open Herbert.xcodeproj
 | Scheme | 题库 | 用途 |
 | --- | --- | --- |
 | `Herbert`（默认） | 30 道原创题 + 1,769 道社区题 | 开源版 |
-| `HerbertAppStore`（商店显示名 **Herbot Bot**） | 仅 30 道原创题 | 真机检查、TestFlight、App Store 候选版 |
+| `HerbertAppStore`（商店显示名 **Herbot Bot**） | 30 道原创题，可选服务端验证排行榜 | 真机检查、TestFlight、App Store 候选版 |
+| `HerbertLearning` | 30 道原创练习；完全本地，无 AI、云账号和 Game Center | 离线学习候选版，分类需确认 |
 
 社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
 CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。
