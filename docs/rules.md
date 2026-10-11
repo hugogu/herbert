@@ -2,6 +2,8 @@
 
 来源：http://herbert.tealang.info/rule.php ，2026-10-07 读取。原始响应 SHA-256：`6fa113d0f633e2828e462fd31b69789e4b0121c2b4030b1276af517c2030a7d5`。
 
+该页面是 quolc 的 Herbert Online Judge 发布的规则资料；Herbert 挑战最初由 Wild Noodle Corporation 创作，Wild Noodle 的公开材料将 H 语言的开发归于其创始人 Brian Conte。详见 [NOTICE](../NOTICE.md) 中的来源与项目边界说明。
+
 本项目独立实现规则，不再分发原站页面、图片或 Flash 文件。以下为事实性核对说明。
 
 - 机器人只能执行代码，不能直接通过方向按钮移动。

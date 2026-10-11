@@ -16,11 +16,21 @@ module. Its two public worked teaching boards and answers are also independently
 and MIT licensed; scored curriculum reference answers remain test-only.
 It excludes the community resource module, archive and community gallery images.
 
+## Original Herbert challenge and H language
+
+The Herbert programming challenge originated with **Wild Noodle Corporation**. Wild Noodle's
+[published account](https://wildnoodle.medium.com/how-to-create-an-effective-hiring-assessment-strategy-for-your-organization-c797266eaf34)
+identifies its founder, Brian Conte, as the developer of the `h` language. Herbert was used
+in Microsoft's Imagine Cup algorithm competition. This repository independently implements
+the public rules; it is not an official Wild Noodle or Microsoft release, and does not include
+the original Flash client or server source.
+
 ## Archived community Herbert problems
 
 `Sources/HerbertCommunity/Resources/problems.json` contains a snapshot of 1,769 public problems
-from [Herbert Online Judge](http://herbert.tealang.info/problems.php), created by quolc
-and its community. Each record preserves the original ID, title, credited author,
+from the later [Herbert Online Judge](http://herbert.tealang.info/problems.php), created by
+quolc and its community. It is a separate community judge and problem archive, not the origin
+of the Herbert challenge or `h` language. Each record preserves the original ID, title, credited author,
 byte limit, source URL, and response SHA-256. Import provenance is recorded in
 [the manifest](docs/problem-import-manifest.json). The snapshot was imported on October 7, 2026.
 

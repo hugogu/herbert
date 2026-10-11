@@ -1,8 +1,11 @@
 Download **Herbert-macOS-universal.dmg** below, open it, and drag **Herbert.app** to
 **Applications**. Requires **macOS 14+**; supports **Apple Silicon and Intel**. No Xcode needed.
 
-**Updated in 0.3.9:**
+**Updated in 0.4.0:**
 
+- Correct the project's historical credits: Wild Noodle Corporation created the Herbert
+  challenge, its founder Brian Conte developed the `h` language, and tealang.info hosts
+  the later quolc-led community judge and puzzle archive.
 - Redesign the advanced course as open geometric routes with broken-wall landmarks and trap ribbons. Keep the target/start geometry of L23–L30, preserve old progress and match snapshots, and add alternative budget-compliant traversals.
 - Rebuild L04–L06 as Sunlit courtyard, Diamond stair and Growing spiral, with localized hints and legacy-save protection.
 - Improve action-label contrast across Apple platforms, shorten backup actions to Export / Import in all three languages, and refresh the English and Chinese course captures.
@@ -46,8 +49,8 @@ and three attempts per problem. All models can finish their selected attempts.
 
 AI is optional and requires your API key/credits. Keys stay in Keychain; settings and
 history stay local. Streaming estimates and cancellation cannot guarantee provider
-billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/v0.3.9/docs/ai-battlefield.md)
-and [privacy](https://github.com/hugogu/herbert/blob/v0.3.9/PRIVACY.md).
+billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/v0.4.0/docs/ai-battlefield.md)
+and [privacy](https://github.com/hugogu/herbert/blob/v0.4.0/PRIVACY.md).
 
 **Signing:** this preview is ad-hoc signed and has not been notarized by Apple.
 If macOS blocks the first launch, follow [Apple's instructions](https://support.apple.com/en-us/102445)
@@ -65,14 +68,14 @@ builds pass. Native Mac UI tests use deterministic fixtures; paid provider calls
 iPhone/iPad runtime checks remain device verification work.
 
 Code and the 30 originals are MIT licensed. Community content has separate, unconfirmed
-redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v0.3.9/NOTICE.md).
+redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v0.4.0/NOTICE.md).
 The App Store scheme contains only originals; this DMG is the open-source edition.
 
-中文：0.3.9 重构进阶开放几何关卡，加入断续墙面、陷阱纹样及经过验证的替代路线，保护旧进度和比赛快照；重做 L04–L06 并补齐三语提示。提高操作按钮文字对比度，统一导入/导出名称并刷新中英文关卡截图。App Store 版显示名改为 **Herbot Bot**；本次 GitHub Mac 预览仍名为 **Herbert**。
+中文：0.4.0 更正项目历史来源：Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发；tealang.info 是 quolc 后来建立的社区评测器和题库。重构进阶开放几何关卡，加入断续墙面、陷阱纹样及经过验证的替代路线，保护旧进度和比赛快照；重做 L04–L06 并补齐三语提示。提高操作按钮文字对比度，统一导入/导出名称并刷新中英文关卡截图。App Store 版显示名改为 **Herbot Bot**；本次 GitHub Mac 预览仍名为 **Herbert**。
 
 下载下方 DMG 后将 Herbert 拖入“应用程序”。支持 macOS 14+，包含 30 道原创和 1,769 道社区题，
 中英日界面、连续墙、轨迹与网格、本地历史和 PNG 分享。预览版尚未经过 Apple 公证。
 AI 使用自己的 API 额度；密钥留在钥匙串，本地预算与取消请求无法保证最终账单。
 
-See the [changelog](https://github.com/hugogu/herbert/blob/v0.3.9/CHANGELOG.md)
-and [README](https://github.com/hugogu/herbert/tree/v0.3.9#readme) for screenshots and controls.
+See the [changelog](https://github.com/hugogu/herbert/blob/v0.4.0/CHANGELOG.md)
+and [README](https://github.com/hugogu/herbert/tree/v0.4.0#readme) for screenshots and controls.

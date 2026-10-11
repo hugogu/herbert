@@ -3,6 +3,15 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## [0.4.0] - 2026-10-11
+
+- Correct Herbert's historical attribution: credit Wild Noodle Corporation and its founder
+  Brian Conte for the original challenge and `h` language, and distinguish the later
+  quolc-led Herbert Online Judge community archive.
+- Bump the app marketing version to 0.4.0 and build number to 13.
+
+## Unreleased
+
 ## [0.3.9] - 2026-10-11
 
 - Set explicit foreground colors for primary and secondary actions across iOS and macOS, including prompt copying, sharing and progress transfer. Shorten backup button labels to Export / Import in all three languages.
@@ -12,8 +21,6 @@ save or API formats through documented migrations.
 - Enrich L04–L06 and L10–L30 with authored broken brackets and trap ribbons: each obstacle type uses 15–30% of the enclosing-border cell count. Rebuild L04–L06 as Sunlit courtyard, Diamond stair and Growing spiral, with localized teaching hints and protected legacy saves.
 - Add an offline before/after board review generator. Refresh English and Chinese native app screenshots using the same six selected course puzzles after design approval.
 - Set the App Store edition's display name to **Herbot Bot** while keeping the open-source app and repository named Herbert.
-
-## Unreleased
 
 ## [0.3.8] - 2026-10-09
 
@@ -204,6 +211,7 @@ save or API formats through documented migrations.
 - The UI is Simplified Chinese. There is no cloud sync, online leaderboard, App Store
   release, or notarized Mac binary.
 
+[0.4.0]: https://github.com/hugogu/herbert/releases/tag/v0.4.0
 [0.3.9]: https://github.com/hugogu/herbert/releases/tag/v0.3.9
 [0.3.8]: https://github.com/hugogu/herbert/releases/tag/v0.3.8
 [0.3.7]: https://github.com/hugogu/herbert/releases/tag/v0.3.7

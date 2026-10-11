@@ -387,11 +387,19 @@ to start. For feature ideas, open an issue before a large implementation.
 
 ## Credits and license
 
-Inspired by [Herbert Online Judge](http://herbert.tealang.info/), created by **quolc**, and
-its problem authors. Original [rules](http://herbert.tealang.info/rule.php) and
-[problem collection](http://herbert.tealang.info/problems.php) are linked for attribution.
-The original Flash client, online accounts, submissions, and leaderboard are not included;
-original best scores are an import-time snapshot, not live rankings.
+The Herbert programming challenge was originally created by **Wild Noodle Corporation**;
+Wild Noodle's [published account](https://wildnoodle.medium.com/how-to-create-an-effective-hiring-assessment-strategy-for-your-organization-c797266eaf34)
+credits its founder, Brian Conte, with developing the `h` language. Herbert was also used
+in Microsoft's Imagine Cup algorithm competition. This repository is an independent
+implementation based on public rules, not an official Wild Noodle or Microsoft release.
+
+The open-source edition separately includes a snapshot of community puzzles from
+[Herbert Online Judge](http://herbert.tealang.info/), created by **quolc** and its community.
+That site's [published rules](http://herbert.tealang.info/rule.php) and
+[problem collection](http://herbert.tealang.info/problems.php) are linked for attribution;
+each original problem author retains their rights. The original Flash client, online
+accounts, submissions, and leaderboard are not included; original best scores are an
+import-time snapshot, not live rankings.
 
 Our source code, 30 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
 Third-party community puzzle data and community layouts visible in screenshots are
