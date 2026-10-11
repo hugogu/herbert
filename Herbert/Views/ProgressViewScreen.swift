@@ -3,6 +3,11 @@ import SwiftUI
 
 struct ProgressViewScreen: View {
     @EnvironmentObject private var store: AppStore
+    #if APP_STORE && !LOCAL_LEARNING
+        @EnvironmentObject private var cloud: CloudModel
+    #endif
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showBestInfo = false
     @State private var accountSelected = false
     @State private var exporting = false
     @State private var importing = false
@@ -30,6 +35,9 @@ struct ProgressViewScreen: View {
         }.background(Palette.paper).navigationTitle("我的")
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
+            #endif
+            #if APP_STORE && !LOCAL_LEARNING
+                .task { await cloud.loadBests(problems: store.problems) }
             #endif
             .navigationDestination(for: Problem.self) { problem in GameDestination(problem: problem, store: store) }
             .fileExporter(
@@ -64,8 +72,41 @@ struct ProgressViewScreen: View {
         VStack(alignment: .leading, spacing: 24) {
             Eyebrow(text: "ONE SMALL STEP AT A TIME")
             Text("思考留下的足迹。").font(.system(size: 30, weight: .bold, design: .rounded))
-            HStack(spacing: 16) {
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.flexible(), spacing: 12), count: horizontalSizeClass == .compact ? 2 : 4),
+                spacing: 12
+            ) {
                 counter("已完成", value: store.completedCount)
+                Button {
+                    showBestInfo = true
+                } label: {
+                    counter("最佳解", value: bestCount, info: true)
+                }.buttonStyle(.plain).accessibilityIdentifier("progress-best-count")
+                    .popover(isPresented: $showBestInfo) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("最佳解").font(.headline)
+                                Spacer()
+                                Button("完成") { showBestInfo = false }
+                            }
+                            Text(
+                                "已通关且长度不大于该题已知最短纪录的本机解答数量，并列也算。只比较 Size，不比较分数或执行步数。社区题参考收录时的原站纪录，原创题参考当前在线纪录；尚无纪录的题目不计入。"
+                            )
+                            .font(.callout).foregroundStyle(Palette.muted)
+                            #if APP_STORE && !LOCAL_LEARNING
+                                if let error = cloud.bestsError {
+                                    Text(error).font(.caption).foregroundStyle(Palette.danger)
+                                }
+                                Button("刷新") { Task { await cloud.loadBests(problems: store.problems) } }
+                                    .secondaryButtonStyle().disabled(!cloud.configured)
+                            #endif
+                        }.padding(20).frame(width: 320)
+                            #if os(iOS)
+                                .presentationCompactAdaptation(.sheet)
+                                .presentationDetents([.medium])
+                            #endif
+                    }
                 counter("已收藏", value: store.favoriteCount)
                 counter("草稿", value: store.visibleRecords.filter { !$0.draft.isEmpty }.count)
             }
@@ -155,10 +196,25 @@ struct ProgressViewScreen: View {
         }
     }
 
-    private func counter(_ title: String, value: Int) -> some View {
+    private var bestCount: Int? {
+        var references = Dictionary(
+            uniqueKeysWithValues: store.problems.compactMap { problem in
+                problem.originalBest.map { (problem.id, $0) }
+            })
+        #if APP_STORE && !LOCAL_LEARNING
+            if cloud.configured, !cloud.bestsLoaded { return nil }
+            references.merge(cloud.bestReferences) { _, online in online }
+        #endif
+        return store.visibleSnapshot.bestCount(references: references)
+    }
+
+    private func counter(_ title: String, value: Int?, info: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(String(value)).font(.system(size: 30, weight: .medium, design: .monospaced))
-            Text(LocalizedStringKey(title)).font(.system(size: 12)).foregroundStyle(Palette.muted)
+            Text(value.map(String.init) ?? "—").font(.system(size: 30, weight: .medium, design: .monospaced))
+            HStack(spacing: 6) {
+                Text(LocalizedStringKey(title))
+                if info { Image(systemName: "info.circle") }
+            }.font(.system(size: 12)).foregroundStyle(Palette.muted)
         }.frame(maxWidth: .infinity, alignment: .leading).panel(padding: 16)
     }
 }

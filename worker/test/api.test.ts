@@ -130,6 +130,7 @@ describe("Worker + real D1 bindings", () => {
                     accepted: 1,
                     lit_targets: 1,
                     target_count: 1,
+                    steps: 1,
                 },
                 {
                     rank: 2,
@@ -140,6 +141,7 @@ describe("Worker + real D1 bindings", () => {
                     accepted: 0,
                     lit_targets: 0,
                     target_count: 1,
+                    steps: 1,
                 },
             ],
         });
@@ -189,6 +191,81 @@ describe("Worker + real D1 bindings", () => {
         expect(board.entries.map((entry) => entry.user_id)).toEqual([
             "visible",
         ]);
+    });
+    it("returns minimum accepted sizes independently of score, instruction count and ranking limit", async () => {
+        const alice = await user();
+        await submit(alice, { source: "r", request_id: "partial" });
+        const empty = await (
+            await request("/v1/problems/bests")
+        ).json<{ entries: unknown[] }>();
+        expect(empty.entries).toEqual([]);
+        await submit(alice, { source: "s", request_id: "long" });
+        await submit(alice, { source: "s", request_id: "short" });
+        // The shortest accepted answer need not be the highest-scoring attempt.
+        await bindings.DB.prepare(
+            "UPDATE submissions SET points=100,bytes=5,steps=5 WHERE request_id='long'",
+        ).run();
+        const ranking = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard?limit=1`)
+        ).json<{ entries: { bytes: number; steps: number }[] }>();
+        expect(ranking.entries[0]).toMatchObject({ bytes: 5, steps: 5 });
+        const response = await request("/v1/problems/bests");
+        expect(response.headers.get("Cache-Control")).toBe("no-store");
+        expect(await response.json()).toEqual({
+            rules_version: "herbert-h-v1",
+            entries: [
+                {
+                    problem_id: puzzles[0].id,
+                    puzzle_version: await hash(puzzleIdentity(puzzles[0])),
+                    bytes: 1,
+                },
+            ],
+        });
+    });
+    it("excludes rejected, hidden, stale and moderated attempts from best-size references", async () => {
+        for (const name of [
+            "visible",
+            "hidden",
+            "stale",
+            "blocked",
+            "deleted",
+            "oldrules",
+            "retired",
+            "rejected",
+        ]) {
+            await submit(await user(name));
+        }
+        await bindings.DB.batch([
+            bindings.DB.prepare(
+                "UPDATE submissions SET bytes=4 WHERE user_id='visible'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE submissions SET hidden_at=? WHERE user_id='hidden'",
+            ).bind(now()),
+            bindings.DB.prepare(
+                "UPDATE submissions SET puzzle_version='retired' WHERE user_id='stale'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE users SET status='blocked' WHERE user_id='blocked'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE users SET status='deleted' WHERE user_id='deleted'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE submissions SET rules_version='retired' WHERE user_id='oldrules'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE submissions SET problem_id=999999 WHERE user_id='retired'",
+            ),
+            bindings.DB.prepare(
+                "UPDATE submissions SET accepted=0 WHERE user_id='rejected'",
+            ),
+        ]);
+        const bests = await (
+            await request("/v1/problems/bests")
+        ).json<{ entries: { bytes: number }[] }>();
+        expect(bests.entries).toHaveLength(1);
+        expect(bests.entries[0].bytes).toBe(4);
     });
     it("breaks problem ranking ties by answer length and stable user ID", async () => {
         for (const name of ["c", "b", "a"]) await submit(await user(name));

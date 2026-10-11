@@ -41,6 +41,8 @@
                                         Text(
                                             L10n.text(
                                                 "已点亮 %ld/%ld · %ld B", entry.litTargets, entry.targetCount, entry.bytes)
+                                                + " · "
+                                                + (entry.steps.map { L10n.text("%ld 条指令", $0) } ?? L10n.text("指令数未知"))
                                         )
                                         .font(.caption).foregroundStyle(Palette.muted)
                                     }

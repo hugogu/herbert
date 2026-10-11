@@ -55,6 +55,29 @@ final class CloudClientTests: XCTestCase {
         XCTAssertEqual(ranking.entries.first?.points, 80)
         XCTAssertEqual(ranking.entries.first?.litTargets, 1)
         XCTAssertEqual(ranking.entries.first?.bytes, 1)
+        XCTAssertEqual(ranking.entries.first?.steps, 1)
+    }
+    func testPublicBestReferencesMatchCurrentBoardsOnly() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockProtocol.self]
+        let client = try CloudClient(
+            endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
+        let bests = try await client.problemBests()
+        let puzzles = try ProblemCatalog.bundled()
+        XCTAssertEqual(bests.references(for: puzzles), [puzzles[0].id: 1])
+        let obsolete = try JSONDecoder().decode(
+            ProblemBests.self,
+            from: Data(
+                #"{"rules_version":"retired","entries":[]}"#.utf8))
+        XCTAssertTrue(obsolete.references(for: puzzles).isEmpty)
+    }
+    func testOldLeaderboardWithoutInstructionsStillDecodes() throws {
+        let ranking = try JSONDecoder().decode(
+            ProblemLeaderboard.self,
+            from: Data(
+                #"{"problem_id":10001,"puzzle_version":"old","entries":[{"rank":1,"user_id":"alice","display_name":"Alice","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1}]}"#
+                    .utf8))
+        XCTAssertNil(ranking.entries[0].steps)
     }
     func testNicknameUpdateUsesAuthenticatedPatchWithoutClaimedUserID() async throws {
         let config = URLSessionConfiguration.ephemeral
@@ -71,7 +94,8 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         let isRanking = request.url?.path == "/v1/problems/10001/leaderboard"
-        if isRanking {
+        let isBests = request.url?.path == "/v1/problems/bests"
+        if isRanking || isBests {
             XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
         } else {
             XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-session")
@@ -93,7 +117,17 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.cachePolicy, .reloadIgnoringLocalCacheData)
             reply =
-                #"{"problem_id":10001,"puzzle_version":"current","entries":[{"rank":1,"user_id":"alice","display_name":"Alice","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1}]}"#
+                #"{"problem_id":10001,"puzzle_version":"current","entries":[{"rank":1,"user_id":"alice","display_name":"Alice","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1,"steps":1}]}"#
+        } else if isBests {
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.cachePolicy, .reloadIgnoringLocalCacheData)
+            let puzzle = try! ProblemCatalog.bundled()[0]
+            reply = """
+                {"rules_version":"herbert-h-v1","entries":[
+                {"problem_id":\(puzzle.id),"puzzle_version":"\(CloudPuzzle.version(puzzle))","bytes":1},
+                {"problem_id":10002,"puzzle_version":"retired","bytes":0},
+                {"problem_id":999999,"puzzle_version":"unknown","bytes":0}]}
+                """
         } else if request.url?.path == "/v1/me" {
             XCTAssertEqual(request.httpMethod, "PATCH")
             XCTAssertEqual(Set(body?.keys.map { $0 } ?? []), Set(["display_name"]))

@@ -142,6 +142,9 @@ struct GameView: View {
         .onChange(of: model.source) { _, _ in model.edited() }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.pause() } }
         .onAppear { if !model.isTrial { store.visit(model.problem.id) } }
+        #if APP_STORE && !LOCAL_LEARNING
+            .task { await cloud.loadBests(problems: store.problems) }
+        #endif
         .onDisappear { model.disappear() }
         .sensoryFeedback(.success, trigger: model.isCompleted)
         .sensoryFeedback(.warning, trigger: model.lastEvent == .trap)
@@ -167,7 +170,7 @@ struct GameView: View {
                 promptCopied = false
                 showProblemInfo = true
             } label: {
-                Label(LocalizedStringKey(model.isTrial ? "AI 试运行" : "题目说明"), systemImage: "info.circle")
+                Label("详情", systemImage: "info.circle")
                     .padding(.horizontal, 10).padding(.vertical, 6)
                     .background(Palette.mintLight.opacity(0.7), in: Capsule()).frame(minHeight: 44)
             }
@@ -177,10 +180,21 @@ struct GameView: View {
                 model.pause()
                 showGuide = true
             } label: {
-                Label("游戏规则", systemImage: "questionmark.circle")
+                Label("规则", systemImage: "questionmark.circle")
                     .padding(.horizontal, 10).padding(.vertical, 6)
                     .background(Palette.mintLight.opacity(0.7), in: Capsule()).frame(minHeight: 44)
             }.accessibilityIdentifier("game-rules")
+            #if APP_STORE && !LOCAL_LEARNING
+                if model.problem.lesson != nil {
+                    NavigationLink {
+                        LeaderboardView(problem: model.problem)
+                    } label: {
+                        Label("排名", systemImage: "trophy")
+                            .padding(.horizontal, 10).padding(.vertical, 6)
+                            .background(Palette.mintLight.opacity(0.7), in: Capsule()).frame(minHeight: 44)
+                    }.accessibilityIdentifier("cloud-problem-ranking")
+                }
+            #endif
         }.font(.system(size: 11, weight: .semibold)).buttonStyle(.plain).foregroundStyle(Palette.mint).fixedSize()
     }
 
@@ -270,53 +284,88 @@ struct GameView: View {
                 stat("执行步数", value: "\(model.session.steps)")
             }.padding(.vertical, 16)
             if model.problem.lesson == nil {
-                Divider().padding(.horizontal, 16)
-                Button {
-                    showOriginalBestInfo = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Label("原站最短参考", systemImage: "trophy")
-                            .foregroundStyle(Palette.muted)
-                        Spacer(minLength: 4)
-                        Text(originalBestValue)
-                            .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                            .foregroundStyle(Palette.mint)
-                        Image(systemName: "info.circle").foregroundStyle(Palette.muted)
-                    }.font(.system(size: 12)).frame(minHeight: 44).contentShape(Rectangle())
-                }
-                .buttonStyle(.plain).padding(.horizontal, 16)
-                .accessibilityLabel(L10n.text("原站最短参考") + ": " + originalBestValue)
-                .accessibilityIdentifier("original-best-reference")
-                .accessibilityHint("查看原站最短参考的说明")
-                .popover(isPresented: $showOriginalBestInfo, arrowEdge: .top) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("原站最短参考").font(.headline)
-                            Spacer()
-                            Button("完成") { showOriginalBestInfo = false }
-                                .accessibilityIdentifier("close-original-best-info")
-                        }
-                        Text("这是收录题库时原站 Best 栏的答案长度，不会改变本题的通关长度限制。它与「我的最短解」分别记录，原站之后可能已有更短的答案。")
-                            .font(.system(size: 13)).foregroundStyle(Palette.muted).fixedSize(
-                                horizontal: false, vertical: true
-                            )
-                            .accessibilityIdentifier("original-best-explanation")
-                        Link("原版 Problems ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
-                            .font(.system(size: 13))
-                    }.padding(20).frame(width: 340)
-                        #if os(iOS)
-                            .presentationCompactAdaptation(.sheet)
-                            .presentationDetents([.medium])
-                            .presentationDragIndicator(.visible)
-                        #endif
-                }
+                bestReferenceRow
+            } else {
+                #if APP_STORE && !LOCAL_LEARNING
+                    bestReferenceRow
+                #endif
             }
         }.background(.white, in: RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Palette.line, lineWidth: 1))
     }
 
+    private var bestReferenceTitle: String {
+        model.problem.lesson == nil ? "原站最短参考" : "排行榜最短参考"
+    }
+
     private var originalBestValue: String {
-        model.problem.originalBest.map { "\($0) B" } ?? L10n.text("暂无记录")
+        if model.problem.lesson == nil {
+            return model.problem.originalBest.map { "\($0) B" } ?? L10n.text("暂无记录")
+        }
+        #if APP_STORE && !LOCAL_LEARNING
+            if let size = cloud.bestReferences[model.problem.id] { return "\(size) B" }
+            if cloud.configured, !cloud.bestsLoaded {
+                return L10n.text(cloud.bestsError == nil ? "正在加载…" : "暂不可用")
+            }
+        #endif
+        return L10n.text("暂无记录")
+    }
+
+    private var bestReferenceRow: some View {
+        VStack(spacing: 0) {
+            Divider().padding(.horizontal, 16)
+            Button {
+                showOriginalBestInfo = true
+            } label: {
+                HStack(spacing: 8) {
+                    Label(LocalizedStringKey(bestReferenceTitle), systemImage: "trophy")
+                        .foregroundStyle(Palette.muted)
+                    Spacer(minLength: 4)
+                    Text(originalBestValue)
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(Palette.mint)
+                    Image(systemName: "info.circle").foregroundStyle(Palette.muted)
+                }.font(.system(size: 12)).frame(minHeight: 44).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain).padding(.horizontal, 16)
+            .accessibilityLabel(L10n.text(bestReferenceTitle) + ": " + originalBestValue)
+            .accessibilityIdentifier(model.problem.lesson == nil ? "original-best-reference" : "puzzle-best-reference")
+            .popover(isPresented: $showOriginalBestInfo, arrowEdge: .top) {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text(LocalizedStringKey(bestReferenceTitle)).font(.headline)
+                        Spacer()
+                        Button("完成") { showOriginalBestInfo = false }
+                            .accessibilityIdentifier("close-original-best-info")
+                    }
+                    if model.problem.lesson == nil {
+                        Text("这是收录题库时原站 Best 栏的答案长度，不会改变本题的通关长度限制。它与「我的最短解」分别记录，原站之后可能已有更短的答案。")
+                            .font(.system(size: 13)).foregroundStyle(Palette.muted)
+                            .accessibilityIdentifier("original-best-explanation")
+                        Link("原版 Problems ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
+                            .font(.system(size: 13))
+                    } else {
+                        Text("当前排行榜中已通关解答的最短长度，与分数和执行步数无关；不会改变本题的通关长度限制。没有纪录时，可以上传你的解答建立纪录。")
+                            .font(.system(size: 13)).foregroundStyle(Palette.muted)
+                        #if APP_STORE && !LOCAL_LEARNING
+                            if !cloud.configured {
+                                Text("此构建尚未配置排行榜服务。").font(.caption).foregroundStyle(Palette.muted)
+                            }
+                            if let error = cloud.bestsError {
+                                Text(error).font(.caption).foregroundStyle(Palette.danger)
+                            }
+                            Button("刷新") { Task { await cloud.loadBests(problems: store.problems) } }
+                                .secondaryButtonStyle().disabled(!cloud.configured)
+                        #endif
+                    }
+                }.fixedSize(horizontal: false, vertical: true).padding(20).frame(width: 340)
+                    #if os(iOS)
+                        .presentationCompactAdaptation(.sheet)
+                        .presentationDetents([.medium])
+                        .presentationDragIndicator(.visible)
+                    #endif
+            }
+        }
     }
 
     private func stat(_ title: String, value: String, danger: Bool = false, identifier: String = "") -> some View {
@@ -434,22 +483,17 @@ struct GameView: View {
 
     #if APP_STORE && !LOCAL_LEARNING
         @ViewBuilder private var leaderboardActions: some View {
-            if model.problem.lesson != nil {
+            if model.problem.lesson != nil, cloud.configured,
+                (model.finishedSource != nil && !model.isTrial) || cloud.busy || cloud.message != nil
+            {
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        if let source = model.finishedSource, !model.isTrial, cloud.configured {
-                            Button {
-                                Task { await cloud.uploadAnswer(model.problem, source: source) }
-                            } label: {
-                                Label("上传本次答案", systemImage: "arrow.up.circle")
-                            }.secondaryButtonStyle().disabled(cloud.busy)
-                                .accessibilityIdentifier("cloud-upload-answer")
-                        }
-                        NavigationLink {
-                            LeaderboardView(problem: model.problem)
+                    if let source = model.finishedSource, !model.isTrial {
+                        Button {
+                            Task { await cloud.uploadAnswer(model.problem, source: source) }
                         } label: {
-                            Label("本题排名", systemImage: "trophy")
-                        }.secondaryButtonStyle().accessibilityIdentifier("cloud-problem-ranking")
+                            Label("上传本次答案", systemImage: "arrow.up.circle")
+                        }.secondaryButtonStyle().disabled(cloud.busy)
+                            .accessibilityIdentifier("cloud-upload-answer")
                     }
                     if model.finishedSource != nil, !model.isTrial, cloud.configured {
                         Text("上传后公开昵称和成绩；未登录时会先打开 Apple 登录。")

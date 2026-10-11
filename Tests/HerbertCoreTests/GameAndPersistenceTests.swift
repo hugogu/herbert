@@ -10,6 +10,20 @@ final class GameAndPersistenceTests: XCTestCase {
         return Problem(id: 99, title: "Fixture", author: "Tests", byteLimit: limit, rows: rows.map { String($0) })
     }
 
+    func testBestCountUsesAcceptedLocalSizesAndCountsTiesAndImprovements() {
+        let accepted: [ProblemProgress] = [
+            ProblemProgress(problemID: 1, bestSolution: "s", bestBytes: 1, completedAt: .now),
+            ProblemProgress(problemID: 2, bestSolution: "ss", bestBytes: 2, completedAt: .now),
+            ProblemProgress(problemID: 3, bestSolution: "sss", bestBytes: 3, completedAt: .now),
+            ProblemProgress(problemID: 4, draft: "s"),
+            ProblemProgress(problemID: 5, bestSolution: "s", bestBytes: 1, completedAt: .now),
+            ProblemProgress(problemID: 6, bestSolution: "s", bestBytes: 1),
+        ]
+        let snapshot = ProgressSnapshot(records: accepted)
+        XCTAssertEqual(snapshot.bestCount(references: [1: 1, 2: 3, 3: 2, 4: 1, 6: 1]), 2)
+        XCTAssertEqual(snapshot.bestCount(references: [:]), 0)
+    }
+
     func testEveryImportedBoardIsValidAndIdentifiable() throws {
         let catalog = try CommunityProblemCatalog.bundled()
         XCTAssertFalse(catalog.isEmpty)

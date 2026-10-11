@@ -13,6 +13,10 @@
         @Published private(set) var busy = false
         @Published var message: String?
         @Published var suggestedName: String?
+        @Published private(set) var bestReferences: [Int: Int] = [:]
+        @Published private(set) var bestsLoaded = false
+        @Published private(set) var bestsError: String?
+        private var bestsRequestID = UUID()
         private let client: CloudClient?
         private var session: CloudSession?
         private var challenge: LoginChallenge?
@@ -64,6 +68,28 @@
                 false
             #endif
         }
+        func loadBests(problems: [Problem]) async {
+            guard configured else { return }
+            let requestID = UUID()
+            bestsRequestID = requestID
+            do {
+                let references: [Int: Int]
+                if Self.previewAccount {
+                    references = problems.first.map { [$0.id: 1] } ?? [:]
+                } else if let client {
+                    references = try await client.problemBests().references(for: problems)
+                } else {
+                    return
+                }
+                // Navigation and uploads can overlap; an older response must not replace new records.
+                guard !Task.isCancelled, bestsRequestID == requestID else { return }
+                bestReferences = references
+                bestsLoaded = true
+                bestsError = nil
+            } catch {
+                if !Task.isCancelled, bestsRequestID == requestID { bestsError = error.localizedDescription }
+            }
+        }
         func problemLeaderboard(_ problem: Problem) async throws -> ProblemLeaderboard? {
             #if DEBUG
                 if Self.previewAccount {
@@ -72,7 +98,7 @@
                         from: Data(
                             """
                             {"problem_id":\(problem.id),"puzzle_version":"\(CloudPuzzle.version(problem))","entries":[
-                            {"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1}]}
+                            {"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1,"steps":1}]}
                             """.utf8))
                 }
             #endif
@@ -241,6 +267,7 @@
             guard let client else { return }
             let result = try await client.submit(problem: problem, source: source, requestID: UUID(), token: token())
             message = L10n.text("已上传并验证：%@ 分 · %@", result.points.formatted(), result.feedback)
+            await loadBests(problems: (try? ProblemCatalog.bundled()) ?? [])
         }
         func upload(_ records: [ProblemProgress], problems: [Problem]) async {
             guard let client, !busy else { return }
@@ -259,6 +286,7 @@
                 }
                 if message == nil { message = L10n.text("已验证并上传 %ld 份解答。", accepted) }
             } catch { handle(error) }
+            await loadBests(problems: problems)
         }
         func updateDisplayName(_ name: String) async -> Bool {
             guard let client, !busy else { return false }
