@@ -39,6 +39,9 @@ struct GameView: View {
     @State private var showBest = false
     @State private var showOriginalBestInfo = false
     @State private var revealedHints = 0
+    #if APP_STORE && !LOCAL_LEARNING
+        @EnvironmentObject private var cloud: CloudModel
+    #endif
 
     init(model: GameModel) { _model = StateObject(wrappedValue: model) }
 
@@ -70,6 +73,9 @@ struct GameView: View {
                             VStack(spacing: compact ? 10 : 18) {
                                 editorPanel(compact: compact)
                                 statusPanel
+                                #if APP_STORE && !LOCAL_LEARNING
+                                    leaderboardActions
+                                #endif
                                 controls
                             }
                             .frame(width: min(compact ? 420 : 380, geometry.size.width * (compact ? 0.46 : 0.40)))
@@ -78,6 +84,9 @@ struct GameView: View {
                         BoardView(model: model).frame(height: min(400, max(270, geometry.size.width - 24)))
                         editorPanel(compact: false)
                         statusPanel
+                        #if APP_STORE && !LOCAL_LEARNING
+                            leaderboardActions
+                        #endif
                     }
                     if compact { stats }
                     if model.isCompleted { completionPanel }
@@ -422,6 +431,39 @@ struct GameView: View {
         case .failed(let message): message
         }
     }
+
+    #if APP_STORE && !LOCAL_LEARNING
+        @ViewBuilder private var leaderboardActions: some View {
+            if model.problem.lesson != nil {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        if let source = model.finishedSource, !model.isTrial, cloud.configured {
+                            Button {
+                                Task { await cloud.uploadAnswer(model.problem, source: source) }
+                            } label: {
+                                Label("上传本次答案", systemImage: "arrow.up.circle")
+                            }.secondaryButtonStyle().disabled(cloud.busy)
+                                .accessibilityIdentifier("cloud-upload-answer")
+                        }
+                        NavigationLink {
+                            LeaderboardView(problem: model.problem)
+                        } label: {
+                            Label("本题排名", systemImage: "trophy")
+                        }.secondaryButtonStyle().accessibilityIdentifier("cloud-problem-ranking")
+                    }
+                    if model.finishedSource != nil, !model.isTrial, cloud.configured {
+                        Text("上传后公开昵称和成绩；未登录时会先打开 Apple 登录。")
+                            .font(.caption).foregroundStyle(Palette.muted)
+                    }
+                    if cloud.busy { SwiftUI.ProgressView() }
+                    if let message = cloud.message {
+                        Text(message).font(.caption).foregroundStyle(Palette.muted)
+                            .accessibilityIdentifier("cloud-game-message")
+                    }
+                }
+            }
+        }
+    #endif
 
     private var controls: some View {
         VStack(spacing: 10) {

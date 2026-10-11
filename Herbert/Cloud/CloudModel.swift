@@ -10,7 +10,6 @@
         ASAuthorizationControllerPresentationContextProviding
     {
         @Published private(set) var user: CloudUser?
-        @Published private(set) var leaderboard: Leaderboard?
         @Published private(set) var busy = false
         @Published var message: String?
         @Published var suggestedName: String?
@@ -18,6 +17,7 @@
         private var session: CloudSession?
         private var challenge: LoginChallenge?
         private var controller: ASAuthorizationController?
+        private var pendingUpload: (problem: Problem, source: String)?
         private let keychainService: String
         private static var previewAccount: Bool {
             #if DEBUG
@@ -31,7 +31,7 @@
         override init() {
             // UI fixtures have no network client or session and never access the real Keychain.
             let endpoint =
-                Self.previewAccount
+                Self.previewAccount || Self.offlinePreview
                 ? "" : Bundle.main.object(forInfoDictionaryKey: "HerbertLeaderboardURL") as? String ?? ""
             client = URL(string: endpoint).flatMap { try? CloudClient(endpoint: $0) }
             keychainService = "info.hugogu.Herbert.Cloud." + endpoint
@@ -41,6 +41,7 @@
                     CloudUser.self, from: Data(#"{"user_id":"ui-preview","display_name":"Learner preview"}"#.utf8))
                 return
             }
+            if Self.offlinePreview { return }
             do {
                 var query = keychainQuery
                 query[kSecReturnData as String] = true
@@ -55,6 +56,42 @@
             } catch { handle(error) }
         }
         var configured: Bool { client != nil || Self.previewAccount }
+        private static var offlinePreview: Bool {
+            #if DEBUG
+                ProcessInfo.processInfo.arguments.contains("--ui-testing")
+                    && ProcessInfo.processInfo.arguments.contains("--ui-testing-cloud-offline")
+            #else
+                false
+            #endif
+        }
+        func problemLeaderboard(_ problem: Problem) async throws -> ProblemLeaderboard? {
+            #if DEBUG
+                if Self.previewAccount {
+                    return try JSONDecoder().decode(
+                        ProblemLeaderboard.self,
+                        from: Data(
+                            """
+                            {"problem_id":\(problem.id),"puzzle_version":"\(CloudPuzzle.version(problem))","entries":[
+                            {"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1}]}
+                            """.utf8))
+                }
+            #endif
+            guard let client else { return nil }
+            return try await client.problemLeaderboard(problem.id)
+        }
+        func totalLeaderboard() async throws -> Leaderboard? {
+            #if DEBUG
+                if Self.previewAccount {
+                    return try JSONDecoder().decode(
+                        Leaderboard.self,
+                        from: Data(
+                            #"{"puzzle_count":30,"entries":[{"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"percentage":2.67,"solved":1}]}"#
+                                .utf8))
+                }
+            #endif
+            guard let client else { return nil }
+            return try await client.leaderboard()
+        }
         private func handle(_ error: Error) {
             if case CloudError.request(401, _) = error { try? persist(nil) }
             message = error.localizedDescription
@@ -104,17 +141,14 @@
             }
         }
         func load() async {
-            guard let client, !busy else { return }
+            guard let client, !busy, session != nil else { return }
             busy = true
             defer { busy = false }
             do {
-                leaderboard = try await client.leaderboard()
-                if session != nil {
-                    let account = try await client.me(token: token())
-                    var next = session
-                    next?.user = account
-                    try persist(next)
-                }
+                let account = try await client.me(token: token())
+                var next = session
+                next?.user = account
+                try persist(next)
             } catch { handle(error) }
         }
         func signIn() async {
@@ -136,6 +170,7 @@
             } catch {
                 message = error.localizedDescription
                 busy = false
+                pendingUpload = nil
             }
         }
         func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
@@ -155,6 +190,9 @@
                 let challenge, let client
             else {
                 busy = false
+                pendingUpload = nil
+                self.controller = nil
+                self.challenge = nil
                 message = L10n.text("Apple 登录未完成。")
                 return
             }
@@ -163,6 +201,7 @@
                     busy = false
                     self.controller = nil
                     self.challenge = nil
+                    pendingUpload = nil
                 }
                 do {
                     try persist(
@@ -172,7 +211,9 @@
                             .trimmingCharacters(in: .whitespacesAndNewlines)
                         if !name.isEmpty { suggestedName = name }
                     }
-                    leaderboard = try await client.leaderboard()
+                    if let pendingUpload {
+                        try await submit(pendingUpload.problem, source: pendingUpload.source)
+                    }
                 } catch { handle(error) }
             }
         }
@@ -181,6 +222,25 @@
             busy = false
             self.controller = nil
             challenge = nil
+            pendingUpload = nil
+        }
+        /// Retain the executed answer across Apple authorization, never a mutable editor binding.
+        func uploadAnswer(_ problem: Problem, source: String) async {
+            guard configured, !busy, problem.lesson != nil else { return }
+            message = nil
+            if user == nil {
+                pendingUpload = (problem, source)
+                await signIn()
+                return
+            }
+            busy = true
+            defer { busy = false }
+            do { try await submit(problem, source: source) } catch { handle(error) }
+        }
+        private func submit(_ problem: Problem, source: String) async throws {
+            guard let client else { return }
+            let result = try await client.submit(problem: problem, source: source, requestID: UUID(), token: token())
+            message = L10n.text("已上传并验证：%@ 分 · %@", result.points.formatted(), result.feedback)
         }
         func upload(_ records: [ProblemProgress], problems: [Problem]) async {
             guard let client, !busy else { return }
@@ -197,7 +257,6 @@
                         problem: problem, source: source, requestID: UUID(), token: token)
                     if result.accepted { accepted += 1 } else { message = "\(problem.number): \(result.feedback)" }
                 }
-                leaderboard = try await client.leaderboard()
                 if message == nil { message = L10n.text("已验证并上传 %ld 份解答。", accepted) }
             } catch { handle(error) }
         }
@@ -212,7 +271,6 @@
                 next?.user = account
                 try persist(next)
                 suggestedName = nil
-                leaderboard = try await client.leaderboard()
                 return true
             } catch {
                 handle(error)
@@ -237,7 +295,6 @@
                 try await client.deleteAccount(token: token())
                 try persist(nil)
                 suggestedName = nil
-                leaderboard = try await client.leaderboard()
                 message = L10n.text("云账号已删除，本地练习记录已保留。")
             } catch { handle(error) }
         }

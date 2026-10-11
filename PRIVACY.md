@@ -14,19 +14,19 @@ only when requested. Opening an external link uses your browser and that site's 
 ## Optional cloud leaderboard (App Store builds)
 
 Opening the leaderboard contacts its configured HTTPS service and exposes normal
-connection information. Uploading solutions requires an explicit Apple login and
-confirmation. The service receives an Apple account subject identifier, a generated or user-chosen
+connection information. Uploading solutions requires Apple login and your explicit upload action. The service receives an Apple account subject identifier, a generated or user-chosen
 nickname, original exercise IDs and H solutions, and computes scores itself. It
 requests an optional Apple name on first authorization only to prefill the nickname
 editor; the name is sent to the service only after you confirm saving it. It does
 not request your Apple email address. Your confirmed nickname,
-score and completion count are public; submitted programs are private to you and
-authorized operators. Drafts, community solutions, AI histories and API keys are
-not uploaded. IP-derived hashes are retained briefly for rate limits.
+score, completion count, answer length and target coverage are public; submitted
+programs are private to you and authorized operators. You can upload the answer
+from a finished original-puzzle run or batch-upload saved shortest solutions.
+Other drafts, community solutions, AI histories and API keys are not uploaded. IP-derived hashes are retained briefly for rate limits.
 
 Session credentials stay in device-only Keychain. The service runs on Cloudflare
 Workers/D1; the operator controls its configured database location and retention.
-Authentication uses Apple. In **Progress → Global leaderboard**, you can sign out
+Authentication uses Apple. In **My → Account**, you can sign out
 or delete your cloud account. Deletion revokes Apple authorization, removes the
 Apple identifier/credential, blanks uploaded programs, hides scores and revokes
 sessions. Internal numerical tombstones and operator audit records remain subject
@@ -96,9 +96,9 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 开发者不代理请求，不收集副本。密钥保存在关闭同步的系统钥匙串中，配置和完整比赛历史保存在本机。
 分享图片仅通过你选择的系统分享目标发送，图片不包含密钥、端点或原始对话。移除服务商会删除其密钥与配置，但保留比赛历史。
 
-中文（可选排行榜）：App Store 构建在配置服务后，用户可使用 Apple 登录并主动上传原创题的最短解。
+中文（可选排行榜）：App Store 构建在配置服务后，用户可使用 Apple 登录并主动上传原创题本次运行的答案或批量上传最短解。
 首次 Apple 授权返回的姓名仅用于预填昵称，确认保存后才发送至服务器；不请求邮箱。你可以随时修改昵称。
-服务端重新验题；昵称、分数和完成数公开，程序只供本人及授权管理员访问。可在排行榜页删除云账号，
+服务端重新验题；昵称、分数、完成数、答案长度和目标覆盖率公开，程序只供本人及授权管理员访问。可在「我的 → 账号」中删除云账号，
 撤销授权、移除已上传程序和排名；本地记录保留。HerbertLearning 不含云账号或在线功能。
 
 日本語：通常のゲームは完全にオフラインです。AI Battlefield では利用者がサービスと API キーを指定します。
@@ -106,7 +106,7 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 サービスがリクエストを保存し、料金を請求する場合があります。開発者はリクエストを中継・収集しません。
 キーは同期しないシステムのキーチェーン、設定と試合履歴は本機に保存します。共有画像は選択した共有先にだけ送信します。
 
-任意のランキング：設定済み App Store 版では、Apple でサインインし、明示的な同意後にオリジナル問題の最短解を送信できます。
+任意のランキング：設定済み App Store 版では、Apple でサインインし、明示的な送信操作により、実行済みの解答や保存済みの最短解を送信できます。
 Apple が初回認証時に提供する氏名はニックネームの入力候補としてのみ使い、保存の確認後に送信します。メールは要求しません。
-サーバーが再実行し、ニックネーム・得点・完了数のみ公開します。クラウドアカウントの削除で認証と送信済みプログラム・順位を除去し、
+サーバーが再実行し、ニックネーム・得点・完了数・解答の長さ・目標の達成率を公開します。クラウドアカウントの削除で認証と送信済みプログラム・順位を除去し、
 ローカル記録は残します。HerbertLearning にはクラウドアカウントやオンライン機能はありません。
