@@ -3,6 +3,9 @@ import SwiftUI
 @main
 struct HerbertApp: App {
     @StateObject private var store = AppStore()
+    #if APP_STORE && !LOCAL_LEARNING
+        @StateObject private var cloud = CloudModel()
+    #endif
     #if !LOCAL_LEARNING
         @StateObject private var battlefield = BattlefieldModel()
     #endif
@@ -12,6 +15,9 @@ struct HerbertApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(store)
+                #if APP_STORE && !LOCAL_LEARNING
+                    .environmentObject(cloud)
+                #endif
                 #if !LOCAL_LEARNING
                     .environmentObject(battlefield)
                 #endif

@@ -3,7 +3,7 @@ import SwiftUI
 private enum AppSection: String, CaseIterable, Identifiable {
     case library = "关卡"
     case guide = "手册"
-    case progress = "记录"
+    case progress = "我的"
     #if !LOCAL_LEARNING
         case battlefield = "AI Battlefield"
     #endif
@@ -12,7 +12,7 @@ private enum AppSection: String, CaseIterable, Identifiable {
         switch self {
         case .library: "square.grid.2x2"
         case .guide: "book.closed"
-        case .progress: "chart.bar.xaxis"
+        case .progress: "person.crop.circle"
         #if !LOCAL_LEARNING
             case .battlefield: "flag.checkered"
         #endif
@@ -43,7 +43,7 @@ struct RootView: View {
             TabView {
                 NavigationStack { LibraryView() }.tabItem { Label("关卡", systemImage: "square.grid.2x2") }
                 NavigationStack { GuideView() }.tabItem { Label("手册", systemImage: "book.closed") }
-                NavigationStack { ProgressViewScreen() }.tabItem { Label("记录", systemImage: "chart.bar.xaxis") }
+                NavigationStack { ProgressViewScreen() }.tabItem { Label("我的", systemImage: "person.crop.circle") }
                 #if !LOCAL_LEARNING
                     NavigationStack { BattlefieldView() }.tabItem {
                         Label("AI Battlefield", systemImage: "flag.checkered")

@@ -26,11 +26,21 @@ of Herbert refresh tokens. Apple's refresh credential is encrypted using AES-GCM
 so the service can revoke Apple authorization when an account is deleted. No
 Cloudflare credential or Apple private key belongs in an app, save file or repo.
 
-Users explicitly confirm uploading their saved shortest solutions from
-**Progress → Global leaderboard**. Drafts, community solutions and AI provider
-keys are never uploaded. Failed uploads leave the local solutions intact; the
+The **My** tab has separate **Progress** and **Account** sections. Account owns
+Apple sign-in, public nickname editing, sign-out/deletion and batch upload of
+saved shortest solutions. This account state is shared with puzzle pages.
+
+After an original puzzle's program finishes, **Upload this answer** uploads
+that executed source snapshot (including incomplete attempts). If
+signed out, Apple sign-in opens and the requested upload resumes after login;
+canceling login cancels the pending upload. Editing or resetting the program
+hides its upload action until another run finishes. AI trial pages and community
+puzzles do not offer this upload action. Opening a ranking never requires login.
+**Puzzle ranking** opens that puzzle's leaderboard; **My → Account → Global
+leaderboard** opens the overall ranking, with a selector for individual puzzles.
+Community solutions and AI provider keys are never uploaded. Failed uploads leave the local solutions intact; the
 user can retry. Uploads are sequential and limited to 60 per user per minute, enough for the full course. Public results contain
-only a generated pseudonym, score and completion count; source programs are
+only a public nickname, scores and completion/answer-length metrics; source programs are
 available to the owner/admin, not anonymously published.
 
 `POST /v1/submissions` accepts only a request ID, problem ID, puzzle version and H
@@ -45,7 +55,11 @@ Puzzle identity is SHA-256 of `herbert-h-v1\n{id}\n{byteLimit}\n{rows joined by 
 Retired/revised boards cannot inherit current scores. Rankings use each user's
 best non-hidden attempt per current puzzle, sum the points, then divide by 30 for
 a percentage. Ties use solved count and user UUID for deterministic display;
-client timing cannot influence standings. Results reflect program quality; they
+client timing cannot influence standings. Per-problem rankings include each
+active user's best visible attempt for the current board/rules version, ordered
+by points descending, bytes ascending and user UUID. Equal-scoring attempts for
+one user select shorter code, fewer steps, then earlier submission. Public rows
+include bytes and lit/total targets, never source programs. Results reflect program quality; they
 do not establish whether a human or AI authored a solution.
 
 ## Local development
@@ -176,6 +190,7 @@ JSON request/response fields use snake_case. Authenticated calls use
 | --- | --- | --- |
 | `GET /v1/problems` | Public | Current original IDs, versions, limits and rules version |
 | `GET /v1/leaderboard?limit=50` | Public | Top 1–100 current aggregate scores |
+| `GET /v1/problems/{problem_id}/leaderboard?limit=50` | Public | Top 1–100 best per-user attempts for a current original puzzle |
 | `POST /v1/auth/challenge` | Public, throttled | `{ challenge_id, nonce }`, valid for 5 minutes |
 | `POST /v1/auth/apple` | Apple proof | `{ challenge_id, nonce, identity_token, authorization_code }` → session and user |
 | `POST /v1/auth/apple/notifications` | Signed Apple event | Revoke sessions or remove a deleted Apple account |
