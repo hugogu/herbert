@@ -127,6 +127,12 @@ def configs(name, settings):
         values['SWIFT_OPTIMIZATION_LEVEL'] = '-Onone' if kind == 'Debug' else '-O'
         values['ONLY_ACTIVE_ARCH'] = 'YES' if kind == 'Debug' else 'NO'
         values['DEBUG_INFORMATION_FORMAT'] = 'dwarf' if kind == 'Debug' else 'dwarf-with-dsym'
+        if name == 'store':
+            environment = 'STAGING' if kind == 'Debug' else 'PRODUCTION'
+            values['HERBERT_CLOUD_URL'] = f'$(HERBERT_CLOUD_{environment}_URL)'
+            if kind == 'Debug':
+                values['PRODUCT_BUNDLE_IDENTIFIER'] = 'info.hugogu.Herbert.Staging'
+                values['INFOPLIST_KEY_CFBundleDisplayName'] = 'Herbert Staging'
         conditions = settings.get('SWIFT_ACTIVE_COMPILATION_CONDITIONS', '$(inherited)')
         if kind == 'Debug': values['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = 'DEBUG ' + conditions
         extra = {'baseConfigurationReference': signing} if name != 'project' else {}
@@ -148,7 +154,7 @@ store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore',
                   'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.education',
                   'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)',
                   'CODE_SIGN_ENTITLEMENTS': 'Config/AppStore.entitlements',
-                  'INFOPLIST_KEY_HerbertLeaderboardURL': '$(HERBERT_CLOUD_URL)'}
+                  'INFOPLIST_FILE': 'Config/Cloud/Info.plist'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
     buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework, cloud_framework]), phase('store-resources', 'PBXResourcesBuildPhase', store_resources)],
     buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product, cloud_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')

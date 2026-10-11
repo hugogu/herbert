@@ -1,3 +1,5 @@
 // Keep personal signing settings in the ignored Config/Local.xcconfig.
 DEVELOPMENT_TEAM =
+HERBERT_CLOUD_STAGING_URL =
+HERBERT_CLOUD_PRODUCTION_URL =
 #include? "Local.xcconfig"
