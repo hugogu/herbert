@@ -111,9 +111,9 @@ final class HerbertUITests: XCTestCase {
     func testProgressActionsHaveCompactLabelsAndVisibleColors() throws {
         let app = launch(language: "en")
         #if os(macOS)
-            app.descendants(matching: .any)["section-记录"].firstMatch.activateControl()
+            app.descendants(matching: .any)["section-我的"].firstMatch.activateControl()
         #else
-            app.buttons["Progress"].activateControl()
+            app.buttons["My"].activateControl()
         #endif
         let export = app.buttons["export-backup"]
         let importButton = app.buttons["import-backup"]
