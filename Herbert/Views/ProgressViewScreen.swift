@@ -70,10 +70,18 @@ struct ProgressViewScreen: View {
                 counter("草稿", value: store.visibleRecords.filter { !$0.draft.isEmpty }.count)
             }
             VStack(alignment: .leading, spacing: 16) {
-                Label("你的进度保存在这台设备上", systemImage: "internaldrive")
-                    .font(.system(size: 16, weight: .semibold))
-                Text("草稿自动保存，每关保留最短解。导出 JSON 备份可迁移到另一台设备；导入会合并记录，保留更短的有效解。")
-                    .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+                #if APP_STORE && !LOCAL_LEARNING
+                    Label("本机练习与在线成绩", systemImage: "internaldrive")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("草稿和完整练习记录自动保存在本机。你可以选择上传原创题解答，在排行榜分享昵称和成绩；排行榜不会同步草稿。导出和导入可用于备份或迁移本机记录。")
+                        .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+                        .accessibilityIdentifier("progress-storage-explanation")
+                #else
+                    Label("你的进度保存在这台设备上", systemImage: "internaldrive")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("草稿自动保存，每关保留最短解。导出 JSON 备份可迁移到另一台设备；导入会合并记录，保留更短的有效解。")
+                        .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+                #endif
                 HStack(spacing: 12) {
                     Button {
                         do {
@@ -100,6 +108,17 @@ struct ProgressViewScreen: View {
                 }
                 if let error = store.storageMessage { Text(error).font(.caption).foregroundStyle(Palette.danger) }
             }.panel()
+            #if APP_STORE && !LOCAL_LEARNING
+                NavigationLink {
+                    LeaderboardView()
+                } label: {
+                    HStack {
+                        Label("全球排行榜", systemImage: "globe")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }.frame(minHeight: 32)
+                }.secondaryButtonStyle().accessibilityIdentifier("cloud-leaderboard")
+            #endif
             HStack {
                 Text("已完成的关卡").font(.system(size: 20, weight: .bold))
                 Spacer()
