@@ -258,22 +258,20 @@ describe("Worker + real D1 bindings", () => {
         expect((await request("/v1/auth/apple", "POST", body)).status).toBe(
             401,
         );
-        for (const identity of [
-            await appleJWT({ nonce: "wrong" }),
-            await appleJWT({}, "other-app"),
+        for (const [identity, diagnostic] of [
+            [await appleJWT({ nonce: "wrong" }), "apple_nonce_mismatch"],
+            [await appleJWT({}, "other-app"), "apple_audience_mismatch"],
         ]) {
             const next = await (
                 await request("/v1/auth/challenge", "POST")
             ).json();
-            expect(
-                (
-                    await request("/v1/auth/apple", "POST", {
-                        ...(next as object),
-                        identity_token: identity,
-                        authorization_code: "one-time-code",
-                    })
-                ).status,
-            ).toBe(401);
+            const rejected = await request("/v1/auth/apple", "POST", {
+                ...(next as object),
+                identity_token: identity,
+                authorization_code: "one-time-code",
+            });
+            expect(rejected.status).toBe(401);
+            expect(await rejected.text()).toContain(diagnostic);
         }
         const stored = await bindings.DB.prepare(
             "SELECT apple_refresh_cipher FROM users",

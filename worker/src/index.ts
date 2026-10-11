@@ -224,16 +224,11 @@ async function route(request: Request, env: Env): Promise<Response> {
             .first<{ nonce_hash: string }>();
         if (!challenge || challenge.nonce_hash !== (await hash(nonce)))
             throw new HTTPError(401, "Login challenge expired");
-        let subject: string;
-        try {
-            subject = await verifyApple(
-                string(data, "identity_token"),
-                env,
-                nonce,
-            );
-        } catch {
-            throw new HTTPError(401, "Apple identity validation failed");
-        }
+        const subject = await verifyApple(
+            string(data, "identity_token"),
+            env,
+            nonce,
+        );
         const exchange = await exchangeApple(
             string(data, "authorization_code"),
             env,

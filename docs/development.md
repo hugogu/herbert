@@ -134,6 +134,62 @@ credentials. Generate a fresh `SESSION_SECRET` with `openssl rand -hex 32` and
 `chmod 600 .dev.vars`; it is ignored by Git. Never use production secrets locally.
 Local files are not uploaded by `wrangler deploy`.
 
+#### What goes into `APPLE_PRIVATE_KEY`?
+
+The downloaded `.p8` file **is the private key**. The Worker needs its complete
+PEM text, including `-----BEGIN PRIVATE KEY-----` and `-----END PRIVATE KEY-----`.
+Do not put the filename, path, a certificate, or a newly generated random secret
+in this variable. Use a **Sign in with Apple** key associated with the staging
+App ID (or its configured primary App ID), not an App Store Connect API key.
+See [Apple's key setup](https://developer.apple.com/help/account/capabilities/create-a-sign-in-with-apple-private-key/).
+
+In `worker/.dev.vars`, write the PEM as a single double-quoted line, replacing
+each actual line break with `\n` (one backslash followed by `n`):
+
+```dotenv
+APPLE_TEAM_ID="YOUR_TEAM_ID"
+APPLE_KEY_ID="YOUR_KEY_ID"
+APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_REAL_P8_BASE64_LINES\n-----END PRIVATE KEY-----\n"
+```
+
+Replace the placeholder with **every base64 line from your own P8**; do not copy
+this placeholder literally. `APPLE_KEY_ID` is the identifier of this key in Apple
+Developer; `APPLE_TEAM_ID` is your developer team's identifier. Neither is the
+key's contents. `APPLE_CLIENT_ID` is the **native app Bundle ID**, configured in
+`wrangler.jsonc` (`info.hugogu.Herbert.Staging` for Debug), not the Team ID, Key ID,
+or tunnel hostname. `.dev.vars` can override that setting, so check for an old
+override if the audience mismatches.
+
+Restart `npm run dev` after changing credentials, then start a fresh Apple login;
+authorization codes are short-lived and single-use. Keep the original P8 safely:
+Apple only allows downloading it once. Never put it in `Local.xcconfig`, the app,
+`wrangler.jsonc`, Git, a screenshot, or a diagnostic message. Local secrets use
+[Wrangler's `.dev.vars` support](https://developers.cloudflare.com/workers/configuration/secrets/);
+remote staging secrets must be set separately with `wrangler secret put`.
+
+#### Diagnose an Apple login failure
+
+The app displays a diagnostic code and reference UUID. Find the same reference
+in the local Wrangler terminal (or deployed Worker logs). Logs contain only an
+allowlisted code and reference, never the token, authorization code, private key,
+Apple subject, or original exception. Do not paste those secrets when reporting
+an error. A successful `/v1/problems` request verifies our API, not its ability to
+reach Apple's authentication services.
+
+| Code | Meaning / action |
+| --- | --- |
+| `apple_audience_mismatch` (401) | Match the running app Bundle ID to the Worker's `APPLE_CLIENT_ID`. |
+| `apple_token_expired`, `apple_nonce_mismatch`, `apple_code_invalid` (401) | Start a new login; check the system clock if expiration persists. |
+| `apple_token_invalid`, `apple_claim_invalid`, `apple_signature_invalid`, `apple_subject_missing` (401) | Identity proof was rejected; retry a fresh native login and investigate if persistent. |
+| `apple_keys_unavailable` (503) | Worker could not load Apple's signing keys; check DNS, proxy and access to `https://appleid.apple.com/auth/keys`. A successful host curl does not guarantee Wrangler has the same network route. |
+| `apple_client_id_missing`, `apple_credentials_missing` (503) | Fill in the indicated Worker configuration. |
+| `apple_private_key_invalid` (503) | Supply the full Sign in with Apple P8 PEM, including both header/footer lines. |
+| `apple_client_invalid` (503) | Apple rejected the developer credentials; verify Team ID, Key ID, client ID, key association/revocation, and system clock. |
+| `apple_service_unavailable`, `apple_authorization_failed` (503) | Apple authorization service could not complete the request; check connectivity and retry. |
+
+A failed login consumes its challenge. Retry using the app's sign-in action;
+replaying a captured login request will produce `Login challenge expired`.
+
 There is no development authentication bypass: a challenge is not a session and
 submissions still require a verified Apple login. Automated tests inject their
 own test keys and mocked proofs; `npm run dev` does not enable those mocks.
