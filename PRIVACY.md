@@ -15,9 +15,11 @@ only when requested. Opening an external link uses your browser and that site's 
 
 Opening the leaderboard contacts its configured HTTPS service and exposes normal
 connection information. Uploading solutions requires an explicit Apple login and
-confirmation. The service receives an Apple account subject identifier, a generated
+confirmation. The service receives an Apple account subject identifier, a generated or user-chosen
 nickname, original exercise IDs and H solutions, and computes scores itself. It
-does not request your Apple email address or real name. Your generated nickname,
+requests an optional Apple name on first authorization only to prefill the nickname
+editor; the name is sent to the service only after you confirm saving it. It does
+not request your Apple email address. Your confirmed nickname,
 score and completion count are public; submitted programs are private to you and
 authorized operators. Drafts, community solutions, AI histories and API keys are
 not uploaded. IP-derived hashes are retained briefly for rate limits.
@@ -95,7 +97,8 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 分享图片仅通过你选择的系统分享目标发送，图片不包含密钥、端点或原始对话。移除服务商会删除其密钥与配置，但保留比赛历史。
 
 中文（可选排行榜）：App Store 构建在配置服务后，用户可使用 Apple 登录并主动上传原创题的最短解。
-服务端重新验题；匿名昵称、分数和完成数公开，程序只供本人及授权管理员访问。可在排行榜页删除云账号，
+首次 Apple 授权返回的姓名仅用于预填昵称，确认保存后才发送至服务器；不请求邮箱。你可以随时修改昵称。
+服务端重新验题；昵称、分数和完成数公开，程序只供本人及授权管理员访问。可在排行榜页删除云账号，
 撤销授权、移除已上传程序和排名；本地记录保留。HerbertLearning 不含云账号或在线功能。
 
 日本語：通常のゲームは完全にオフラインです。AI Battlefield では利用者がサービスと API キーを指定します。
@@ -104,5 +107,6 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 キーは同期しないシステムのキーチェーン、設定と試合履歴は本機に保存します。共有画像は選択した共有先にだけ送信します。
 
 任意のランキング：設定済み App Store 版では、Apple でサインインし、明示的な同意後にオリジナル問題の最短解を送信できます。
-サーバーが再実行し、匿名名・得点・完了数のみ公開します。クラウドアカウントの削除で認証と送信済みプログラム・順位を除去し、
+Apple が初回認証時に提供する氏名はニックネームの入力候補としてのみ使い、保存の確認後に送信します。メールは要求しません。
+サーバーが再実行し、ニックネーム・得点・完了数のみ公開します。クラウドアカウントの削除で認証と送信済みプログラム・順位を除去し、
 ローカル記録は残します。HerbertLearning にはクラウドアカウントやオンライン機能はありません。

@@ -8,6 +8,11 @@
         @StateObject private var model = CloudModel()
         @State private var confirmDeletion = false
         @State private var confirmUpload = false
+        @State private var nicknameDraft: NicknameDraft?
+        private struct NicknameDraft: Identifiable {
+            let id = UUID()
+            let name: String
+        }
 
         var body: some View {
             ScrollView {
@@ -63,6 +68,14 @@
                 }.padding(24).frame(maxWidth: 850).frame(maxWidth: .infinity)
             }.background(Palette.paper).navigationTitle("全球排行榜")
                 .task { await model.load() }
+                .sheet(item: $nicknameDraft) { draft in
+                    NicknameEditor(model: model, initialName: draft.name)
+                }
+                .onChange(of: model.suggestedName) { _, suggestion in
+                    if let suggestion {
+                        nicknameDraft = NicknameDraft(name: suggestion)
+                    }
+                }
                 .confirmationDialog("上传原创练习的最短解？", isPresented: $confirmUpload, titleVisibility: .visible) {
                     Button("上传并验证") {
                         Task {
@@ -83,17 +96,26 @@
         private var account: some View {
             VStack(alignment: .leading, spacing: 16) {
                 if let user = model.user {
-                    Label(user.displayName, systemImage: "person.crop.circle").font(.headline)
+                    HStack {
+                        Label(user.displayName, systemImage: "person.crop.circle").font(.headline)
+                        Spacer()
+                        Button {
+                            nicknameDraft = NicknameDraft(name: model.suggestedName ?? user.displayName)
+                        } label: {
+                            Label("编辑昵称", systemImage: "pencil")
+                        }.secondaryButtonStyle().accessibilityIdentifier("cloud-edit-name")
+                    }
                     Button {
                         confirmUpload = true
                     } label: {
                         Label("上传最短解", systemImage: "arrow.up.circle")
                     }
-                    .prominentButtonStyle().accessibilityIdentifier("cloud-upload")
+                    .buttonStyle(PrimaryButtonStyle()).accessibilityIdentifier("cloud-upload")
                     HStack {
                         Button("退出登录") { Task { await model.signOut() } }.secondaryButtonStyle()
                         Spacer()
                         Button("删除云账号", role: .destructive) { confirmDeletion = true }.buttonStyle(.plain)
+                            .foregroundStyle(Palette.danger)
                     }
                 } else {
                     AppleLoginButton { Task { await model.signIn() } }
@@ -101,6 +123,41 @@
                         .accessibilityIdentifier("cloud-apple-login")
                 }
             }.panel()
+        }
+    }
+
+    private struct NicknameEditor: View {
+        @ObservedObject var model: CloudModel
+        @Environment(\.dismiss) private var dismiss
+        @State private var nickname: String
+
+        init(model: CloudModel, initialName: String) {
+            self.model = model
+            _nickname = State(initialValue: initialName)
+        }
+
+        var body: some View {
+            VStack(alignment: .leading, spacing: 18) {
+                Text("排行榜昵称").font(.title2.bold())
+                Text("昵称将公开显示在排行榜上。你可以使用昵称，无需公开真实姓名。")
+                    .font(.callout).foregroundStyle(Palette.muted)
+                TextField(L10n.text("昵称（1–32 个字符）"), text: $nickname)
+                    .textFieldStyle(.roundedBorder).accessibilityIdentifier("cloud-name-field")
+                if let message = model.message {
+                    Text(message).font(.callout).foregroundStyle(Palette.danger)
+                }
+                HStack {
+                    Button("取消") { dismiss() }.secondaryButtonStyle()
+                    Spacer()
+                    Button("保存") {
+                        Task {
+                            if await model.updateDisplayName(nickname) { dismiss() }
+                        }
+                    }.buttonStyle(PrimaryButtonStyle())
+                        .disabled(model.busy || nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .accessibilityIdentifier("cloud-save-name")
+                }
+            }.padding(24).frame(idealWidth: 440).background(Palette.paper).disabled(model.busy)
         }
     }
 #endif

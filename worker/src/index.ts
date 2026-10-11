@@ -311,6 +311,20 @@ async function route(request: Request, env: Env): Promise<Response> {
     const user = await authenticate(request, env);
     if (method === "GET" && path === "/v1/me")
         return json({ user_id: user.user_id, display_name: user.display_name });
+    if (method === "PATCH" && path === "/v1/me") {
+        await rateLimit(env, `profile:${user.user_id}`, 10);
+        const data = await body(request);
+        const name = string(data, "display_name", 256).normalize("NFC").trim();
+        if (!name || [...name].length > 32 || /[\p{Cc}\p{Cf}]/u.test(name))
+            throw new HTTPError(
+                400,
+                "Display name must contain 1–32 characters without control characters",
+            );
+        await env.DB.prepare("UPDATE users SET display_name=? WHERE user_id=?")
+            .bind(name, user.user_id)
+            .run();
+        return json({ user_id: user.user_id, display_name: name });
+    }
     if (method === "POST" && path === "/v1/auth/logout") {
         await env.DB.prepare(
             "UPDATE sessions SET revoked_at=? WHERE session_id=?",

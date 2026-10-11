@@ -7,7 +7,14 @@ model tokens or benchmark timings. Only the 30 MIT-original exercises are scored
 
 ## Trust and data boundaries
 
-The native App Store app uses Sign in with Apple without requesting name or email.
+The native App Store app uses Sign in with Apple without requesting email. It
+requests an optional full name, which Apple normally returns only on first
+authorization, to prefill the public nickname editor. The name stays on-device
+until the user explicitly saves it; existing users can choose an alias without
+reauthorizing Apple. `PATCH /v1/me` updates only the authenticated user's nickname
+(1–32 Unicode code points, NFC-normalized, no control/format characters), with
+rate limiting. Nicknames are public labels, not verified identities or unique
+usernames; duplicates do not merge accounts or change scores.
 The Worker verifies Apple's signature, issuer, audience, expiry and a single-use
 nonce, exchanges the authorization code, then binds the verified Apple subject to
 an internal UUID. It issues a 15-minute JWT and a rotating, 30-day session refresh
@@ -173,7 +180,8 @@ JSON request/response fields use snake_case. Authenticated calls use
 | `POST /v1/auth/apple` | Apple proof | `{ challenge_id, nonce, identity_token, authorization_code }` → session and user |
 | `POST /v1/auth/apple/notifications` | Signed Apple event | Revoke sessions or remove a deleted Apple account |
 | `POST /v1/auth/refresh` | Refresh token | `{ refresh_token }` → rotated session credentials |
-| `GET /v1/me` | Session | Current generated profile |
+| `GET /v1/me` | Session | Current profile |
+| `PATCH /v1/me` | Session | Save the current user's public `display_name` |
 | `POST /v1/auth/logout` | Session | Revoke current session |
 | `DELETE /v1/me` | Session | Revoke Apple authorization and delete cloud account |
 | `GET /v1/me/submissions` | Session | Last 100 own judge results |

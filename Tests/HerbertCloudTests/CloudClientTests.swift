@@ -45,13 +45,20 @@ final class CloudClientTests: XCTestCase {
         XCTAssertTrue(result.accepted)
         XCTAssertEqual(result.points, 80)
     }
+    func testNicknameUpdateUsesAuthenticatedPatchWithoutClaimedUserID() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockProtocol.self]
+        let client = try CloudClient(
+            endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
+        let user = try await client.updateDisplayName("小机器人", token: "test-session")
+        XCTAssertEqual(user.userID, "alice")
+        XCTAssertEqual(user.displayName, "小机器人")
+    }
 }
 private final class MockProtocol: URLProtocol, @unchecked Sendable {
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
-        XCTAssertEqual(request.httpMethod, "POST")
-        XCTAssertEqual(request.url?.path, "/v1/submissions")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-session")
         var bytes = request.httpBody ?? Data()
         if bytes.isEmpty, let stream = request.httpBodyStream {
@@ -65,12 +72,24 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
             }
         }
         let body = try? JSONSerialization.jsonObject(with: bytes) as? [String: Any]
-        XCTAssertEqual(Set(body?.keys.map { $0 } ?? []), Set(["source", "problem_id", "puzzle_version", "request_id"]))
-        XCTAssertEqual(body?["source"] as? String, "s")
+        let reply: String
+        if request.url?.path == "/v1/me" {
+            XCTAssertEqual(request.httpMethod, "PATCH")
+            XCTAssertEqual(Set(body?.keys.map { $0 } ?? []), Set(["display_name"]))
+            XCTAssertEqual(body?["display_name"] as? String, "小机器人")
+            reply = #"{"user_id":"alice","display_name":"小机器人"}"#
+        } else {
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/v1/submissions")
+            XCTAssertEqual(
+                Set(body?.keys.map { $0 } ?? []), Set(["source", "problem_id", "puzzle_version", "request_id"]))
+            XCTAssertEqual(body?["source"] as? String, "s")
+            reply = #"{"accepted":true,"bytes":1,"points":80,"feedback":"Accepted"}"#
+        }
         let response = HTTPURLResponse(
             url: request.url!, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        client?.urlProtocol(self, didLoad: Data(#"{"accepted":true,"bytes":1,"points":80,"feedback":"Accepted"}"#.utf8))
+        client?.urlProtocol(self, didLoad: Data(reply.utf8))
         client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}

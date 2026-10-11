@@ -13,17 +13,34 @@
         @Published private(set) var leaderboard: Leaderboard?
         @Published private(set) var busy = false
         @Published var message: String?
+        @Published var suggestedName: String?
         private let client: CloudClient?
         private var session: CloudSession?
         private var challenge: LoginChallenge?
         private var controller: ASAuthorizationController?
         private let keychainService: String
+        private static var previewAccount: Bool {
+            #if DEBUG
+                ProcessInfo.processInfo.arguments.contains("--ui-testing")
+                    && ProcessInfo.processInfo.arguments.contains("--ui-testing-cloud-account")
+            #else
+                false
+            #endif
+        }
 
         override init() {
-            let endpoint = Bundle.main.object(forInfoDictionaryKey: "HerbertLeaderboardURL") as? String ?? ""
+            // UI fixtures have no network client or session and never access the real Keychain.
+            let endpoint =
+                Self.previewAccount
+                ? "" : Bundle.main.object(forInfoDictionaryKey: "HerbertLeaderboardURL") as? String ?? ""
             client = URL(string: endpoint).flatMap { try? CloudClient(endpoint: $0) }
             keychainService = "info.hugogu.Herbert.Cloud." + endpoint
             super.init()
+            if Self.previewAccount {
+                user = try? JSONDecoder().decode(
+                    CloudUser.self, from: Data(#"{"user_id":"ui-preview","display_name":"Learner preview"}"#.utf8))
+                return
+            }
             do {
                 var query = keychainQuery
                 query[kSecReturnData as String] = true
@@ -37,7 +54,7 @@
                 }
             } catch { handle(error) }
         }
-        var configured: Bool { client != nil }
+        var configured: Bool { client != nil || Self.previewAccount }
         private func handle(_ error: Error) {
             if case CloudError.request(401, _) = error { try? persist(nil) }
             message = error.localizedDescription
@@ -109,7 +126,8 @@
                 self.challenge = challenge
                 let request = ASAuthorizationAppleIDProvider().createRequest()
                 request.nonce = challenge.nonce
-                // The leaderboard needs no email address or real name.
+                // Apple supplies a name only on first authorization; use it as an optional nickname suggestion.
+                request.requestedScopes = [.fullName]
                 let controller = ASAuthorizationController(authorizationRequests: [request])
                 self.controller = controller
                 controller.delegate = self
@@ -149,6 +167,11 @@
                 do {
                     try persist(
                         try await client.signIn(challenge: challenge, identityToken: identity, authorizationCode: code))
+                    if let fullName = credential.fullName {
+                        let name = PersonNameComponentsFormatter().string(from: fullName)
+                            .trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !name.isEmpty { suggestedName = name }
+                    }
                     leaderboard = try await client.leaderboard()
                 } catch { handle(error) }
             }
@@ -178,6 +201,24 @@
                 if message == nil { message = L10n.text("已验证并上传 %ld 份解答。", accepted) }
             } catch { handle(error) }
         }
+        func updateDisplayName(_ name: String) async -> Bool {
+            guard let client, !busy else { return false }
+            busy = true
+            message = nil
+            defer { busy = false }
+            do {
+                let account = try await client.updateDisplayName(name, token: token())
+                var next = session
+                next?.user = account
+                try persist(next)
+                suggestedName = nil
+                leaderboard = try await client.leaderboard()
+                return true
+            } catch {
+                handle(error)
+                return false
+            }
+        }
         func signOut() async {
             guard let client, !busy else { return }
             busy = true
@@ -185,6 +226,7 @@
             do {
                 try await client.logout(token: token())
                 try persist(nil)
+                suggestedName = nil
             } catch { handle(error) }
         }
         func deleteAccount() async {
@@ -194,6 +236,7 @@
             do {
                 try await client.deleteAccount(token: token())
                 try persist(nil)
+                suggestedName = nil
                 leaderboard = try await client.leaderboard()
                 message = L10n.text("云账号已删除，本地练习记录已保留。")
             } catch { handle(error) }
