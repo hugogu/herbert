@@ -1,4 +1,10 @@
-import { createRemoteJWKSet, importPKCS8, jwtVerify, SignJWT } from "jose";
+import {
+    createRemoteJWKSet,
+    errors,
+    importPKCS8,
+    jwtVerify,
+    SignJWT,
+} from "jose";
 export interface Env {
     DB: D1Database;
     APPLE_CLIENT_ID: string;
@@ -20,6 +26,62 @@ export class HTTPError extends Error {
         super(message);
     }
 }
+export function appleFailure(status: number, code: string, hint: string) {
+    const reference = crypto.randomUUID();
+    // Never log the original exception: JOSE errors can contain identity claims.
+    console.warn(
+        JSON.stringify({ event: "apple_auth_failed", code, reference }),
+    );
+    return new HTTPError(status, `${hint} [${code}; reference: ${reference}]`);
+}
+
+export function appleIdentityFailure(error: unknown): HTTPError {
+    if (error instanceof errors.JWTExpired)
+        return appleFailure(
+            401,
+            "apple_token_expired",
+            "Apple identity expired; sign in again",
+        );
+    if (error instanceof errors.JWTClaimValidationFailed) {
+        if (error.claim === "aud")
+            return appleFailure(
+                401,
+                "apple_audience_mismatch",
+                "Apple app identity does not match APPLE_CLIENT_ID; check the app Bundle ID and Worker environment",
+            );
+        return appleFailure(
+            401,
+            "apple_claim_invalid",
+            "Apple identity claims are invalid; sign in again and check the system clock",
+        );
+    }
+    if (
+        error instanceof errors.JWSSignatureVerificationFailed ||
+        error instanceof errors.JWKSNoMatchingKey
+    )
+        return appleFailure(
+            401,
+            "apple_signature_invalid",
+            "Apple identity signature could not be verified",
+        );
+    if (
+        error instanceof errors.JWTInvalid ||
+        error instanceof errors.JWSInvalid ||
+        error instanceof errors.JOSEAlgNotAllowed ||
+        error instanceof errors.JOSENotSupported
+    )
+        return appleFailure(
+            401,
+            "apple_token_invalid",
+            "Apple identity token is malformed or unsupported",
+        );
+    return appleFailure(
+        503,
+        "apple_keys_unavailable",
+        "Apple signing keys could not be loaded; check Worker network, DNS and proxy access to appleid.apple.com, then retry",
+    );
+}
+
 export const now = () => Math.floor(Date.now() / 1000);
 export const randomToken = () =>
     [...crypto.getRandomValues(new Uint8Array(32))]
@@ -46,14 +108,35 @@ function sessionKey(env: Env) {
     return new TextEncoder().encode(env.SESSION_SECRET);
 }
 export async function verifyApple(token: string, env: Env, nonce?: string) {
-    const { payload } = await jwtVerify(token, appleKeys, {
-        issuer: "https://appleid.apple.com",
-        audience: env.APPLE_CLIENT_ID,
-        algorithms: ["RS256"],
-        maxTokenAge: "10m",
-    });
-    if (!payload.sub || (nonce !== undefined && payload.nonce !== nonce))
-        throw new HTTPError(401, "Invalid Apple identity");
+    if (!env.APPLE_CLIENT_ID)
+        throw appleFailure(
+            503,
+            "apple_client_id_missing",
+            "Set APPLE_CLIENT_ID to the app Bundle ID",
+        );
+    let payload;
+    try {
+        ({ payload } = await jwtVerify(token, appleKeys, {
+            issuer: "https://appleid.apple.com",
+            audience: env.APPLE_CLIENT_ID,
+            algorithms: ["RS256"],
+            maxTokenAge: "10m",
+        }));
+    } catch (error) {
+        throw appleIdentityFailure(error);
+    }
+    if (!payload.sub)
+        throw appleFailure(
+            401,
+            "apple_subject_missing",
+            "Apple identity has no subject",
+        );
+    if (nonce !== undefined && payload.nonce !== nonce)
+        throw appleFailure(
+            401,
+            "apple_nonce_mismatch",
+            "Apple login challenge does not match; sign in again",
+        );
     return payload.sub;
 }
 export async function appleNotification(token: string, env: Env) {
@@ -89,11 +172,24 @@ export async function appleNotification(token: string, env: Env) {
 }
 async function appleSecret(env: Env) {
     if (!env.APPLE_TEAM_ID || !env.APPLE_KEY_ID || !env.APPLE_PRIVATE_KEY)
-        throw new HTTPError(503, "Apple authentication is not configured");
-    const key = await importPKCS8(
-        env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-        "ES256",
-    );
+        throw appleFailure(
+            503,
+            "apple_credentials_missing",
+            "Set APPLE_TEAM_ID, APPLE_KEY_ID and APPLE_PRIVATE_KEY on the Worker",
+        );
+    let key;
+    try {
+        key = await importPKCS8(
+            env.APPLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+            "ES256",
+        );
+    } catch {
+        throw appleFailure(
+            503,
+            "apple_private_key_invalid",
+            "APPLE_PRIVATE_KEY must contain the full Sign in with Apple P8 PEM, not its filename",
+        );
+    }
     return new SignJWT({})
         .setProtectedHeader({ alg: "ES256", kid: env.APPLE_KEY_ID })
         .setIssuer(env.APPLE_TEAM_ID)
@@ -113,16 +209,42 @@ async function appleRequest(
         client_secret: await appleSecret(env),
         ...fields,
     });
-    const response = await fetch(`https://appleid.apple.com/auth/${endpoint}`, {
-        method: "POST",
-        body,
-        signal: AbortSignal.timeout(15000),
-    });
-    if (!response.ok)
-        throw new HTTPError(
-            endpoint === "token" && response.status === 400 ? 401 : 503,
-            "Apple authorization could not be completed",
+    let response;
+    try {
+        response = await fetch(`https://appleid.apple.com/auth/${endpoint}`, {
+            method: "POST",
+            body,
+            signal: AbortSignal.timeout(15000),
+        });
+    } catch {
+        throw appleFailure(
+            503,
+            "apple_service_unavailable",
+            "Apple authorization service is unreachable; check Worker network and proxy settings",
         );
+    }
+    if (!response.ok) {
+        const data = await response
+            .json<{ error?: string }>()
+            .catch(() => null);
+        if (data?.error === "invalid_client")
+            throw appleFailure(
+                503,
+                "apple_client_invalid",
+                "Apple rejected the Worker credentials; check APPLE_CLIENT_ID, TEAM_ID, KEY_ID and the Sign in with Apple P8 key association",
+            );
+        if (endpoint === "token" && data?.error === "invalid_grant")
+            throw appleFailure(
+                401,
+                "apple_code_invalid",
+                "Apple authorization code expired or was already used; sign in again",
+            );
+        throw appleFailure(
+            503,
+            "apple_authorization_failed",
+            "Apple authorization could not be completed; retry later",
+        );
+    }
     return response;
 }
 export async function exchangeApple(code: string, env: Env) {
