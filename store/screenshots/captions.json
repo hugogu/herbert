@@ -1,0 +1,95 @@
+{
+  "scenes": [
+    "play",
+    "course",
+    "hints",
+    "guide",
+    "battlefield",
+    "progress"
+  ],
+  "locales": {
+    "en": "en-US",
+    "zh-Hans": "zh-Hans",
+    "ja": "ja"
+  },
+  "captions": {
+    "en": {
+      "play": [
+        "Tiny programs, intricate paths",
+        "Write H code and light every target in as few bytes as you can."
+      ],
+      "course": [
+        "30 original lessons",
+        "Go from a single step to recursion across six chapters."
+      ],
+      "hints": [
+        "Hints, never spoilers",
+        "Follow the goal, run your code and open hints one at a time."
+      ],
+      "guide": [
+        "Learn H in minutes",
+        "Three commands, then procedures, parameters and recursion."
+      ],
+      "battlefield": [
+        "Pit AI models against the puzzles",
+        "Optional: bring your own API key. Every answer is judged on your device."
+      ],
+      "progress": [
+        "Every byte counts",
+        "Keep your shortest solutions. Offline, no account, no ads."
+      ]
+    },
+    "zh-Hans": {
+      "play": [
+        "几行代码，走出繁复图案",
+        "用 H 语言编写程序，以尽量少的字节点亮所有目标。"
+      ],
+      "course": [
+        "30 道原创关卡",
+        "从迈出第一步到掌握递归，六个章节循序渐进。"
+      ],
+      "hints": [
+        "只给提示，不剧透答案",
+        "跟随关卡目标运行代码，需要时再逐条展开提示。"
+      ],
+      "guide": [
+        "几分钟学会 H 语言",
+        "三个基本指令，再加上过程、参数与递归。"
+      ],
+      "battlefield": [
+        "让 AI 模型同台解题",
+        "可选功能：使用你自己的 API Key，\n所有答案都在本机判分。"
+      ],
+      "progress": [
+        "每个字节都算数",
+        "保存每关最短解。离线可玩，无需账号，没有广告。"
+      ]
+    },
+    "ja": {
+      "play": [
+        "短いコード、精緻な軌跡",
+        "H 言語でプログラムを書き、\nできるだけ少ないバイト数で目標を照らそう。"
+      ],
+      "course": [
+        "オリジナル 30 レッスン",
+        "最初の一歩から再帰まで、\n6つの章で段階的に学べます。"
+      ],
+      "hints": [
+        "ネタバレなしのヒント",
+        "目標に沿ってコードを動かし、\n必要なときだけヒントを1つずつ開こう。"
+      ],
+      "guide": [
+        "数分で覚える H 言語",
+        "3つの基本命令に、\n手続き・引数・再帰を組み合わせよう。"
+      ],
+      "battlefield": [
+        "AI モデル同士で腕比べ",
+        "任意機能：自分の API キーを使用。\nすべての解答は端末上で判定します。"
+      ],
+      "progress": [
+        "1バイトにこだわる",
+        "各レッスンの最短解を保存。\nオフライン、アカウント不要、広告なし。"
+      ]
+    }
+  }
+}

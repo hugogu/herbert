@@ -43,7 +43,8 @@ final class BattlefieldModel: ObservableObject {
                         streamErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-stream-errors"),
                         specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"),
                         recovery: ProcessInfo.processInfo.arguments.contains("--battlefield-recovery"),
-                        accounting: ProcessInfo.processInfo.arguments.contains("--battlefield-accounting"))
+                        accounting: ProcessInfo.processInfo.arguments.contains("--battlefield-accounting"),
+                        showcase: ProcessInfo.processInfo.arguments.contains("--battlefield-showcase"))
                 }
             }
         #endif
@@ -338,13 +339,18 @@ final class BattlefieldModel: ObservableObject {
     #if DEBUG
         private func seedFixtures() {
             if settings.providers.isEmpty {
-                for index in 1...(ProcessInfo.processInfo.arguments.contains("--battlefield-three-models") ? 3 : 2) {
-                    var provider = ProviderConfiguration(kind: .compatible, name: "Fixture Provider \(index)")
+                let arguments = ProcessInfo.processInfo.arguments
+                // Store screenshots show neutral placeholder names rather than test fixture labels.
+                let showcase = arguments.contains("--battlefield-showcase")
+                for index in 1...(showcase || arguments.contains("--battlefield-three-models") ? 3 : 2) {
+                    let letter = ["A", "B", "C"][index - 1]
+                    var provider = ProviderConfiguration(
+                        kind: .compatible, name: showcase ? "Provider \(letter)" : "Fixture Provider \(index)")
                     let model = AIModel(
-                        id: "fixture-\(index)", name: "Fixture: Fixture Model \(index) (free)",
+                        id: "fixture-\(index)",
+                        name: showcase ? "Model \(letter)" : "Fixture: Fixture Model \(index) (free)",
                         supportedParameters: ["enable_thinking", "reasoning_effort"],
-                        maximumOutputTokens: ProcessInfo.processInfo.arguments.contains("--battlefield-diagnostics")
-                            ? 4096 : nil)
+                        maximumOutputTokens: arguments.contains("--battlefield-diagnostics") ? 4096 : nil)
                     provider.models = [model]
                     provider.presets = [ModelPreset(model: model)]
                     settings.providers.append(provider)
@@ -377,16 +383,18 @@ func battlefieldError(_ error: Error) -> String {
         let specialErrors: Bool
         let recovery: Bool
         let accounting: Bool
+        let showcase: Bool
         private var calls: [String: Int] = [:]
         init(
             diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false,
-            recovery: Bool = false, accounting: Bool = false
+            recovery: Bool = false, accounting: Bool = false, showcase: Bool = false
         ) {
             self.diagnostics = diagnostics
             self.streamErrors = streamErrors
             self.specialErrors = specialErrors
             self.recovery = recovery
             self.accounting = accounting
+            self.showcase = showcase
         }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
             try await Task.sleep(for: .milliseconds(100))
@@ -476,9 +484,10 @@ func battlefieldError(_ error: Error) -> String {
             }
             try await Task.sleep(for: .milliseconds(accounting ? 1250 : 400))
             let examples = [(10006, "rsslsslss"), (10012, "a:ssssr\naaaa")]
-            let program =
-                request.participant.entrant.preset.model.id == "fixture-1"
-                ? examples.first { problem.contains("ID \($0.0)") }?.1 ?? "s" : "s"
+            let model = request.participant.entrant.preset.model.id
+            // The showcase ranks entrants apart: Model B also solves L02, while Model C only solves L01.
+            let known = model == "fixture-1" ? examples : showcase && model == "fixture-2" ? [examples[0]] : []
+            let program = known.first { problem.contains("ID \($0.0)") }?.1 ?? "s"
             let text = firstAttempt ? "z" : "```h\n\(program)\n```"
             let usage = TokenUsage(
                 input: 900, output: 12, total: accounting ? 1200 : nil,
