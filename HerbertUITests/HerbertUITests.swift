@@ -268,6 +268,30 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testKeyboardDismissAndCommandKeysFollowTheReflowedIPadEditor() throws {
+        #if os(iOS)
+            try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "The reflow happens on iPad.")
+            // The landscape keyboard switches the lesson to its compact layout while editing.
+            XCUIDevice.shared.orientation = .landscapeLeft
+            defer { XCUIDevice.shared.orientation = .portrait }
+            let app = launch(language: "en")
+            openFirst(app)
+            let editor = app.textViews["code-editor"]
+            editor.activateControl()
+            editor.typeText("s")
+            let dismiss = app.buttons["Dismiss keyboard"]
+            dismiss.waitForStableFrame()
+            dismiss.activateControl()
+            XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+            app.buttons["insert-s"].activateControl()
+            XCTAssertEqual(editor.value as? String, "ss")
+            app.terminate()
+        #else
+            throw XCTSkip("Only iPhone and iPad show a software keyboard.")
+        #endif
+    }
+
+    @MainActor
     func testAutomaticEnglishAndJapaneseLocalization() {
         for (language, title, error, guideTitle) in [
             ("en", "Explore problems", "Procedure z is not defined.", "Game guide"),

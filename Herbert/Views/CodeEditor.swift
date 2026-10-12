@@ -61,6 +61,7 @@ final class EditorController: ObservableObject {
 
         func updateUIView(_ view: UITextView, context: Context) {
             context.coordinator.parent = self
+            controller.textView = view
             if view.text != text { view.text = text }
         }
 
@@ -69,6 +70,8 @@ final class EditorController: ObservableObject {
         final class Coordinator: NSObject, UITextViewDelegate {
             var parent: CodeEditor
             init(_ parent: CodeEditor) { self.parent = parent }
+            // The iPad keyboard can rebuild the editor layout; keep command keys and dismissal on the live view.
+            func textViewDidBeginEditing(_ textView: UITextView) { parent.controller.textView = textView }
             func textViewDidChange(_ textView: UITextView) { parent.text = textView.text }
             func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String)
                 -> Bool
