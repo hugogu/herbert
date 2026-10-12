@@ -94,6 +94,9 @@ app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'P
                 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
                 'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert',
                 'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.puzzle-games',
+                'INFOPLIST_KEY_NSHumanReadableCopyright': '© 2026 Hugo Gu and Herbert contributors',
+                # Only operating-system HTTPS and Keychain encryption: exempt from export documentation.
+                'INFOPLIST_KEY_ITSAppUsesNonExemptEncryption': 'NO',
                 'INFOPLIST_KEY_UIApplicationSceneManifest_Generation': 'YES',
                 'INFOPLIST_KEY_UILaunchScreen_Generation': 'YES',
                 'INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents': 'YES',
@@ -130,6 +133,8 @@ obj('uitests', 'PBXNativeTarget', buildConfigurationList=configs('tests', test_s
     buildRules=[], dependencies=[dependency], name='HerbertUITests', productName='HerbertUITests', productReference=test_product, productType='com.apple.product-type.bundle.ui-testing')
 store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore',
                   'INFOPLIST_KEY_CFBundleDisplayName': 'Herbot Bot',
+                  # Matches the primary App Store Connect category in store/metadata.
+                  'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.education',
                   'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
     buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
