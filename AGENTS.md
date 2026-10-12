@@ -5,7 +5,7 @@
 - All progress goes through `ProgressRepository`. Keep cloud credentials out of clients. Future Cloudflare D1 access must be through an authenticated Worker.
 - `swift test` runs unit/integration tests. `python3 scripts/generate_project.py` regenerates the checked-in Xcode project. `scripts/check.sh` formats/lints and tests.
 - Original public Flash client loads boards with POST `action=problem` to `problem.php?id=N`; a response contains a 625-character map and byte limit separated by a newline. A plain GET yields HTML. Some requests to this old HTTP server stall; use bounded retries and validate every cached response.
-- This machine has Xcode but no installed iOS Simulator runtime. Build iOS without signing and exercise the native macOS app/UI tests; do not claim simulator validation without an installed runtime.
+- This machine has the iOS 27 Simulator runtime (iPhone 18 Pro Max, iPad Pro 13-inch (M5)). Simulator runs are not real-device validation; say which one was used.
 - In native Mac UI tests, SwiftUI static text can expose its content through accessibility `value` rather than `label`; assert the visible value with a label fallback.
 - Under Swift 6 isolation checking, value-type `Animatable.animatableData` must be `nonisolated` when the drawing also conforms to SwiftUI `View`.
 - AppKit drawing needs an RGBA bitmap context; export icons through an opaque Core Graphics context to produce RGB PNGs without alpha. Fail generation explicitly if the drawing context cannot be created.
@@ -53,3 +53,8 @@
 
 - When a plain Button shares a container background with a sibling action, give its label a rectangular contentShape. Otherwise blank space inside the apparent progress cell may not open answer details.
 - Battlefield repositories encode dates as milliseconds since 1970. Normalize expected values through that date strategy when comparing complete disk round trips; in-memory Date precision can differ slightly.
+
+- App Store listing files live in `store/`; `scripts/check_store_metadata.py` enforces App Store Connect limits. Keywords allow 100 bytes (a CJK character is 3), and each keyword must be longer than two characters. The store name must start with the Home Screen name.
+- `scripts/capture_store_screenshots.sh` runs the opt-in `StoreScreenshotTests`. XCTest returns landscape iPad screens in portrait pixel order, turned clockwise; the compositor rotates them. `simctl status_bar --time` accepts only an ISO time with milliseconds, such as `2026-01-09T01:41:00.000Z`.
+- Native Mac UI tests take over the mouse and keyboard; ask before running them while the user is at the Mac. They fail with "Timed out while enabling automation mode" on a locked screen; check `ioreg -n Root -d1 | grep CGSSessionScreenIsLocked` first. After a failed UI test, xcodebuild can hang for minutes past "TEST EXECUTE FAILED".
+- On iPhone, the keyboard and pinned Run controls cover an editor in the lower half of the lesson. UI tests should scroll the editor header to the top before typing. On iPad, wait for the keyboard reflow to settle (`waitForStableFrame`) before tapping editor controls.
