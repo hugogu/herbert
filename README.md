@@ -44,7 +44,7 @@ launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) fo
 **System Settings → Privacy & Security → Open Anyway** if you trust the download.
 See [checksums, installation and build details](docs/macos-distribution.md).
 
-[Explore the original curriculum](docs/original-course.md) · [Open geometry design](docs/open-course-design.zh-CN.md) · [Community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md)
+[Explore the original curriculum](docs/original-course.md) · [Open geometry design](docs/open-course-design.zh-CN.md) · [Community study](docs/advanced-course-design.md) · [App Store build and device testing](docs/app-store.md) · [App Store listing kit](store/README.md)
 
 ![Herbert original course in the English Mac app: Vaulted mosaic](docs/screenshots/en/course/course-mosaic.png)
 
@@ -340,8 +340,9 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert \
 ```
 
 **Status: early preview.** Core tests, native Mac UI flows, and iOS compilation have been
-verified. iPhone/iPad runtime and real-device testing remain open; there is no App Store
-or notarized binary release yet. See [verification details](docs/verification.md).
+verified, and the App Store screenshot flows run in the iPhone and iPad simulators. Real-device
+testing remains open; there is no App Store or notarized binary release yet. See
+[verification details](docs/verification.md).
 
 ## How it is built
 

@@ -3,14 +3,22 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## Unreleased
+
+- Add the App Store submission kit for Herbot Bot: English, Simplified Chinese and Japanese listing
+  text, captioned iPhone, iPad and Mac screenshots, a support page, a privacy policy covering the
+  App Store edition, and scripts to capture screenshots, validate metadata and archive builds.
+- Declare `ITSAppUsesNonExemptEncryption = NO` for both editions and the Education category for the
+  App Store edition.
+- Fix Dismiss keyboard and the command keys on iPad after the keyboard reflows a lesson.
+- Translate the 0.4.0 Guide credits and rule links into English and Japanese.
+
 ## [0.4.0] - 2026-10-11
 
 - Correct Herbert's historical attribution: credit Wild Noodle Corporation and its founder
   Brian Conte for the original challenge and `h` language, and distinguish the later
   quolc-led Herbert Online Judge community archive.
 - Bump the app marketing version to 0.4.0 and build number to 13.
-
-## Unreleased
 
 ## [0.3.9] - 2026-10-11
 

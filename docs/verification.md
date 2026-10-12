@@ -2,6 +2,14 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## App Store 上架准备（10 月 12 日）
+
+- 本机已安装 iOS 27 Simulator runtime。`StoreScreenshotTests` 在 iPhone 18 Pro Max（竖屏）、iPad Pro 13 英寸（M5，横屏）模拟器和原生 Mac 上分别以英文、简体中文、日文运行通过：用参考解依次通过 L01–L07，截取 L07 通关、关卡库、L18 提示与部分程序、手册、确定性夹具 AI Battlefield 比赛和记录页，合成 54 张商店截图。没有调用付费 API。
+- 模拟器运行发现：iPad 横屏键盘弹出后课程布局重排，`EditorController` 指向失效的文本视图，「收起键盘」与 s/l/r 命令键都不起作用。修复前的诊断测试复现了问题；修复后新增的 iPad UI 回归测试通过。
+- iPhone 竖屏打开键盘时，固定的运行栏和键盘会遮住屏幕下半部的编辑器与「收起键盘」按钮，页面不会自动滚动到编辑器。本次未修改，留在真机清单中检查。
+- `scripts/check.sh` 通过：严格格式检查、34 项 Python 检查（含新增商店资料检查）和 Swift 测试。0.4.0 的 GuideView 超长行和未翻译的致谢文案曾使检查失败，已分别修复。
+- `scripts/archive_app_store.sh ios --check` 与 `macos --check` 的无签名归档通过资源检查：仅 30 道原创题，无社区题库和参考答案；Info.plist 含 `ITSAppUsesNonExemptEncryption = NO`，Mac 版类别为 Education，可执行文件为 arm64 + x86_64。没有进行签名导出或上传。
+
 ## 0.3.8 发布校验（10 月 9 日）
 
 - `.build/release-038-check.log`：严格格式检查、157 项 Swift 测试（45 Core、112 Battlefield）和 16 项 Python 检查通过。累计模型用时覆盖全部尝试、失败、手动重试、等待间隔排除和历史恢复；Token 总量保留服务商报告的额外计量，缺失缓存率与 0% 区分。

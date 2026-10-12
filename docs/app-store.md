@@ -78,6 +78,7 @@ python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Releas
 完成设备测试后，选择 **HerbertAppStore → Product → Archive**。
 对归档中的 `Products/Applications/HerbertAppStore.app` 再运行同一资源检查；确保 App Store Connect 的 Bundle ID 和版本/build 与归档一致，再由 Organizer 上传。
 原生 macOS 版本需要选择 Mac 目标单独归档与检查。不要用 `Herbert` scheme 的归档提交 App Store。
+`scripts/archive_app_store.sh ios|macos` 会完成同样的归档、资源检查和导出或上传；商店文案、截图、隐私问卷与提交步骤见 [App Store 上架资料](../store/README.md)。
 
 ## 维护原创课程
 

@@ -133,6 +133,7 @@ open Herbert.xcodeproj
 社区题库位于可选的 `HerbertCommunity` 模块，App Store target 不链接它；不是在界面中隐藏题目。
 CI 对构建后的 iOS/Mac 包执行资源检查，拒绝社区数据或测试答案混入。
 个人签名团队可写在被 Git 忽略的 `Config/Local.xcconfig` 中：`DEVELOPMENT_TEAM = YOUR_TEAM_ID`。
+商店文案、截图、隐私问卷与提交步骤见 [App Store 上架资料](store/README.md)。
 
 ```sh
 # 引擎、关卡、持久化与备份集成测试
@@ -215,5 +216,5 @@ python3 scripts/import_problems.py
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
 运行 `scripts/capture_screenshots.sh zh-Hans store` 生成原创课程截图；省略 `store` 则生成社区关卡截图。
 
-当前尚未接入云同步或发布 App Store 版；Mac DMG 为未公证的预览版，iPhone/iPad 运行时验证仍待完成。
+当前尚未接入云同步或发布 App Store 版；Mac DMG 为未公证的预览版。App Store 截图流程已在 iPhone/iPad 模拟器中运行，真机验证仍待完成。
 完整记录见 [验证说明](docs/verification.md)。
