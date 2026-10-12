@@ -1,7 +1,14 @@
 # Privacy
 
-Effective for Herbert **0.3.2**. Herbert's developer does not operate an account,
-analytics, advertising or cloud storage service for this app.
+Last updated October 12, 2026 (version 0.4.0). This policy covers **Herbert**, the open-source
+app, and **Herbot Bot**, its App Store edition, on iPhone, iPad and Mac. Both editions handle data
+the same way.
+
+The developer does not collect personal data. There is no account, analytics, advertising,
+tracking, third-party SDK, crash reporting or developer server, and the developer receives no
+copy of anything you do in the app. If you allow your device to share analytics with app
+developers, Apple may provide aggregated App Store statistics and crash reports under Apple's
+privacy policy.
 
 ## Offline game
 
@@ -28,16 +35,16 @@ API keys are stored in the system Keychain with synchronization disabled and dev
 accessibility. They are sent only in authentication headers to the configured HTTPS
 endpoint. Changing endpoints requires re-entering the key; redirects are rejected.
 Settings and match history are local JSON files. History contains full AI responses,
-programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters and usage. From 0.3.2 it also
-retains received model reasoning and bounded provider error details (up to 64 KiB). Known
-credential fields, Bearer values and the configured API key are redacted from error details.
-Review provider text before sharing it; providers control the contents of their responses.
-App data may be included in operating-system device backups according to your settings;
-Herbert implements no cloud synchronization.
+programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters
+and usage. It also retains received model reasoning and bounded provider error details (up to
+64 KiB). Known credential fields, Bearer values and the configured API key are redacted from
+error details. Review provider text before sharing it; providers control the contents of their
+responses. App data may be included in operating-system device backups according to your
+settings; Herbert implements no cloud synchronization.
 
 Removing a provider in AI Providers deletes its configuration and Keychain entry.
 Existing match histories remain for review. Match histories are retained locally until
-app data is removed; 0.3.2 does not offer individual history deletion. Operating-system
+app data is removed; the app does not yet delete individual histories. Operating-system
 app/container removal and backup retention vary by platform. Avoid assuming that deleting
 the app removes Keychain entries; remove providers in the app first if desired.
 
@@ -48,19 +55,33 @@ ranks, scores and usage, but omit keys, endpoints, raw responses and additional 
 An image is sent only through the system share destination you choose. Herbert does not
 host shared images or publish match results automatically.
 
+## Children
+
+The game suits all ages and collects no personal information from anyone, including children.
+AI Battlefield needs an account with a third-party AI provider, which sets its own age
+requirements.
+
+## Changes
+
+Changes to this policy are published in this file with a new date; the Git history keeps every
+earlier version.
+
 ## Contact
 
 Questions or deletion guidance: [hugogu@outlook.com](mailto:hugogu@outlook.com).
-For security issues, see [SECURITY.md](SECURITY.md).
+For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [SECURITY.md](SECURITY.md).
 
 ---
 
-中文：普通游戏完全离线。AI Battlefield 由你自行选择服务商并提供 API Key；保存或刷新服务商会发送模型查询，
+中文：本政策适用于开源版 Herbert 与 App Store 版 Herbot Bot。开发者不收集任何个人数据，没有账号、统计、广告、追踪或开发者服务器。
+普通游戏完全离线。AI Battlefield 由你自行选择服务商并提供 API Key；保存或刷新服务商会发送模型查询，
 点击“同意并开始比赛”会直接发送规则、题目、附加提示词和当前题目的对话。服务商可能保存请求并收取 API 费用。
 开发者不代理请求，不收集副本。密钥保存在关闭同步的系统钥匙串中，配置和完整比赛历史保存在本机。
 分享图片仅通过你选择的系统分享目标发送，图片不包含密钥、端点或原始对话。移除服务商会删除其密钥与配置，但保留比赛历史。
 
-日本語：通常のゲームは完全にオフラインです。AI Battlefield では利用者がサービスと API キーを指定します。
+日本語：本ポリシーはオープンソース版 Herbert と App Store 版 Herbot Bot に適用されます。開発者は個人データを収集せず、
+アカウント、解析、広告、トラッキング、開発者のサーバーはありません。通常のゲームは完全にオフラインです。
+AI Battlefield では利用者がサービスと API キーを指定します。
 保存・更新時はモデル一覧、同意して開始するとルール、問題、追加プロンプト、今回の問題の会話を直接サービスに送信します。
 サービスがリクエストを保存し、料金を請求する場合があります。開発者はリクエストを中継・収集しません。
 キーは同期しないシステムのキーチェーン、設定と試合履歴は本機に保存します。共有画像は選択した共有先にだけ送信します。
