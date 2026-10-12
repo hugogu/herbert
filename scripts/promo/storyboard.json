@@ -1,0 +1,14 @@
+{
+  "duration": 45,
+  "voice": "af_heart",
+  "speed": 1.08,
+  "chapters": [
+    {"start": 0, "end": 4, "title": "A tiny language. A big idea.", "narration": "Three commands. Thirty puzzles. One tiny robot."},
+    {"start": 4, "end": 10, "title": "01 / CODE", "narration": "Turn a few lines of code into a beautiful path. Every byte counts."},
+    {"start": 10, "end": 16, "title": "02 / DEBUG", "narration": "Run it. Pause it. Step through each move. See your thinking come to life."},
+    {"start": 16, "end": 23, "title": "03 / GROW", "narration": "Start simple. Learn procedures, parameters, and recursion. Then take on the cathedral."},
+    {"start": 23, "end": 29, "title": "04 / EXPLORE", "narration": "Modern boards. Classic charm. Learn from the guide, and save your progress offline."},
+    {"start": 29, "end": 38, "title": "05 / AI BATTLEFIELD", "narration": "Meet AI Battlefield. Bring your own models. Same puzzles. Same rules. Compare solutions with a real puzzle judge."},
+    {"start": 38, "end": 45, "title": "THINK IN PATTERNS", "narration": "Think smaller. Solve bigger. Herbot Bot. How elegant is your solution?"}
+  ]
+}

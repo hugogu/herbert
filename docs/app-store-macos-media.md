@@ -45,6 +45,8 @@ The render targets **1920 × 1080, 30 fps, progressive H.264 High Level 4.0, 10 
 
 ## Uploading the delivered package
 
+The revised English feature film and separately narrated 30-second cut are documented in [herbot-bot-promo.md](herbot-bot-promo.md). Use the newer 30-second English cut if choosing the feature-focused version with Kokoro narration and music; the original silent localized cuts remain available.
+
 - Use `en-US` for the English listing and `zh-Hans` for Simplified Chinese.
 - Upload the six numbered PNGs from each language's `screenshots/` folder. Suggested order: **02-code**, **01-library**, **05-advanced**, **03-step**, **04-classic**, **06-guide**.
 - Upload `video/herbot-bot-mac-preview.mp4` in the Mac App Preview slot for the same localization. Its captions and native UI both match that language.
