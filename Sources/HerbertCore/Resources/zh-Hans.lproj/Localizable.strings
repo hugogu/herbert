@@ -6,7 +6,7 @@
 "A LITTLE ROBOT. A BIG IDEA." = "小小机器人，大大新思路。";
 "H LANGUAGE" = "H 语言";
 "H 代码" = "H 代码";
-"Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。" = "Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发，并曾用于 Microsoft Imagine Cup 编程挑战。本应用依据公开规则独立实现，非官方作品。开源版另收录 quolc 发起的 Herbert Online Judge 社区题库，并保留原作者署名、题目名称、编号与 byte 限制；原题作者保留其权利。" = "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发，并曾用于 Microsoft Imagine Cup 编程挑战。本应用依据公开规则独立实现，非官方作品。开源版另收录 quolc 发起的 Herbert Online Judge 社区题库，并保留原作者署名、题目名称、编号与 byte 限制；原题作者保留其权利。";
 "Herbert 正在执行你的程序…" = "Herbert 正在执行你的程序…";
 "MAKE EVERY BYTE COUNT" = "珍惜每一个 BYTE";
 "Mac：⌘ Return 运行 / 暂停。所有关卡、草稿与最短解都可离线使用。" = "Mac：⌘ Return 运行 / 暂停。所有关卡、草稿与最短解都可离线使用。";
@@ -47,7 +47,8 @@
 "前进一步" = "前进一步";
 "单步执行" = "单步执行";
 "原版 Problems ↗" = "原版 Problems ↗";
-"原版规则 ↗" = "原版规则 ↗";
+"公开规则（Herbert Online Judge）↗" = "公开规则（Herbert Online Judge）↗";
+"HOJ 社区题库 ↗" = "HOJ 社区题库 ↗";
 "参数 %@ 不是数值。" = "参数 %@ 不是数值。";
 "参数 %@ 未声明。" = "参数 %@ 未声明。";
 "参数也能传入一段指令，甚至空指令。下面的程序依次执行 l、ls、lss、lsss…；这是无限递归，游戏会在点亮所有目标时立即结束。" = "参数也能传入一段指令，甚至空指令。下面的程序依次执行 l、ls、lss、lsss…；这是无限递归，游戏会在点亮所有目标时立即结束。";
@@ -187,7 +188,7 @@
 "第 %ld 章 · %@" = "第 %ld 章 · %@";
 "提示 %ld：%@" = "提示 %ld：%@";
 "显示下一条提示" = "显示下一条提示";
-"本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。" = "本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "PROBLEM %@  /  COMMUNITY COLLECTION";
 "LESSON %@  /  ORIGINAL COURSE" = "LESSON %@  /  ORIGINAL COURSE";
 

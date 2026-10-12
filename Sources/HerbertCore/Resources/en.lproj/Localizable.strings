@@ -6,7 +6,7 @@
 "A LITTLE ROBOT. A BIG IDEA." = "A LITTLE ROBOT. A BIG IDEA.";
 "H LANGUAGE" = "H LANGUAGE";
 "H 代码" = "H code";
-"Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。" = "Herbert originated in the Imagine Cup programming challenge. This independent implementation follows quolc’s Herbert Online Judge rules and preserves original problem titles, authors, IDs and byte limits. Original authors retain their rights.";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发，并曾用于 Microsoft Imagine Cup 编程挑战。本应用依据公开规则独立实现，非官方作品。开源版另收录 quolc 发起的 Herbert Online Judge 社区题库，并保留原作者署名、题目名称、编号与 byte 限制；原题作者保留其权利。" = "The Herbert challenge was created by Wild Noodle Corporation, whose founder Brian Conte developed the H language, and was used in the Microsoft Imagine Cup programming competition. This app independently implements the public rules and is not an official release. The open-source edition also includes the community archive of the quolc-led Herbert Online Judge, keeping original author credits, titles, IDs and byte limits; original authors retain their rights.";
 "Herbert 正在执行你的程序…" = "Herbert is running your program…";
 "MAKE EVERY BYTE COUNT" = "MAKE EVERY BYTE COUNT";
 "Mac：⌘ Return 运行 / 暂停。所有关卡、草稿与最短解都可离线使用。" = "Mac: ⌘ Return to run or pause. Every problem, draft and shortest solution works offline.";
@@ -47,7 +47,8 @@
 "前进一步" = "One step forward";
 "单步执行" = "Step";
 "原版 Problems ↗" = "Original problems ↗";
-"原版规则 ↗" = "Original rules ↗";
+"公开规则（Herbert Online Judge）↗" = "Public rules (Herbert Online Judge) ↗";
+"HOJ 社区题库 ↗" = "HOJ community problems ↗";
 "参数 %@ 不是数值。" = "Parameter %@ is not a number.";
 "参数 %@ 未声明。" = "Parameter %@ is not declared.";
 "参数也能传入一段指令，甚至空指令。下面的程序依次执行 l、ls、lss、lsss…；这是无限递归，游戏会在点亮所有目标时立即结束。" = "Arguments can contain commands, even an empty sequence. This program runs l, ls, lss, lsss… recursively. Play stops as soon as every target is lit.";
@@ -187,7 +188,7 @@
 "第 %ld 章 · %@" = "Chapter %ld · %@";
 "提示 %ld：%@" = "Hint %ld: %@";
 "显示下一条提示" = "Show the next hint";
-"本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。" = "This edition includes 30 independently designed original puzzles. It independently implements the public H language rules and is not an official release of the original site.";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "The Herbert challenge was created by Wild Noodle Corporation, whose founder Brian Conte developed the H language. This app independently implements the public rules; the 30 lessons in this edition were designed by this project and are not an official Wild Noodle or Microsoft release.";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "PROBLEM %@  /  COMMUNITY COLLECTION";
 "LESSON %@  /  ORIGINAL COURSE" = "LESSON %@  /  ORIGINAL COURSE";
 

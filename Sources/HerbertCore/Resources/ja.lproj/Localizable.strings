@@ -6,7 +6,7 @@
 "A LITTLE ROBOT. A BIG IDEA." = "小さなロボット、大きなひらめき。";
 "H LANGUAGE" = "H 言語";
 "H 代码" = "H コード";
-"Herbert 最初来自 Imagine Cup 编程挑战。本应用依据 quolc 的 Herbert Online Judge 规则独立实现，保留原站题目名称、作者、编号与 byte 限制。原题作者保留其权利。" = "Herbert は Imagine Cup のプログラミング課題に由来します。本アプリは quolc の Herbert Online Judge のルールに基づく独立実装です。原題の名前、作者、番号、byte 制限を保持し、原作者の権利を尊重します。";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发，并曾用于 Microsoft Imagine Cup 编程挑战。本应用依据公开规则独立实现，非官方作品。开源版另收录 quolc 发起的 Herbert Online Judge 社区题库，并保留原作者署名、题目名称、编号与 byte 限制；原题作者保留其权利。" = "Herbert チャレンジは Wild Noodle Corporation が生み出し、H 言語は同社の創業者 Brian Conte が開発しました。Microsoft Imagine Cup のプログラミング競技でも使われました。本アプリは公開ルールに基づく独立した実装で、公式作品ではありません。オープンソース版には quolc が始めた Herbert Online Judge のコミュニティ問題集も収録し、原作者の表記、問題名、番号、バイト制限を保持しています。原作者は自身の権利を保持します。";
 "Herbert 正在执行你的程序…" = "Herbert がプログラムを実行中…";
 "MAKE EVERY BYTE COUNT" = "1 byte を大切に";
 "Mac：⌘ Return 运行 / 暂停。所有关卡、草稿与最短解都可离线使用。" = "Mac：⌘ Return で実行・一時停止。問題、下書き、最短解はすべてオフラインで使えます。";
@@ -47,7 +47,8 @@
 "前进一步" = "1マス前進";
 "单步执行" = "ステップ実行";
 "原版 Problems ↗" = "オリジナルの問題 ↗";
-"原版规则 ↗" = "オリジナルのルール ↗";
+"公开规则（Herbert Online Judge）↗" = "公開ルール（Herbert Online Judge）↗";
+"HOJ 社区题库 ↗" = "HOJ コミュニティ問題集 ↗";
 "参数 %@ 不是数值。" = "パラメーター %@ は数値ではありません。";
 "参数 %@ 未声明。" = "パラメーター %@ が宣言されていません。";
 "参数也能传入一段指令，甚至空指令。下面的程序依次执行 l、ls、lss、lsss…；这是无限递归，游戏会在点亮所有目标时立即结束。" = "引数には命令列や空の命令列も渡せます。次のプログラムは再帰で l、ls、lss、lsss… を実行します。全ターゲットが点灯した時点で終了します。";
@@ -187,7 +188,7 @@
 "第 %ld 章 · %@" = "第 %ld 章 · %@";
 "提示 %ld：%@" = "ヒント %ld：%@";
 "显示下一条提示" = "次のヒントを表示";
-"本版本包含 30 道独立设计的原创关卡。本应用依据公开的 H 语言规则独立实现，非原站官方作品。" = "この版には独自に設計した30問を収録しています。公開された H 言語の規則を独立に実装したもので、元サイトの公式作品ではありません。";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "Herbert チャレンジは Wild Noodle Corporation が生み出し、H 言語は同社の創業者 Brian Conte が開発しました。本アプリは公開ルールに基づく独立した実装です。この版の 30 レッスンは本プロジェクトが独自に設計したもので、Wild Noodle や Microsoft の公式作品ではありません。";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "問題 %@  /  コミュニティ問題集";
 "LESSON %@  /  ORIGINAL COURSE" = "レッスン %@  /  オリジナル講座";
 
