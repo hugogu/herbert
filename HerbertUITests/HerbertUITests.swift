@@ -528,6 +528,153 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testCaptureAppStoreMedia() throws {
+        #if os(macOS) && APP_STORE
+            try XCTSkipUnless(ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1")
+            let language = ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
+            let app = launch(language: language)
+            resizeMediaWindow(app, height: 900)
+            app.scrollViews.containing(.textField, identifier: "problem-search").firstMatch.scroll(
+                byDeltaX: 0, deltaY: 10000)
+            capture(app, name: "store-01-library")
+            openProblem(10051, in: app)
+            let editor = app.textViews["code-editor"]
+            editor.activateControl()
+            editor.typeText("a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)")
+            capture(app, name: "store-02-code")
+            app.buttons[language == "en" ? "Back" : "返回"].activateControl()
+            app.buttons["clear-search"].activateControl()
+            openProblem(10096, in: app)
+            editor.activateControl()
+            editor.typeText("a(X):sa(X-1)\na(3)")
+            for _ in 0..<3 { app.buttons["step-program"].activateControl() }
+            capture(app, name: "store-03-step")
+            app.buttons["board-options"].activateControl()
+            selectBoardStyle("classic", in: app)
+            app.buttons["close-board-options"].activateControl()
+            XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+            capture(app, name: "store-04-classic")
+            app.buttons["board-options"].activateControl()
+            selectBoardStyle("modern", in: app)
+            app.buttons["close-board-options"].activateControl()
+            XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+            app.buttons[language == "en" ? "Back" : "返回"].activateControl()
+            app.buttons["clear-search"].activateControl()
+            openProblem(10097, in: app)
+            capture(app, name: "store-05-advanced")
+            app.descendants(matching: .any)["section-手册"].firstMatch.activateControl()
+            capture(app, name: "store-06-guide")
+            app.terminate()
+        #else
+            throw XCTSkip("Mac App Store media is captured on macOS using the store target.")
+        #endif
+    }
+
+    @MainActor
+    func testCaptureAppStoreVideo() throws {
+        #if os(macOS) && APP_STORE
+            let environment = ProcessInfo.processInfo.environment
+            try XCTSkipUnless(environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1")
+            let output = FileManager.default.temporaryDirectory.appendingPathComponent(
+                "StoreVideo-\(UUID().uuidString)", isDirectory: true)
+            try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+            let language = environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
+            let app = launch(language: language)
+            resizeMediaWindow(app, width: 1600, height: 900)
+            app.scrollViews.containing(.textField, identifier: "problem-search").firstMatch.scroll(
+                byDeltaX: 0, deltaY: 10000)
+
+            func record(_ name: String, seconds: Int, actions: [() -> Void] = []) throws {
+                app.activate()
+                let directory = output.appendingPathComponent(name, isDirectory: true)
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                var frames: [(String, TimeInterval)] = []
+                let start = ProcessInfo.processInfo.systemUptime
+                func sample() throws {
+                    let filename = String(format: "frame-%05d.png", frames.count)
+                    let timestamp = ProcessInfo.processInfo.systemUptime - start
+                    try app.windows.firstMatch.screenshot().pngRepresentation.write(
+                        to: directory.appendingPathComponent(filename))
+                    frames.append((filename, timestamp))
+                }
+                try sample()
+                for action in actions {
+                    action()
+                    try sample()
+                }
+                while ProcessInfo.processInfo.systemUptime - start < Double(seconds) {
+                    try sample()
+                }
+                var manifest = "ffconcat version 1.0\n"
+                for index in frames.indices {
+                    let end = index + 1 < frames.count ? frames[index + 1].1 : Double(seconds)
+                    manifest += "file '\(frames[index].0)'\nduration \(max(0.001, end - frames[index].1))\n"
+                }
+                manifest += "file '\(try XCTUnwrap(frames.last).0)'\n"
+                try manifest.write(
+                    to: directory.appendingPathComponent("frames.ffconcat"), atomically: true, encoding: .utf8)
+                XCTAssertGreaterThan(frames.count, seconds * 2, "Capture must retain visible native motion")
+                let archive = output.appendingPathComponent("\(name).zip")
+                let zipper = Process()
+                zipper.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
+                zipper.arguments = ["-c", "-k", directory.path, archive.path]
+                try zipper.run()
+                zipper.waitUntilExit()
+                XCTAssertEqual(zipper.terminationStatus, 0)
+                let attachment = XCTAttachment(contentsOfFile: archive)
+                attachment.name = "store-video-\(name)"
+                attachment.lifetime = .keepAlways
+                add(attachment)
+            }
+
+            try record("01-library", seconds: 4)
+            openProblem(10051, in: app)
+            app.textViews["code-editor"].activateControl()
+            app.textViews["code-editor"].typeText("a(N,X):XrXlXrrXrXlXrra(N-1,Xs)\nq(P):PPPP\nq(a(3,ss)r)")
+            app.buttons["4×"].activateControl()
+            try record("02-run", seconds: 19, actions: [{ app.buttons["run-program"].activateControl() }])
+            XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
+            app.buttons[language == "en" ? "Back" : "返回"].activateControl()
+            app.buttons["clear-search"].activateControl()
+            openProblem(10096, in: app)
+            app.textViews["code-editor"].activateControl()
+            app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(3)")
+            app.buttons["board-options"].activateControl()
+            selectBoardStyle("classic", in: app)
+            app.buttons["close-board-options"].activateControl()
+            XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+            try record(
+                "03-step", seconds: 7,
+                actions: (0..<3).map { _ in
+                    { app.buttons["step-program"].activateControl() }
+                })
+            app.terminate()
+        #else
+            throw XCTSkip("Mac App Store video is captured on macOS using the store target.")
+        #endif
+    }
+
+    #if os(macOS)
+        @MainActor
+        private func resizeMediaWindow(_ app: XCUIApplication, width: CGFloat = 1440, height: CGFloat) {
+            let window = app.windows.firstMatch
+            let origin = window.coordinate(withNormalizedOffset: .zero)
+            window.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5))
+                .withOffset(CGVector(dx: -1, dy: 0))
+                .click(
+                    forDuration: 0.2,
+                    thenDragTo: origin.withOffset(CGVector(dx: width - 1, dy: window.frame.height / 2)))
+            window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 1))
+                .withOffset(CGVector(dx: 0, dy: -1))
+                .click(
+                    forDuration: 0.2,
+                    thenDragTo: origin.withOffset(CGVector(dx: window.frame.width / 2, dy: height - 1)))
+            XCTAssertEqual(window.frame.width, width)
+            XCTAssertEqual(window.frame.height, height)
+        }
+    #endif
+
+    @MainActor
     func testCaptureOriginalCourseScreenshots() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1")
         let language = ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en"
