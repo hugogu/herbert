@@ -48,13 +48,17 @@ struct GuideView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("致谢与来源").font(.headline).foregroundStyle(Palette.ink)
                     #if APP_STORE
-                        Text("Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。")
+                        Text(
+                            "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。"
+                        )
                     #else
                         Text(
                             "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发，并曾用于 Microsoft Imagine Cup 编程挑战。本应用依据公开规则独立实现，非官方作品。开源版另收录 quolc 发起的 Herbert Online Judge 社区题库，并保留原作者署名、题目名称、编号与 byte 限制；原题作者保留其权利。"
                         )
                     #endif
-                    Link("公开规则（Herbert Online Judge）↗", destination: URL(string: "http://herbert.tealang.info/rule.php")!)
+                    Link(
+                        "公开规则（Herbert Online Judge）↗",
+                        destination: URL(string: "http://herbert.tealang.info/rule.php")!)
                     #if !APP_STORE
                         Link("HOJ 社区题库 ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
                     #endif
