@@ -231,8 +231,10 @@ final class CloudUITests: XCTestCase {
                 activate(app.descendants(matching: .any)["section-我的"].firstMatch)
             #else
                 // The game hides the tab bar until returning to the library.
-                activate(app.buttons["Back"])
-                activate(app.buttons["Back"])
+                activate(app.navigationBars.buttons.element(boundBy: 0))
+                XCTAssertTrue(app.buttons["game-rules"].waitForExistence(timeout: 5))
+                activate(app.navigationBars.buttons.element(boundBy: 0))
+                XCTAssertTrue(app.tabBars.buttons["My"].waitForExistence(timeout: 5))
                 app.tabBars.buttons["My"].tap()
             #endif
             let best = app.buttons["progress-best-count"]
