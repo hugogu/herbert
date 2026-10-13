@@ -51,8 +51,17 @@ final class BattlefieldUITests: XCTestCase {
 
     @MainActor
     private func openSection(_ name: String, in app: XCUIApplication) {
-        app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
-            .battlefieldTap()
+        #if os(iOS)
+            if app.tabBars.buttons["AI Battlefield"].exists {
+                app.tabBars.buttons["AI Battlefield"].battlefieldTap()
+            } else {
+                app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
+                    .battlefieldTap()
+            }
+        #else
+            app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
+                .battlefieldTap()
+        #endif
         if name == "AI 配置" { choose("AI Providers", in: app) }
     }
 

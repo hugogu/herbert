@@ -17,6 +17,73 @@ final class BattlefieldTests: XCTestCase {
         }
     }
 
+    func testConcurrentStreamingBurstsCoalesceWithoutLosingFinalAnswers() async throws {
+        let collector = BattlefieldUpdateCollector()
+        let result = try await BattlefieldEngine(client: BurstingAI()).run(
+            configuration: CompetitionConfiguration(), problems: try first(), participants: participants(3)
+        ) { await collector.append($0) }
+        let updates = await collector.items
+        XCTAssertLessThan(updates.count, 30, "600 token updates should not rebuild the dashboard 600 times")
+        XCTAssertEqual(updates.last, result)
+        XCTAssertEqual(result.entrants.map { $0.answers[0].status }, [.solved, .solved, .solved])
+        XCTAssertEqual(result.entrants.map { $0.answers[0].attempts[0].response }, Array(repeating: "s", count: 3))
+        XCTAssertEqual(
+            result.entrants.map { $0.answers[0].attempts[0].reasoning?.content }, Array(repeating: "Plan 199", count: 3)
+        )
+        let count = updates.count
+        try await Task.sleep(for: .milliseconds(600))
+        let later = await collector.items
+        XCTAssertEqual(later.count, count, "A pending refresh must not fire after completion")
+    }
+
+    func testPendingStreamRefreshPublishesLatestOutputAndStopFlushesImmediately() async throws {
+        let streamed = expectation(description: "Latest streaming snapshot reaches observer")
+        let collector = BattlefieldUpdateCollector()
+        let engine = BattlefieldEngine(client: BurstingAI(waitAfterBurst: true))
+        let problems = try first()
+        let entrants = participants(2)
+        let run = Task {
+            try await engine.run(configuration: CompetitionConfiguration(), problems: problems, participants: entrants)
+            {
+                await collector.append($0)
+                if $0.status == .running,
+                    $0.entrants.allSatisfy({ $0.answers[0].attempts.last?.response == "partial 199" })
+                {
+                    streamed.fulfill()
+                }
+            }
+        }
+        await fulfillment(of: [streamed], timeout: 5)
+        await engine.stop()
+        let result = try await run.value
+        XCTAssertEqual(result.status, .userStopped)
+        XCTAssertEqual(
+            result.entrants.map { $0.answers[0].attempts[0].response }, Array(repeating: "partial 199", count: 2))
+        XCTAssertTrue(result.entrants.allSatisfy { $0.answers[0].attempts[0].usage.partial })
+        let updates = await collector.items
+        XCTAssertEqual(updates.last, result)
+        XCTAssertLessThan(updates.count, 15)
+        try await Task.sleep(for: .milliseconds(600))
+        let later = await collector.items
+        XCTAssertEqual(later.count, updates.count)
+    }
+
+    func testStreamingBudgetIsEnforcedBeforeDeferredRefresh() async throws {
+        var configuration = CompetitionConfiguration()
+        configuration.problemTokenLimitEnabled = true
+        configuration.problemTokenLimit = 100_000
+        let collector = BattlefieldUpdateCollector()
+        let result = try await BattlefieldEngine(client: BurstingAI(waitAfterBurst: true, inputTokens: 99_910)).run(
+            configuration: configuration, problems: try first(), participants: participants(1)
+        ) { await collector.append($0) }
+        let answer = result.entrants[0].answers[0]
+        XCTAssertEqual(answer.status, .burnout)
+        XCTAssertEqual(answer.attempts[0].usage.total, 100_000)
+        XCTAssertEqual(answer.attempts[0].response, "partial 89")
+        let updates = await collector.items
+        XCTAssertTrue(updates.contains { $0.entrants[0].answers[0].status == .burnout })
+    }
+
     func testAttemptTimersAreIndependentAndPersistAfterFinishing() throws {
         let start = Date(timeIntervalSince1970: 1000)
         var first = AnswerAttempt(number: 1, startedAt: start)
@@ -485,5 +552,31 @@ actor ScriptedAI: AIClient {
         if slowRacer { usage.input = 10 }
         await progress(AIProgress(text: text, usage: usage, isFinal: true))
         return AIReply(text: text, usage: usage)
+    }
+}
+
+private actor BattlefieldUpdateCollector {
+    var items: [CompetitionResult] = []
+    func append(_ result: CompetitionResult) { items.append(result) }
+}
+
+private struct BurstingAI: AIClient {
+    var waitAfterBurst = false
+    var inputTokens = 10
+    func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] { [] }
+    func complete(_ request: AICompletionRequest, progress: @escaping @Sendable (AIProgress) async -> Void) async throws
+        -> AIReply
+    {
+        for index in 0..<200 {
+            try Task.checkCancellation()
+            await progress(
+                AIProgress(
+                    text: "partial \(index)", usage: TokenUsage(input: inputTokens, output: index + 1),
+                    reasoning: AIReasoning(content: "Plan \(index)", field: .content)))
+        }
+        if waitAfterBurst { try await Task.sleep(for: .seconds(30)) }
+        return AIReply(
+            text: "s", usage: TokenUsage(input: 10, output: 200),
+            reasoning: AIReasoning(content: "Plan 199", field: .content))
     }
 }

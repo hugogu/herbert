@@ -478,12 +478,13 @@ struct ChatStreamAccumulator: CompletionStreamAccumulator {
     var contentBlocks: [AnthropicContentBlock]? { nil }
     var isFinal: Bool { finishReason != nil && reportedUsage != nil }
     var isComplete: Bool { done || finishReason != nil }
-    var shouldPublish: Bool { reportedUsage != nil }
+    private(set) var shouldPublish = false
     var usage: TokenUsage {
         reportedUsage ?? .estimate(messages: messages, outputBytes: text.utf8.count + reasoningBytes)
     }
 
     mutating func consume(_ payload: String) throws {
+        shouldPublish = false
         if payload == "[DONE]" {
             done = true
             return
@@ -513,6 +514,7 @@ struct ChatStreamAccumulator: CompletionStreamAccumulator {
         }
         if let usage = object["usage"] as? [String: Any] {
             reportedUsage = OpenAICompatibleClient.decodeUsage(usage, fallback: self.usage)
+            shouldPublish = true
         }
         let reply = AIReply(text: text, usage: usage, finishReason: finishReason, reasoning: reasoning)
         if ProviderDiagnostics.hasError(object) || first.map(ProviderDiagnostics.hasError) == true

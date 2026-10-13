@@ -9,6 +9,32 @@ final class AITransportTests: XCTestCase {
     private let anthropicAnswer =
         #"{"type":"message","content":[{"type":"text","text":"```h\ns\n```"}],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":20}}"#
 
+    func testEarlyUsageDoesNotBypassStreamingThrottleForEveryFollowingDelta() async throws {
+        let provider = provider()
+        let events =
+            [#"{"choices":[],"usage":{"prompt_tokens":10,"completion_tokens":0}}"#]
+            + Array(repeating: #"{"choices":[{"delta":{"content":"s"}}]}"#, count: 200)
+            + [
+                #"{"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":200}}"#,
+                "[DONE]",
+            ]
+        let stub = HTTPStub(body: events.map { "data: \($0)\n\n" }.joined(), contentType: "text/event-stream")
+        BattlefieldURLProtocol.registry.add(stub, host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let collector = ProgressCollector()
+        let reply = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "test"))),
+                    apiKey: "fixture"), messages: [], maxOutputTokens: 4096)
+        ) { await collector.append($0) }
+        let updates = await collector.items
+        XCTAssertLessThan(updates.count, 20, "Early usage must not publish every subsequent token")
+        XCTAssertEqual(reply.text, String(repeating: "s", count: 200))
+        XCTAssertEqual(updates.last?.text, reply.text)
+        XCTAssertEqual(updates.last?.usage.output, 200)
+        XCTAssertTrue(updates.last?.isFinal == true)
+    }
+
     func testReasoningFinalAndOverLimitSubmissionSurviveHTTPJudgingAndManualRetry() async throws {
         let provider = provider()
         let first = HTTPStub(

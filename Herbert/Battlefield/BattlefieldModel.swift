@@ -294,7 +294,7 @@ final class BattlefieldModel: ObservableObject {
         do {
             guard let persistence else { throw BattlefieldError.storageCorrupt }
             try await persistence.save(result)
-            storageMessage = nil
+            if storageMessage != nil { storageMessage = nil }
         } catch {
             storageMessage = L10n.text("比赛结果保存失败。当前结果仍在内存中，请重试保存。")
             if result.status == .running { await engine?.stop(reason: .interrupted) }
