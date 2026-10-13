@@ -22,7 +22,8 @@ GAME_SUBCATEGORIES = {
 MAC_CATEGORIES = {'EDUCATION': 'public.app-category.education', 'GAMES': 'public.app-category.games'}
 # Accepted portrait sizes; landscape is the same pair swapped. Mac screenshots are landscape only.
 SCREENSHOT_SIZES = {
-    'iphone': {(1320, 2868), (1290, 2796), (1260, 2736), (1284, 2778), (1242, 2688)},
+    'iphone-6.3': {(1206, 2622), (1179, 2556)},
+    'iphone-6.9': {(1320, 2868), (1290, 2796), (1260, 2736)},
     'ipad': {(2064, 2752), (2048, 2732)},
     'mac': {(1280, 800), (1440, 900), (2560, 1600), (2880, 1800)},
 }
@@ -130,6 +131,9 @@ def check_metadata(metadata, project):
 
 def check_screenshots(screenshots, locales):
     errors = []
+    devices = {path.name for path in screenshots.iterdir() if path.is_dir()} if screenshots.exists() else set()
+    if devices & {'iphone-6.3', 'iphone-6.9'} and 'iphone-6.3' not in devices:
+        errors.append('iphone-6.3: App Store Connect requires the 6.3-inch medium iPhone screenshots')
     for device, sizes in SCREENSHOT_SIZES.items():
         folder = screenshots / device
         if not folder.exists():

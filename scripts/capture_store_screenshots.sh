@@ -1,10 +1,11 @@
 #!/bin/sh
 # Captures the App Store screenshots of the original-only edition and frames them with captions.
-# Usage: scripts/capture_store_screenshots.sh [iphone] [ipad] [mac]
-# LANGUAGES (default "en zh-Hans ja"), IPHONE_SIMULATOR and IPAD_SIMULATOR override the defaults.
+# Usage: scripts/capture_store_screenshots.sh [iphone-6.3] [iphone-6.9] [ipad] [mac]
+# LANGUAGES (default "en zh-Hans ja") and IPHONE_63_SIMULATOR, IPHONE_69_SIMULATOR or IPAD_SIMULATOR
+# override the defaults. App Store Connect requires iphone-6.3; iphone-6.9 is optional.
 set -eu
 cd "$(dirname "$0")/.."
-devices="${*:-iphone ipad mac}"
+devices="${*:-iphone-6.3 iphone-6.9 ipad mac}"
 languages="${LANGUAGES:-en zh-Hans ja}"
 captures=.build/store-captures
 derived=.build/store-screenshots
@@ -24,12 +25,12 @@ raise SystemExit(f"No available iOS simulator named {sys.argv[1]}")' "$1"
 
 for device in $devices; do
     case "$device" in
-        iphone | ipad)
-            if [ "$device" = iphone ]; then
-                name="${IPHONE_SIMULATOR:-iPhone 18 Pro Max}"
-            else
-                name="${IPAD_SIMULATOR:-iPad Pro 13-inch (M5)}"
-            fi
+        iphone-6.3 | iphone-6.9 | ipad)
+            case "$device" in
+                iphone-6.3) name="${IPHONE_63_SIMULATOR:-iPhone 18 Pro}" ;;
+                iphone-6.9) name="${IPHONE_69_SIMULATOR:-iPhone 18 Pro Max}" ;;
+                *) name="${IPAD_SIMULATOR:-iPad Pro 13-inch (M5)}" ;;
+            esac
             udid=$(simulator "$name")
             xcrun simctl boot "$udid" 2>/dev/null || true
             xcrun simctl bootstatus "$udid" -b >/dev/null
@@ -49,7 +50,7 @@ print(datetime(2026, 1, 9, 9, 41).astimezone().astimezone(timezone.utc).strftime
             destination='platform=macOS,arch=arm64'
             ;;
         *)
-            echo "Usage: scripts/capture_store_screenshots.sh [iphone] [ipad] [mac]" >&2
+            echo "Usage: scripts/capture_store_screenshots.sh [iphone-6.3] [iphone-6.9] [ipad] [mac]" >&2
             exit 2
             ;;
     esac

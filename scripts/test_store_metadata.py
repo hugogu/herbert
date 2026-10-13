@@ -71,18 +71,27 @@ class StoreMetadataTests(unittest.TestCase):
         self.assertIn('Review notes use 4200 of 4000 bytes', self.errors())
 
     def test_screenshots_need_accepted_sizes_without_alpha_and_matching_locales(self):
-        png(self.store / 'screenshots/iphone/en-US/01-play.png', 1320, 2868)
-        png(self.store / 'screenshots/iphone/ja/01-play.png', 1320, 2868)
+        png(self.store / 'screenshots/iphone-6.3/en-US/01-play.png', 1206, 2622)
+        png(self.store / 'screenshots/iphone-6.3/ja/01-play.png', 1206, 2622)
         self.assertEqual(check_store(self.store), [])
-        png(self.store / 'screenshots/iphone/ja/01-play.png', 1320, 2868, alpha=True)
+        png(self.store / 'screenshots/iphone-6.3/ja/01-play.png', 1206, 2622, alpha=True)
+        png(self.store / 'screenshots/iphone-6.9/en-US/01-play.png', 1206, 2622)
         png(self.store / 'screenshots/ipad/en-US/01-play.png', 2752, 2064)
         png(self.store / 'screenshots/mac/en-US/01-play.png', 1800, 2880)
         png(self.store / 'screenshots/mac/fr-FR/01-play.png', 2880, 1800)
         errors = self.errors()
-        self.assertIn('iphone/ja/01-play.png: screenshots cannot contain alpha', errors)
+        self.assertIn('iphone-6.3/ja/01-play.png: screenshots cannot contain alpha', errors)
+        self.assertIn('iphone-6.9/en-US/01-play.png: 1206 × 2622 is not an accepted size', errors)
         self.assertNotIn('ipad/en-US/01-play.png', errors)
         self.assertIn('mac/en-US/01-play.png: 1800 × 2880 is not an accepted size', errors)
         self.assertIn('mac/fr-FR: screenshots have no matching metadata locale', errors)
+
+    def test_requires_the_medium_iphone_set(self):
+        # App Store Connect rejects a listing whose only iPhone screenshots are 6.9-inch.
+        png(self.store / 'screenshots/iphone-6.9/en-US/01-play.png', 1320, 2868)
+        self.assertIn('requires the 6.3-inch medium iPhone screenshots', self.errors())
+        png(self.store / 'screenshots/iphone-6.3/en-US/01-play.png', 1206, 2622)
+        self.assertEqual(check_store(self.store), [])
 
 
 if __name__ == '__main__':

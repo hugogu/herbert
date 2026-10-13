@@ -10,7 +10,7 @@ platforms (universal purchase) because both share the bundle ID `info.hugogu.Her
 | `metadata/<locale>/` | Name, subtitle, description, keywords, promotional text and URLs for `en-US`, `zh-Hans` and `ja` |
 | `metadata/*.txt` | Copyright and categories |
 | `metadata/review_information/` | App Review contact and notes |
-| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone` (6.9″), `ipad` (13″) and `mac` |
+| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone-6.3` (required), `iphone-6.9` (optional), `ipad` (13″) and `mac` |
 | `screenshots/captions.json` | Screenshot order and the caption text for each language |
 
 File names follow the [fastlane `deliver`](https://docs.fastlane.tools/actions/deliver/) layout, so
@@ -24,7 +24,7 @@ counts and the absence of alpha channels.
 ## Screenshots
 
 ```sh
-scripts/capture_store_screenshots.sh            # iphone ipad mac, en zh-Hans ja
+scripts/capture_store_screenshots.sh            # iphone-6.3 iphone-6.9 ipad mac, en zh-Hans ja
 LANGUAGES=ja scripts/capture_store_screenshots.sh mac
 ```
 
@@ -32,14 +32,25 @@ LANGUAGES=ja scripts/capture_store_screenshots.sh mac
 shows L07 solved, the library, L18 with its first hint and a partial program, the guide, an AI
 Battlefield match and the progress screen. The match uses the debug-only fixture client with
 neutral names (`--battlefield-showcase`); no real provider, key or paid model is involved.
-iPhone 18 Pro Max (1320 × 2868) and iPad Pro 13-inch (2752 × 2064, landscape) run in the
-simulator with a 9:41 status bar. The Mac window is 1680 × 1050 points; the Mac pass takes over the
+iPhone 18 Pro (1206 × 2622), iPhone 18 Pro Max (1320 × 2868) and iPad Pro 13-inch (2752 × 2064,
+landscape) run in the simulator with a 9:41 status bar. The Mac window is 1680 × 1050 points; the Mac pass takes over the
 mouse and keyboard for about five minutes per language, and macOS cannot enable UI automation on a
 locked screen. `scripts/compose_store_screenshots.swift` then adds the captions and writes opaque
-PNGs at 1320 × 2868, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
-(useful for Chinese and Japanese); the wider iPad and Mac captions join it into one line. Upload
-each folder to the matching device and language. App Store Connect scales the 6.9″ and 13″ images
-to smaller devices.
+PNGs at 1206 × 2622, 1320 × 2868, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
+(useful for Chinese and Japanese); the wider iPad and Mac captions join it into one line.
+
+Upload each folder to the matching device and language. App Store Connect requires `iphone-6.3`
+("iPhone with Dynamic Island, medium display": 1206 × 2622 or 1179 × 2556), `ipad` and `mac`, and
+scales them to smaller devices. It rejects the 1320 × 2868 images in that slot as an invalid size.
+`iphone-6.9` is optional; add it for large iPhones under "View all sizes in Media Manager".
+iPhone Duo screenshots are optional for now; reports say Apple will require them from April 2027.
+
+### Header and search artwork (optional)
+
+The "Header and Search Results" tab (iOS 27 and later) takes optional creative assets, not
+screenshots: a 21:9 header at 3840 × 1646, a 3:2 search image from 1920 × 1280 to 3840 × 2560, or
+one universal 5244 × 2950 PNG for both. Only a small centered safe area is guaranteed to stay
+visible, and the art must be opaque. None is prepared yet; the listing is complete without it.
 
 Review every image before uploading: captures depend on the OS version, fonts and simulator.
 

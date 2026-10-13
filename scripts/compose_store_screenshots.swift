@@ -25,9 +25,13 @@ struct Device {
     let bottom: CGFloat
 }
 
+// App Store Connect requires the 6.3-inch medium iPhone; the 6.9-inch large set is optional.
 let devices = [
     Device(
-        name: "iphone", canvas: CGSize(width: 1320, height: 2868), cornerRadius: 0.12, titleSize: 92,
+        name: "iphone-6.3", canvas: CGSize(width: 1206, height: 2622), cornerRadius: 0.12, titleSize: 84,
+        subtitleSize: 46, lines: 2, top: 137, gap: 77, bottom: 100),
+    Device(
+        name: "iphone-6.9", canvas: CGSize(width: 1320, height: 2868), cornerRadius: 0.12, titleSize: 92,
         subtitleSize: 50, lines: 2, top: 150, gap: 84, bottom: 110),
     Device(
         name: "ipad", canvas: CGSize(width: 2752, height: 2064), cornerRadius: 0.02, titleSize: 96,
