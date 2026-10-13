@@ -181,16 +181,16 @@
 "风格" = "スタイル";
 "，已完成" = "、クリア済み";
 "玩法手册" = "遊び方ガイド";
-"原创课程" = "オリジナル講座";
+"原创课程" = "オリジナル問題";
 "社区题库" = "コミュニティ";
 "30 道原创关卡 · 按学习顺序探索 · 全部离线可玩" = "オリジナル全30問 · 順番に学ぶ · オフライン対応";
 "30 道原创课程 + 社区题库 · 全部离线可玩" = "オリジナル30問 + コミュニティ問題集 · オフライン対応";
 "第 %ld 章 · %@" = "第 %ld 章 · %@";
 "提示 %ld：%@" = "ヒント %ld：%@";
 "显示下一条提示" = "次のヒントを表示";
-"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "Herbert チャレンジは Wild Noodle Corporation が生み出し、H 言語は同社の創業者 Brian Conte が開発しました。本アプリは公開ルールに基づく独立した実装です。この版の 30 レッスンは本プロジェクトが独自に設計したもので、Wild Noodle や Microsoft の公式作品ではありません。";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "Herbert チャレンジは Wild Noodle Corporation が生み出し、H 言語は同社の創業者 Brian Conte が開発しました。本アプリは公開ルールに基づく独立した実装です。この版の 30 問は本プロジェクトが独自に設計したもので、Wild Noodle や Microsoft の公式作品ではありません。";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "問題 %@  /  コミュニティ問題集";
-"LESSON %@  /  ORIGINAL COURSE" = "レッスン %@  /  オリジナル講座";
+"PUZZLE %@  /  ORIGINAL SERIES" = "パズル %@  /  オリジナルシリーズ";
 
 // AI Battlefield
 "AI 配置" = "AI 設定";

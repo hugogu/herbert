@@ -206,7 +206,7 @@ struct GameView: View {
                     Eyebrow(
                         text: L10n.text(
                             model.problem.lesson == nil
-                                ? "PROBLEM %@  /  COMMUNITY COLLECTION" : "LESSON %@  /  ORIGINAL COURSE",
+                                ? "PROBLEM %@  /  COMMUNITY COLLECTION" : "PUZZLE %@  /  ORIGINAL SERIES",
                             model.problem.number))
                     Text(model.problem.displayTitle).font(.headline)
                     Text("由 \(model.problem.author) 创作 · 点亮所有目标，试着把代码再缩短一点。")

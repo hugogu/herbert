@@ -181,16 +181,16 @@
 "风格" = "Style";
 "，已完成" = ", solved";
 "玩法手册" = "Game guide";
-"原创课程" = "Original course";
+"原创课程" = "Original puzzles";
 "社区题库" = "Community";
-"30 道原创关卡 · 按学习顺序探索 · 全部离线可玩" = "30 original lessons · Learn in order · Play offline";
-"30 道原创课程 + 社区题库 · 全部离线可玩" = "30 original lessons + community archive · All offline";
+"30 道原创关卡 · 按学习顺序探索 · 全部离线可玩" = "30 original puzzles · Play in order · All offline";
+"30 道原创课程 + 社区题库 · 全部离线可玩" = "30 original puzzles + community archive · All offline";
 "第 %ld 章 · %@" = "Chapter %ld · %@";
 "提示 %ld：%@" = "Hint %ld: %@";
 "显示下一条提示" = "Show the next hint";
-"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "The Herbert challenge was created by Wild Noodle Corporation, whose founder Brian Conte developed the H language. This app independently implements the public rules; the 30 lessons in this edition were designed by this project and are not an official Wild Noodle or Microsoft release.";
+"Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "The Herbert challenge was created by Wild Noodle Corporation, whose founder Brian Conte developed the H language. This app independently implements the public rules; the 30 puzzles in this edition were designed by this project and are not an official Wild Noodle or Microsoft release.";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "PROBLEM %@  /  COMMUNITY COLLECTION";
-"LESSON %@  /  ORIGINAL COURSE" = "LESSON %@  /  ORIGINAL COURSE";
+"PUZZLE %@  /  ORIGINAL SERIES" = "PUZZLE %@  /  ORIGINAL SERIES";
 
 // AI Battlefield
 "AI 配置" = "AI Providers";

@@ -190,7 +190,7 @@
 "显示下一条提示" = "显示下一条提示";
 "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。" = "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。";
 "PROBLEM %@  /  COMMUNITY COLLECTION" = "PROBLEM %@  /  COMMUNITY COLLECTION";
-"LESSON %@  /  ORIGINAL COURSE" = "LESSON %@  /  ORIGINAL COURSE";
+"PUZZLE %@  /  ORIGINAL SERIES" = "关卡 %@  /  原创系列";
 
 // AI Battlefield
 "AI 配置" = "AI 配置";
