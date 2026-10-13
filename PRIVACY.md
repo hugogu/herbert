@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated October 12, 2026 (version 0.4.0). This policy covers **Herbert**, the open-source
+Last updated October 12, 2026, for version 1.0.0. This policy covers **Herbert**, the open-source
 app, and **Herbot Bot**, its App Store edition, on iPhone, iPad and Mac. Both editions handle data
 the same way.
 

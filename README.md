@@ -32,14 +32,13 @@ Display numbers are separate from internal save IDs; retired records remain impo
 
 ## Download for Mac
 
-**[Download the 0.3.9 preview DMG](https://github.com/hugogu/herbert/releases/download/v0.3.9/Herbert-macOS-universal.dmg)**
+**[Download the 1.0.0 DMG](https://github.com/hugogu/herbert/releases/download/v1.0.0/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
 no Xcode is needed. Includes all 1,799 problems.
 
-Screenshots below match the 0.3.9 source. This release includes the redesigned course
-and clearer action-button labels.
+Screenshots below match the 1.0.0 source.
 
-This preview is ad-hoc signed and **not Apple notarized**. macOS may block its first
+This DMG is ad-hoc signed and **not Apple notarized**. macOS may block its first
 launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
 **System Settings → Privacy & Security → Open Anyway** if you trust the download.
 See [checksums, installation and build details](docs/macos-distribution.md).
@@ -77,7 +76,7 @@ full game screen:
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The redesigned course is included in the 0.3.9 preview.*
+The redesigned course is included in the 1.0.0 release.*
 
 | L07 · Turning rose | L08 · Tandem lanterns |
 | --- | --- |
@@ -339,9 +338,9 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert \
   -destination 'platform=macOS' CODE_SIGN_IDENTITY=- test
 ```
 
-**Status: early preview.** Core tests, native Mac UI flows, and iOS compilation have been
-verified, and the App Store screenshot flows run in the iPhone and iPad simulators. Real-device
-testing remains open; there is no App Store or notarized binary release yet. See
+**Status: 1.0.0.** Core tests, native Mac UI flows, and iOS compilation have been verified,
+and the App Store screenshot flows run in the iPhone and iPad simulators. Real-device testing
+remains open; the App Store submission and a notarized Mac build are still to come. See
 [verification details](docs/verification.md).
 
 ## How it is built

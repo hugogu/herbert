@@ -11,12 +11,12 @@ L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙
 
 ## 下载 Mac 版
 
-**[下载 0.3.9 预览版 DMG](https://github.com/hugogu/herbert/releases/download/v0.3.9/Herbert-macOS-universal.dmg)**
+**[下载 1.0.0 版 DMG](https://github.com/hugogu/herbert/releases/download/v1.0.0/Herbert-macOS-universal.dmg)**
 — 支持 macOS 14+，同一个包兼容 Apple Silicon 和 Intel。打开 DMG，将 Herbert 拖到“应用程序”即可安装，无需 Xcode。包含全部 1,799 道题。
 
-下方截图与 0.3.9 源码一致。本版已包含新版课程和更清晰的操作按钮标签。
+下方截图与 1.0.0 源码一致。
 
-此预览版采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
+此 DMG 采用 ad-hoc 签名，**尚未经过 Apple 公证**。如果 macOS 阻止首次启动，确认信任下载来源后，可按 [Apple 指引](https://support.apple.com/en-us/102445)在“系统设置 → 隐私与安全 → 仍要打开”中确认。校验摘要、安装和构建方法见 [Mac 分发说明](docs/macos-distribution.md)。
 
 ![原创版原生 Mac App：穹顶镶嵌](docs/screenshots/course/course-mosaic.png)
 
@@ -216,5 +216,5 @@ python3 scripts/import_problems.py
 CI 执行格式检查、单元/集成测试和 Mac/iOS 编译；原生界面测试需要交互式 Mac 桌面。
 运行 `scripts/capture_screenshots.sh zh-Hans store` 生成原创课程截图；省略 `store` 则生成社区关卡截图。
 
-当前尚未接入云同步或发布 App Store 版；Mac DMG 为未公证的预览版。App Store 截图流程已在 iPhone/iPad 模拟器中运行，真机验证仍待完成。
+当前版本为 1.0.0，尚未接入云同步；App Store 版待提交，Mac DMG 尚未公证。App Store 截图流程已在 iPhone/iPad 模拟器中运行，真机验证仍待完成。
 完整记录见 [验证说明](docs/verification.md)。

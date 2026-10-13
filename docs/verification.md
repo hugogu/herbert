@@ -2,6 +2,13 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 1.0.0 发布校验（10 月 13 日）
+
+- 版本号更新为 1.0.0（build 14）。`scripts/check.sh` 通过：严格格式检查、34 项 Python 检查和 Swift 测试；工程与课程重复生成一致，商店资料检查通过。
+- 本机按 CI 参数构建通用 Mac Release 版：`scripts/package_macos.py` 生成 DMG 并挂载校验，确认 Herbert 1.0.0 (14)、arm64 + x86_64、macOS 14+、沙盒、30 道原创与 1,769 道社区题；`v1.0.0` 标签与应用版本一致。
+- `scripts/archive_app_store.sh ios --check` 和 `macos --check` 生成 Herbot Bot 1.0.0 (14) 的无签名归档，资源检查通过，含 `ITSAppUsesNonExemptEncryption = NO`，Mac 版类别为 Education。没有进行签名导出或上传。
+- 发布流程调整：`v0.*` 标签仍发布为预览版，1.0 及之后的标签发布为正式版并标记为最新。
+
 ## App Store 上架准备（10 月 12 日）
 
 - 本机已安装 iOS 27 Simulator runtime。`StoreScreenshotTests` 在 iPhone 18 Pro Max（竖屏）、iPad Pro 13 英寸（M5，横屏）模拟器和原生 Mac 上分别以英文、简体中文、日文运行通过：用参考解依次通过 L01–L07，截取 L07 通关、关卡库、L18 提示与部分程序、手册、确定性夹具 AI Battlefield 比赛和记录页，合成 54 张商店截图。没有调用付费 API。

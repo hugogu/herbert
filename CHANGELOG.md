@@ -3,15 +3,19 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
-## Unreleased
+## [1.0.0] - 2026-10-13
 
 - Add the App Store submission kit for Herbot Bot: English, Simplified Chinese and Japanese listing
   text, captioned iPhone, iPad and Mac screenshots, a support page, a privacy policy covering the
   App Store edition, and scripts to capture screenshots, validate metadata and archive builds.
 - Declare `ITSAppUsesNonExemptEncryption = NO` for both editions and the Education category for the
   App Store edition.
-- Fix Dismiss keyboard and the command keys on iPad after the keyboard reflows a lesson.
+- Fix Dismiss keyboard and the command keys on iPad after the keyboard reflows a puzzle.
 - Translate the 0.4.0 Guide credits and rule links into English and Japanese.
+- Call the 30 originals puzzles in the English and Japanese interface; puzzle details show
+  PUZZLE / ORIGINAL SERIES in all three languages.
+- Publish v1.0 and later tags as regular GitHub releases; v0.* tags stay pre-releases.
+- Bump the app marketing version to 1.0.0 and build number to 14.
 
 ## [0.4.0] - 2026-10-11
 

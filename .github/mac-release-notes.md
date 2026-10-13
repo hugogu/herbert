@@ -1,58 +1,34 @@
 Download **Herbert-macOS-universal.dmg** below, open it, and drag **Herbert.app** to
 **Applications**. Requires **macOS 14+**; supports **Apple Silicon and Intel**. No Xcode needed.
 
-**Updated in 0.4.0:**
+**New in 1.0.0:**
 
-- Correct the project's historical credits: Wild Noodle Corporation created the Herbert
-  challenge, its founder Brian Conte developed the `h` language, and tealang.info hosts
-  the later quolc-led community judge and puzzle archive.
-- Redesign the advanced course as open geometric routes with broken-wall landmarks and trap ribbons. Keep the target/start geometry of L23–L30, preserve old progress and match snapshots, and add alternative budget-compliant traversals.
-- Rebuild L04–L06 as Sunlit courtyard, Diamond stair and Growing spiral, with localized hints and legacy-save protection.
-- Improve action-label contrast across Apple platforms, shorten backup actions to Export / Import in all three languages, and refresh the English and Chinese course captures.
-- Set the App Store edition's display name to **Herbot Bot**. The open-source Mac preview in this release remains **Herbert**.
+- Herbert reaches 1.0. Its original-only App Store edition, **Herbot Bot**, is prepared for
+  iPhone, iPad and Mac, with listing text in English, Simplified Chinese and Japanese, captioned
+  screenshots, a support page and a privacy policy that covers both editions. This DMG remains the
+  open-source **Herbert** edition.
+- The 30 originals are called puzzles in the English and Japanese interface, and puzzle details
+  show PUZZLE / ORIGINAL SERIES in all three languages.
+- On iPad, **Dismiss keyboard** and the s/l/r keys work again after the landscape keyboard
+  reflows a puzzle.
+- The Guide credits and rule links are translated into English and Japanese.
+- Since 0.3.9, the project also credits Wild Noodle Corporation for the original Herbert
+  challenge and its founder Brian Conte for the `h` language, distinct from the later quolc-led
+  Herbert Online Judge community archive.
 
-**AI Battlefield features refined in 0.3.8:**
+This build includes **30 original puzzles + 1,769 archived community problems**, automatic
+English/Chinese/Japanese UI, Modern and Classic boards, movement trails, grid dots and local
+progress with JSON backups. Original puzzles are numbered L01–L30.
 
-- Add **Anthropic-compatible Messages API** providers with native authentication,
-  model discovery, streaming thinking, signed content replay and cache-aware usage.
-  A dedicated **Google Gemini** provider joins OpenRouter, SiliconFlow and OpenAI-compatible endpoints.
-- **Manual retry** gives a specific model one extra attempt on a non-accepted puzzle,
-  including saved matches. It preserves prompts, model settings, prior answers, best
-  scores, remaining budgets and overload cooldowns. The icon sits beside the status
-  on the first line, leaving the program preview and timing the full second line.
-- Retain full responses and diagnostics. Recover explicitly marked final H answers
-  from reasoning or incomplete fences while keeping their original output. Interrupted
-  or truncated responses remain separate from rejected programs. Playground can run
-  over-limit programs as trials without recording accepted progress.
-- Treat **429 rate limits as Overloaded**, honor provider retry hints and apply
-  exponential backoff to transient failures. Stop cancels pending waits and requests.
-  **402 credit failures become Burnout** and stop that entrant's automatic requests.
-- Show each attempt's time and each model's cumulative attempt time, including
-  retries and failures. Align model time with the top of the normalized percentage,
-  with total points underneath. Share cards use the same input/output and reported
-  total tokens, include time and points, and omit unavailable cache rates.
-- Open **Match history as a full page** that expands with the main Mac window.
-  Keep answer dialogs resizable with collapsible Markdown reasoning. Compact result
-  headers, contextual help and landscape layouts give boards and code more space.
-- **Copy AI prompt** from a puzzle's details to reuse Battlefield's exact rules,
-  worked examples and board in an external chat. Community puzzles show archived
-  best-answer lengths; a board guide explains walls and traps.
+**AI Battlefield** pits models from OpenRouter, SiliconFlow, Google Gemini and OpenAI- or
+Anthropic-compatible APIs against the puzzles. Programs are judged by the native engine with
+normalized coverage/code-efficiency scores, retries, timing, token usage and shareable result
+cards. AI is optional and uses your own API key and credits. Keys stay in Keychain; settings and
+history stay local. Streaming estimates and cancellation cannot guarantee provider billing. See
+[setup and scoring](https://github.com/hugogu/herbert/blob/v1.0.0/docs/ai-battlefield.md) and
+[privacy](https://github.com/hugogu/herbert/blob/v1.0.0/PRIVACY.md).
 
-The preview includes **30 original lessons + 1,769 archived community problems**,
-automatic English/Chinese/Japanese UI, Modern and Classic boards, movement trails,
-grid dots and local progress with JSON backups. Original lessons are numbered L01–L30.
-
-Herbert Benchmark judges H programs in the native engine. Rankings use normalized
-coverage/code-efficiency scores, with total points as a reference. Match Settings
-provides optional time and per-model, per-problem token budgets, both off by default,
-and three attempts per problem. All models can finish their selected attempts.
-
-AI is optional and requires your API key/credits. Keys stay in Keychain; settings and
-history stay local. Streaming estimates and cancellation cannot guarantee provider
-billing. See [setup and scoring](https://github.com/hugogu/herbert/blob/v0.4.0/docs/ai-battlefield.md)
-and [privacy](https://github.com/hugogu/herbert/blob/v0.4.0/PRIVACY.md).
-
-**Signing:** this preview is ad-hoc signed and has not been notarized by Apple.
+**Signing:** this DMG is ad-hoc signed and has not been notarized by Apple.
 If macOS blocks the first launch, follow [Apple's instructions](https://support.apple.com/en-us/102445)
 for **System Settings → Privacy & Security → Open Anyway** after trying to open it.
 
@@ -65,17 +41,17 @@ shasum -a 256 -c Herbert-macOS-universal.dmg.sha256
 GitHub Actions tests, builds both architectures, audits the signature, sandbox and
 bundled catalogs, mounts the DMG read-only to verify it, and publishes after Mac/iOS
 builds pass. Native Mac UI tests use deterministic fixtures; paid provider calls and
-iPhone/iPad runtime checks remain device verification work.
+real iPhone/iPad devices remain manual verification work.
 
 Code and the 30 originals are MIT licensed. Community content has separate, unconfirmed
-redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v0.4.0/NOTICE.md).
-The App Store scheme contains only originals; this DMG is the open-source edition.
+redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v1.0.0/NOTICE.md).
+The App Store edition contains only the originals; this DMG is the open-source edition.
 
-中文：0.4.0 更正项目历史来源：Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发；tealang.info 是 quolc 后来建立的社区评测器和题库。重构进阶开放几何关卡，加入断续墙面、陷阱纹样及经过验证的替代路线，保护旧进度和比赛快照；重做 L04–L06 并补齐三语提示。提高操作按钮文字对比度，统一导入/导出名称并刷新中英文关卡截图。App Store 版显示名改为 **Herbot Bot**；本次 GitHub Mac 预览仍名为 **Herbert**。
+中文：Herbert 1.0.0 发布。仅含原创关卡的 App Store 版 **Herbot Bot** 已备齐 iPhone、iPad 与 Mac 的中英日商店文案、带说明的截图、支持页面和覆盖两个版本的隐私政策；本 DMG 仍是开源版 **Herbert**。英文和日文界面将 30 道原创关卡称为谜题（puzzle），题目说明显示「关卡 / 原创系列」。修复 iPad 横屏键盘弹出后「收起键盘」和 s/l/r 键失效的问题，补齐手册致谢与规则链接的英日翻译，并沿用 0.4.0 对 Herbert 挑战与 H 语言来源的更正。
 
 下载下方 DMG 后将 Herbert 拖入“应用程序”。支持 macOS 14+，包含 30 道原创和 1,769 道社区题，
-中英日界面、连续墙、轨迹与网格、本地历史和 PNG 分享。预览版尚未经过 Apple 公证。
+中英日界面、连续墙、轨迹与网格、本地历史和 PNG 分享。此 DMG 尚未经过 Apple 公证。
 AI 使用自己的 API 额度；密钥留在钥匙串，本地预算与取消请求无法保证最终账单。
 
-See the [changelog](https://github.com/hugogu/herbert/blob/v0.4.0/CHANGELOG.md)
-and [README](https://github.com/hugogu/herbert/tree/v0.4.0#readme) for screenshots and controls.
+See the [changelog](https://github.com/hugogu/herbert/blob/v1.0.0/CHANGELOG.md)
+and [README](https://github.com/hugogu/herbert/tree/v1.0.0#readme) for screenshots and controls.
