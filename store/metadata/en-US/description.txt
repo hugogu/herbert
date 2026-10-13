@@ -1,11 +1,11 @@
 Herbot Bot is a programming puzzle game about one idea: say more with less.
 
-Guide a little robot across a 25 × 25 board and light every target. You describe the route in H, a tiny language with three commands: s steps forward, l turns left and r turns right. Every letter and number costs one byte, so each lesson asks for a program that is not only correct, but short.
+Guide a little robot across a 25 × 25 board and light every target. You describe the route in H, a tiny language with three commands: s steps forward, l turns left and r turns right. Every letter and number costs one byte, so each puzzle asks for a program that is not only correct, but short.
 
 LEARN BY PLAYING
-• 30 original lessons in six chapters, from a single step to recursive systems
+• 30 original puzzles in six chapters, from a single step to recursive systems
 • Discover procedures, parameters, commands passed as arguments and recursion
-• Every lesson has a clear goal and two optional hints, never a full answer
+• Every puzzle has a clear goal and two optional hints, never a full answer
 • A built-in guide explains the whole language with examples
 
 WATCH YOUR IDEAS RUN
@@ -16,7 +16,7 @@ WATCH YOUR IDEAS RUN
 • Pinch to zoom and drag the board on iPhone and iPad; press ⌘Return to run on Mac
 
 EVERY BYTE COUNTS
-• Your shortest solution for each lesson is saved automatically
+• Your shortest solution for each puzzle is saved automatically
 • Drafts are kept as you type and restored when you return
 • Export and import JSON backups to move progress between devices
 
@@ -24,6 +24,6 @@ AI BATTLEFIELD (OPTIONAL)
 Curious how AI models handle the same puzzles? Add a provider you already use (OpenRouter, SiliconFlow, Google Gemini, or any OpenAI-compatible or Anthropic-compatible API) with your own API key, choose models and puzzles, and start a match. Every submitted program is judged on your device, with retries, timing, token usage and a shareable result card. The app contacts a provider only when you save it or agree to start a match, sending requests directly with your key, which stays in the Keychain. AI Battlefield requires your own provider account, and the provider may charge you for its use; the rest of the game works without it.
 
 PRIVATE AND OFFLINE
-No account, no ads, no tracking and no in-app purchases. Lessons, progress and settings stay on your device. Available in English, Simplified Chinese and Japanese.
+No account, no ads, no tracking and no in-app purchases. Puzzles, progress and settings stay on your device. Available in English, Simplified Chinese and Japanese.
 
-Herbot Bot independently implements the public rules of the Herbert programming challenge, created by Wild Noodle Corporation, whose founder Brian Conte developed the H language. It is not affiliated with Wild Noodle or Microsoft. All lessons in this app are original designs, and its source code is open on GitHub.
+Herbot Bot independently implements the public rules of the Herbert programming challenge, created by Wild Noodle Corporation, whose founder Brian Conte developed the H language. It is not affiliated with Wild Noodle or Microsoft. All puzzles in this app are original designs, and its source code is open on GitHub.

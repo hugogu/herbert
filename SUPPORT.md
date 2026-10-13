@@ -19,7 +19,7 @@ device. Nothing is synchronized through the developer.
 
 **How do I move progress to another device?** Open **Progress**, choose **Export** and save the JSON
 backup. On the other device, choose **Import**. Imports validate every solution and keep the
-shorter one when both devices solved a lesson.
+shorter one when both devices solved a puzzle.
 
 **Does the game need an internet connection?** No. Only the optional AI Battlefield contacts the AI
 providers you configure.
@@ -31,12 +31,12 @@ Optional time and token limits help you control a match, but only the provider's
 **How do I remove an API key?** In **AI Battlefield**, open **AI Providers** (**Models** on iPhone),
 select the provider and choose **Remove provider**. This deletes the key from the Keychain.
 
-**Why does the App Store edition have 30 puzzles?** It contains the 30 original lessons designed for
+**Why does the App Store edition have 30 puzzles?** It contains the 30 original puzzles designed for
 this project. The open-source edition on GitHub also includes an archive of community puzzles
 whose redistribution rights are not confirmed, so it is not distributed through the App Store.
 
 **Which languages are supported?** English, Simplified Chinese and Japanese. The app follows your
 device or per-app language setting and uses English for other languages.
 
-**I think a lesson or an attribution is wrong.** Please open an issue or send an email with the
-lesson number (for example L18) and what you expected.
+**I think a puzzle or an attribution is wrong.** Please open an issue or send an email with the
+puzzle number (for example L18) and what you expected.

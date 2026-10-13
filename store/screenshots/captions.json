@@ -19,7 +19,7 @@
         "Write H code and light every target in as few bytes as you can."
       ],
       "course": [
-        "30 original lessons",
+        "30 original puzzles",
         "Go from a single step to recursion across six chapters."
       ],
       "hints": [
@@ -71,7 +71,7 @@
         "H 言語でプログラムを書き、\nできるだけ少ないバイト数で目標を照らそう。"
       ],
       "course": [
-        "オリジナル 30 レッスン",
+        "オリジナルパズル 30 問",
         "最初の一歩から再帰まで、\n6つの章で段階的に学べます。"
       ],
       "hints": [
@@ -88,7 +88,7 @@
       ],
       "progress": [
         "1バイトにこだわる",
-        "各レッスンの最短解を保存。\nオフライン、アカウント不要、広告なし。"
+        "各パズルの最短解を保存。\nオフライン、アカウント不要、広告なし。"
       ]
     }
   }

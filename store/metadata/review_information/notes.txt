@@ -1,10 +1,10 @@
 Herbot Bot is an offline programming puzzle game for iPhone, iPad and Mac. It needs no account or sign-in and has no ads, tracking or in-app purchases.
 
 HOW TO PLAY
-1. On Problems, tap "Take the first step" to open lesson L01.
-2. Type s in the program editor (or tap the s key) and tap Run. The robot moves one cell, lights the target and the lesson is solved.
-3. Lesson L02 is solved by: rsslsslss
-Every lesson has a goal and two optional hints. "Game rules" explains the H language.
+1. On Problems, tap "Take the first step" to open puzzle L01.
+2. Type s in the program editor (or tap the s key) and tap Run. The robot moves one cell, lights the target and the puzzle is solved.
+3. Puzzle L02 is solved by: rsslsslss
+Every puzzle has a goal and two optional hints. "Game rules" explains the H language.
 
 H programs are puzzle solutions run by the app's own interpreter for this game. They only move the robot on the board; they are never compiled or executed as native code, and no code is downloaded.
 
