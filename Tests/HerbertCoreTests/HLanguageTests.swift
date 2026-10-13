@@ -26,6 +26,16 @@ final class HLanguageTests: XCTestCase {
         XCTAssertEqual(try commands("a:s\na()"), "s")
     }
 
+    func testParameterlessProceduresMayUseEmptyParentheses() throws {
+        XCTAssertEqual(try commands("f():ssssrf()\nf()", maximum: 10), "ssssrssssr")
+        XCTAssertEqual(try commands("a():s\na"), "s")
+        XCTAssertEqual(try commands("a( ):s\nb:a()r\nb"), "sr")
+        // Punctuation is free, so the parentheses never change the byte count.
+        XCTAssertEqual(HProgram.countBytes("f():ssssrf()\nf()"), HProgram.countBytes("f:ssssrf\nf"))
+        // A procedure with a parameter still receives `()` as one empty instruction argument.
+        XCTAssertEqual(try commands("a(X):Xs\na()"), "s")
+    }
+
     func testNumericRecursionAndZeroSuppression() throws {
         XCTAssertEqual(try commands("a(X):sa(X-1)\na(4)"), "ssss")
         XCTAssertEqual(try commands("a(X,Y):Ya(X-1,Y)\na(4,s)"), "ssss")
@@ -57,6 +67,7 @@ final class HLanguageTests: XCTestCase {
             "", "u", "a:s", "ss\na:s", "s:s\ns", "a:s\na:r\na", "a(X,X):s\na(s,s)",
             "a(X):X\na", "a(X):X\na(s,s)", "a(X):X\na(256)", "a(X):X\na(1s)",
             "a(X):X\na(s", "a(X):Y\na(s)", "a(X):s\na(1*)", "a(X):s\na(1+)",
+            "a(:s\na", "a(,):s\na", "a(,X):s\na(s)", "a():s\na(s)", "a()(X):s\na(s)",
         ]
         for source in invalid { XCTAssertThrowsError(try HProgram.compile(source), source) }
     }
