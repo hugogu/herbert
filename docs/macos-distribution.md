@@ -75,7 +75,8 @@ for subsequent local builds. Outputs and derived build files are ignored by Git.
 2. Commit and push the tested changes. Use a new tag matching the app version,
    for example `v0.3.3`; the workflow rejects a mismatch.
 3. Push the tag. CI builds the exact tagged source, then the release job verifies
-   the downloaded artifact checksum and creates a GitHub **pre-release** with the DMG.
+   the downloaded artifact checksum and publishes the DMG as a GitHub release. `v0.*` tags
+   become **pre-releases**; 1.0 and later become regular releases marked as latest.
 
 Release publishing has write permission only in the tagged release job, after the
 read-only checks job succeeds. Pull requests and branch builds cannot publish a release.

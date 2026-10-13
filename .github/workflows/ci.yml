@@ -101,8 +101,13 @@ jobs:
         run: |
           cd outputs
           sha256sum --check Herbert-macOS-universal.dmg.sha256
+          # 0.x tags remain previews; 1.0 and later are regular releases.
+          case "$RELEASE_TAG" in
+            v0.*) kind=--prerelease; title="Herbert $RELEASE_TAG — Mac preview" ;;
+            *) kind=--latest; title="Herbert $RELEASE_TAG for Mac" ;;
+          esac
           gh release create "$RELEASE_TAG" \
             Herbert-macOS-universal.dmg Herbert-macOS-universal.dmg.sha256 \
-            --repo "$GITHUB_REPOSITORY" --verify-tag --prerelease \
-            --title "Herbert $RELEASE_TAG — Mac preview" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag "$kind" \
+            --title "$title" \
             --notes-file ../.github/mac-release-notes.md
