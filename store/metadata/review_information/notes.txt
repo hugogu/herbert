@@ -1,26 +1,27 @@
-HERBOT BOT 1.1.0 (15) - APP REVIEW NOTES
+HERBOT BOT 2.0.0 (15) - APP REVIEW NOTES
 
 BINARY IDENTITY
 The product is Herbot Bot.app; its display, bundle and executable names are Herbot Bot. Bundle ID remains info.hugogu.Herbert.
 
-WHAT CHANGED SINCE 1.0.0
-- 20 new original puzzles: L31-L40 master lessons and L41-L50 synthesis lessons. The course now has 50 puzzles in ten chapters, each with a goal and two optional hints. Existing L01-L30 progress is preserved.
-- A 3D board style alongside Modern and Classic, with camera rotation, tilt, zoom, an enlarged board and follow-robot controls. All styles use the same puzzle rules.
-- AI Battlefield: cancel one generating answer without stopping the match; manual retry; average output speed; stable column order for tied models; improved long-response viewing and model output/reasoning limits. New matches reuse the previous selection.
-- App version and build at the end of the Guide.
+WHAT CHANGED SINCE 1.1.0
+- Optional Apple-authenticated global and per-puzzle leaderboards, verified by a Cloudflare Workers + D1 service.
+- My combines local Progress and Account, with public nickname settings, explicit solution sharing and account deletion.
 
 PURPOSE AND ACCESS
-An educational programming puzzle game for learners and developers. Guide a robot to light every target on a 25 x 25 board using H: s (forward), l (left) and r (right). Procedures, parameters and recursion allow very short solutions. Each letter and numeric literal costs one byte; punctuation is free. All 50 puzzles, hints, the Guide and progress work offline. No app account, login, registration, account deletion, ads, tracking, purchases or paid app features.
+An educational programming puzzle game for learners and developers. Guide a robot to light every target on a 25 x 25 board using H: s (forward), l (left) and r (right). Procedures, parameters and recursion allow very short solutions. Each letter and numeric literal costs one byte; punctuation is free. All 50 puzzles, hints, the Guide and progress work offline. Offline play needs no account. Optional leaderboards offer Apple sign-in, nickname settings and account deletion when a service URL is configured. No ads, tracking, purchases or paid app features.
 
 HOW TO TEST
 1. Problems: open L01, type s (or tap the s key), then Run. On iPhone, scroll the editor header near the top before typing. L02 can be solved with rsslsslss. "Show the next hint" reveals one of two hints; "Game rules" explains H.
 2. Search L31 or L41 to find the new chapters; L50 is the final puzzle. All puzzles are available without payment or unlocking earlier chapters.
 3. In any puzzle, open Board settings and choose 3D. Close settings, then use Enlarge board. Try rotate, tilt, zoom and follow-robot controls; execution controls remain available. Close to return to the editor. Modern and Classic are still available.
-4. Guide explains H and shows version/build at the end. Progress lists solved puzzles and exports/imports JSON backups.
+4. Guide explains H and shows version/build at the end. My > Progress lists solved puzzles and exports/imports JSON backups.
 5. Optional AI Battlefield: open AI Providers ("Models" on iPhone), add a provider with an HTTPS base URL and your own API key, then save to load models. Under New match ("New" on iPhone), choose models and puzzles and tap "Agree & start match". While generating, the stop button at the end of an answer's first line cancels that answer; the match continues. The same action offers retry afterwards. Open an answer, view history or share a result image.
 
 EXTERNAL SERVICES AND PRIVACY
-Only optional AI Battlefield uses external services, configured by the user: OpenRouter, SiliconFlow, Google Gemini, or an OpenAI- or Anthropic-compatible HTTPS API. Saving a provider fetches models; consenting to a match sends rules, selected boards, an optional prompt and AI conversation directly to that provider. A provider account/key is required for AI requests and the provider may charge for usage. Keys are stored in the system Keychain, never bundled. No developer server, proxy, analytics, authentication or payment service. Answers are judged locally; H programs move the robot and never execute as native code. Product-page AI match screenshots use neutral demo models, not commercial performance claims.
+Optional AI Battlefield uses providers configured by the user: OpenRouter, SiliconFlow, Google Gemini, or an OpenAI- or Anthropic-compatible HTTPS API. Saving a provider fetches models; consenting to a match sends rules, selected boards, an optional prompt and AI conversation directly to that provider. A provider account/key is required for AI requests and the provider may charge for usage. Keys are stored in the system Keychain, never bundled. AI requests go directly to the selected provider, without a developer proxy. The optional leaderboard uses the configured Worker service and Apple authentication; no analytics or payment service is integrated. Answers are judged locally; H programs move the robot and never execute as native code. Product-page AI match screenshots use neutral demo models, not commercial performance claims.
 
 REGIONS AND CONTENT
 Features are identical across available regions; UI languages are English, Simplified Chinese and Japanese. No regulated services. All bundled puzzles, texts and artwork are original, MIT-licensed at https://github.com/hugogu/herbert. The app independently implements the public Herbert rules and is not affiliated with Wild Noodle or Microsoft. No community puzzle archive or reference solutions are bundled.
+
+OPTIONAL LEADERBOARD
+When a service URL is configured, My > Account provides Sign in with Apple, nickname editing and account deletion. Puzzle pages offer explicit solution uploads; the server replays programs to verify scores. Only nicknames and verified scores/metrics are public, not solution programs. Offline play still needs no account.

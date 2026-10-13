@@ -1,5 +1,8 @@
 # Privacy
 
+Last updated October 13, 2026, for version 2.0.0. This policy covers **Herbert**, the
+open-source app, and **Herbot Bot**, its App Store edition, on iPhone, iPad and Mac.
+
 Herbert supports offline use, optional user-configured AI providers, and an optional
 verified leaderboard in configured App Store builds. No analytics or advertising
 service is integrated. Deployments must publish their operator, retention policy
@@ -74,7 +77,8 @@ host shared images or publish match results automatically.
 
 ## Children
 
-The game suits all ages and collects no personal information from anyone, including children.
+Offline play requires no personal information, including from children. Optional cloud
+accounts process the identity and solution data described above.
 AI Battlefield needs an account with a third-party AI provider, which sets its own age
 requirements.
 
@@ -90,7 +94,7 @@ For help with the app, see [SUPPORT.md](SUPPORT.md). For security issues, see [S
 
 ---
 
-中文：本政策适用于开源版 Herbert 与 App Store 版 Herbot Bot。开发者不收集任何个人数据，没有账号、统计、广告、追踪或开发者服务器。
+中文：本政策适用于开源版 Herbert 与 App Store 版 Herbot Bot。没有统计、广告或追踪。普通游戏无需账号；可选排行榜的数据处理见下文。
 普通游戏完全离线。AI Battlefield 由你自行选择服务商并提供 API Key；保存或刷新服务商会发送模型查询，
 点击“同意并开始比赛”会直接发送规则、题目、附加提示词和当前题目的对话。服务商可能保存请求并收取 API 费用。
 开发者不代理请求，不收集副本。密钥保存在关闭同步的系统钥匙串中，配置和完整比赛历史保存在本机。
