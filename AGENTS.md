@@ -53,3 +53,5 @@
 
 - When a plain Button shares a container background with a sibling action, give its label a rectangular contentShape. Otherwise blank space inside the apparent progress cell may not open answer details.
 - Battlefield repositories encode dates as milliseconds since 1970. Normalize expected values through that date strategy when comparing complete disk round trips; in-memory Date precision can differ slightly.
+
+- Store media capture uses an unlocked Mac and sequential native tests. Direct AX window writes can be denied even when XCTest works; drag a window edge to `desiredSize - 1` for the exact final size. Use 1440 × 900 points for Retina screenshots and 1600 × 900 for 16:9 video so playback controls remain visible. The UI runner cannot write into the checkout: save timestamped window frames in its temporary directory, attach ZIPs to XCTest results, and export them with `xcresulttool`.
