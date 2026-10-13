@@ -151,7 +151,7 @@ app before a match starts, which also covers Guideline 5.1.2(i) on sharing data 
 | Promotional text, description, keywords | `metadata/<locale>/` |
 | Support URL, marketing URL | `metadata/<locale>/support_url.txt`, `marketing_url.txt` |
 | Copyright | `metadata/copyright.txt`: 2026 Hugo Gu |
-| Version / build | 1.0.0 (14) from `scripts/generate_project.py` |
+| Version / build | 2.0.0 (15) from `scripts/generate_project.py` |
 | What's New | Not shown for the first version; write `release_notes.txt` for later updates |
 | App previews | None (optional) |
 | Release | Manually release this version |

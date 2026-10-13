@@ -1,0 +1,69 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "herbert-leaderboard-local",
+    "main": "src/index.ts",
+    "compatibility_date": "2026-10-10",
+    "compatibility_flags": ["nodejs_compat"],
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "herbert-leaderboard-local",
+            "database_id": "00000000-0000-0000-0000-000000000000",
+            "migrations_dir": "migrations",
+        },
+    ],
+    "vars": {
+        "APPLE_CLIENT_ID": "info.hugogu.Herbert.Staging",
+        "APPLE_TEAM_ID": "",
+        "APPLE_KEY_ID": "",
+        "TOKEN_ISSUER": "herbert-leaderboard-local",
+        "ADMIN_ISSUER": "",
+        "ADMIN_AUDIENCE": "",
+        "ADMIN_EMAILS": "",
+    },
+    "triggers": { "crons": [] },
+    "env": {
+        "staging": {
+            "name": "herbert-leaderboard-staging",
+            "d1_databases": [
+                {
+                    "binding": "DB",
+                    "database_name": "herbert-leaderboard-staging",
+                    "database_id": "00000000-0000-0000-0000-000000000001",
+                    "migrations_dir": "migrations",
+                },
+            ],
+            "vars": {
+                "APPLE_CLIENT_ID": "info.hugogu.Herbert.Staging",
+                "APPLE_TEAM_ID": "",
+                "APPLE_KEY_ID": "",
+                "TOKEN_ISSUER": "herbert-leaderboard-staging",
+                "ADMIN_ISSUER": "",
+                "ADMIN_AUDIENCE": "",
+                "ADMIN_EMAILS": "",
+            },
+            "triggers": { "crons": ["17 3 * * *"] },
+        },
+        "production": {
+            "name": "herbert-leaderboard",
+            "d1_databases": [
+                {
+                    "binding": "DB",
+                    "database_name": "herbert-leaderboard-production",
+                    "database_id": "00000000-0000-0000-0000-000000000002",
+                    "migrations_dir": "migrations",
+                },
+            ],
+            "vars": {
+                "APPLE_CLIENT_ID": "info.hugogu.Herbert",
+                "APPLE_TEAM_ID": "",
+                "APPLE_KEY_ID": "",
+                "TOKEN_ISSUER": "herbert-leaderboard-production",
+                "ADMIN_ISSUER": "",
+                "ADMIN_AUDIENCE": "",
+                "ADMIN_EMAILS": "",
+            },
+            "triggers": { "crons": ["17 3 * * *"] },
+        },
+    },
+}

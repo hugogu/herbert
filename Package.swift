@@ -9,11 +9,16 @@ let package = Package(
         .library(name: "HerbertCore", targets: ["HerbertCore"]),
         .library(name: "HerbertCommunity", targets: ["HerbertCommunity"]),
         .library(name: "HerbertBattlefield", targets: ["HerbertBattlefield"]),
+        .library(name: "HerbertCloud", targets: ["HerbertCloud"]),
     ],
     targets: [
         .target(name: "HerbertCore", resources: [.process("Resources")]),
         .target(name: "HerbertCommunity", dependencies: ["HerbertCore"], resources: [.process("Resources")]),
         .target(name: "HerbertBattlefield", dependencies: ["HerbertCore"]),
+        .target(name: "HerbertCloud", dependencies: ["HerbertCore"]),
+        .testTarget(name: "HerbertCloudTests", dependencies: ["HerbertCloud"]),
+        .executableTarget(
+            name: "HerbertJudgeFixtures", dependencies: ["HerbertCore"], path: "Tools/HerbertJudgeFixtures"),
         .testTarget(name: "HerbertBattlefieldTests", dependencies: ["HerbertBattlefield"]),
         .testTarget(
             name: "HerbertCoreTests", dependencies: ["HerbertCore", "HerbertCommunity"],

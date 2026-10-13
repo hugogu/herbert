@@ -10,11 +10,38 @@ or reports from real devices. Small, focused changes are easiest to review.
 3. Run on your Mac, or select your own signing team for an iPhone/iPad.
 4. Create a branch for your change. Do not commit personal signing settings or save files.
 
-There are no external package dependencies. `HerbertCore` is a standalone local Swift
+The native app has no external Swift dependencies. `HerbertCore` is a standalone local Swift
 package; `HerbertBattlefield` contains the UI-independent AI client, judge and competition engine.
 UI and original lessons support English, Simplified Chinese and Japanese.
 Use `HerbertAppStore` to test the original-only edition. Personal signing can go in
 ignored `Config/Local.xcconfig`; generation keeps it intact.
+
+## Cloud service development
+
+See the [development guide](docs/development.md) for local testing, Apple login,
+database migrations and staging/production setup. Local Worker/D1 tests need
+**no Cloudflare account, remote database or Apple credentials**:
+
+The npm project and lockfile live in **`worker/`**. Start from the repository
+root and include the `cd worker` below; running `npm ci` at the root fails.
+
+```sh
+cd worker
+npm ci                 # Node 24
+npm run check
+npm test
+npm run migrate:local   # Manual API testing: persistent local SQLite
+npm run dev             # http://127.0.0.1:8787
+```
+
+`worker/wrangler.jsonc` defines local, `staging` and `production` bindings; remote
+commands explicitly select an environment. Use separate D1 databases and secrets.
+`HerbertAppStore` Debug uses `HERBERT_CLOUD_STAGING_URL` and the separate Apple
+App ID `info.hugogu.Herbert.Staging`; Release/Archive uses
+`HERBERT_CLOUD_PRODUCTION_URL` and `info.hugogu.Herbert`. Put these HTTPS origins
+in ignored `Config/Local.xcconfig`, following `Config/Local.xcconfig.example`.
+For signed-device end-to-end testing, configure the staging Worker and Apple
+App ID as described in the guide. The native client does not accept plain HTTP.
 
 ## Before opening a pull request
 

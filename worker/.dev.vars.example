@@ -1,0 +1,11 @@
+# Optional for manual local Apple sign-in, not needed by npm test or public API reads.
+# Copy to .dev.vars, generate fresh local keys, then fill in the staging Apple details.
+# Never use production credentials here. Do not commit .dev.vars.
+SESSION_SECRET=""
+TOKEN_ENCRYPTION_KEY=""
+APPLE_TEAM_ID=""
+APPLE_KEY_ID=""
+# Full Sign in with Apple P8 PEM contents, not a filename/path.
+# Keep BEGIN/END PRIVATE KEY lines; encode line breaks as \n in a double-quoted value.
+# See docs/development.md for a complete example and diagnostic codes.
+APPLE_PRIVATE_KEY=""

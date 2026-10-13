@@ -16,9 +16,13 @@
 3. 给 app 和 UI test target 选择自己的签名团队。推荐在被 Git 忽略的 `Config/Local.xcconfig` 中写 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`；生成工程时不会覆盖此文件。不要提交个人签名配置、证书或密钥。
 4. Run 安装。新安装时应显示 **30 PROBLEMS**，继续卡片为 L01。
 
-两种 scheme 沿用同一个 Bundle ID；同一设备上互相安装会替换应用，不会同时存在。
-先导出已有进度备份。已有社区记录会留在本地文件中，但原创版不显示、不计数、不导出这些记录。
+`HerbertAppStore` 的 Debug 使用 `info.hugogu.Herbert.Staging`，可以与正式版同时安装，
+存档独立；需要在 Apple Developer 中给这个测试 App ID 配置签名及 Sign in with Apple。
+Release / Archive 仍使用 `info.hugogu.Herbert`，与默认开源版共用 Bundle ID，安装会互相替换。
+替换前先导出已有进度备份。已有社区记录会留在本地文件中，但原创版不显示、不计数、不导出这些记录。
 原创版导出的备份可以导入两种版本；包含社区题号的完整开源版备份只能导入开源版。
+本地 Worker/D1 测试不需要 CF 远程数据库；测试与生产 API 的切换、独立数据库及
+`Config/Local.xcconfig` 配置见 [Development guide](development.md)。
 
 ## 真机检查清单
 
