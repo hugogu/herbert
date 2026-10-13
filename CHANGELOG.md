@@ -3,6 +3,18 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## [2.0.0] - Unreleased
+
+- Add optional Apple-authenticated global and per-puzzle leaderboards backed by Cloudflare
+  Workers and D1. The service reruns submitted programs against versioned original boards;
+  submitted programs remain private and public rankings show verified scores and instructions.
+- Introduce My with Progress and Account sections, editable public nicknames, direct answer
+  uploads from puzzles, shortest-size references and a Best solutions counter that includes ties.
+- Add isolated local, staging and production configurations and an offline HerbertLearning
+  product, with deployment, testing and distribution guidance.
+- Preserve the 1.0.0 store identity, metadata and screenshot tooling. Set the app version to
+  2.0.0 and build number to 15.
+
 ## [1.0.0] - 2026-10-13
 
 - Add the App Store submission kit for Herbot Bot: English, Simplified Chinese and Japanese listing
@@ -236,3 +248,5 @@ save or API formats through documented migrations.
 [0.3.0]: https://github.com/hugogu/herbert/releases/tag/v0.3.0
 [0.2.0]: https://github.com/hugogu/herbert/releases/tag/v0.2.0
 [0.1.0]: https://github.com/hugogu/herbert/releases/tag/v0.1.0
+
+[2.0.0]: https://github.com/hugogu/herbert/compare/v1.0.0...codex/verified-cloud-leaderboards

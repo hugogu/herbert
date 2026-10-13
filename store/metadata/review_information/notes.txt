@@ -9,9 +9,11 @@ Every puzzle has a goal and two optional hints. "Game rules" explains the H lang
 H programs are puzzle solutions run by the app's own interpreter for this game. They only move the robot on the board; they are never compiled or executed as native code, and no code is downloaded.
 
 AI BATTLEFIELD (OPTIONAL TAB)
-Users can compare AI models on the puzzles with their own provider account (OpenRouter, SiliconFlow, Google Gemini, or an OpenAI- or Anthropic-compatible HTTPS API). The app contains no API keys and the developer runs no server or proxy. The app contacts a provider only when the user saves it (to list models) or taps "Agree & start match" after the app shows what will be sent: the rules, the selected puzzle boards, an optional prompt and the AI conversation. Keys are stored in the Keychain on the device. Answers returned by models are judged by the same local interpreter.
+Users can compare AI models on the puzzles with their own provider account (OpenRouter, SiliconFlow, Google Gemini, or an OpenAI- or Anthropic-compatible HTTPS API). The app contains no API keys and the developer does not proxy AI requests. The app contacts a provider only when the user saves it (to list models) or taps "Agree & start match" after the app shows what will be sent: the rules, the selected puzzle boards, an optional prompt and the AI conversation. Keys are stored in the Keychain on the device. Answers returned by models are judged by the same local interpreter.
 
 To try it: open AI Battlefield > AI Providers ("Models" on iPhone) > Add provider, choose its type, enter the HTTPS base URL and an API key, then save to load models. Under New match ("New" on iPhone), choose models and puzzles, then tap "Agree & start match".
 [Optional, filled in before submission: a demo key with a small spending limit for <provider>, base URL <url>, model <model>.]
 
 The rest of the app works fully without AI Battlefield or a network connection.
+
+Version 2.0.0 adds an optional verified leaderboard when a service URL is configured. Offline play still needs no account. My > Account provides Sign in with Apple, nickname editing and account deletion; puzzle pages offer explicit solution uploads. Only nicknames and verified scores/metrics are public, not solution programs.
