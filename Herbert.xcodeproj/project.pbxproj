@@ -582,7 +582,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
 				"CURRENT_PROJECT_VERSION" = "15";
-				"MARKETING_VERSION" = "1.1.0";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -624,7 +624,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "Herbert";
 				"CURRENT_PROJECT_VERSION" = "15";
-				"MARKETING_VERSION" = "1.1.0";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.puzzle-games";
@@ -783,7 +783,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert.Staging";
 				"PRODUCT_NAME" = "HerbertAppStore";
 				"CURRENT_PROJECT_VERSION" = "15";
-				"MARKETING_VERSION" = "1.1.0";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert Staging";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.education";
@@ -828,7 +828,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
 				"PRODUCT_NAME" = "HerbertAppStore";
 				"CURRENT_PROJECT_VERSION" = "15";
-				"MARKETING_VERSION" = "1.1.0";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbot Bot";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.education";
@@ -1003,8 +1003,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertLearning";
 				"PRODUCT_NAME" = "HerbertLearning";
-				"CURRENT_PROJECT_VERSION" = "14";
-				"MARKETING_VERSION" = "1.0.0";
+				"CURRENT_PROJECT_VERSION" = "15";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert Learning";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.education";
@@ -1045,8 +1045,8 @@
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.HerbertLearning";
 				"PRODUCT_NAME" = "HerbertLearning";
-				"CURRENT_PROJECT_VERSION" = "14";
-				"MARKETING_VERSION" = "1.0.0";
+				"CURRENT_PROJECT_VERSION" = "15";
+				"MARKETING_VERSION" = "2.0.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
 				"INFOPLIST_KEY_CFBundleDisplayName" = "Herbert Learning";
 				"INFOPLIST_KEY_LSApplicationCategoryType" = "public.app-category.education";
