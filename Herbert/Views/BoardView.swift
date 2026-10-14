@@ -38,14 +38,8 @@ struct BoardDrawing: View, Animatable {
     }
 
     private var bounds: (x: Int, y: Int, width: Int, height: Int) {
-        guard focused else { return (0, 0, 25, 25) }
-        let points = board.targets.union(board.traps).union(board.walls).union([board.start, position])
-            .union(trail.flatMap { [$0.from, $0.to] })
-        let minX = max(0, (points.map(\.x).min() ?? 0) - 2)
-        let minY = max(0, (points.map(\.y).min() ?? 0) - 2)
-        let maxX = min(24, (points.map(\.x).max() ?? 24) + 2)
-        let maxY = min(24, (points.map(\.y).max() ?? 24) + 2)
-        return (minX, minY, maxX - minX + 1, maxY - minY + 1)
+        let region = focused ? board.focusRegion(position: position, trail: trail) : board.fullRegion
+        return (region.minX, region.minY, region.width, region.height)
     }
 
     var body: some View {
