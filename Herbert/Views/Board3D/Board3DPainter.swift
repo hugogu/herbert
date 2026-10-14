@@ -2,11 +2,16 @@ import HerbertCore
 import SwiftUI
 
 /// Draws the board as a lit diorama with the painter's algorithm: floor details first, then every wall block and
-/// Herbert from far to near. All geometry goes through ``BoardCamera`` so it can be tested without a view.
+/// Herbert from far to near. Projection, draw order and occlusion come from ``BoardCamera``, which is unit tested.
 struct Board3DPainter {
     static let wallHeight = 0.62
     static let curbHeight = 0.26
     static let slabDepth = 0.45
+    /// The light shines from the left and slightly behind the viewer, in the camera's frame, so faces turned toward
+    /// the left are brightest and shadows fall to the right and toward the viewer whichever way the board is turned.
+    private static let lightDirection = (across: -0.55, toward: -0.25)
+    private static let lightLength = 0.604
+    private static let castShadow = (across: 0.85, toward: 0.45)
 
     let board: Board
     let visited: Set<GridPoint>
@@ -180,14 +185,16 @@ struct Board3DPainter {
         if showGridDots {
             var dots = Path()
             let radius = max(0.9, cellSize * 0.035)
+            // A circle on the floor is squashed vertically by the tilt of the camera.
+            let flattening = sin(camera.pitch)
             for y in 0..<board.height {
                 for x in 0..<board.width {
                     let point = screen(Double(x) + 0.5, Double(y) + 0.5)
                     guard viewport.contains(point) else { continue }
                     dots.addEllipse(
                         in: CGRect(
-                            x: point.x - radius, y: point.y - radius * camera.pitchFlattening, width: radius * 2,
-                            height: radius * 2 * camera.pitchFlattening))
+                            x: point.x - radius, y: point.y - radius * flattening, width: radius * 2,
+                            height: radius * 2 * flattening))
                 }
             }
             context.fill(dots, with: .color(Board3DPalette.floorSeam.color(0.55)))
@@ -196,8 +203,8 @@ struct Board3DPainter {
 
     /// Soft contact shadows plus a longer one cast away from the light.
     private func paintShadows(_ context: inout GraphicsContext) {
-        let cells = board.walls.sorted { ($0.y, $0.x) < ($1.y, $1.x) } + curbCells
-        let cast = camera.boardVector(across: 0.85, toward: 0.45)
+        let cells = Array(board.walls) + curbCells
+        let cast = camera.boardVector(across: Self.castShadow.across, toward: Self.castShadow.toward)
         var occlusion = Path()
         var shadow = Path()
         for cell in cells {
@@ -345,23 +352,27 @@ struct Board3DPainter {
         let touched = (roof + floorLevel).reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }
         guard viewport.intersects(touched) else { return }
         let material = board.walls.contains(cell) ? Board3DPalette.wall : Board3DPalette.curb
-        let sides: [(Heading, (Double, Double), (Double, Double))] = [
+        let edges: [(Heading, (Double, Double), (Double, Double))] = [
             (.north, (x0, y0), (x1, y0)), (.east, (x1, y0), (x1, y1)), (.south, (x1, y1), (x0, y1)),
             (.west, (x0, y1), (x0, y0)),
         ]
-        for (side, from, to) in sides where camera.isVisible(side, ofBlockAt: cell) {
+        // Only faces turned toward the eye and not hidden by a block of the same height are drawn.
+        let faces = edges.compactMap {
+            side, from, to -> (side: Heading, from: (Double, Double), to: (Double, Double), bottom: Double)? in
+            guard camera.isVisible(side, ofBlockAt: cell) else { return nil }
             let neighbor = GridPoint(x: cell.x + side.vector.x, y: cell.y + side.vector.y)
             let neighborTop = blockHeight(at: neighbor)
-            if let neighborTop, neighborTop >= top { continue }
-            let bottom = inSlab(neighbor) ? (neighborTop ?? 0) : -Self.slabDepth
+            if let neighborTop, neighborTop >= top { return nil }
+            return (side, from, to, inSlab(neighbor) ? (neighborTop ?? 0) : -Self.slabDepth)
+        }
+        for (side, from, to, bottom) in faces {
             let face = polygon([
                 screen(from.0, from.1, top), screen(to.0, to.1, top), screen(to.0, to.1, bottom),
                 screen(from.0, from.1, bottom),
             ])
             let normal = camera.cameraNormal(of: side)
-            let lambert = max(0, normal.across * -0.55 + normal.toward * -0.25) / 0.604
-            let shade = 0.40 + 0.60 * lambert
-            let lit = material.lit(shade)
+            let facing = normal.across * Self.lightDirection.across + normal.toward * Self.lightDirection.toward
+            let lit = material.lit(0.40 + 0.60 * max(0, facing) / Self.lightLength)
             context.fill(
                 face,
                 with: .linearGradient(
@@ -383,11 +394,9 @@ struct Board3DPainter {
             roof.map { CGPoint(x: middle.x + ($0.x - middle.x) * 0.76, y: middle.y + ($0.y - middle.y) * 0.76) })
         context.fill(inset, with: .color(.white.opacity(0.07)))
         var rim = Path()
-        for (side, from, to) in sides where camera.isVisible(side, ofBlockAt: cell) {
-            let neighborTop = blockHeight(at: GridPoint(x: cell.x + side.vector.x, y: cell.y + side.vector.y))
-            if let neighborTop, neighborTop >= top { continue }
-            rim.move(to: screen(from.0, from.1, top))
-            rim.addLine(to: screen(to.0, to.1, top))
+        for face in faces {
+            rim.move(to: screen(face.from.0, face.from.1, top))
+            rim.addLine(to: screen(face.to.0, face.to.1, top))
         }
         context.stroke(rim, with: .color(.white.opacity(0.32)), lineWidth: max(1, cellSize * 0.03))
     }
@@ -413,11 +422,6 @@ struct Board3DPainter {
             context.stroke(ring, with: .color(Board3DPalette.trail.color(0.95)), lineWidth: max(1.5, cellSize * 0.05))
         }
     }
-}
-
-extension BoardCamera {
-    /// How much a circle on the floor is squashed vertically at this tilt.
-    var pitchFlattening: Double { sin(pitch) }
 }
 
 /// Andrew's monotone chain; the result winds counter-clockwise.
