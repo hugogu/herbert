@@ -8,7 +8,7 @@ final class BoardCameraRigTests: XCTestCase {
     func testANewRigIsTheDefaultView() {
         let rig = BoardCameraRig()
         XCTAssertTrue(rig.isDefault)
-        XCTAssertEqual(rig.yaw, BoardCamera.defaultYaw)
+        XCTAssertEqual(rig.turn, 0)
         XCTAssertEqual(rig.pitch, BoardCamera.defaultPitch)
         XCTAssertEqual(rig.zoom, 1)
         XCTAssertFalse(rig.follow)
@@ -17,8 +17,8 @@ final class BoardCameraRigTests: XCTestCase {
     func testDraggingRightPullsTheNearSideRightAndDownTiltsTowardTopDown() {
         var rig = BoardCameraRig()
         rig.orbit(dx: 100, dy: 0, allowsTilt: true)
-        XCTAssertLessThan(rig.yaw, BoardCamera.defaultYaw, "Dragging right turns the board counter-clockwise")
-        XCTAssertEqual(rig.yaw, BoardCamera.defaultYaw - 100 * BoardCameraRig.radiansPerPoint, accuracy: 1e-12)
+        XCTAssertLessThan(rig.turn, 0, "Dragging right turns the board counter-clockwise")
+        XCTAssertEqual(rig.turn, -100 * BoardCameraRig.radiansPerPoint, accuracy: 1e-12)
         rig = BoardCameraRig()
         rig.orbit(dx: 0, dy: 40, allowsTilt: true)
         XCTAssertGreaterThan(rig.pitch, BoardCamera.defaultPitch)
@@ -32,15 +32,15 @@ final class BoardCameraRigTests: XCTestCase {
         var rig = BoardCameraRig()
         rig.orbit(dx: 10, dy: 300, allowsTilt: false)
         XCTAssertEqual(rig.pitch, BoardCamera.defaultPitch)
-        XCTAssertNotEqual(rig.yaw, BoardCamera.defaultYaw)
+        XCTAssertNotEqual(rig.turn, 0)
     }
 
     func testQuarterTurnsAccumulateWithoutWrapping() {
         var rig = BoardCameraRig()
         for _ in 0..<5 { rig.rotate(quarterTurns: 1) }
-        XCTAssertEqual(rig.yaw, BoardCamera.defaultYaw + 5 * .pi / 2, accuracy: 1e-12)
+        XCTAssertEqual(rig.turn, 5 * .pi / 2, accuracy: 1e-12)
         rig.rotate(quarterTurns: -6)
-        XCTAssertEqual(rig.yaw, BoardCamera.defaultYaw - .pi / 2, accuracy: 1e-12)
+        XCTAssertEqual(rig.turn, -.pi / 2, accuracy: 1e-12)
     }
 
     func testTiltSwitchesBetweenTheAngledAndSteepViews() {
@@ -101,19 +101,18 @@ final class BoardCameraRigTests: XCTestCase {
         XCTAssertEqual(rig.pan, CGSize(width: 150, height: -130))
     }
 
-    func testResetTakesTheShortWayBackToTheDefaultYaw() {
+    func testResetTakesTheShortWayBackToTheOpeningAngle() {
         var rig = BoardCameraRig()
         rig.rotate(quarterTurns: 5)
         rig.toggleTilt()
         rig.zoom(by: 2, about: CGPoint(x: 10, y: 10), in: size)
         rig.follow = true
         XCTAssertFalse(rig.isDefault)
-        let spun = rig.yaw
+        let spun = rig.turn
         rig.reset()
         XCTAssertTrue(rig.isDefault)
-        XCTAssertEqual(
-            rig.yaw, BoardCamera.defaultYaw + 2 * .pi, accuracy: 1e-9, "5 quarter turns is closest to 1 turn")
-        XCTAssertLessThan(abs(rig.yaw - spun), .pi)
+        XCTAssertEqual(rig.turn, 2 * .pi, accuracy: 1e-9, "5 quarter turns is closest to 1 turn")
+        XCTAssertLessThan(abs(rig.turn - spun), .pi)
     }
 
     func testResettingTheFramingKeepsTheAngle() {
@@ -127,6 +126,6 @@ final class BoardCameraRigTests: XCTestCase {
         XCTAssertEqual(rig.pan, .zero)
         XCTAssertFalse(rig.follow)
         XCTAssertEqual(rig.pitch, BoardCameraRig.steepPitch)
-        XCTAssertEqual(rig.yaw, BoardCamera.defaultYaw + .pi / 2, accuracy: 1e-12)
+        XCTAssertEqual(rig.turn, .pi / 2, accuracy: 1e-12)
     }
 }
