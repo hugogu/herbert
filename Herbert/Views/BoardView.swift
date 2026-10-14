@@ -203,6 +203,8 @@ struct BoardDrawing: View, Animatable {
 struct BoardView: View {
     @ObservedObject var model: GameModel
     var compact = false
+    /// Opens the 3D board full size; only offered in 3D style.
+    var onEnlarge: (() -> Void)?
     @AppStorage("board.style") private var style = BoardStyle.modern
     @AppStorage("board.showTrail") private var showTrail = true
     @AppStorage("board.showGridDots") private var showGridDots = true
@@ -212,8 +214,11 @@ struct BoardView: View {
     @State private var zoom: CGFloat = 1
     @GestureState private var magnification: CGFloat = 1
     @State private var pan = CGSize.zero
+    @State private var rig = BoardCameraRig()
     @GestureState private var drag = CGSize.zero
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var framingAnimation: Animation? { reduceMotion ? nil : .easeInOut(duration: 0.3) }
 
     var body: some View {
         VStack(spacing: compact ? 8 : 14) {
@@ -225,9 +230,12 @@ struct BoardView: View {
                 }
                 Spacer()
                 Button {
-                    focused.toggle()
-                    zoom = 1
-                    pan = .zero
+                    withAnimation(framingAnimation) {
+                        focused.toggle()
+                        zoom = 1
+                        pan = .zero
+                        rig.resetFraming()
+                    }
                 } label: {
                     if compact {
                         Image(systemName: "viewfinder").frame(width: 32, height: 32)
@@ -238,12 +246,23 @@ struct BoardView: View {
                 }.buttonStyle(.plain).foregroundStyle(Palette.mint)
                     .accessibilityLabel(LocalizedStringKey(focused ? "全棋盘" : "聚焦"))
                 Button {
-                    zoom = 1
-                    pan = .zero
+                    withAnimation(framingAnimation) {
+                        zoom = 1
+                        pan = .zero
+                        rig.reset()
+                    }
                 } label: {
                     Image(systemName: "arrow.counterclockwise").frame(width: 32, height: 32)
                 }
-                .buttonStyle(.plain).accessibilityLabel("复原棋盘缩放")
+                .buttonStyle(.plain).accessibilityLabel(LocalizedStringKey(style == .threeD ? "复原视角" : "复原棋盘缩放"))
+                .accessibilityIdentifier("reset-board-view")
+                if style == .threeD, let onEnlarge {
+                    Button(action: onEnlarge) {
+                        Image(systemName: "arrow.up.left.and.arrow.down.right").frame(width: 32, height: 32)
+                    }
+                    .buttonStyle(.plain).foregroundStyle(Palette.mint).accessibilityLabel("放大棋盘")
+                    .accessibilityIdentifier("enlarge-board")
+                }
                 Button {
                     showOptions = true
                 } label: {
@@ -252,39 +271,49 @@ struct BoardView: View {
                 .buttonStyle(.plain).accessibilityLabel("棋盘设置").accessibilityIdentifier("board-options")
                 .popover(isPresented: $showOptions, arrowEdge: .top) { BoardOptionsView() }
             }
-            GeometryReader { geometry in
-                BoardDrawing(
-                    board: model.session.board, position: model.session.position, heading: model.session.heading,
-                    visited: model.session.visitedTargets, focused: focused, style: style, showGridDots: showGridDots,
-                    trail: model.session.trail, showTrail: showTrail
-                )
-                .animation(
-                    reduceMotion || model.speed >= 16 || model.session.status == .ready
-                        ? nil : .easeInOut(duration: 0.12), value: model.session.position
-                )
-                .padding(12)
-                .scaleEffect(min(4, max(1, zoom * magnification)))
-                .offset(x: pan.width + drag.width, y: pan.height + drag.height)
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .contentShape(Rectangle())
-                .gesture(
-                    MagnifyGesture().updating($magnification) { value, state, _ in state = value.magnification }
-                        .onEnded { value in
-                            zoom = min(4, max(1, zoom * value.magnification))
-                            if zoom == 1 { pan = .zero }
-                        }
-                )
-                .simultaneousGesture(
-                    DragGesture().updating($drag) { value, state, _ in
-                        if zoom > 1 { state = value.translation }
-                    }.onEnded { value in
-                        if zoom > 1 {
-                            let maxX = geometry.size.width * (zoom - 1) / 2
-                            let maxY = geometry.size.height * (zoom - 1) / 2
-                            pan.width = min(maxX, max(-maxX, pan.width + value.translation.width))
-                            pan.height = min(maxY, max(-maxY, pan.height + value.translation.height))
-                        }
-                    })
+            Group {
+                if style == .threeD {
+                    Board3DView(
+                        model: model, rig: $rig, focused: focused, showTrail: showTrail,
+                        showGridDots: showGridDots)
+                } else {
+                    GeometryReader { geometry in
+                        BoardDrawing(
+                            board: model.session.board, position: model.session.position,
+                            heading: model.session.heading,
+                            visited: model.session.visitedTargets, focused: focused, style: style,
+                            showGridDots: showGridDots,
+                            trail: model.session.trail, showTrail: showTrail
+                        )
+                        .animation(
+                            reduceMotion || model.speed >= 16 || model.session.status == .ready
+                                ? nil : .easeInOut(duration: 0.12), value: model.session.position
+                        )
+                        .padding(12)
+                        .scaleEffect(min(4, max(1, zoom * magnification)))
+                        .offset(x: pan.width + drag.width, y: pan.height + drag.height)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .contentShape(Rectangle())
+                        .gesture(
+                            MagnifyGesture().updating($magnification) { value, state, _ in state = value.magnification }
+                                .onEnded { value in
+                                    zoom = min(4, max(1, zoom * value.magnification))
+                                    if zoom == 1 { pan = .zero }
+                                }
+                        )
+                        .simultaneousGesture(
+                            DragGesture().updating($drag) { value, state, _ in
+                                if zoom > 1 { state = value.translation }
+                            }.onEnded { value in
+                                if zoom > 1 {
+                                    let maxX = geometry.size.width * (zoom - 1) / 2
+                                    let maxY = geometry.size.height * (zoom - 1) / 2
+                                    pan.width = min(maxX, max(-maxX, pan.width + value.translation.width))
+                                    pan.height = min(maxY, max(-maxY, pan.height + value.translation.height))
+                                }
+                            })
+                    }
+                }
             }
             .background(style.background, in: RoundedRectangle(cornerRadius: style == .classic ? 0 : 16))
             .overlay {
