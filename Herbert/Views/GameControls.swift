@@ -3,12 +3,14 @@ import SwiftUI
 /// Herbert's status line: the latest error, or what the board is waiting for.
 struct GameStatusLine: View {
     @ObservedObject var model: GameModel
+    /// Distinguishes a second copy of the line from the one on the page behind it.
+    var identifierPrefix = ""
 
     var body: some View {
         HStack(alignment: .top, spacing: 9) {
             Image(systemName: model.message == nil ? "terminal" : "exclamationmark.circle")
             Text(model.message ?? statusText).lineSpacing(3)
-                .accessibilityIdentifier("game-status")
+                .accessibilityIdentifier(identifierPrefix + "game-status")
             Spacer(minLength: 0)
         }.font(.system(size: 12)).foregroundStyle(model.message == nil ? Palette.muted : Palette.danger)
             .padding(.horizontal, 3).frame(maxWidth: .infinity, alignment: .leading)
@@ -30,6 +32,8 @@ struct GameStatusLine: View {
 struct GameControls: View {
     @ObservedObject var model: GameModel
     var editor: EditorController?
+    /// Distinguishes a second copy of the controls from the ones on the page behind it.
+    var identifierPrefix = ""
 
     var body: some View {
         VStack(spacing: 10) {
@@ -43,7 +47,7 @@ struct GameControls: View {
                         systemImage: model.isRunning ? "pause.fill" : "play.fill")
                 }
                 .buttonStyle(PrimaryButtonStyle()).keyboardShortcut(.return, modifiers: .command)
-                .accessibilityIdentifier("run-program")
+                .accessibilityIdentifier(identifierPrefix + "run-program")
                 Button {
                     editor?.dismiss()
                     model.step()
@@ -52,7 +56,7 @@ struct GameControls: View {
                 }
                 .buttonStyle(.plain).background(.white, in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.line, lineWidth: 1))
-                .accessibilityLabel("单步执行").accessibilityIdentifier("step-program")
+                .accessibilityLabel("单步执行").accessibilityIdentifier(identifierPrefix + "step-program")
                 Button {
                     model.reset()
                 } label: {
@@ -60,7 +64,7 @@ struct GameControls: View {
                 }
                 .buttonStyle(.plain).background(.white, in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.line, lineWidth: 1))
-                .accessibilityLabel("重置棋盘").accessibilityIdentifier("reset-program")
+                .accessibilityLabel("重置棋盘").accessibilityIdentifier(identifierPrefix + "reset-program")
             }
             HStack {
                 Label("速度", systemImage: "speedometer").font(.system(size: 10)).foregroundStyle(Palette.muted)
@@ -79,5 +83,16 @@ struct GameControls: View {
                 }
             }
         }
+    }
+}
+
+extension GameModel {
+    /// The byte-count line shown after every target lights up, which says whether the run was saved.
+    var completionSummary: String {
+        !session.isAccepted
+            ? L10n.text("%ld byte · 超过长度限制，仅供试运行，未保存为解答", session.programBytes)
+            : isTrial
+                ? L10n.text("%ld byte · AI 答案试运行完成", session.programBytes)
+                : L10n.text("%ld byte · 最短解已保存到本机", session.programBytes)
     }
 }

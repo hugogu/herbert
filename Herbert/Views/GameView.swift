@@ -36,6 +36,8 @@ struct GameView: View {
     @State private var showBest = false
     @State private var showOriginalBestInfo = false
     @State private var revealedHints = 0
+    @State private var showStage = false
+    @AppStorage("board.style") private var boardStyle = BoardStyle.modern
 
     init(model: GameModel) { _model = StateObject(wrappedValue: model) }
 
@@ -47,54 +49,38 @@ struct GameView: View {
         return store.problems[index + 1]
     }
 
+    /// The 3D board is foreshortened, so its panel gets more room than the flat styles, in proportion to the
+    /// width of the column beside the editor: a taller panel would only leave empty bands around the board.
+    private func wideBoardHeight(in size: CGSize) -> CGFloat {
+        guard boardStyle == .threeD else { return 520 }
+        let column = size.width - 2 * 28 - 20 - min(380, size.width * 0.40)
+        return min(700, max(440, min(size.height - 120, column * 1.25)))
+    }
+
+    private func narrowBoardHeight(for width: CGFloat) -> CGFloat {
+        boardStyle == .threeD ? min(480, max(340, width * 1.12)) : min(400, max(270, width - 24))
+    }
+
+    private func setStage(_ visible: Bool) {
+        if visible { editor.dismiss() }
+        withAnimation(.easeInOut(duration: 0.25)) { showStage = visible }
+    }
+
     var body: some View {
-        GeometryReader { geometry in
-            // Keep narrow portrait layouts stacked when the keyboard reduces their height.
-            let compact =
-                geometry.size.height < 500 && geometry.size.width >= 560
-                && geometry.size.width > geometry.size.height
-            let wide = geometry.size.width >= 760 || compact
-            ScrollView {
-                VStack(alignment: .leading, spacing: compact ? 12 : 20) {
-                    heading(compact: compact, width: geometry.size.width)
-                    if !compact, !model.isTrial, let lesson = model.problem.lesson { lessonPanel(lesson) }
-                    if !compact { stats }
-                    if wide {
-                        HStack(alignment: .top, spacing: compact ? 12 : 20) {
-                            BoardView(model: model, compact: compact)
-                                .frame(height: compact ? max(200, min(340, geometry.size.height - 80)) : 520)
-                                .frame(maxWidth: .infinity)
-                            VStack(spacing: compact ? 10 : 18) {
-                                editorPanel(compact: compact)
-                                statusPanel
-                                controls
-                            }
-                            .frame(width: min(compact ? 420 : 380, geometry.size.width * (compact ? 0.46 : 0.40)))
-                        }
-                    } else {
-                        BoardView(model: model).frame(height: min(400, max(270, geometry.size.width - 24)))
-                        editorPanel(compact: false)
-                        statusPanel
-                    }
-                    if compact { stats }
-                    if model.isCompleted { completionPanel }
-                    if let error = store.storageMessage {
-                        Label(error, systemImage: "externaldrive.badge.exclamationmark")
-                            .font(.caption).foregroundStyle(Palette.danger).panel()
-                    }
-                }.padding(compact ? 12 : wide ? 28 : 20).frame(maxWidth: 1200).frame(maxWidth: .infinity)
+        ZStack {
+            content
+                .accessibilityHidden(showStage)
+                .disabled(showStage)
+            if showStage {
+                Board3DStage(model: model) { setStage(false) }.transition(.opacity)
             }
-            .scrollDismissesKeyboard(.interactively)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                if !wide { controls.padding(.horizontal, 20).padding(.vertical, 12).background(.regularMaterial) }
-            }
-            .background(Palette.paper)
         }
         .navigationTitle("\(model.problem.number)")
         .navigationBarBackButtonHidden(model.isTrial)
         #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .tabBar)
+            .toolbar(showStage ? .hidden : .automatic, for: .navigationBar)
         #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -129,10 +115,61 @@ struct GameView: View {
         }
         .onChange(of: model.source) { _, _ in model.edited() }
         .onChange(of: scenePhase) { _, phase in if phase != .active { model.pause() } }
+        .onChange(of: boardStyle) { _, style in if style != .threeD { showStage = false } }
         .onAppear { if !model.isTrial { store.visit(model.problem.id) } }
         .onDisappear { model.disappear() }
         .sensoryFeedback(.success, trigger: model.isCompleted)
         .sensoryFeedback(.warning, trigger: model.lastEvent == .trap)
+    }
+
+    private var content: some View {
+        GeometryReader { geometry in
+            // Keep narrow portrait layouts stacked when the keyboard reduces their height.
+            let compact =
+                geometry.size.height < 500 && geometry.size.width >= 560
+                && geometry.size.width > geometry.size.height
+            let wide = geometry.size.width >= 760 || compact
+            ScrollView {
+                VStack(alignment: .leading, spacing: compact ? 12 : 20) {
+                    heading(compact: compact, width: geometry.size.width)
+                    if !compact, !model.isTrial, let lesson = model.problem.lesson { lessonPanel(lesson) }
+                    if !compact { stats }
+                    if wide {
+                        HStack(alignment: .top, spacing: compact ? 12 : 20) {
+                            BoardView(model: model, compact: compact, onEnlarge: { setStage(true) })
+                                .frame(
+                                    height: compact
+                                        ? max(200, min(340, geometry.size.height - 80))
+                                        : wideBoardHeight(in: geometry.size)
+                                )
+                                .frame(maxWidth: .infinity)
+                            VStack(spacing: compact ? 10 : 18) {
+                                editorPanel(compact: compact)
+                                statusPanel
+                                controls
+                            }
+                            .frame(width: min(compact ? 420 : 380, geometry.size.width * (compact ? 0.46 : 0.40)))
+                        }
+                    } else {
+                        BoardView(model: model, onEnlarge: { setStage(true) })
+                            .frame(height: narrowBoardHeight(for: geometry.size.width))
+                        editorPanel(compact: false)
+                        statusPanel
+                    }
+                    if compact { stats }
+                    if model.isCompleted { completionPanel }
+                    if let error = store.storageMessage {
+                        Label(error, systemImage: "externaldrive.badge.exclamationmark")
+                            .font(.caption).foregroundStyle(Palette.danger).panel()
+                    }
+                }.padding(compact ? 12 : wide ? 28 : 20).frame(maxWidth: 1200).frame(maxWidth: .infinity)
+            }
+            .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !wide { controls.padding(.horizontal, 20).padding(.vertical, 12).background(.regularMaterial) }
+            }
+            .background(Palette.paper)
+        }
     }
 
     private func heading(compact: Bool, width: CGFloat) -> some View {
@@ -406,14 +443,8 @@ struct GameView: View {
             Image(systemName: "sparkles").font(.system(size: 30)).foregroundStyle(Palette.mint)
             VStack(alignment: .leading, spacing: 6) {
                 Text("漂亮，全部点亮！").font(.system(size: 20, weight: .bold)).accessibilityIdentifier("completion-title")
-                Text(
-                    !model.session.isAccepted
-                        ? L10n.text("%ld byte · 超过长度限制，仅供试运行，未保存为解答", model.session.programBytes)
-                        : model.isTrial
-                            ? L10n.text("%ld byte · AI 答案试运行完成", model.session.programBytes)
-                            : L10n.text("%ld byte · 最短解已保存到本机", model.session.programBytes)
-                )
-                .font(.system(size: 12)).foregroundStyle(Palette.muted)
+                Text(model.completionSummary)
+                    .font(.system(size: 12)).foregroundStyle(Palette.muted)
             }
             Spacer(minLength: 0)
             if let next = nextProblem {
