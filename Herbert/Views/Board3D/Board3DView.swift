@@ -155,13 +155,20 @@ struct Board3DView: View {
                 }
             }
         }
-        return ViewThatFits(in: .vertical) {
-            VStack(spacing: 8) { buttons }
-            HStack(spacing: 8) { buttons }
+        // A short inline board, such as a phone on its side, has no room for buttons over it. Gestures still
+        // work, and the Enlarge board button opens the stage.
+        let hasRoom = isStage || size.height >= 220
+        return Group {
+            if hasRoom {
+                ViewThatFits(in: .vertical) {
+                    VStack(spacing: 8) { buttons }
+                    HStack(spacing: 8) { buttons }
+                }
+                .padding(10)
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("视角控制")
+            }
         }
-        .padding(10)
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("视角控制")
     }
 }
 
