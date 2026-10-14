@@ -23,11 +23,12 @@ struct Board3DStage: View {
                         VStack(alignment: .leading, spacing: 16) {
                             header
                             stats
-                            program(lines: 10)
+                            // A short rail, such as a phone on its side, keeps room for the controls instead.
+                            if geometry.size.height >= 480 { program(lines: 10) }
                             Spacer(minLength: 0)
                             footer
                         }.padding(.vertical, 12).padding(.trailing, 20).padding(.leading, 8)
-                            .frame(width: min(340, geometry.size.width * 0.3))
+                            .frame(width: min(340, max(280, geometry.size.width * 0.3)))
                     }
                 } else {
                     VStack(spacing: 0) {
@@ -99,7 +100,8 @@ struct Board3DStage: View {
 
     private func stat(_ title: String, value: String, danger: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(LocalizedStringKey(title)).font(.system(size: 10)).foregroundStyle(Palette.muted)
+            Text(LocalizedStringKey(title)).font(.system(size: 10)).foregroundStyle(Palette.muted).lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(value).font(.system(size: 15, weight: .semibold, design: .monospaced))
                 .foregroundStyle(danger ? Palette.danger : Palette.ink).contentTransition(.numericText()).lineLimit(1)
                 .minimumScaleFactor(0.7)
