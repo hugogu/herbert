@@ -211,7 +211,7 @@ or proven minima; unavailable entries show **No record**. For example, #0027 all
 39 bytes and has an archived best of 14 bytes.
 [See the problem panel](docs/screenshots/en/community-reference.png).
 
-Tap the board legend to learn the symbols in either Modern or Classic style:
+Tap the board legend to learn the symbols in Modern, Classic or 3D style:
 **walls block movement**, while **traps can be entered but turn off all lit targets**.
 Both continue the program; traps leave the robot on the trap.
 [See the board guide](docs/screenshots/en/community-board-guide.png).
@@ -231,20 +231,48 @@ Both continue the program; traps leave the robot on the trap.
 
 *These are board screenshots from the running app. Click a board to see its full game screen.*
 
-## Modern or Classic
+## Modern, Classic or 3D
 
 <table>
   <tr>
-    <td align="center"><a href="docs/screenshots/en/course/course-mosaic.png"><img src="docs/screenshots/en/course/course-mosaic-board.png" width="380" alt="Modern Vaulted mosaic board with continuous walls and amber targets"></a></td>
-    <td align="center"><a href="docs/screenshots/en/course/course-mosaic-classic.png"><img src="docs/screenshots/en/course/course-mosaic-classic-board.png" width="380" alt="Classic Vaulted mosaic board with black walls, white targets, red robot and blue trail"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-mosaic.png"><img src="docs/screenshots/en/course/course-mosaic-board.png" width="280" alt="Modern Vaulted mosaic board with continuous walls and amber targets"></a></td>
+    <td align="center"><a href="docs/screenshots/en/course/course-mosaic-classic.png"><img src="docs/screenshots/en/course/course-mosaic-classic-board.png" width="280" alt="Classic Vaulted mosaic board with black walls, white targets, red robot and blue trail"></a></td>
+    <td align="center"><a href="docs/screenshots/en/three-d-stage.png"><img src="docs/screenshots/three-d-board.png" width="280" alt="3D Vaulted mosaic board: charcoal stone walls with soft shadows, glowing amber discs, dark holes, a glowing cyan trail and a white robot"></a></td>
   </tr>
-  <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td></tr>
+  <tr><td align="center">Modern · default</td><td align="center">Classic · movement trail</td><td align="center">3D · lit diorama</td></tr>
 </table>
 
-*Both are actual app captures of original lesson L29. Classic follows the original
-rules-page board appearance. Its screenshot follows three successful moves. Adjacent
-walls share a continuous outline in both styles. Use the sliders button above the board
-to change style, grid dots, and trail visibility.*
+*All three are actual app captures of original lesson L29. Classic follows the original
+rules-page board appearance, and its screenshot follows three successful moves. Adjacent
+walls share a continuous outline in Modern and Classic. The 3D capture was taken on the
+iOS Simulator after the same three moves. Use the sliders button above the board to change
+style, grid dots, and trail visibility.*
+
+**3D style** draws the same board as a lit diorama: charcoal stone walls with soft shadows,
+glowing amber discs for targets (cyan once lit), dark holes for traps, a glowing trail and a
+white robot whose face turns with him. It is only a different view of the same game, so
+scores, saves and AI Battlefield are unaffected.
+
+- **Look around.** Drag to turn the board, pinch to zoom toward your fingers, twist to
+  rotate and double-tap to reset; the buttons turn it by quarter turns and change the tilt.
+  On Mac, Shift-drag pans. Vertical swipes over the board still scroll the page on iPhone
+  and iPad.
+- **See what a wall hides.** A target or Herbert behind a wall keeps a see-through ring, so
+  nothing is lost at a low angle.
+- **Get a bigger board.** A 25 × 25 board is foreshortened in 3D, so the panel is taller and
+  the view opens nearly straight on when it is tall or square, which gives about a fifth
+  larger cells. **Enlarge board** opens a stage that gives the whole window to the board, with
+  turn, tilt, zoom, follow-Herbert, focus and reset buttons, your progress, a read-only
+  program preview and the run controls. Wide windows put the controls beside the board.
+
+<table>
+  <tr>
+    <td align="center"><a href="docs/screenshots/en/three-d-stage.png"><img src="docs/screenshots/en/three-d-stage.png" width="260" alt="Enlarged 3D stage on iPhone: the board fills the screen with camera buttons, progress, the program and run controls"></a></td>
+  </tr>
+  <tr><td align="center">Enlarge board · iPhone</td></tr>
+</table>
+
+*Captured on the iOS Simulator (iPhone 18 Pro), not on a physical device.*
 
 <details>
 <summary>Explore the original course library</summary>
@@ -267,7 +295,7 @@ to change style, grid dots, and trail visibility.*
   and switch between the full 25 × 25 grid and its occupied region. See the robot’s complete
   movement trail, including at Turbo speed.
 - **Make the board yours.** Open the sliders button above the board to choose Modern
-  (default) or Classic, show/hide grid dots for counting cells, and toggle the movement
+  (default), Classic or 3D, show/hide grid dots for counting cells, and toggle the movement
   trail. Preferences stay on this device. Resetting or editing code clears the trail;
   hiding it keeps recording.
 - **Play in your language.** English, Simplified Chinese, and Japanese cover navigation,

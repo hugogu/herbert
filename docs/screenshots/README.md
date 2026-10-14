@@ -29,6 +29,20 @@ The popover is captured directly because it can extend beyond the main window.
 Both are unmodified English app images; no model responses or personal progress are used.
 The reference lengths come from the October 7 collection snapshot, not a live leaderboard.
 
+The 3D board images `three-d-board.png` (the `game-board` element after three successful moves of
+L29 · Vaulted mosaic, language neutral) and `three-d-stage.png` / `en/three-d-stage.png` (the enlarged
+stage, Chinese and English) are unmodified captures taken on the **iOS Simulator** (iPhone 18 Pro) with
+`testCaptureThreeDScreenshots` on October 15, 2026. They are not Mac screenshots and not evidence of
+physical-device validation. Refresh them with:
+
+```sh
+TEST_RUNNER_HERBERT_CAPTURE_SCREENSHOTS=1 TEST_RUNNER_HERBERT_SCREENSHOT_LANGUAGE=en xcodebuild \
+    -project Herbert.xcodeproj -scheme Herbert -destination 'platform=iOS Simulator,name=iPhone 18 Pro' \
+    -resultBundlePath .build/shots.xcresult CODE_SIGNING_ALLOWED=NO \
+    -only-testing:HerbertUITests/HerbertUITests/testCaptureThreeDScreenshots test
+xcrun xcresulttool export attachments --path .build/shots.xcresult --output-path .build/shots
+```
+
 Refresh on an interactive Mac desktop:
 
 ```sh

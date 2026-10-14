@@ -26,6 +26,20 @@ save or API formats through documented migrations.
   an oversized cap with its maximum, the request is sent again within that maximum.
 - Accept `a():` for a procedure without parameters, matching the `a()` call already accepted.
   Punctuation stays free, so byte counts and the original `a:` form are unchanged.
+- Add a 3D board style beside Modern and Classic. It draws the same board, trail and Herbert as a lit
+  diorama: charcoal stone walls with soft shadows, glowing amber discs for targets (cyan once lit), holes
+  for traps, a glowing cyan trail and a white robot whose face turns with him. A perspective camera orbits
+  the board: drag to turn, pinch to zoom toward the fingers, twist to rotate, double-tap to reset, with
+  buttons for quarter turns and tilt. Shift-drag pans on Mac; on iPhone and iPad vertical swipes over the
+  board still scroll the page. A target or Herbert hidden behind a wall keeps a see-through ring.
+- Give the 3D board more room. The panel is taller on phones and follows its column width beside the
+  editor, and the view opens nearly straight on when it is tall or square, which gives about a fifth
+  larger cells than the diagonal. Enlarge board opens a stage that gives the window to the board, with
+  turn, tilt, zoom, follow-Herbert, focus and reset buttons, progress, a read-only program preview and the
+  run controls beside or below it.
+- Move the camera model into HerbertCore (`BoardCamera`, `BoardCameraRig`, `Board.focusRegion`) with unit
+  tests, and extract the run controls and status line from the game screen so the stage can reuse them.
+- Localize the 3D controls, legend wording and guide tip in English, Simplified Chinese and Japanese.
 
 ## [1.0.0] - 2026-10-13
 
