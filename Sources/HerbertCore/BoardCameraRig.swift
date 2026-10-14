@@ -4,7 +4,9 @@ import Foundation
 /// What a player has done to the 3D camera: orbit, tilt, zoom and pan. The pure rules live here so they can be
 /// tested without a view; gestures and buttons only feed values in.
 public struct BoardCameraRig: Equatable, Sendable {
-    public var yaw = BoardCamera.defaultYaw
+    /// How far the player has turned the board from its opening angle, clockwise, in radians. The opening angle
+    /// itself depends on the shape of the view (see ``BoardCamera/homeYaw(forAspect:)``).
+    public var turn = 0.0
     public var pitch = BoardCamera.defaultPitch
     public var zoom = 1.0
     public var pan = CGSize.zero
@@ -21,18 +23,18 @@ public struct BoardCameraRig: Equatable, Sendable {
 
     public var isDefault: Bool {
         zoom == 1 && pan == .zero && !follow && pitch == BoardCamera.defaultPitch
-            && abs(BoardCamera.equivalentAngle(BoardCamera.defaultYaw, nearestTo: yaw) - yaw) < 1e-9
+            && abs(BoardCamera.equivalentAngle(0, nearestTo: turn) - turn) < 1e-9
     }
 
     /// Dragging pulls the near side of the board along with the finger. `dy` only tilts when `allowsTilt` is set.
     public mutating func orbit(dx: Double, dy: Double, allowsTilt: Bool) {
-        yaw -= dx * Self.radiansPerPoint
+        turn -= dx * Self.radiansPerPoint
         if allowsTilt { pitch = BoardCamera.clampedPitch(pitch + dy * Self.radiansPerPoint * 0.65) }
     }
 
     /// Positive turns rotate the board clockwise, as seen from above.
     public mutating func rotate(quarterTurns: Int) {
-        yaw += Double(quarterTurns) * .pi / 2
+        turn += Double(quarterTurns) * .pi / 2
     }
 
     public mutating func toggleTilt() {
@@ -66,7 +68,7 @@ public struct BoardCameraRig: Equatable, Sendable {
 
     /// Back to the opening view, turning the short way round.
     public mutating func reset() {
-        yaw = BoardCamera.equivalentAngle(BoardCamera.defaultYaw, nearestTo: yaw)
+        turn = BoardCamera.equivalentAngle(0, nearestTo: turn)
         pitch = BoardCamera.defaultPitch
         zoom = 1
         pan = .zero

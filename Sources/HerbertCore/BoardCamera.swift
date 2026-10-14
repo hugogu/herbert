@@ -88,6 +88,8 @@ public struct BoardCamera: Equatable, Sendable {
     private let eyeZ: Double
 
     public static let defaultYaw = 0.62
+    /// Nearly straight on: a tall, narrow view fits a board about a fifth wider this way than on the diagonal.
+    public static let uprightYaw = 0.18
     public static let defaultPitch = 0.98
     public static let defaultDistance = 52.0
     /// Low enough to feel three-dimensional, high enough that a wall never hides more than the next cell.
@@ -109,6 +111,12 @@ public struct BoardCamera: Equatable, Sendable {
         eyeX = focusX + distance * cos(pitch) * sin(yaw)
         eyeY = focusY + distance * cos(pitch) * cos(yaw)
         eyeZ = distance * sin(pitch)
+    }
+
+    /// The opening angle for a view of the given width over height. A square board always fits larger when seen
+    /// nearly straight on, so only a clearly wide view, with room to spare, opens on the diagonal.
+    public static func homeYaw(forAspect aspect: Double) -> Double {
+        aspect < 1.15 ? uprightYaw : defaultYaw
     }
 
     public static func clampedPitch(_ pitch: Double) -> Double {

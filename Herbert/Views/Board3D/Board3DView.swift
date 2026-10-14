@@ -51,16 +51,18 @@ struct Board3DView: View {
             minX: -1, minY: -1, maxX: Double(session.board.width + 1), maxY: Double(session.board.height + 1))
     }
 
-    private var pose: Board3DPose {
+    /// The board opens at an angle that suits the shape of its view; the player's turns are added to it.
+    private func pose(in size: CGSize) -> Board3DPose {
         Board3DPose(
-            robot: model.session.position, headingAngle: headingAngle, yaw: rig.yaw, pitch: rig.pitch, floor: floor,
-            zoom: rig.zoom, pan: rig.pan, follow: rig.follow ? 1 : 0)
+            robot: model.session.position, headingAngle: headingAngle,
+            yaw: BoardCamera.homeYaw(forAspect: size.width / max(size.height, 1)) + rig.turn, pitch: rig.pitch,
+            floor: floor, zoom: rig.zoom, pan: rig.pan, follow: rig.follow ? 1 : 0)
     }
 
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .topTrailing) {
-                drawing.modifier(
+                drawing(in: geometry.size).modifier(
                     Board3DInput(
                         rig: $rig, size: geometry.size, yieldsVerticalDrags: presentation == .inline, onReset: reset))
                 controls(in: geometry.size)
@@ -71,17 +73,17 @@ struct Board3DView: View {
         }
     }
 
-    private var drawing: some View {
+    private func drawing(in size: CGSize) -> some View {
         let session = model.session
         return Board3DDrawing(
             board: session.board, visited: session.visitedTargets, trail: session.trail, showTrail: showTrail,
-            showGridDots: showGridDots, pose: pose
+            showGridDots: showGridDots, pose: pose(in: size)
         )
         .animation(stepAnimation, value: Step(position: session.position, heading: session.heading))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityValue(
-            L10n.text("视角 %ld°，俯角 %ld°", Int(degrees(rig.yaw - BoardCamera.defaultYaw)), Int(degrees(rig.pitch)))
+            L10n.text("视角 %ld°，俯角 %ld°", Int(degrees(rig.turn)), Int(degrees(rig.pitch)))
         )
         .accessibilityIdentifier("game-board")
     }

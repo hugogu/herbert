@@ -35,7 +35,7 @@ struct Board3DInput: ViewModifier {
                         rig.follow = false
                     },
                     onZoom: { rig.zoom(by: $0, about: $1, in: size) },
-                    onTwist: { rig.yaw += $0 },
+                    onTwist: { rig.turn += $0 },
                     onReset: onReset
                 ).accessibilityHidden(true)
             }
@@ -78,7 +78,7 @@ struct Board3DInput: ViewModifier {
             let twist = RotateGesture()
                 .onChanged { value in
                     gesturing = true
-                    rig.yaw += value.rotation.radians - twisted
+                    rig.turn += value.rotation.radians - twisted
                     twisted = value.rotation.radians
                 }
                 .onEnded { _ in
