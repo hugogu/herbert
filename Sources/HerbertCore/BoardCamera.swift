@@ -169,11 +169,15 @@ public struct BoardCamera: Equatable, Sendable {
         return dx * dx + dy * dy + dz * dz
     }
 
-    /// Cells holding blocks of `height`, farthest from the eye first, so nearer blocks paint over farther ones.
-    public func drawOrder<Cells: Sequence>(of cells: Cells, height: Double) -> [GridPoint]
+    /// Cells holding blocks of the given heights, farthest from the eye first, so nearer blocks paint over
+    /// farther ones.
+    public func drawOrder<Cells: Sequence>(of cells: Cells, height: (GridPoint) -> Double) -> [GridPoint]
     where Cells.Element == GridPoint {
         cells.map {
-            (cell: $0, distance: eyeDistanceSquared(x: Double($0.x) + 0.5, y: Double($0.y) + 0.5, height: height / 2))
+            (
+                cell: $0,
+                distance: eyeDistanceSquared(x: Double($0.x) + 0.5, y: Double($0.y) + 0.5, height: height($0) / 2)
+            )
         }
         .sorted { first, second in
             first.distance != second.distance
@@ -188,6 +192,11 @@ public struct BoardCamera: Equatable, Sendable {
         let faceX = Double(cell.x) + 0.5 + 0.5 * Double(vector.x)
         let faceY = Double(cell.y) + 0.5 + 0.5 * Double(vector.y)
         return (eyeX - faceX) * Double(vector.x) + (eyeY - faceY) * Double(vector.y) > 0
+    }
+
+    /// Whether a horizontal direction at a board position points toward the eye rather than away from it.
+    public func isFacingEye(direction: (x: Double, y: Double), atX x: Double, y: Double) -> Bool {
+        (eyeX - x) * direction.x + (eyeY - y) * direction.y > 0
     }
 
     /// A face's outward normal in the camera's frame: `across` points right and `toward` points at the viewer.
