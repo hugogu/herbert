@@ -458,6 +458,182 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testThreeDStyleCanBeChosenTurnedAndTiltedAndPersists() throws {
+        var app = launch(language: "en")
+        openProblem(10074, in: app)
+        selectThreeD(in: app)
+        var board = app.descendants(matching: .any)["game-board"].firstMatch
+        XCTAssertTrue(board.label.contains("3D; grid dots on; trail on; 0"), board.debugDescription)
+        XCTAssertEqual(board.value as? String, "View 0°, tilt 56°")
+        let amber = try countPixels(in: board) { red, green, blue in
+            red > 200 && (120...190).contains(green) && blue < 110
+        }
+        XCTAssertGreaterThan(amber, 300, "The glowing discs are part of the picture")
+        app.buttons["camera-rotate-right"].activateControl()
+        XCTAssertEqual(board.value as? String, "View 90°, tilt 56°")
+        app.buttons["camera-rotate-left"].activateControl()
+        app.buttons["camera-rotate-left"].activateControl()
+        XCTAssertEqual(board.value as? String, "View 270°, tilt 56°")
+        app.buttons["camera-tilt"].activateControl()
+        XCTAssertEqual(board.value as? String, "View 270°, tilt 76°")
+        capture(app, name: "three-d-turned")
+        app.buttons["reset-board-view"].activateControl()
+        XCTAssertEqual(board.value as? String, "View 0°, tilt 56°")
+        app.terminate()
+        app = launch(reset: false, language: "en")
+        openFirst(app)
+        board = app.descendants(matching: .any)["game-board"].firstMatch
+        XCTAssertTrue(board.label.contains("3D; grid dots on; trail on; 0"), "The style is remembered")
+        app.terminate()
+    }
+
+    @MainActor
+    func testThreeDBoardOrbitsWithADragAndKeepsVerticalSwipesForThePage() throws {
+        let app = launch(language: "en")
+        openProblem(10074, in: app)
+        selectThreeD(in: app)
+        let board = app.descendants(matching: .any)["game-board"].firstMatch
+        XCTAssertEqual(board.value as? String, "View 0°, tilt 56°")
+        #if os(macOS)
+            board.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click(
+                forDuration: 0.1, thenDragTo: board.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.5)))
+            XCTAssertNotEqual(board.value as? String, "View 0°, tilt 56°", "Dragging turns the board")
+        #else
+            board.swipeLeft()
+            let turned = try XCTUnwrap(board.value as? String)
+            XCTAssertNotEqual(turned, "View 0°, tilt 56°", "Dragging sideways turns the board")
+            XCTAssertTrue(turned.hasSuffix("tilt 56°"), "Sideways drags never tilt")
+            let before = board.frame.minY
+            // Start in the visible upper part of the board, clear of the pinned run controls.
+            board.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.3)).press(
+                forDuration: 0.05, thenDragTo: board.coordinate(withNormalizedOffset: CGVector(dx: 0.4, dy: 0.02)))
+            XCTAssertEqual((board.value as? String)?.hasSuffix("tilt 56°"), true, "Vertical drags never tilt")
+            if app.windows.firstMatch.frame.width < 600 {
+                XCTAssertLessThan(board.frame.minY, before, "A vertical swipe over the board scrolls the page")
+            }
+        #endif
+        app.terminate()
+    }
+
+    @MainActor
+    func testThreeDBoardGetsMoreRoomThanTheFlatStyles() throws {
+        let app = launch(language: "en")
+        openProblem(10074, in: app)
+        let flat = app.descendants(matching: .any)["game-board"].firstMatch.frame
+        selectThreeD(in: app)
+        let deep = app.descendants(matching: .any)["game-board"].firstMatch.frame
+        XCTAssertGreaterThan(deep.height, flat.height * 1.1, "A foreshortened board needs a taller panel")
+        XCTAssertGreaterThanOrEqual(deep.width, flat.width - 1)
+        app.terminate()
+    }
+
+    @MainActor
+    func testThreeDStageEnlargesTheBoardAndRunsTheProgram() throws {
+        let app = launch(language: "en")
+        openFirst(app)
+        selectThreeD(in: app)
+        app.textViews["code-editor"].activateControl()
+        app.textViews["code-editor"].typeText("s")
+        let inline = app.descendants(matching: .any)["game-board"].firstMatch.frame
+        app.buttons["enlarge-board"].activateControl()
+        XCTAssertTrue(app.buttons["close-stage"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.textViews["code-editor"].exists, "The page behind the stage is out of reach")
+        let stage = app.descendants(matching: .any)["game-board"].firstMatch.frame
+        XCTAssertGreaterThan(
+            stage.width * stage.height, inline.width * inline.height * 1.3, "The stage is for a bigger board")
+        for identifier in [
+            "camera-rotate-left", "camera-rotate-right", "camera-tilt", "camera-zoom-in", "camera-zoom-out",
+            "camera-follow", "camera-focus", "camera-reset",
+        ] {
+            XCTAssertTrue(app.buttons[identifier].exists, identifier)
+        }
+        capture(app, name: "three-d-stage")
+        app.buttons["camera-follow"].activateControl()
+        app.buttons["camera-zoom-in"].activateControl()
+        XCTAssertEqual(app.staticTexts["stage-program"].displayedText, "s")
+        app.buttons["stage-run-program"].activateControl()
+        XCTAssertTrue(
+            app.descendants(matching: .any)["stage-completion"].waitForExistence(timeout: 8), app.debugDescription)
+        capture(app, name: "three-d-stage-complete")
+        app.buttons["close-stage"].activateControl()
+        XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.textViews["code-editor"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testThreeDBoardGuideNamesDiscsAndHoles() throws {
+        let app = launch(language: "en")
+        openProblem(10074, in: app)
+        selectThreeD(in: app)
+        let legend = app.buttons["board-legend"]
+        #if os(iOS)
+            // On a phone the legend sits below the fold, under the pinned run controls.
+            if app.windows.firstMatch.frame.width < 600 { app.swipeUp() }
+        #endif
+        legend.activateControl()
+        // Match any element type: iOS exposes sheet text differently from a Mac popover.
+        let targetHelp = app.descendants(matching: .any)["board-target-help"].firstMatch
+        XCTAssertTrue(targetHelp.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(targetHelp.displayedText.contains("glowing disc"), targetHelp.debugDescription)
+        let trapHelp = app.descendants(matching: .any)["board-trap-help"].firstMatch
+        XCTAssertTrue(trapHelp.displayedText.contains("Herbert stays on the trap"), trapHelp.debugDescription)
+        capture(app, name: "three-d-guide")
+        app.buttons["close-board-legend"].activateControl()
+        app.terminate()
+    }
+
+    @MainActor
+    func testCaptureThreeDScreenshots() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.environment["HERBERT_CAPTURE_SCREENSHOTS"] == "1",
+            "Run scripts/capture_screenshots.sh to refresh the documentation images.")
+        let app = launch(language: ProcessInfo.processInfo.environment["HERBERT_SCREENSHOT_LANGUAGE"] ?? "en")
+        openProblem(10096, in: app)
+        selectThreeD(in: app)
+        app.textViews["code-editor"].activateControl()
+        app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(3)")
+        for _ in 0..<3 { app.buttons["step-program"].activateControl() }
+        capture(app, name: "three-d-board")
+        let board = app.descendants(matching: .any)["game-board"].firstMatch
+        app.activate()
+        let image = XCTAttachment(screenshot: board.screenshot())
+        image.name = "readme-three-d-board-only"
+        image.lifetime = .keepAlways
+        add(image)
+        app.buttons["enlarge-board"].activateControl()
+        XCTAssertTrue(app.buttons["close-stage"].waitForExistence(timeout: 5))
+        capture(app, name: "three-d-stage-capture")
+        app.terminate()
+    }
+
+    @MainActor
+    private func selectThreeD(in app: XCUIApplication) {
+        app.buttons["board-options"].activateControl()
+        selectBoardStyle("threeD", in: app)
+        app.buttons["close-board-options"].activateControl()
+        XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func countPixels(in element: XCUIElement, matching predicate: (UInt8, UInt8, UInt8) -> Bool) throws -> Int {
+        let data = element.screenshot().pngRepresentation as CFData
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(data, nil))
+        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let context = try XCTUnwrap(
+            CGContext(
+                data: nil, width: image.width, height: image.height, bitsPerComponent: 8,
+                bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        var count = 0
+        for index in stride(from: 0, to: image.width * image.height * 4, by: 4)
+        where predicate(pixels[index], pixels[index + 1], pixels[index + 2]) { count += 1 }
+        return count
+    }
+
+    @MainActor
     private func openProblem(_ id: Int, in app: XCUIApplication) {
         let search = app.textFields["problem-search"]
         search.activateControl()
@@ -704,7 +880,8 @@ final class HerbertUITests: XCTestCase {
 }
 
 extension XCUIElement {
-    fileprivate var displayedText: String { (value as? String) ?? label }
+    /// Static text puts its content in `value` on macOS and in `label` on iOS, where `value` can be empty.
+    fileprivate var displayedText: String { (value as? String).flatMap { $0.isEmpty ? nil : $0 } ?? label }
     fileprivate func activateControl() {
         #if os(macOS)
             XCUIApplication().activate()
