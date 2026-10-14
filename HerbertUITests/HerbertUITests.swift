@@ -594,8 +594,20 @@ final class HerbertUITests: XCTestCase {
         app.textViews["code-editor"].activateControl()
         app.textViews["code-editor"].typeText("a(X):sa(X-1)\na(3)")
         for _ in 0..<3 { app.buttons["step-program"].activateControl() }
-        capture(app, name: "three-d-board")
         let board = app.descendants(matching: .any)["game-board"].firstMatch
+        #if os(iOS)
+            // Bring the whole board between the navigation bar and the pinned run controls.
+            let window = app.windows.firstMatch.frame
+            for _ in 0..<3 where board.frame.minY < 150 || board.frame.maxY > window.height - 170 {
+                let delta = board.frame.minY - 160
+                let start = CGVector(dx: 0.5, dy: 0.7)
+                app.coordinate(withNormalizedOffset: start).press(
+                    forDuration: 0.05,
+                    thenDragTo: app.coordinate(
+                        withNormalizedOffset: CGVector(dx: 0.5, dy: start.dy - delta / window.height)))
+            }
+        #endif
+        capture(app, name: "three-d-board")
         app.activate()
         let image = XCTAttachment(screenshot: board.screenshot())
         image.name = "readme-three-d-board-only"
