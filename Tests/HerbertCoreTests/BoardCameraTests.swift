@@ -111,16 +111,17 @@ final class BoardCameraTests: XCTestCase {
     }
 
     func testNearerBlocksPaintLastAndTiesAreStable() {
+        let wall: (GridPoint) -> Double = { _ in 0.6 }
         let camera = BoardCamera(yaw: 0, pitch: 1, focusX: 12.5, focusY: 12.5)
         let cells = [GridPoint(x: 12, y: 20), GridPoint(x: 12, y: 3), GridPoint(x: 12, y: 11)]
         XCTAssertEqual(
-            camera.drawOrder(of: cells, height: 0.6),
+            camera.drawOrder(of: cells, height: wall),
             [GridPoint(x: 12, y: 3), GridPoint(x: 12, y: 11), GridPoint(x: 12, y: 20)])
         let mirrored = [GridPoint(x: 15, y: 9), GridPoint(x: 9, y: 9)]
         XCTAssertEqual(
-            camera.drawOrder(of: mirrored, height: 0.6), camera.drawOrder(of: mirrored.reversed(), height: 0.6))
+            camera.drawOrder(of: mirrored, height: wall), camera.drawOrder(of: mirrored.reversed(), height: wall))
         let turned = BoardCamera(yaw: .pi, pitch: 1, focusX: 12.5, focusY: 12.5)
-        XCTAssertEqual(turned.drawOrder(of: cells, height: 0.6).first, GridPoint(x: 12, y: 20))
+        XCTAssertEqual(turned.drawOrder(of: cells, height: wall).first, GridPoint(x: 12, y: 20))
     }
 
     func testOnlyFacesTurnedTowardTheEyeAreVisible() {
@@ -136,6 +137,16 @@ final class BoardCameraTests: XCTestCase {
         let behind = BoardCamera(yaw: .pi, pitch: 1, focusX: 12.5, focusY: 12.5)
         XCTAssertTrue(behind.isVisible(.north, ofBlockAt: left))
         XCTAssertFalse(behind.isVisible(.south, ofBlockAt: left))
+    }
+
+    func testADirectionFacesTheEyeWhenItPointsAtIt() {
+        let camera = BoardCamera(yaw: 0, pitch: 1, focusX: 12.5, focusY: 12.5)
+        XCTAssertTrue(camera.isFacingEye(direction: (0, 1), atX: 12.5, y: 12.5), "South points at the viewer")
+        XCTAssertFalse(camera.isFacingEye(direction: (0, -1), atX: 12.5, y: 12.5))
+        XCTAssertTrue(camera.isFacingEye(direction: (1, 0), atX: 3, y: 12.5), "Looking across toward the eye")
+        XCTAssertFalse(camera.isFacingEye(direction: (-1, 0), atX: 3, y: 12.5))
+        let turned = BoardCamera(yaw: .pi / 2, pitch: 1, focusX: 12.5, focusY: 12.5)
+        XCTAssertTrue(turned.isFacingEye(direction: (1, 0), atX: 12.5, y: 12.5), "East points at the viewer")
     }
 
     func testCameraFrameNormalsInvertBackToBoardDirections() {
