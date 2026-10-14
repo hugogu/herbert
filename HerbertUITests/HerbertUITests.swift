@@ -522,8 +522,13 @@ final class HerbertUITests: XCTestCase {
         let flat = app.descendants(matching: .any)["game-board"].firstMatch.frame
         selectThreeD(in: app)
         let deep = app.descendants(matching: .any)["game-board"].firstMatch.frame
-        XCTAssertGreaterThan(deep.height, flat.height * 1.1, "A foreshortened board needs a taller panel")
         XCTAssertGreaterThanOrEqual(deep.width, flat.width - 1)
+        if app.windows.firstMatch.frame.width < 600 {
+            XCTAssertGreaterThan(deep.height, flat.height * 1.1, "A foreshortened board needs a taller phone panel")
+        } else {
+            // Beside the editor the panel follows its column: no taller than the board can use, never cramped.
+            XCTAssertGreaterThanOrEqual(deep.height, 340)
+        }
         app.terminate()
     }
 
