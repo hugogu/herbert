@@ -14,6 +14,8 @@ public struct BoardCameraRig: Equatable, Sendable {
     public var follow = false
 
     public static let zoomRange: ClosedRange<Double> = 1...6
+    /// Following Herbert only means something when zoomed in, so turning it on zooms at least this far.
+    public static let followZoom = 2.2
     /// Nearly top-down: easiest for reading a route, at the cost of depth.
     public static let steepPitch = 1.32
     /// Radians of orbit per point of drag.
@@ -51,6 +53,13 @@ public struct BoardCameraRig: Equatable, Sendable {
             height: pan.height * ratio + (anchor.y - center.y) * (1 - ratio))
         zoom = target
         clampPan(in: size)
+    }
+
+    public mutating func toggleFollow(in size: CGSize) {
+        follow.toggle()
+        if follow && zoom < Self.followZoom {
+            zoom(by: Self.followZoom / zoom, about: CGPoint(x: size.width / 2, y: size.height / 2), in: size)
+        }
     }
 
     public mutating func pan(by delta: CGSize, in size: CGSize) {

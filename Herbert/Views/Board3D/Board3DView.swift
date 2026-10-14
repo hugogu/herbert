@@ -114,6 +114,12 @@ struct Board3DView: View {
         withAnimation(cameraAnimation) { rig.reset() }
     }
 
+    private func zoom(by factor: Double, in size: CGSize) {
+        withAnimation(cameraAnimation) {
+            rig.zoom(by: factor, about: CGPoint(x: size.width / 2, y: size.height / 2), in: size)
+        }
+    }
+
     private func controls(in size: CGSize) -> some View {
         let isStage = presentation == .stage
         let steep = rig.pitch >= BoardCameraRig.steepPitch - 0.12
@@ -131,19 +137,15 @@ struct Board3DView: View {
             }
             if isStage {
                 CameraButton(symbol: "plus.magnifyingglass", label: "拉近视角", identifier: "camera-zoom-in") {
-                    withAnimation(cameraAnimation) {
-                        rig.zoom(by: 1.4, about: CGPoint(x: size.width / 2, y: size.height / 2), in: size)
-                    }
+                    zoom(by: 1.4, in: size)
                 }
                 CameraButton(symbol: "minus.magnifyingglass", label: "拉远视角", identifier: "camera-zoom-out") {
-                    withAnimation(cameraAnimation) {
-                        rig.zoom(by: 1 / 1.4, about: CGPoint(x: size.width / 2, y: size.height / 2), in: size)
-                    }
+                    zoom(by: 1 / 1.4, in: size)
                 }
                 CameraButton(
                     symbol: "scope", label: "跟随 Herbert", identifier: "camera-follow", isOn: rig.follow
                 ) {
-                    withAnimation(cameraAnimation) { rig.follow.toggle() }
+                    withAnimation(cameraAnimation) { rig.toggleFollow(in: size) }
                 }
                 if let onToggleFocus {
                     CameraButton(

@@ -90,6 +90,21 @@ final class BoardCameraRigTests: XCTestCase {
         XCTAssertEqual(rig.zoom, 3, accuracy: 1e-12)
     }
 
+    func testFollowingZoomsInBecauseItOnlyMeansSomethingWhenMagnified() {
+        var rig = BoardCameraRig()
+        rig.toggleFollow(in: size)
+        XCTAssertTrue(rig.follow)
+        XCTAssertEqual(rig.zoom, BoardCameraRig.followZoom)
+        XCTAssertEqual(rig.pan, .zero, "Zooming about the middle needs no pan")
+        rig.zoom(by: 2, about: CGPoint(x: 200, y: 150), in: size)
+        let zoomed = rig.zoom
+        rig.toggleFollow(in: size)
+        XCTAssertFalse(rig.follow)
+        XCTAssertEqual(rig.zoom, zoomed, "Turning it off leaves the framing alone")
+        rig.toggleFollow(in: size)
+        XCTAssertEqual(rig.zoom, zoomed, "Already zoomed in further than follow needs")
+    }
+
     func testPanNeverRevealsMoreThanTheMagnifiedEdge() {
         var rig = BoardCameraRig()
         rig.pan(by: CGSize(width: 500, height: 500), in: size)
