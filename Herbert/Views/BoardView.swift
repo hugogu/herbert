@@ -359,7 +359,9 @@ private struct BoardLegendGuide: View {
             }
             item(
                 "目标", symbol: "circle", color: style == .classic ? .black : Palette.amber,
-                detail: "走到圆环上即可点亮。让所有目标同时亮起即可完成。", identifier: "board-target-help")
+                detail: style == .threeD
+                    ? "走到发光的圆盘上即可点亮。让所有目标同时亮起即可完成。" : "走到圆环上即可点亮。让所有目标同时亮起即可完成。",
+                identifier: "board-target-help")
             item(
                 "墙", symbol: "square.fill", color: Palette.ink,
                 detail: "挡住去路：撞到墙或棋盘边界时，Herbert 留在原地，接着执行下一条指令。", identifier: "board-wall-help")
