@@ -42,6 +42,7 @@ struct GuideView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("为你的设备重新设计").font(.headline)
                     Text("用快捷指令键在光标处插入代码。单步执行便于调试，暂停后可继续。双指缩放棋盘，放大后拖动；「全棋盘」显示完整 25×25 区域。切到后台会自动暂停并保存草稿。")
+                    Text("3D 风格下，拖动旋转视角，双指缩放，双击复原。点「放大棋盘」进入大舞台，可让镜头跟随 Herbert。")
                     Text("Mac：⌘ Return 运行 / 暂停。所有关卡、草稿与最短解都可离线使用。")
                     Text("每次运行最多 100 万步；命令展开、递归深度也有保护上限，以保持界面可响应。")
                 }.font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5).panel()
