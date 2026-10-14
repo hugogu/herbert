@@ -201,6 +201,24 @@ final class BoardCameraTests: XCTestCase {
         XCTAssertEqual(Heading.south.angle(nearest: 0.1), .pi, accuracy: 1e-9)
     }
 
+    func testOnlyClearlyWideViewsOpenOnTheDiagonal() {
+        XCTAssertEqual(BoardCamera.homeYaw(forAspect: 0.77), BoardCamera.uprightYaw)
+        XCTAssertEqual(BoardCamera.homeYaw(forAspect: 1), BoardCamera.uprightYaw, "A square view favors size")
+        XCTAssertEqual(BoardCamera.homeYaw(forAspect: 1.149), BoardCamera.uprightYaw)
+        XCTAssertEqual(BoardCamera.homeYaw(forAspect: 1.15), BoardCamera.defaultYaw)
+        XCTAssertEqual(BoardCamera.homeYaw(forAspect: 1.6), BoardCamera.defaultYaw)
+    }
+
+    func testStraightOnGivesATallViewALargerBoard() {
+        let size = CGSize(width: 376, height: 520)
+        let board = FloorRect(minX: -1, minY: -1, maxX: 26, maxY: 26)
+        func scale(yaw: Double) -> Double {
+            BoardCamera(yaw: yaw, focusX: board.centerX, focusY: board.centerY)
+                .frame(fitting: board, heights: -0.45...0.62, in: size, padding: 18).scale
+        }
+        XCTAssertGreaterThan(scale(yaw: BoardCamera.uprightYaw), scale(yaw: BoardCamera.defaultYaw) * 1.15)
+    }
+
     func testPitchStaysInsideTheSupportedRange() {
         XCTAssertEqual(BoardCamera.clampedPitch(0), BoardCamera.pitchRange.lowerBound)
         XCTAssertEqual(BoardCamera.clampedPitch(3), BoardCamera.pitchRange.upperBound)
