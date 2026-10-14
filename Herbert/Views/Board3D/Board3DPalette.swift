@@ -41,8 +41,6 @@ enum Board3DPalette {
     static let floorSeam = Tone(0x8C877F)
     static let wall = Tone(0x6A645E)
     static let curb = Tone(0x8D877F)
-    static let slab = Tone(0x4A4642)
-    static let edgeLight = Tone(0xFFFFFF)
     static let amber = Tone(0xF6A12E)
     static let amberLight = Tone(0xFFD27A)
     static let amberDeep = Tone(0xC2600C)
