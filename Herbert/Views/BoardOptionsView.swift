@@ -1,10 +1,22 @@
 import SwiftUI
 
 enum BoardStyle: String, CaseIterable, Identifiable {
-    case modern, classic
+    case modern, classic, threeD
     var id: String { rawValue }
-    var title: LocalizedStringKey { self == .modern ? "现代风格" : "经典风格" }
-    var background: Color { self == .classic ? Color(white: 0.98) : Palette.paper.opacity(0.7) }
+    var title: LocalizedStringKey {
+        switch self {
+        case .modern: "现代风格"
+        case .classic: "经典风格"
+        case .threeD: "3D 风格"
+        }
+    }
+    var background: Color {
+        switch self {
+        case .modern: Palette.paper.opacity(0.7)
+        case .classic: Color(white: 0.98)
+        case .threeD: Board3DPalette.backdropBottom.color()
+        }
+    }
 }
 
 struct BoardOptionsView: View {
