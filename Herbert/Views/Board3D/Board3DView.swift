@@ -16,13 +16,15 @@ struct Board3DView: View {
     let showTrail: Bool
     let showGridDots: Bool
     var presentation = Presentation.inline
+    /// Offered as a camera button on the stage, where the board header is not around.
+    var onToggleFocus: (() -> Void)?
 
     @State private var headingAngle: Double
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(
         model: GameModel, rig: Binding<BoardCameraRig>, focused: Bool, showTrail: Bool, showGridDots: Bool,
-        presentation: Presentation = .inline
+        presentation: Presentation = .inline, onToggleFocus: (() -> Void)? = nil
     ) {
         self.model = model
         _rig = rig
@@ -30,6 +32,7 @@ struct Board3DView: View {
         self.showTrail = showTrail
         self.showGridDots = showGridDots
         self.presentation = presentation
+        self.onToggleFocus = onToggleFocus
         _headingAngle = State(initialValue: model.session.heading.angle)
     }
 
@@ -121,7 +124,9 @@ struct Board3DView: View {
             CameraButton(symbol: "rotate.right", label: "向右旋转视角", identifier: "camera-rotate-right") {
                 withAnimation(cameraAnimation) { rig.rotate(quarterTurns: 1) }
             }
-            CameraButton(symbol: steep ? "view.3d" : "view.2d", label: "切换俯视角度", identifier: "camera-tilt") {
+            CameraButton(
+                symbol: steep ? "perspective" : "square.grid.3x3", label: "切换俯视角度", identifier: "camera-tilt"
+            ) {
                 withAnimation(cameraAnimation) { rig.toggleTilt() }
             }
             if isStage {
@@ -139,6 +144,14 @@ struct Board3DView: View {
                     symbol: "scope", label: "跟随 Herbert", identifier: "camera-follow", isOn: rig.follow
                 ) {
                     withAnimation(cameraAnimation) { rig.follow.toggle() }
+                }
+                if let onToggleFocus {
+                    CameraButton(
+                        symbol: "viewfinder", label: focused ? "全棋盘" : "聚焦", identifier: "camera-focus",
+                        action: onToggleFocus)
+                }
+                CameraButton(symbol: "arrow.counterclockwise", label: "复原视角", identifier: "camera-reset") {
+                    reset()
                 }
             }
         }
