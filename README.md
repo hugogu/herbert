@@ -17,24 +17,26 @@ SwiftUI. Guide the robot to every target using H, a tiny language whose short pr
 can express surprisingly intricate paths. Learn three commands, discover recursion,
 and keep making your solution smaller.
 
-Start with **10 introductory lessons**, then explore **20 advanced challenges** in
+Start with **10 introductory lessons**, then explore **40 advanced and synthesis challenges** in
 wall-assisted counting, parameter swaps, recursive returns, mutual recursion and
-composition. All **30 original puzzles** have English, Chinese and Japanese goals
+composition. All **50 original puzzles** have English, Chinese and Japanese goals
 and two optional hints. Reference programs are verified by the native engine;
 H language behavior is also audited against the HOJ reference implementation.
 The default open-source edition also includes **1,769 community problems**, preserving
-their IDs, authors and byte limits. The **App Store edition contains only the 30 originals**.
-The course uses continuous **L01–L30** numbers: ten introductory lessons followed
-by twenty advanced challenges. Only the first two fit a direct sequence of commands.
+their IDs, authors and byte limits. The **App Store edition contains only the 50 originals**.
+The course uses continuous **L01–L50** numbers: ten introductory lessons followed
+by forty advanced and synthesis challenges. Only the first two fit a direct sequence of commands.
 L04–L06 introduce reusable patterns; L11–L22 explore open geometric compositions.
 Broken wall landmarks and trap motifs guide the route while leaving alternative traversals.
 Display numbers are separate from internal save IDs; retired records remain importable.
+L41–L50 add paired inverse paths, changing dimensions and layered recursive composition,
+while preserving the previous forty lessons.
 
 ## Download for Mac
 
 **[Download the 1.0.0 DMG](https://github.com/hugogu/herbert/releases/download/v1.0.0/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
-no Xcode is needed. Includes all 1,799 problems.
+no Xcode is needed. This published release includes 1,799 problems; the source course above includes the new lessons.
 
 Screenshots below match the 1.0.0 source.
 
@@ -144,7 +146,7 @@ accepted solution; OpenRouter 402 credit failures become Burnout.
 
 ## Herbert Benchmark
 
-Use the **30 retained original puzzles** as an AI programming benchmark: movement and
+Use the **50 original puzzles** as an AI programming benchmark: movement and
 walls, numeric and instruction parameters, recursion, multiple procedures and their
 composition. Every answer runs in the same bounded native H engine used for human play.
 The platform measures actual board outcomes and code length, with no model acting as judge.
@@ -255,10 +257,10 @@ to change style, grid dots, and trail visibility.*
 
 ## What you can do
 
-- **Learn one idea at a time.** Follow the 30-lesson course from one step to the Astral cathedral;
+- **Learn one idea at a time.** Follow the 50-lesson course from one step to the Palace of woven paths;
   reveal hints individually when you need them. Titles, goals and hints support all three languages.
-- **Play anywhere offline.** The default edition bundles 1,799 problems; the App Store
-  edition bundles 30 originals. Search by ID, title, or author;
+- **Play anywhere offline.** The default edition bundles 1,819 problems; the App Store
+  edition bundles 50 originals. Search by ID, title, or author;
   bookmark favorites and return to your last problem.
 - **Think in H.** Use `s`, `l`, and `r`, then build single-letter procedures, numeric and
   command parameters, and recursive programs. Original byte-counting rules are preserved.
@@ -314,8 +316,8 @@ No developer account is configured in the repository.
 
 | Scheme | Included content | Intended use |
 | --- | --- | --- |
-| `Herbert` (default) | 30 original lessons + 1,769 archived community puzzles | Open-source edition |
-| `HerbertAppStore` (**Herbot Bot**) | 30 original lessons only | TestFlight / App Store candidate |
+| `Herbert` (default) | 50 original lessons + 1,769 archived community puzzles | Open-source edition |
+| `HerbertAppStore` (**Herbot Bot**) | 50 original lessons only | TestFlight / App Store candidate |
 
 The community archive is a separate optional Swift package target, not a runtime-hidden
 file in the store app. CI audits built iOS and Mac store apps for content isolation.
@@ -402,6 +404,6 @@ each original problem author retains their rights. The original Flash client, on
 accounts, submissions, and leaderboard are not included; original best scores are an
 import-time snapshot, not live rankings.
 
-Our source code, 30 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
+Our source code, 50 original lessons, original icon, and documentation use the **[MIT License](LICENSE)**.
 Third-party community puzzle data and community layouts visible in screenshots are
 **not relicensed under MIT**. See [NOTICE.md](NOTICE.md) for the precise scope and provenance.

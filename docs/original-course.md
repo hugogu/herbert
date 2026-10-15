@@ -1,12 +1,12 @@
-# 40 original lessons
+# 50 original lessons
 
 These puzzles were independently designed from the public H language and board rules, not adapted from the community archive. Original layouts, names, objectives, hints, generation code and reference programs are released under MIT.
 
-Ten introductory lessons in two chapters cover movement and obstacles, then reuse, recursion, instruction arguments and composition. Only the first two fit a direct sequence of moves. Six advanced and master chapters contain thirty open geometric challenges: wall-assisted counting, state and return invariants, nested patterns, recursive systems, advanced fractals and algorithm synthesis. L04–L06 and L10–L40 use broken brackets, wall fragments and trap ribbons; each obstacle type occupies 15–30% of the full route-border cell count. L11–L22 have open geometry; L23–L30 retain historical target motifs; L31–L40 introduce closed-loop filling, Terdragons, orthogonal Sierpinski gaskets, Peano meanders, asymmetric trees and dual-rate oscillation. Each new concept starts with a small example and is transferred to a larger pattern. All lessons are unlocked. Objectives appear first; two hints are revealed individually. Alternative valid solutions are welcome.
+Ten introductory lessons in two chapters cover movement and obstacles, then reuse, recursion, instruction arguments and composition. Only the first two fit a direct sequence of moves. Eight advanced, master and synthesis chapters contain forty open geometric challenges: wall-assisted counting, state and return invariants, nested patterns, recursive systems, advanced fractals and algorithm synthesis. L04–L06 and L10–L50 use broken brackets, wall fragments and trap ribbons; each obstacle type occupies 15–30% of the full route-border cell count. L11–L22 have open geometry; L23–L30 retain historical target motifs; L31–L40 extend loops and branching. L41–L50 preserve the previous forty lessons and add dimension swaps, paired instruction growth, decorated inverse curves and layered recursive synthesis. Each new concept starts with a small example and is transferred to a larger pattern. All lessons are unlocked. Objectives appear first; two hints are revealed individually. Alternative valid solutions are welcome.
 
 Byte limits are verified achievable learning budgets, not claimed optimal scores or a numeric difficulty scale. Scored puzzle reference programs are test-only and excluded from app bundles; the AI prompt uses separate public teaching boards. Names, goals and hints are localized in English, Chinese and Japanese.
 
-Display numbers remain continuous L01–L40. Revised L04–L06 use new internal IDs 10074–10076, L10–L30 use 10077–10097, and new master lessons L31–L40 use 10098–10107 so old solutions and completions are not applied to changed boards. Retired records remain importable and match history retains its original board snapshots. L01–L03 and L07–L09 are unchanged.
+Display numbers are continuous L01–L50. L41–L50 use new internal IDs 10108–10117; L01–L40 retain their boards, budgets and save identities. Previously revised L04–L06 use 10074–10076, L10–L30 use 10077–10097, and master lessons L31–L40 use 10098–10107. Retired records remain importable without completing a changed board, and match history retains its original board snapshots.
 
 | Lesson | Chapter | Name | Learning objective | Byte limit |
 | --- | --- | --- | --- | --- |
@@ -50,6 +50,16 @@ Display numbers remain continuous L01–L40. Revised L04–L06 use new internal 
 | 10105 / L38 | Grandmaster recursive synthesis | Hanoi ribbon | Execute a binary reflected Gray code sequence, recursing through inner chambers before each pivot step. | 42 |
 | 10106 / L39 | Grandmaster recursive synthesis | Octagram mandala | Harmonize cardinal steps and diagonal staircase walkers across three concentric octagonal tiers with 8-fold dihedral symmetry. | 53 |
 | 10107 / L40 | Grandmaster recursive synthesis | Celestial armillary | Synthesize concentric courtyards, asymmetric Fibonacci spires, and orbital rotations into a grandmaster capstone. | 66 |
+| 10108 / L41 | Transformations and inverse paths | Alternating mirror halls | Swap shrinking rectangle dimensions and chirality while restoring every entrance pose. | 71 |
+| 10109 / L42 | Transformations and inverse paths | Paired folding ribbons | Grow a forward instruction and its inverse together, then execute one selected expansion. | 46 |
+| 10110 / L43 | Transformations and inverse paths | Counterchanging windows | Coordinate shrinking widths, growing heights and row offsets with separate return invariants. | 74 |
+| 10111 / L44 | Transformations and inverse paths | Counterpoised organ | Alternate branch sides as reach shrinks and the terminal window grows, then unwind the central spine. | 62 |
+| 10112 / L45 | Transformations and inverse paths | Lantern curve workshop | Replace each recursive curve link with a reusable window-and-walk instruction without changing its pose contract. | 59 |
+| 10113 / L46 | Layered recursive synthesis | Diagonal homecoming | Build inverse stair walkers and reuse them through unequal, mirrored recursive branches. | 76 |
+| 10114 / L47 | Layered recursive synthesis | Branching courtyards | Place unequal recursive courtyards at alternating corners, with swapped dimensions and chirality. | 62 |
+| 10115 / L48 | Layered recursive synthesis | Layered lantern vault | Nest returning windows inside shrinking rows while window size grows between tiers. | 83 |
+| 10116 / L49 | Layered recursive synthesis | Returning star atlas | Dock with four decorated recursive curves and construct the inverse of both the curve and its link motif. | 96 |
+| 10117 / L50 | Layered recursive synthesis | Palace of woven paths | Combine inverse diagonal trunks, unequal subtrees and exchanged node motifs into one returning recursive system. | 96 |
 
 `scripts/check.sh` replays all references with the real H compiler and game engine, checking byte limits, boards, distinct IDs, translations and save compatibility. App Store puzzle resources come only from HerbertCore; both editions also link the resource-free HerbertBattlefield. The archive lives in optional HerbertCommunity.
 

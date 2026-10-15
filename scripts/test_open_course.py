@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import unittest
 
-from master_course import master_designs as advanced_designs
+from expert_course import expert_designs as advanced_designs
 from advanced_course import outline
 from generate_original_problems import designs, trace
 from render_course_review import render
@@ -54,11 +54,11 @@ class OpenCourseTests(unittest.TestCase):
 
     def test_wall_and_trap_density_each_use_15_to_30_percent_of_enclosing_border(self):
         all_designs = designs() + advanced_designs(trace)
-        for order in [4, 5, 6, *range(10, 41)]:
+        for order in [4, 5, 6, *range(10, 51)]:
             with self.subTest(lesson=order):
                 start, commands, _, _, walls, traps = all_designs[order-1]
                 route = {start, *trace(start, commands, set(walls))}
-                symmetry = 2 if order in (4, 11, 14, 19, 32, 33) else 1 if order in (6, 26) else 4
+                symmetry = 2 if order in (4, 11, 14, 19, 32, 33) else 1 if order in (6, 26, 43, 45, 47, 48) else 4
                 capacity = len(outline(orbit(route, symmetry)))
                 for cells in (walls, traps):
                     self.assertGreaterEqual(len(cells) / capacity, .15)
@@ -84,7 +84,7 @@ class OpenCourseTests(unittest.TestCase):
 
     def test_authored_obstacles_leave_reference_geometry_safe(self):
         designs = advanced_designs(trace)
-        self.assertEqual(len(designs), 30)
+        self.assertEqual(len(designs), 40)
         for start, commands, source, targets, walls, traps in designs:
             route = set(trace(start, commands, set(walls)))
             self.assertTrue(set(targets) <= route)
@@ -95,9 +95,17 @@ class OpenCourseTests(unittest.TestCase):
         page = render(self.problems, self.problems)
         payload = page.split('<script>const data=', 1)[1].split(';\nconst select=', 1)[0]
         data = json.loads(payload)
-        self.assertEqual([item['order'] for item in data], [4, 5, 6, *range(10, 41)])
+        self.assertEqual([item['order'] for item in data], [4, 5, 6, *range(10, 51)])
         self.assertTrue(all(item['after'].startswith('<svg ') for item in data))
         self.assertTrue(all(item['before'] == item['after'] for item in data))
         self.assertNotIn('alternateSources', page)
         self.assertNotIn('original-solutions', page)
         self.assertNotIn('https://', page)
+
+    def test_offline_review_marks_added_lessons_without_a_previous_board(self):
+        page = render(self.problems, self.problems[:40])
+        payload = page.split('<script>const data=', 1)[1].split(';\nconst select=', 1)[0]
+        added = json.loads(payload)[-10:]
+        self.assertEqual([item['order'] for item in added], list(range(41, 51)))
+        self.assertTrue(all(item['oldCounts'] is None for item in added))
+        self.assertTrue(all(item['before'] == '<p>新增关卡</p>' for item in added))

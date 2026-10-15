@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail closed unless a built app contains only the 40 original puzzle resources."""
+"""Fail closed unless a built app contains only the 50 original puzzle resources."""
 import argparse
 import json
 from pathlib import Path
@@ -21,11 +21,11 @@ def check_bundle(app):
     if len(originals) != 1:
         raise ValueError('Expected exactly one original-problems.json in the app.')
     catalog = originals[0]
-    retained_ids = [10001, 10006, 10012, 10074, 10075, 10076, 10051, 10052, 10027] + list(range(10077, 10108))
+    retained_ids = [10001, 10006, 10012, 10074, 10075, 10076, 10051, 10052, 10027] + list(range(10077, 10118))
     if [item.get('id') for item in catalog] != retained_ids:
-        raise ValueError('Expected the 40 retained curriculum IDs only.')
-    if [item['lesson']['order'] for item in catalog] != list(range(1, 41)):
-        raise ValueError('Expected continuous L01–L40 display numbers.')
+        raise ValueError('Expected the 50 retained curriculum IDs only.')
+    if [item['lesson']['order'] for item in catalog] != list(range(1, 51)):
+        raise ValueError('Expected continuous L01–L50 display numbers.')
     if any(not item.get('lesson') or item.get('sourceURL') for item in catalog):
         raise ValueError('Every puzzle must be an original curriculum lesson.')
     canonical = Path(__file__).resolve().parents[1] / 'Sources/HerbertCore/Resources/original-problems.json'
@@ -41,7 +41,7 @@ def main():
         check_bundle(args.app)
     except (ValueError, OSError) as error:
         parser.exit(1, f'App Store resource check failed: {error}\n')
-    print('App Store resource check passed: 40 originals, no community archive or reference solutions.')
+    print('App Store resource check passed: 50 originals, no community archive or reference solutions.')
 
 
 if __name__ == '__main__':

@@ -472,12 +472,12 @@ final class HerbertUITests: XCTestCase {
     func testCurriculumHintsAndCatalogEdition() {
         let app = launch(language: "en")
         #if APP_STORE
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
             XCTAssertFalse(app.buttons["filter-community"].exists)
         #else
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,799 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,819 PROBLEMS")
             app.buttons["filter-originals"].activateControl()
-            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "30 PROBLEMS")
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
             app.buttons["filter-community"].activateControl()
             XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "1,769 PROBLEMS")
             app.buttons["filter-all"].activateControl()
@@ -549,6 +549,58 @@ final class HerbertUITests: XCTestCase {
             app.buttons["clear-search"].activateControl()
         }
         app.terminate()
+    }
+
+    @MainActor
+    func testExpertCourseProgramsComplete() {
+        for (id, source) in [
+            (
+                10108,
+                "b(N):sb(N-1)\nq(X):XXXX\nc(W,H,T):b(W)Tb(H)Tb(W)Tb(H)T\n"
+                    + "a(N,W,H,T,U):c(W,H,T)b(2)Tb(2)Ua(N-1,H-2,W-2,U,T)Ub(2)Ub(2)rr\nq(a(3,8,6,r,l)r)"
+            ),
+            (
+                10117,
+                "q(X):XXXX\nd(N,T,U):sTsUd(N-1,T,U)\ne(N,T,U):TsUse(N-1,T,U)\nc:q(sr)\nw:q(srslr)\n"
+                    + "a(N,D,T,U,P,Q):Pd(D,T,U)Ta(N-1,D-1,U,T,Q,P)rra(N-2,D-2,T,U,P,Q)Trre(D,T,U)rr\n"
+                    + "q(a(4,4,r,l,c,w)r)"
+            ),
+        ] {
+            let app = launch(language: "en")
+            #if !APP_STORE
+                app.buttons["filter-originals"].activateControl()
+            #endif
+            XCTAssertEqual(app.staticTexts["catalog-count"].displayedText, "50 PROBLEMS")
+            openProblem(id, in: app)
+            XCTAssertTrue(app.staticTexts["lesson-objective"].exists)
+            app.buttons["reveal-hint"].activateControl()
+            XCTAssertTrue(app.staticTexts["lesson-hint-1"].exists)
+            #if os(iOS)
+                if UIDevice.current.userInterfaceIdiom == .phone {
+                    let page = app.scrollViews.containing(.textView, identifier: "code-editor").firstMatch
+                    let top = app.navigationBars.firstMatch.frame.maxY + 16
+                    for _ in 0..<4 where app.buttons["Dismiss keyboard"].frame.minY > top + 10 {
+                        let distance = min(app.buttons["Dismiss keyboard"].frame.minY - top, page.frame.height * 0.6)
+                        let start = page.coordinate(withNormalizedOffset: .zero).withOffset(
+                            CGVector(dx: 6, dy: page.frame.height * 0.85))
+                        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -distance)))
+                    }
+                }
+            #endif
+            let editor = app.textViews["code-editor"]
+            editor.activateControl()
+            editor.typeText(source)
+            #if os(iOS)
+                let dismiss = app.buttons["Dismiss keyboard"]
+                dismiss.waitForStableFrame()
+                dismiss.activateControl()
+                XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+            #endif
+            app.buttons["Turbo"].activateControl()
+            app.buttons["run-program"].activateControl()
+            XCTAssertTrue(app.staticTexts["completion-title"].waitForExistence(timeout: 15), "Problem \(id)")
+            app.terminate()
+        }
     }
 
     @MainActor

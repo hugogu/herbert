@@ -100,10 +100,10 @@ struct LibraryView: View {
                 HStack(spacing: 8) {
                     Circle().fill(Palette.mint).frame(width: 5, height: 5)
                     #if APP_STORE
-                        Text("30 道原创关卡 · 按学习顺序探索 · 全部离线可玩")
+                        Text("50 道原创关卡 · 按学习顺序探索 · 全部离线可玩")
                             .font(.system(size: 11)).foregroundStyle(Palette.muted)
                     #else
-                        Text("30 道原创课程 + 社区题库 · 全部离线可玩")
+                        Text("50 道原创课程 + 社区题库 · 全部离线可玩")
                             .font(.system(size: 11)).foregroundStyle(Palette.muted)
                     #endif
                 }.frame(maxWidth: .infinity).padding(.vertical, 12)

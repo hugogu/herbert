@@ -275,7 +275,7 @@ private struct BattlefieldSetupView: View {
                         systemImage: "square.grid.2x2")
                 }.accessibilityIdentifier("chooseBattlefieldProblems")
             }
-            Text("默认使用 30 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
+            Text("默认使用 50 道原创题目，按题号顺序解答。各个 AI 并行比赛，每个 AI 逐题作答。")
                 .font(.callout).foregroundStyle(Palette.muted)
             Divider()
             Text("每题按点亮目标比例与代码长度计分，取各次尝试的最高分。同分时 Token 消耗更少者在前。错误答案会收到反馈后重试。")
@@ -431,7 +431,7 @@ private struct BattlefieldProblemPicker: View {
 
     private var selectionActions: some View {
         HStack(spacing: 16) {
-            Button("原创 30 题") {
+            Button("原创 50 题") {
                 selected = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
             }
             Button("选择当前列表") { selected.formUnion(filtered.map(\.id)) }

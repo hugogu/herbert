@@ -72,7 +72,7 @@ scripts/archive_app_store.sh macos --upload
 
 The script refuses to reuse an output folder, so increase `CURRENT_PROJECT_VERSION` in
 `scripts/generate_project.py` and regenerate the project for every new upload. It audits the
-archived app with `scripts/check_app_store_bundle.py` (exactly the 30 original puzzles, no community
+archived app with `scripts/check_app_store_bundle.py` (exactly the 50 original puzzles, no community
 archive or reference solutions), prints the version, build and export-compliance keys, and checks
 the Mac sandbox. Without `--upload` it exports an `.ipa` or `.pkg` you can send with Transporter.
 Uploading requires an Xcode account with App Manager access; automatic signing may create
@@ -105,7 +105,7 @@ named "Herbot Bot".
 | License Agreement | Apple's standard EULA |
 
 The Mac build declares `public.app-category.education`, matching the primary category as App Store
-Connect requires. Education is also accurate for 30 puzzles that build up like a course, and it avoids the game approval
+Connect requires. Education is also accurate for 50 puzzles that build up like a course, and it avoids the game approval
 number that China mainland requires for apps in Games; see China mainland below.
 
 ### Age rating
