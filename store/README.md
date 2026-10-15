@@ -166,10 +166,30 @@ skip the encryption questions.
 
 - Sign-in: not required.
 - Contact: `metadata/review_information/` plus a phone number with country code.
-- Notes: `metadata/review_information/notes.txt`. They explain how to play, that H programs are only
-  interpreted by the game, and how AI Battlefield works. To let App Review try a real match, add a
-  key with a small spending limit (for example an OpenRouter key with a credit cap) to the bracketed
-  line; never put a key in the app or this repository.
+- Notes: `metadata/review_information/notes.txt`. They answer the six questions App Review asks
+  accounts with a short review history ("Guideline 2.1 - Information Needed"): screen recording,
+  purpose and audience, how to use the main features, external services, regional differences, and
+  regulated or third-party material. Paste the same text into the reply and the Notes field. To let
+  App Review try a real match, add a key with a small spending limit (for example an OpenRouter key
+  with a credit cap) to the bracketed line, or delete that line; never put a key in the app or this
+  repository.
+
+#### Screen recording for App Review
+
+Record on a physical iPhone running the latest iOS, with Screen Recording from Control Center, and
+attach the movie to the reply. Two to three minutes is enough.
+
+1. Remove Herbot Bot from the app switcher, start recording on the Home Screen, then open the app:
+   the recording must begin with the launch.
+2. Problems: tap "Take the first step" (L01). Scroll the program editor near the top of the screen
+   first, because the keyboard and the Run bar cover its lower half. Tap the s key, tap Run, then
+   open the next puzzle.
+3. L02: tap "Show the next hint", enter `rsslsslss` and run it. Open and close "Game rules".
+4. Show the Problems list with its checkmarks, scroll the Guide, and in Progress tap Export, then
+   cancel the share sheet.
+5. AI Battlefield: add a provider (the key field is masked), save to load models, choose one or two
+   models and L01–L02 under New, and tap "Agree & start match"; open an answer when it finishes.
+   Without a key, show the provider form and the match consent instead.
 
 ## China mainland
 

@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 import unittest
 
-from advanced_course import advanced_designs, outline
+from master_course import master_designs as advanced_designs
+from advanced_course import outline
 from generate_original_problems import designs, trace
 from render_course_review import render
 from open_course import orbit
@@ -53,11 +54,11 @@ class OpenCourseTests(unittest.TestCase):
 
     def test_wall_and_trap_density_each_use_15_to_30_percent_of_enclosing_border(self):
         all_designs = designs() + advanced_designs(trace)
-        for order in [4, 5, 6, *range(10, 31)]:
+        for order in [4, 5, 6, *range(10, 41)]:
             with self.subTest(lesson=order):
                 start, commands, _, _, walls, traps = all_designs[order-1]
                 route = {start, *trace(start, commands, set(walls))}
-                symmetry = 2 if order in (4, 11, 14, 19) else 1 if order in (6, 26) else 4
+                symmetry = 2 if order in (4, 11, 14, 19, 32, 33) else 1 if order in (6, 26) else 4
                 capacity = len(outline(orbit(route, symmetry)))
                 for cells in (walls, traps):
                     self.assertGreaterEqual(len(cells) / capacity, .15)
@@ -76,14 +77,14 @@ class OpenCourseTests(unittest.TestCase):
             'ff0c2d113ef80414bb184b3e89be798bd71beadfa55d8fb05ae9cd77b9f2e3cf',
             '2bbf542e0d8924b52bfb7516982236112960153629a6b7fd72473ed832551cb6',
         ]
-        for problem, digest in zip(self.problems[22:], expected):
+        for problem, digest in zip(self.problems[22:30], expected):
             geometry = [(x, y, c) for y, row in enumerate(problem['rows']) for x, c in enumerate(row) if c in 'ou']
             self.assertEqual(hashlib.sha256(json.dumps(geometry).encode()).hexdigest(), digest,
                              f"L{problem['lesson']['order']}: preserve the approved geometric motif")
 
     def test_authored_obstacles_leave_reference_geometry_safe(self):
         designs = advanced_designs(trace)
-        self.assertEqual(len(designs), 20)
+        self.assertEqual(len(designs), 30)
         for start, commands, source, targets, walls, traps in designs:
             route = set(trace(start, commands, set(walls)))
             self.assertTrue(set(targets) <= route)
@@ -94,7 +95,7 @@ class OpenCourseTests(unittest.TestCase):
         page = render(self.problems, self.problems)
         payload = page.split('<script>const data=', 1)[1].split(';\nconst select=', 1)[0]
         data = json.loads(payload)
-        self.assertEqual([item['order'] for item in data], [4, 5, 6, *range(10, 31)])
+        self.assertEqual([item['order'] for item in data], [4, 5, 6, *range(10, 41)])
         self.assertTrue(all(item['after'].startswith('<svg ') for item in data))
         self.assertTrue(all(item['before'] == item['after'] for item in data))
         self.assertNotIn('alternateSources', page)
