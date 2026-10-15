@@ -41,14 +41,14 @@ Display numbers remain continuous L01–L40. Revised L04–L06 use new internal 
 | 10096 / L29 | Compose recursive systems | Vaulted mosaic | Nest window, row, shrinking tier and rotation routines, each with its own return invariant. | 63 |
 | 10097 / L30 | Compose recursive systems | Astral cathedral | Compose a window generator with a chiral branching tree and a higher-order rotation routine. | 56 |
 | 10098 / L31 | Advanced fractal topology | Moore's nexus | Weave a closed space-filling loop across four quadrants by linking rotated Hilbert quarters. | 56 |
-| 10099 / L32 | Advanced fractal topology | Terdragon spine | Expand a 3-way branching fractal curve on a Manhattan grid using alternating chiral turns. | 38 |
-| 10100 / L33 | Advanced fractal topology | Sierpinski arrowhead | Generate an orthogonal Sierpinski gasket using dual mutually recursive diagonal walkers. | 60 |
-| 10101 / L34 | Advanced fractal topology | Peano tapestry | Traverse a 3x3 space-filling serpentine meander with nested shrinking corridors. | 48 |
-| 10102 / L35 | Advanced fractal topology | Gosper island | Grow a multi-scale fractal coastline using string expansion, filtering out shallower layers with a numeric guard. | 35 |
-| 10103 / L36 | Grandmaster recursive synthesis | Fibonacci bough | Master asymmetric tree recursion: traverse unbalanced N-1 and N-2 subtrees and restore the caller pose. | 50 |
-| 10104 / L37 | Grandmaster recursive synthesis | Dual-rate pendulum | Interleave two independent clock frequencies to weave a poly-periodic harmonic lattice. | 51 |
+| 10099 / L32 | Advanced fractal topology | Twin dragon bough | Traverse two interlocking fractal dragon arms with 180-degree point symmetry. | 51 |
+| 10100 / L33 | Advanced fractal topology | Mirrored canopy | Generate a bilateral fractal canopy with pure vertical mirror symmetry across the central axis. | 52 |
+| 10101 / L34 | Advanced fractal topology | Peano meander | Traverse a space-filling serpentine meander spanning four symmetric quadrants. | 47 |
+| 10102 / L35 | Advanced fractal topology | Koch snowflake star | Synthesize an 8-fold dihedral fractal snowflake star with multi-level triangular promontories. | 44 |
+| 10103 / L36 | Grandmaster recursive synthesis | Fibonacci bough | Master asymmetric tree recursion: traverse unbalanced N-1 and N-2 subtrees and restore caller pose. | 50 |
+| 10104 / L37 | Grandmaster recursive synthesis | Dual-rate pendulum | Interleave two independent clock frequencies to weave a poly-periodic harmonic lattice. | 48 |
 | 10105 / L38 | Grandmaster recursive synthesis | Hanoi ribbon | Execute a binary reflected Gray code sequence, recursing through inner chambers before each pivot step. | 42 |
-| 10106 / L39 | Grandmaster recursive synthesis | Octagram mandala | Harmonize cardinal steps and diagonal staircase walkers across three concentric octagonal tiers. | 60 |
+| 10106 / L39 | Grandmaster recursive synthesis | Octagram mandala | Harmonize cardinal steps and diagonal staircase walkers across three concentric octagonal tiers with 8-fold dihedral symmetry. | 53 |
 | 10107 / L40 | Grandmaster recursive synthesis | Celestial armillary | Synthesize concentric courtyards, asymmetric Fibonacci spires, and orbital rotations into a grandmaster capstone. | 66 |
 
 `scripts/check.sh` replays all references with the real H compiler and game engine, checking byte limits, boards, distinct IDs, translations and save compatibility. App Store puzzle resources come only from HerbertCore; both editions also link the resource-free HerbertBattlefield. The archive lives in optional HerbertCommunity.

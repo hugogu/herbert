@@ -58,7 +58,7 @@ class OpenCourseTests(unittest.TestCase):
             with self.subTest(lesson=order):
                 start, commands, _, _, walls, traps = all_designs[order-1]
                 route = {start, *trace(start, commands, set(walls))}
-                symmetry = 2 if order in (4, 11, 14, 19) else 1 if order in (6, 26, 32) else 4
+                symmetry = 2 if order in (4, 11, 14, 19, 32, 33) else 1 if order in (6, 26) else 4
                 capacity = len(outline(orbit(route, symmetry)))
                 for cells in (walls, traps):
                     self.assertGreaterEqual(len(cells) / capacity, .15)
