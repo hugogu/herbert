@@ -409,5 +409,125 @@
       16
     ],
     "endHeading": 1
+  },
+  {
+    "id": 10098,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\na(N,X,Y):Xa(N-1,Y,X)b(2)Ya(N-1,X,Y)b(2)a(N-1,X,Y)Yb(2)a(N-1,Y,X)X\nq(a(2,r,l)b(2)r)",
+    "steps": 210,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      9,
+      16
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10099,
+    "source": "b(N):sb(N-1)\na(N,T):a(N-1,rrT)b(2)Ta(N-1,T)b(2)rrTa(N-1,rrT)\na(3,r)",
+    "steps": 152,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      14,
+      7
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10100,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\na(N,X,Y):c(N-1,Y,X)b(1)Xa(N-1,X,Y)Yb(1)\nc(N,X,Y):a(N-1,Y,X)b(1)Yc(N-1,X,Y)Xb(1)\nq(a(3,r,l)r)",
+    "steps": 113,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      8,
+      12
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10101,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nc(N,S):b(S)rb(S)lb(S)ra(N-1,S-2)rb(S)lb(S)r\na(N,S):q(c(N,S))\na(2,3)",
+    "steps": 128,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      12
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10102,
+    "source": "a(N,X):a(N-1,XrXllXrX)c(2-N,X)\nc(N,X):XrXrXrXr\na(3,ss)",
+    "steps": 210,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      13,
+      12
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10103,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\na(N,D,T):b(D)Ta(N-1,D-2,rrT)rra(N-2,D-3,T)Trrb(D)rr\nq(a(4,6,r)r)",
+    "steps": 377,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      5,
+      15
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10104,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\np(A,B,T):b(A)Tp(A-1,B-2,rrT)b(B)Tp(A-2,B-1,T)Trrb(A)rr\nq(p(3,5,r)r)",
+    "steps": 292,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      12
+    ],
+    "endHeading": 1
+  },
+  {
+    "id": 10105,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\ng(N,T):g(N-1,rrT)b(N)Tg(N-1,T)Trrb(N)rr\nq(g(4,r)r)",
+    "steps": 830,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      8,
+      14
+    ],
+    "endHeading": 0
+  },
+  {
+    "id": 10106,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nd(N):srsld(N-1)\nm(N,S):b(S)rrd(N)rra(N-1,S-2)rrd(N)rrb(S)rr\na(N,S):q(m(N,S)r)\na(3,4)",
+    "steps": 530,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      11,
+      14
+    ],
+    "endHeading": 3
+  },
+  {
+    "id": 10107,
+    "source": "b(N):sb(N-1)\nq(X):XXXX\nc(W):q(b(W)r)\nf(N,D,T):b(D)Tf(N-1,D-2,rrT)rrf(N-2,D-3,T)Trrb(D)rr\na(N,D,T):c(D)f(N,D,T)r\nq(a(3,5,r))",
+    "steps": 310,
+    "blocked": 0,
+    "traps": 0,
+    "endPosition": [
+      6,
+      9
+    ],
+    "endHeading": 3
   }
 ]

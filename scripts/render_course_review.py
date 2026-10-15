@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 
-from advanced_course import LESSONS as ADVANCED_LESSONS
+from master_course import LESSONS as ADVANCED_LESSONS
 from generate_original_problems import LESSONS
 
 ROOT = Path(__file__).resolve().parents[1]
