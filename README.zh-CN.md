@@ -99,7 +99,7 @@ iPhone/iPad 进入后台会结束比赛并保存。详情见[配置与用量说�
 使用服务商声明的最大输出能力，未知能力则由服务商决定。
 模型表头和分享图统一显示输入/输出与服务商报告的总 Token、累计尝试用时及总分；分享图省略缺失的缓存率。
 历史保存完整共享提示词及其版本、棋盘、模型参数、收到的答案与计分版本，但服务商的模型版本仍可能变化。
-这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank)。
+这是参考原站最短代码排名而制定的独立综合计分策略。[完整判分说明](docs/ai-battlefield.md#judge-and-rank) · [评测特性与模型架构分析](docs/ai-battlefield-benchmark.zh-CN.md)。
 
 ![用户提供的 Herbert Benchmark 运行截图，显示四个模型及每次尝试用时](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 

@@ -168,7 +168,7 @@ limits still apply; unknown Chat Completions limits use provider defaults. Anthr
 request cap, using discovered capacity or a documented 65,536-token fallback.
 History snapshots preserve the full shared prompt and its version, boards, parameters, received answers and the scoring policy;
 provider model versions can still change. This composite score is our benchmark policy,
-inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank).
+inspired by the original site's shortest-code ranking. [Scoring and limits](docs/ai-battlefield.md#judge-and-rank) · [Benchmark design and architecture analysis](docs/ai-battlefield-benchmark.md).
 
 ![User-provided Herbert Benchmark run showing four model columns and per-attempt timing](docs/screenshots/en/battlefield/herbert-benchmark-user-run.png)
 

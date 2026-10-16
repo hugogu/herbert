@@ -331,7 +331,7 @@ attempts. A slower entrant can still overtake an early finisher on points or tok
 Provider failures stop only the affected entrant; other entrants continue. Histories retain
 boards, the full shared prompt, model parameters, match limits and scoring policy. Remote
 model versions and provider routing can still change; snapshots do not make a third-party
-model deterministic.
+model deterministic. For an in-depth analysis of the benchmark's focus on out-of-distribution reasoning and why Mixture-of-Experts (MoE) and distilled models face unique bottlenecks, see [Benchmark design and model architecture analysis](ai-battlefield-benchmark.md) ([中文版](ai-battlefield-benchmark.zh-CN.md)).
 
 ## Understand token accounting
 
