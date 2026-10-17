@@ -65,6 +65,33 @@ progress and JSON backups. UI tests use an isolated preferences suite and progre
 Progress still goes through `ProgressRepository`; future cloud sync requires an authenticated
 Worker rather than client D1 credentials.
 
+## 3D board
+
+The 3D style is a third `BoardStyle` beside Modern and Classic. It draws the same `GameSession` state;
+nothing in execution, saving or the Battlefield changes.
+
+- **Rendering.** `Board3DPainter` draws a lit diorama into a SwiftUI `Canvas` with the painter's
+  algorithm: floor, shadows, trail, holes and discs first, then every wall block and Herbert from
+  far to near, then see-through markers for anything a wall hides. It needs no 3D framework: SceneKit
+  is deprecated, `RealityView` needs iOS 18, and the Canvas path keeps one renderer for iOS 17 and
+  macOS 14 that behaves the same in tests and screenshots. Herbert is built from shaded spheres and
+  discs placed in board space, so his face turns with him and with the camera.
+- **Camera.** `BoardCamera` (projection, framing, draw order, face culling, occlusion) and
+  `BoardCameraRig` (orbit, tilt, zoom toward a point, pan clamping, reset) live in `HerbertCore`
+  with unit tests and no UI dependency. The rig stores the turn relative to an opening angle that
+  depends on the shape of the view: a clearly wide view opens on the isometric diagonal, a tall or
+  square one nearly straight on, which gives a square board about a fifth larger cells.
+- **Animation.** `Board3DPose` packs Herbert's position and heading, the camera and the framed
+  region into one `VectorArithmetic` value, so one SwiftUI animation interpolates all of them.
+  Heading is unwrapped so a turn never unwinds earlier turns.
+- **Input.** `Board3DInput` maps gestures to rig changes. UIKit recognizers on iOS can refuse to
+  begin, so vertical drags over the board scroll the page while horizontal drags orbit it; SwiftUI
+  gestures cannot do that. macOS uses SwiftUI drag, pinch and rotate gestures.
+- **Space.** The panel is taller than the flat styles, and `Board3DStage` gives the whole window
+  to the board with the run controls, progress and a read-only program preview beside or below it.
+  The stage's controls use `stage-` accessibility identifiers because the page behind it stays in
+  the accessibility tree for XCUITest.
+
 One set of `Localizable.strings` resources is bundled in both the native app and HerbertCore.
 Foundation/SwiftUI match the system or per-app preferred language (en, zh-Hans, ja), with en
 as development-language fallback. `HerbertStrings` formats core diagnostics and dynamic

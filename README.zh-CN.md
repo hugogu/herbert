@@ -35,7 +35,7 @@ L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙
 
 题目面板新增**原站最短参考**，与通关长度限制和「我的最短解」分别显示。数据来自收录题库时[原站 Problems](http://herbert.tealang.info/problems.php) 的 Best 栏，并非实时纪录或已证明的最优解；缺失时显示「暂无记录」。例如 0027 的限制是 39 bytes，原站最短参考为 14 bytes。[查看实际面板（英文界面）](docs/screenshots/en/community-reference.png)。
 
-点击棋盘下方图例，可在 Modern / Classic 下查看三语说明：**墙阻挡前进；陷阱允许踩入，但会熄灭全部已点亮目标**。两者都继续执行程序，踩陷阱不会回到起点。[查看棋盘说明（英文界面）](docs/screenshots/en/community-board-guide.png)。
+点击棋盘下方图例，可在 Modern / Classic / 3D 下查看三语说明：**墙阻挡前进；陷阱允许踩入，但会熄灭全部已点亮目标**。两者都继续执行程序，踩陷阱不会回到起点。[查看棋盘说明（英文界面）](docs/screenshots/en/community-board-guide.png)。
 
 | 0037 · Flower | 0027 · Shuriken | 0361 · Butterfly |
 | --- | --- | --- |
@@ -48,11 +48,23 @@ L04–L06 引入可复用图案，L11–L22 探索开放几何构图；断续墙
 
 ## 棋盘风格
 
-| 现代风格（默认） | Classic 经典风格与轨迹 |
-| --- | --- |
-| [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) |
+| 现代风格（默认） | Classic 经典风格与轨迹 | 3D 风格 |
+| --- | --- | --- |
+| [![现代穹顶镶嵌棋盘](docs/screenshots/course/course-mosaic-board.png)](docs/screenshots/course/course-mosaic.png) | [![经典穹顶镶嵌与蓝色运动轨迹](docs/screenshots/course/course-mosaic-classic-board.png)](docs/screenshots/course/course-mosaic-classic.png) | [![3D 穹顶镶嵌：炭灰石墙与柔和阴影、发光金色圆盘、黑色陷阱洞、青色发光轨迹和白色机器人](docs/screenshots/three-d-board.png)](docs/screenshots/three-d-stage.png) |
 
-两张均为原创 L29 的实际 App 截图，相邻墙格连接成连续轮廓。经典风格参考原站规则页中的棋盘，示例执行了三次成功移动。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
+三张均为原创 L29 的实际 App 截图。现代与经典风格的相邻墙格连接成连续轮廓；经典风格参考原站规则页中的棋盘。三张示例都执行了三次成功移动，其中 3D 截图取自 iOS 模拟器。棋盘右上角的滑杆图标可设置风格、网格点和运动轨迹。
+
+**3D 风格**把同一块棋盘画成被灯光照亮的立体小景：炭灰色石墙带柔和阴影，目标是发光的金色圆盘（点亮后变青色），陷阱是黑色的洞，轨迹会发光，白色机器人的脸会随朝向转动。它只是同一局游戏的另一种视角，成绩、存档和 AI Battlefield 都不受影响。
+
+- **四处看看。** 拖动旋转棋盘，双指捏合向手指处缩放，双指扭转可旋转，双击复原；按钮可按 90° 旋转并切换俯视角度。Mac 上按住 Shift 拖动可平移。在 iPhone 和 iPad 上，纵向滑过棋盘仍然滚动页面。
+- **看见被墙挡住的东西。** 被墙遮住的目标或 Herbert 会保留一个透视圆环，低视角也不会丢失。
+- **更大的棋盘。** 25 × 25 的棋盘在 3D 下会被压扁，所以面板更高；视图较高或接近正方形时会近乎正对棋盘打开，格子大约大五分之一。**放大棋盘**会打开大舞台，把整个窗口交给棋盘，并提供旋转、俯视、缩放、跟随 Herbert、聚焦与复原按钮、进度、只读的程序预览和运行控制；宽窗口会把控制放在棋盘旁边。
+
+| 放大棋盘 · iPhone |
+| --- |
+| [![iPhone 上放大的 3D 舞台：棋盘铺满屏幕，带有镜头按钮、进度、程序与运行控制](docs/screenshots/three-d-stage.png)](docs/screenshots/three-d-stage.png) |
+
+截图取自 iOS 模拟器（iPhone 18 Pro），并非真机。
 
 | L07 · 旋转玫瑰 | L08 · 双灯相映 |
 | --- | --- |
@@ -165,7 +177,7 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert -destination 'platform=mac
 - 当前快照包含 **1,769 个可玩关卡**，来源列表全部 21 页，最后原版编号 2077；排除 0000 空占位项，缺失项为零。
 - 自动保存草稿、收藏、最短解与完成日期；本地 JSON 原子写入；损坏存档暂停自动写入，避免覆盖原文件；JSON 备份导入/导出，导入前重放并校验解法，合并时保留更短的有效解。
 - 中英日自动匹配：覆盖导航、玩法手册、无障碍描述和 H 语言错误提示；保留关卡原始名称和作者。
-- 棋盘右上角设置支持现代（默认）/ Classic 经典风格、显示网格点、显示运动轨迹；偏好保存在本机，切换关卡和重启后保留。
+- 棋盘右上角设置支持现代（默认）/ Classic 经典 / 3D 风格、显示网格点、显示运动轨迹；偏好保存在本机，切换关卡和重启后保留。
 - 轨迹记录当前运行走过的路径，单步和极速均完整记录；隐藏后继续记录，重新显示即可查看，重置棋盘或修改代码会清空。
 - 切到后台自动暂停执行并保存；Mac 支持 `⌘ Return` 运行/暂停。
 
