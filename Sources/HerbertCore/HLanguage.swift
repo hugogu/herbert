@@ -87,11 +87,12 @@ public struct HProgram: Sendable {
                 }
                 var parameters: [Character] = []
                 if signature.count > 1 {
-                    guard signature.count >= 4, signature[1] == "(", signature.last == ")" else {
+                    guard signature.count >= 3, signature[1] == "(", signature.last == ")" else {
                         throw HError(HerbertStrings.text("参数声明应写成 a(X,Y):。"), line: line)
                     }
-                    let pieces = String(signature[2..<(signature.count - 1)]).split(
-                        separator: ",", omittingEmptySubsequences: false)
+                    // `a():` declares no parameters, matching the `a()` call accepted for such procedures.
+                    let list = String(signature[2..<(signature.count - 1)])
+                    let pieces = list.isEmpty ? [] : list.split(separator: ",", omittingEmptySubsequences: false)
                     for piece in pieces {
                         guard piece.count == 1, let p = piece.first, p.isASCIIUpper, !parameters.contains(p) else {
                             throw HError(HerbertStrings.text("参数须是互不重复的单个大写字母。"), line: line)

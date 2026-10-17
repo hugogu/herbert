@@ -68,7 +68,12 @@ symbols were corrected together with the decoder.
    with additional source, nesting and stack guards. It keeps tail recursion cancellable
    without freezing the UI. Preserve these protections, and make the differences explicit;
    exact acceptance of pathological resource-limit programs is not promised.
-7. **Scoring:** keep shortest-code scoring and immediate completion. Do not add a movement
+7. **Empty parentheses:** the Ruby parser accepts only `a:` and `a` for a procedure without
+   parameters and rejects `a():` and `a()`. Native code accepts both forms. Punctuation is free, so
+   byte counts are unchanged, and `a()` still passes one empty instruction argument to a procedure
+   that declares a parameter. Procedure names stay single lowercase letters: case is what tells a
+   procedure call from a parameter in single-letter code, so uppercase names would be ambiguous.
+8. **Scoring:** keep shortest-code scoring and immediate completion. Do not add a movement
    efficiency penalty: wall bumps and extra turns can be intentional parts of a compact
    solution. A future online tie-break should use a server timestamp; local device time
    is insufficient for a competitive leaderboard.

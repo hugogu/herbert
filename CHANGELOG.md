@@ -3,6 +3,11 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
+## Unreleased
+
+- Accept `a():` for a procedure without parameters, matching the `a()` call already accepted.
+  Punctuation stays free, so byte counts and the original `a:` form are unchanged.
+
 ## [1.0.0] - 2026-10-13
 
 - Add the App Store submission kit for Herbot Bot: English, Simplified Chinese and Japanese listing
