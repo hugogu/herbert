@@ -51,18 +51,32 @@ final class BattlefieldUITests: XCTestCase {
 
     @MainActor
     private func openSection(_ name: String, in app: XCUIApplication) {
+        let section = name == "AI 配置" ? "AI Battlefield" : name
         #if os(iOS)
-            if app.tabBars.buttons["AI Battlefield"].exists {
-                app.tabBars.buttons["AI Battlefield"].battlefieldTap()
-            } else {
-                app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
-                    .battlefieldTap()
+            if app.tabBars.firstMatch.exists {
+                // This suite launches in English; sidebar identifiers keep their original keys.
+                let titles = ["关卡": "Problems", "手册": "Guide", "记录": "Progress"]
+                app.tabBars.buttons[titles[section] ?? section].battlefieldTap()
+                if name == "AI 配置" { choose("AI Providers", in: app) }
+                return
             }
-        #else
-            app.descendants(matching: .any)["section-\(name == "AI 配置" ? "AI Battlefield" : name)"].firstMatch
-                .battlefieldTap()
         #endif
+        app.descendants(matching: .any)["section-\(section)"].firstMatch.battlefieldTap()
         if name == "AI 配置" { choose("AI Providers", in: app) }
+    }
+
+    @MainActor
+    func testSectionNavigationReturnsToProblemsAndOpensProviders() {
+        let app = launch()
+        openSection("AI Battlefield", in: app)
+        XCTAssertTrue(app.buttons["chooseBattlefieldProblems"].waitForExistence(timeout: 5))
+        openSection("关卡", in: app)
+        XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 5))
+        openSection("AI 配置", in: app)
+        XCTAssertTrue(app.buttons["addAIProvider"].waitForExistence(timeout: 5))
+        openSection("关卡", in: app)
+        XCTAssertTrue(app.buttons["continue-problem"].waitForExistence(timeout: 5))
+        app.terminate()
     }
 
     @MainActor
