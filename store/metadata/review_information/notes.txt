@@ -1,17 +1,24 @@
-Herbot Bot is an offline programming puzzle game for iPhone, iPad and Mac. It needs no account or sign-in and has no ads, tracking or in-app purchases.
+INFORMATION FOR APP REVIEW (Guideline 2.1)
 
-HOW TO PLAY
-1. On Problems, tap "Take the first step" to open puzzle L01.
-2. Type s in the program editor (or tap the s key) and tap Run. The robot moves one cell, lights the target and the puzzle is solved.
-3. Puzzle L02 is solved by: rsslsslss
-Every puzzle has a goal and two optional hints. "Game rules" explains the H language.
+1. SCREEN RECORDING
+A recording made on a physical iPhone running the latest iOS is attached to our reply in App Store Connect. It starts by launching the app from the Home Screen and shows: solving L01 with its hints, a wrong first attempt at L02 and its fix, the Problems list, the Guide, Progress, and AI Battlefield (adding a provider, enabling one model, starting a match on L01 to L03, the judged answer for L01, stopping the match, match history and the shareable result image). The API key field looks empty because iOS hides secure text in screen recordings. Waiting time and browsing of the model list were trimmed. The app has no account registration, login, account deletion, user-generated content, in-app purchases or paid features.
 
-H programs are puzzle solutions run by the app's own interpreter for this game. They only move the robot on the board; they are never compiled or executed as native code, and no code is downloaded.
+2. PURPOSE AND AUDIENCE
+Herbot Bot is an educational programming puzzle game for anyone learning to program, from older children and students to teachers and professional developers. Players guide a robot to light every target on a 25 x 25 board by writing very short programs in H, a language with three commands: s (forward), l (turn left) and r (turn right). Thirty original puzzles in six chapters introduce sequencing, procedures, parameters and recursion, ideas that many learners find hard to grasp from text alone. Every puzzle has a goal and two optional hints, programs run step by step with immediate visual feedback, and the game rewards the shortest correct program. It works fully offline, without an account, ads, tracking or purchases.
 
-AI BATTLEFIELD (OPTIONAL TAB)
-Users can compare AI models on the puzzles with their own provider account (OpenRouter, SiliconFlow, Google Gemini, or an OpenAI- or Anthropic-compatible HTTPS API). The app contains no API keys and the developer runs no server or proxy. The app contacts a provider only when the user saves it (to list models) or taps "Agree & start match" after the app shows what will be sent: the rules, the selected puzzle boards, an optional prompt and the AI conversation. Keys are stored in the Keychain on the device. Answers returned by models are judged by the same local interpreter.
+3. HOW TO USE THE MAIN FEATURES
+No login, setup or sample files are required.
+- Problems: tap "Take the first step" to open L01, type s (or tap the s key) and tap Run; the puzzle is solved. L02 is solved by: rsslsslss. Each puzzle shows its goal above the board; "Show the next hint" reveals a hint, and "Game rules" explains H.
+- Guide: the second tab explains the language with examples.
+- Progress: lists solved puzzles; Export and Import save and restore a JSON backup.
+- AI Battlefield (optional): open AI Providers ("Models" on iPhone) > Add provider, choose its type, enter the HTTPS base URL and an API key, and save to load models. Under New match ("New" on iPhone), choose models and puzzles, then tap "Agree & start match".
+[Demo provider for review, if provided: type <provider>, base URL <url>, API key <key with a small spending limit>, model <model>.]
 
-To try it: open AI Battlefield > AI Providers ("Models" on iPhone) > Add provider, choose its type, enter the HTTPS base URL and an API key, then save to load models. Under New match ("New" on iPhone), choose models and puzzles, then tap "Agree & start match".
-[Optional, filled in before submission: a demo key with a small spending limit for <provider>, base URL <url>, model <model>.]
+4. EXTERNAL SERVICES
+The puzzle game uses no external service. Only the optional AI Battlefield contacts an AI service: the provider the user configures with their own API key, such as OpenRouter, SiliconFlow, Google Gemini, OpenAI or another OpenAI- or Anthropic-compatible HTTPS API. Requests go directly from the device, only when the user saves a provider (to list models) or agrees to start a match (rules, puzzle boards, an optional prompt and the AI conversation). The app contains no API keys; keys stay in the Keychain. The developer runs no server, proxy, analytics, authentication or payment service. Model answers are judged by the app's own interpreter: H programs only move the robot and are never executed as native code.
 
-The rest of the app works fully without AI Battlefield or a network connection.
+5. REGIONAL DIFFERENCES
+None. Features and content are the same in every region; only the interface language follows the device (English, Simplified Chinese or Japanese).
+
+6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
+Not applicable. The app does not operate in a regulated industry and contains no protected third-party material. All 30 puzzles, texts and artwork are original and published under the MIT license at https://github.com/hugogu/herbert. The game independently implements the publicly documented rules of the Herbert programming challenge and is not affiliated with Wild Noodle or Microsoft.
