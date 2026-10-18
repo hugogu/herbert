@@ -7,6 +7,7 @@ struct BattlefieldModelOption: Identifiable {
     let preset: ModelPreset
     var id: String { "\(provider.id.uuidString)/\(preset.model.id)" }
     var isDefault: Bool { preset.isDefault }
+    var reference: ModelReference { ModelReference(providerID: provider.id, modelID: preset.model.id) }
 }
 
 @MainActor
@@ -87,6 +88,20 @@ final class BattlefieldModel: ObservableObject {
                 return BattlefieldModelOption(provider: provider, preset: preset)
             }
         }
+    }
+
+    /// Entrants of the previous match that are still configured, otherwise the default entrants.
+    var initialEntrants: Set<String> {
+        let previous = Set(settings.lastMatch?.entrants ?? [])
+        let remembered = modelOptions.filter { previous.contains($0.reference) }
+        return Set((remembered.isEmpty ? modelOptions.filter(\.isDefault) : remembered).map(\.id))
+    }
+
+    /// Puzzles of the previous match that are still available, otherwise the original course.
+    func initialProblems(from problems: [Problem]) -> Set<Int> {
+        let previous = Set(settings.lastMatch?.problemIDs ?? [])
+        let remembered = problems.filter { previous.contains($0.id) }
+        return Set((remembered.isEmpty ? problems.filter { $0.lesson != nil } : remembered).map(\.id))
     }
 
     func hasKey(_ provider: UUID) -> Bool { (try? keys.hasKey(for: provider)) == true }
@@ -186,6 +201,7 @@ final class BattlefieldModel: ObservableObject {
             }
             var new = settings
             new.competition = configuration
+            new.lastMatch = MatchSelection(entrants: options.map(\.reference), problemIDs: problems.map(\.id))
             try saveSettings(new)
             let engine = BattlefieldEngine(client: client)
             self.engine = engine

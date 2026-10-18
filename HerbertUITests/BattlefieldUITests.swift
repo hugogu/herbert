@@ -264,6 +264,36 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testNewMatchStartsFromThePreviousEntrantsPuzzlesAndSettings() {
+        var app = launch()
+        openSection("AI Battlefield", in: app)
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("30 puzzles selected"))
+        let skipped = toggle("entrant-fixture-2", in: app)
+        XCTAssertTrue(skipped.waitForExistence(timeout: 5))
+        skipped.battlefieldTap()
+        XCTAssertTrue(skipped.waitForNonExistence(timeout: 5), app.debugDescription)
+        toggle("problemTokenLimitEnabled", in: app).battlefieldTap()
+        XCTAssertTrue(app.textFields["problemTokenLimit"].waitForExistence(timeout: 5))
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15), app.debugDescription)
+        app.terminate()
+
+        app = launch(reset: false)
+        openSection("AI Battlefield", in: app)
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("1 puzzles selected"))
+        XCTAssertTrue(toggle("entrant-fixture-1", in: app).waitForExistence(timeout: 5))
+        XCTAssertFalse(toggle("entrant-fixture-2", in: app).exists)
+        let tokens = toggle("problemTokenLimitEnabled", in: app)
+        XCTAssertEqual(String(describing: tokens.value ?? "missing"), "1", app.debugDescription)
+        XCTAssertTrue(app.textFields["problemTokenLimit"].exists)
+        app.terminate()
+    }
+
+    @MainActor
     func testUnifiedMatchSettingsAndModelReasoningControls() {
         let app = launch()
         openSection("AI Battlefield", in: app)

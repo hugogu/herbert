@@ -1,9 +1,38 @@
 import Foundation
 
+/// A discovered model of one configured provider.
+public struct ModelReference: Codable, Hashable, Sendable {
+    public var providerID: UUID
+    public var modelID: String
+    public init(providerID: UUID, modelID: String) {
+        self.providerID = providerID
+        self.modelID = modelID
+    }
+}
+
+/// The entrants and puzzles of the most recent match, offered again when setting up the next one.
+public struct MatchSelection: Codable, Equatable, Sendable {
+    public var entrants: [ModelReference]
+    public var problemIDs: [Int]
+    public init(entrants: [ModelReference], problemIDs: [Int]) {
+        self.entrants = entrants
+        self.problemIDs = problemIDs
+    }
+
+    public func validated() throws -> MatchSelection {
+        guard entrants.count <= 32, Set(entrants).count == entrants.count,
+            entrants.allSatisfy({ !$0.modelID.isEmpty && $0.modelID.count <= 512 }),
+            problemIDs.count <= 2000, Set(problemIDs).count == problemIDs.count
+        else { throw BattlefieldError.invalidConfiguration }
+        return self
+    }
+}
+
 public struct BattlefieldSettings: Codable, Sendable {
     public var schemaVersion = 3
     public var providers: [ProviderConfiguration] = []
     public var competition = CompetitionConfiguration()
+    public var lastMatch: MatchSelection?
     public init() {}
 
     public func validated() throws -> BattlefieldSettings {
@@ -12,6 +41,7 @@ public struct BattlefieldSettings: Codable, Sendable {
         else { throw BattlefieldError.storageCorrupt }
         for provider in providers { _ = try provider.validated() }
         _ = try competition.validated()
+        _ = try lastMatch?.validated()
         return self
     }
 

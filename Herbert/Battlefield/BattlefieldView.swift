@@ -231,8 +231,8 @@ private struct BattlefieldSetupView: View {
             if !initialized {
                 initialized = true
                 configuration = battlefield.settings.competition.forNewMatch()
-                selectedModels = Set(battlefield.modelOptions.filter(\.isDefault).map(\.id))
-                selectedProblems = Set(store.problems.filter { $0.lesson != nil }.map(\.id))
+                selectedModels = battlefield.initialEntrants
+                selectedProblems = battlefield.initialProblems(from: store.problems)
             }
         }
         .sheet(isPresented: $choosingProblems) {

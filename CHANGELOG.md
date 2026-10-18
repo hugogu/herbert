@@ -5,6 +5,9 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield's New match starts from the previous match's entrants, puzzles and settings, so
+  it can run again directly. Entrants or puzzles that are no longer available are dropped, and the
+  defaults apply when none remain.
 - AI Battlefield requests no longer ask for more output than a model allows when the per-problem
   token budget is larger. Discovery reads published limits under common field names, such as
   DeepSeek's `max_output_tokens` and `context_window`; when a provider publishes none and rejects

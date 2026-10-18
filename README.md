@@ -101,8 +101,9 @@ cancels its remaining retries. Other problems and entrants continue.
   by default, using the highest advertised reasoning effort for supported models.
   Explicit advanced JSON overrides these defaults. Output allowances come from the
   shared match policy and provider capabilities, without a separate model cap.
-- Choose models and puzzles; models work in parallel with identical Markdown rules
-  and board prompts. With limits off, all entrants can finish their selected attempts.
+- Choose models and puzzles; a new match starts from the previous match's choices and
+  settings. Models work in parallel with identical Markdown rules and board prompts.
+  With limits off, all entrants can finish their selected attempts.
 - Mac setup places entrants and puzzles side by side. Progress uses compact two-line
   answers and score-sorted model columns. Saved results open as a full page in the
   History tab and expand with the main window. A persistent Back action returns to

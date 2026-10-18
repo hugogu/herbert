@@ -393,6 +393,34 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), "corrupt-but-preserve")
     }
 
+    func testLastMatchSelectionPersistsAndOlderSettingsLoadWithoutIt() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let repository = LocalBattlefieldRepository(directory: directory)
+        let provider = ProviderConfiguration(kind: .compatible)
+        var settings = BattlefieldSettings()
+        settings.providers = [provider]
+        try repository.saveSettings(settings)
+        let url = directory.appendingPathComponent("providers.json")
+        XCTAssertFalse(try String(contentsOf: url, encoding: .utf8).contains("lastMatch"))
+        XCTAssertNil(try repository.loadSettings().lastMatch)
+        let entrant = ModelReference(providerID: provider.id, modelID: "m")
+        settings.lastMatch = MatchSelection(entrants: [entrant], problemIDs: [10001, 10006])
+        try repository.saveSettings(settings)
+        XCTAssertEqual(try repository.loadSettings().lastMatch, settings.lastMatch)
+        for invalid in [
+            MatchSelection(entrants: [entrant, entrant], problemIDs: [10001]),
+            MatchSelection(entrants: [ModelReference(providerID: provider.id, modelID: "")], problemIDs: [10001]),
+            MatchSelection(entrants: [entrant], problemIDs: [10001, 10001]),
+            MatchSelection(
+                entrants: (0...32).map { ModelReference(providerID: provider.id, modelID: "m\($0)") }, problemIDs: []),
+        ] {
+            settings.lastMatch = invalid
+            XCTAssertThrowsError(try repository.saveSettings(settings))
+        }
+        XCTAssertEqual(try repository.loadSettings().lastMatch?.problemIDs, [10001, 10006])
+    }
+
     func testLegacyOutputCapsMigrateOutOfSettingsButRemainInHistoricalSnapshots() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

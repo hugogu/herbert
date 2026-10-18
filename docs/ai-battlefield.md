@@ -237,7 +237,11 @@ accepted personal solution. Battlefield scoring still assigns zero to over-limit
 
 ## Run a match
 
-**New match** starts with your default entrants and all **30 retained original puzzles**.
+The first **New match** starts with your default entrants and all **30 retained original
+puzzles**. Later ones start from the previous match's entrants, puzzles and Match Settings,
+so the same match can run again directly. Entrants or puzzles that are no longer available
+are dropped, and the defaults apply when none remain; **Use default entrants** and
+**30 original puzzles** restore them.
 Choose up to 32 provider/model pairs and a subset of puzzles. The open-source edition
 also permits community puzzles; the App Store edition exposes only its 30 originals.
 Models run concurrently, with one request at a time per model. Each model works through
