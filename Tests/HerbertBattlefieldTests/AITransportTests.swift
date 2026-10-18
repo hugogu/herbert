@@ -770,6 +770,51 @@ final class AITransportTests: XCTestCase {
         }
     }
 
+    func testOversizedOutputCapIsResentWithinTheLimitTheProviderStates() async throws {
+        let rejections = [
+            // A gateway reports the model limit in-band, inside the error's `param` field.
+            HTTPStub(
+                body: "data:"
+                    + #"{"error":{"code":"400","message":"Param Incorrect","param":"max_tokens is too large: 390861. This model supports at most 131072 completion tokens, whereas you provided 390861.","type":""}}"#
+                    + "\n\n", contentType: "text/event-stream"),
+            HTTPStub(
+                body:
+                    #"{"error":{"code":"invalid_request_error","message":"Invalid max_tokens value, the valid range of max_tokens is [1, 131072] (request_id: test)","param":null,"type":"invalid_request_error"}}"#,
+                status: 400),
+        ]
+        for rejection in rejections {
+            let provider = provider()
+            let accepted = HTTPStub(
+                body:
+                    #"{"choices":[{"message":{"content":"```h\ns\n```"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20}}"#
+            )
+            BattlefieldURLProtocol.registry.addSequence(
+                [rejection, accepted], host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+            var configuration = CompetitionConfiguration()
+            configuration.problemTokenLimitEnabled = true
+            configuration.problemTokenLimit = 400_000
+            let result = try await BattlefieldEngine(client: client()).run(
+                configuration: configuration, problems: Array(try ProblemCatalog.bundled().prefix(1)),
+                participants: [
+                    CompetitionParticipant(
+                        entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "m"))),
+                        apiKey: "fixture")
+                ]
+            ) { _ in }
+            let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+            XCTAssertEqual(answer.status, .solved)
+            XCTAssertEqual(answer.attempts.count, 1)
+            XCTAssertEqual(answer.attempts[0].requestedMaxOutputTokens, 131_072)
+            XCTAssertNil(answer.attempts[0].error)
+            let rejected = try XCTUnwrap(
+                JSONSerialization.jsonObject(with: XCTUnwrap(rejection.bodies.first)) as? [String: Any])
+            XCTAssertGreaterThan(try XCTUnwrap(rejected["max_tokens"] as? Int), 131_072)
+            let resent = try XCTUnwrap(
+                JSONSerialization.jsonObject(with: XCTUnwrap(accepted.bodies.first)) as? [String: Any])
+            XCTAssertEqual(resent["max_tokens"] as? Int, 131_072)
+        }
+    }
+
     func testProviderErrorBodyIsBoundedAndOpenErrorStreamCanBeCancelled() async throws {
         let provider = provider()
         let stub = HTTPStub(body: String(repeating: "x", count: 100_000), status: 400, staysOpen: true)

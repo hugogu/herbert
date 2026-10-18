@@ -15,6 +15,8 @@ public actor BattlefieldEngine {
     private var executing = false
     private var participants: [UUID: CompetitionParticipant] = [:]
     private var pendingRetries: [UUID: [Int]] = [:]
+    /// Output limits that providers stated when rejecting a larger cap, by entrant.
+    private var statedOutputLimits: [UUID: Int] = [:]
 
     public init(client: any AIClient) {
         self.client = client
@@ -210,15 +212,17 @@ public actor BattlefieldEngine {
         return max(0, result.configuration.problemTokenLimit - used)
     }
 
+    /// A per-problem budget never raises a request above the model's own output and context limits.
     private func allowance(entrant: Entrant, messages: [AIMessage], remaining: Int?) -> Int? {
         let model = entrant.preset.model
-        var cap = model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }
+        var cap = [model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }, statedOutputLimits[entrant.id]]
+            .compactMap { $0 }.min()
         if cap == nil, entrant.kind == .anthropic { cap = 65_536 }
         let input = TokenUsage.estimate(messages: messages).input
+        if let remaining { cap = min(cap ?? Int.max, max(1, remaining - input)) }
         if let context = model.contextLength, let maximum = cap {
             cap = min(maximum, max(1, context - input - max(256, input / 10)))
         }
-        if let remaining { cap = min(cap ?? Int.max, max(1, remaining - input)) }
         return cap
     }
 
@@ -247,6 +251,45 @@ public actor BattlefieldEngine {
             requests[result!.entrants[entrant].id]?.cancel()
         }
         await publish()
+    }
+
+    private func send(
+        _ participant: CompetitionParticipant, messages: [AIMessage], cap: Int?, entrant e: Int, problem p: Int,
+        attempt a: Int
+    ) async throws -> AIReply {
+        let completion = AICompletionRequest(participant: participant, messages: messages, maxOutputTokens: cap)
+        let request = Task {
+            try await client.complete(
+                completion
+            ) { progress in await self.record(progress, entrant: e, problem: p, attempt: a) }
+        }
+        requests[participant.entrant.id] = request
+        return try await withTaskCancellationHandler {
+            try await request.value
+        } onCancel: {
+            request.cancel()
+        }
+    }
+
+    /// Providers that publish no output limit reject a larger cap and state their maximum; ask again within it.
+    private func complete(
+        _ participant: CompetitionParticipant, messages: [AIMessage], cap: Int?, entrant e: Int, problem p: Int,
+        attempt a: Int
+    ) async throws -> AIReply {
+        do {
+            return try await send(participant, messages: messages, cap: cap, entrant: e, problem: p, attempt: a)
+        } catch let error as AIHTTPError {
+            guard let cap, [200, 400, 422].contains(error.status),
+                error.partialReply.map({ $0.text.isEmpty && $0.reasoning == nil }) ?? true,
+                let limit = ProviderDiagnostics.outputTokenLimit(in: error.providerResponse), limit < cap,
+                await active()
+            else { throw error }
+            result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens = limit
+            let reply = try await send(participant, messages: messages, cap: limit, entrant: e, problem: p, attempt: a)
+            // Keep the limit only once the provider accepts it, so a misread rejection cannot shrink later requests.
+            statedOutputLimits[participant.entrant.id] = limit
+            return reply
+        }
     }
 
     private func solve(_ participant: CompetitionParticipant, only: Int? = nil) async {
@@ -305,19 +348,8 @@ public actor BattlefieldEngine {
                 await publish()
                 do {
                     try Task.checkCancellation()
-                    let completion = AICompletionRequest(
-                        participant: participant, messages: messages, maxOutputTokens: cap)
-                    let request = Task {
-                        try await client.complete(
-                            completion
-                        ) { progress in await self.record(progress, entrant: e, problem: p, attempt: a) }
-                    }
-                    requests[participant.entrant.id] = request
-                    let reply = try await withTaskCancellationHandler {
-                        try await request.value
-                    } onCancel: {
-                        request.cancel()
-                    }
+                    let reply = try await complete(
+                        participant, messages: messages, cap: cap, entrant: e, problem: p, attempt: a)
                     requests[participant.entrant.id] = nil
                     guard await active() else { break }
                     if result!.entrants[e].answers[p].status == .burnout { break }
@@ -363,12 +395,13 @@ public actor BattlefieldEngine {
                         }
                         result!.entrants[e].answers[p].attempts[a].program = program
                     } catch is CancellationError { throw CancellationError() } catch {
+                        let requested = result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens
                         evaluation = JudgeEvaluation(
                             accepted: false, bytes: 0, steps: 0, litTargets: 0,
                             targetCount: try Board(problem: problem).targets.count,
                             feedback:
                                 reply.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                ? "No final H program was returned. The output allowance (\(cap.map(String.init) ?? "provider maximum") tokens) includes reasoning. Finish reason: \(reply.finishReason ?? "unknown"). Return a concise complete fenced H program."
+                                ? "No final H program was returned. The output allowance (\(requested.map(String.init) ?? "provider maximum") tokens) includes reasoning. Finish reason: \(reply.finishReason ?? "unknown"). Return a concise complete fenced H program."
                                 : "Invalid response format. Return exactly one fenced H program, no prose, at most 16 KiB."
                         )
                     }

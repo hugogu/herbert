@@ -27,14 +27,22 @@ token limits and thinking capabilities when available.
 Redirects are rejected; enter the final URL directly. HTTP endpoints are not accepted.
 
 **Match Settings** controls output allowances for every entrant; there is no per-model
-output-cap editor. With token limits off, requests use the provider-declared maximum
+output-cap editor. A per-problem budget never raises a request above the model's own
+limits. With token limits off, requests use the provider-declared maximum
 output capacity, bounded by the remaining context when both limits are known. If no
 maximum is advertised, Chat Completions requests omit the output cap and let the
 provider choose its default. Anthropic Messages requires `max_tokens`: Herbert uses the
 advertised capacity, or 65,536 when discovery omits it. This fallback is recorded in
-attempt details; a smaller shared problem budget can accommodate endpoints with lower
-undocumented limits. “Unlimited” removes the app's arbitrary cap; it cannot
-infer undocumented model capacity or override a provider's limits/defaults.
+attempt details. Discovery reads OpenRouter's `top_provider.max_completion_tokens` and the
+common `max_output_tokens` / `max_completion_tokens` and `context_length` /
+`context_window` / `max_context_length` / `max_model_len` fields; refresh models to pick up
+limits that earlier versions did not read. When an endpoint advertises no limit but
+rejects a cap and states its maximum, for example “supports at most 131072 completion
+tokens” or “the valid range of max_tokens is [1, 393216]”, the request is sent once more
+within that maximum, and the entrant's later requests in the match use it. Only the
+provider's error text is read, and only before any output arrives. “Unlimited” removes the
+app's arbitrary cap; it cannot infer undocumented model capacity or override a provider's
+limits/defaults.
 
 Automatic thinking is **enabled by default** in Model Settings. OpenRouter uses
 `reasoning: {enabled: true, effort: ...}` for models advertising reasoning support,
@@ -353,7 +361,7 @@ wall-clock duration, since models run in parallel. Share images include both mat
 duration and each model's total attempt time.
 
 A limited request receives an output allowance no larger than its remaining problem
-budget minus estimated input and any known model capacity/context constraints. Each
+budget minus estimated input and any known or provider-stated model capacity/context constraints. Each
 entrant's attempts are tracked separately; retries spend the same problem budget. Live
 usage reaching the budget cancels that request and marks Burnout. Provider token-cap
 semantics vary: reasoning may share the output cap or use a separate provider budget.

@@ -185,6 +185,42 @@ extension ProviderDiagnostics {
         return .generic(message: error.localizedDescription)
     }
 
+    /// Providers that publish no model limits still state the largest output cap they accept when rejecting one.
+    static func outputTokenLimit(in detail: String?) -> Int? {
+        guard let detail else { return nil }
+        let text: String
+        if let object = try? JSONSerialization.jsonObject(with: Data(detail.utf8)) {
+            let target = (object as? [[String: Any]])?.first ?? object as? [String: Any]
+            let error = target?["error"] as? [String: Any]
+            // Only inspect the provider error text, never retained model output.
+            text = [error?["message"], error?["param"], target?["message"]].compactMap { $0 as? String }
+                .joined(separator: "\n")
+        } else {
+            text = detail
+        }
+        guard
+            text.range(
+                of: #"(?i)max(?:imum)?[ _]?(?:(?:completion|output|new)[ _]?)?tokens"#, options: .regularExpression)
+                != nil
+        else { return nil }
+        let number = #"(\d{1,3}(?:,\d{3})+|\d+)"#
+        let patterns: [(pattern: String, adjustment: Int)] = [
+            (#"(?i)at most\s+`?"# + number, 0),  // supports at most 131072 completion tokens
+            (#"\[\s*\d+\s*,\s*"# + number + #"\s*\]"#, 0),  // the valid range of max_tokens is [1, 393216]
+            (#"(?i)less than or equal to\s+`?"# + number, 0),
+            (#"(?:<=|≤)\s*`?"# + number, 0),
+            (#"(?i)"# + number + #",?\s+which is the maximum"#, 0),  // max_tokens: 100000 > 64000, which is the maximum
+            (#"(?i)to\s+"# + number + #"\s*\(exclusive\)"#, -1),  // from 1 (inclusive) to 65537 (exclusive)
+        ]
+        let limits = patterns.flatMap { item -> [Int] in
+            guard let regex = try? NSRegularExpression(pattern: item.pattern) else { return [] }
+            return regex.matches(in: text, range: NSRange(text.startIndex..., in: text)).compactMap { match in
+                guard let range = Range(match.range(at: 1), in: text) else { return nil }
+                return Int(text[range].replacingOccurrences(of: ",", with: "")).map { $0 + item.adjustment }
+            }
+        }
+        return limits.filter { $0 > 0 }.min()
+    }
 }
 
 extension AIReply {

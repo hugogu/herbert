@@ -202,11 +202,18 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 return nil
             }
             let top = record["top_provider"] as? [String: Any]
+            func limit(_ value: Any?) -> Int? {
+                guard let value = value as? Int, value > 0 else { return nil }
+                return value
+            }
+            // Providers name their limits differently; OpenRouter nests the output limit per serving provider.
             return AIModel(
                 id: id, name: record["name"] as? String,
-                contextLength: record["context_length"] as? Int,
+                contextLength: limit(record["context_length"]) ?? limit(record["context_window"])
+                    ?? limit(record["max_context_length"]) ?? limit(record["max_model_len"]),
                 supportedParameters: record["supported_parameters"] as? [String],
-                maximumOutputTokens: top?["max_completion_tokens"] as? Int,
+                maximumOutputTokens: limit(top?["max_completion_tokens"]) ?? limit(record["max_output_tokens"])
+                    ?? limit(record["max_completion_tokens"]),
                 supportedReasoningEfforts: (record["reasoning"] as? [String: Any])?["supported_efforts"] as? [String])
         }.sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
     }

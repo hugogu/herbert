@@ -5,6 +5,10 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield requests no longer ask for more output than a model allows when the per-problem
+  token budget is larger. Discovery reads published limits under common field names, such as
+  DeepSeek's `max_output_tokens` and `context_window`; when a provider publishes none and rejects
+  an oversized cap with its maximum, the request is sent again within that maximum.
 - Accept `a():` for a procedure without parameters, matching the `a()` call already accepted.
   Punctuation stays free, so byte counts and the original `a:` form are unchanged.
 
