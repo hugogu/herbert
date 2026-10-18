@@ -80,7 +80,7 @@ enum AnthropicMessages {
                 contextLength: record["max_input_tokens"] as? Int ?? record["context_length"] as? Int,
                 maximumOutputTokens: record["max_tokens"] as? Int ?? record["max_output_tokens"] as? Int,
                 supportedReasoningEfforts: effort.map { effort in
-                    ["max", "xhigh", "high", "medium", "low"].filter { supports(effort[$0]) }
+                    ReasoningDefaults.effortsHighestFirst.filter { supports(effort[$0]) }
                 },
                 supportedThinkingTypes: types.map { types in
                     ["adaptive", "enabled", "disabled"].filter { supports(types[$0]) }
