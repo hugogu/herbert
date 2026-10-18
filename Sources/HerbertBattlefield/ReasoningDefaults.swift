@@ -2,6 +2,9 @@ import Foundation
 
 /// Provider-aware defaults are merged beneath explicit advanced JSON overrides.
 public enum ReasoningDefaults {
+    /// Effort levels Herbert can rank. Discovery orders advertised levels by this scale, so the first is the highest.
+    static let effortsHighestFirst = ["max", "xhigh", "high", "medium", "low"]
+
     public static func parameters(for entrant: Entrant, maxOutputTokens: Int? = nil) -> [String: Any] {
         guard entrant.preset.parameters.automaticReasoning else { return [:] }
         let model = entrant.preset.model
