@@ -206,6 +206,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 guard let value = value as? Int, value > 0 else { return nil }
                 return value
             }
+            // DeepSeek lists effort levels in display order, so rank them; a level off the scale is dropped.
+            let levels = (record["effort"] as? [String: Any])?["supported_levels"] as? [String]
             // Providers name their limits differently; OpenRouter nests the output limit per serving provider.
             return AIModel(
                 id: id, name: record["name"] as? String,
@@ -214,7 +216,8 @@ public final class OpenAICompatibleClient: AIClient, Sendable {
                 supportedParameters: record["supported_parameters"] as? [String],
                 maximumOutputTokens: limit(top?["max_completion_tokens"]) ?? limit(record["max_output_tokens"])
                     ?? limit(record["max_completion_tokens"]),
-                supportedReasoningEfforts: (record["reasoning"] as? [String: Any])?["supported_efforts"] as? [String])
+                supportedReasoningEfforts: (record["reasoning"] as? [String: Any])?["supported_efforts"] as? [String]
+                    ?? levels.map { levels in ReasoningDefaults.effortsHighestFirst.filter(levels.contains) })
         }.sorted { $0.id.localizedStandardCompare($1.id) == .orderedAscending }
     }
 

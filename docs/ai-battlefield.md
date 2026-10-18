@@ -51,6 +51,15 @@ advertises reasoning without listing levels. SiliconFlow defaults to
 `enable_thinking: true`, with `reasoning_effort: max` for its documented DeepSeek V4 /
 GLM-5.2 models or models advertising effort control. Compatible providers receive only
 advertised thinking fields; an effort field without advertised levels uses `high`.
+DeepSeek's `/models` lists `effort.supported_levels` in display order, such as `low`,
+`high`, `max`. Discovery ranks them on the `low` / `medium` / `high` / `xhigh` / `max`
+scale, and Herbert sends the highest as `reasoning_effort`. That value also turns
+DeepSeek's thinking mode on, so no `thinking` object is added. A level outside that scale
+is ignored rather than guessed, and `default_level` is not used. Refresh models on an
+existing DeepSeek provider to read its levels. With automatic thinking off, Herbert sends
+no effort and DeepSeek applies its own default, which keeps thinking on; Advanced JSON
+`{"reasoning_effort": "none"}` turns it off. See [DeepSeek models](https://api-docs.deepseek.com/api/list-models)
+and [thinking mode](https://api-docs.deepseek.com/guides/thinking_mode).
 The standalone Google Gemini provider uses `reasoning_effort: high` for Gemini 2.5/3
 thinking models, following [Google's OpenAI compatibility mapping](https://ai.google.dev/gemini-api/docs/openai#thinking).
 It requests streaming usage totals without injecting the unrelated `enable_thinking` field.

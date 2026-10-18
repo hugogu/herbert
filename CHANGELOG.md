@@ -5,6 +5,10 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield reads the thinking effort levels DeepSeek advertises in `/models`
+  (`effort.supported_levels`) and ranks them, so automatic thinking sends the highest, such as
+  `reasoning_effort: max`, instead of leaving DeepSeek at its default effort. Levels outside the
+  known `low`–`max` scale are ignored. Refresh models on an existing DeepSeek provider to pick this up.
 - AI Battlefield's New match starts from the previous match's entrants, puzzles and settings, so
   it can run again directly. Entrants or puzzles that are no longer available are dropped, and the
   defaults apply when none remain.

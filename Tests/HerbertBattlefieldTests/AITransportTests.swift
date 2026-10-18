@@ -283,6 +283,59 @@ final class AITransportTests: XCTestCase {
         XCTAssertFalse(reply.usage.estimated)
     }
 
+    func testDiscoveryRanksDeepSeekEffortLevelsHighestFirstWithoutGuessing() throws {
+        let data = Data(
+            """
+            {"object":"list","data":[
+            {"id":"deepseek-flash","object":"model","owned_by":"deepseek",
+            "effort":{"supported_levels":["low","high","max"],"default_level":"high"}},
+            {"id":"shuffled","effort":{"supported_levels":["high","max","low"]}},
+            {"id":"unranked","effort":{"supported_levels":["low","turbo","high"]}},
+            {"id":"future","effort":{"supported_levels":["turbo"]}},
+            {"id":"no-effort"},
+            {"id":"openrouter","reasoning":{"supported_efforts":["xhigh","high","low"]}}]}
+            """.utf8)
+        let models = Dictionary(
+            uniqueKeysWithValues: try OpenAICompatibleClient.decodeModels(data).map { ($0.id, $0) })
+        XCTAssertEqual(models["deepseek-flash"]?.supportedReasoningEfforts, ["max", "high", "low"])
+        XCTAssertEqual(models["shuffled"]?.supportedReasoningEfforts, ["max", "high", "low"])
+        XCTAssertEqual(models["unranked"]?.supportedReasoningEfforts, ["high", "low"])
+        XCTAssertEqual(models["openrouter"]?.supportedReasoningEfforts, ["xhigh", "high", "low"])
+        XCTAssertNil(try XCTUnwrap(models["no-effort"]).supportedReasoningEfforts)
+        let future = try XCTUnwrap(models["future"])
+        XCTAssertEqual(future.supportedReasoningEfforts, [])
+        XCTAssertTrue(
+            ReasoningDefaults.parameters(
+                for: Entrant(provider: provider(), preset: ModelPreset(model: future))
+            ).isEmpty)
+    }
+
+    func testDeepSeekRequestSendsOnlyTheHighestAdvertisedEffort() async throws {
+        let provider = provider()
+        let host = try XCTUnwrap(URL(string: provider.baseURL)?.host)
+        // DeepSeek's documented example lists levels in display order, lowest first.
+        let discovery = HTTPStub(
+            body:
+                #"{"object":"list","data":[{"id":"deepseek-flash","object":"model","owned_by":"deepseek","name":"DeepSeek-V4.1-Flash","context_window":1048576,"max_output_tokens":393216,"input_modalities":["text","image"],"output_modalities":["text"],"effort":{"supported_levels":["low","high","max"],"default_level":"high"},"api_capabilities":{"anthropic_messages":{"system_prompt_update":"in-history"}}}]}"#
+        )
+        BattlefieldURLProtocol.registry.add(discovery, host: host)
+        let models = try await client().models(provider: provider, apiKey: "fixture")
+        let model = try XCTUnwrap(models.first)
+        let stub = HTTPStub(body: #"{"choices":[{"message":{"content":"s"},"finish_reason":"stop"}]}"#)
+        BattlefieldURLProtocol.registry.add(stub, host: host)
+        _ = try await client().complete(
+            AICompletionRequest(
+                participant: CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: model)), apiKey: "fixture"),
+                messages: [AIMessage(role: "user", content: "a puzzle")], maxOutputTokens: 4096)
+        ) { _ in }
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: XCTUnwrap(stub.bodies.first)) as? [String: Any])
+        XCTAssertEqual(body["reasoning_effort"] as? String, "max")
+        // The effort also turns thinking on, so no thinking switch is added beside DeepSeek's documented fields.
+        XCTAssertEqual(
+            Set(body.keys), ["model", "messages", "stream", "stream_options", "max_tokens", "reasoning_effort"])
+    }
+
     func testInBandFailuresAreClassifiedRetriedAndPersistedThroughTheHTTPClient() async throws {
         let cases: [(String, ProblemAnswerStatus, Int)] = [
             (#"{"error":{"code":429,"details":[{"retryDelay":"28s"}],"message":"Quota exceeded"}}"#, .overloaded, 2),
