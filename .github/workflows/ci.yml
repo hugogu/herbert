@@ -72,7 +72,7 @@ jobs:
           python3 scripts/check_learning_bundle.py .build/ci-learning-ios/Build/Products/Release-iphoneos/HerbertLearning.app
       - name: Verify native judge fixtures
         run: |
-          swift run HerbertJudgeFixtures > worker/test/native-fixtures.json
+          swift run -c release HerbertJudgeFixtures > worker/test/native-fixtures.json
           git diff --exit-code -- worker/test/native-fixtures.json
       - name: Package and verify universal Mac DMG
         run: |
