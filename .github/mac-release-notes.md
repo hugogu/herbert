@@ -1,32 +1,37 @@
 Download **Herbert-macOS-universal.dmg** below, open it, and drag **Herbert.app** to
 **Applications**. Requires **macOS 14+**; supports **Apple Silicon and Intel**. No Xcode needed.
 
-**New in 1.0.0:**
+**New in 1.1.0:**
 
-- Herbert reaches 1.0. Its original-only App Store edition, **Herbot Bot**, is prepared for
-  iPhone, iPad and Mac, with listing text in English, Simplified Chinese and Japanese, captioned
-  screenshots, a support page and a privacy policy that covers both editions. This DMG remains the
-  open-source **Herbert** edition.
-- The 30 originals are called puzzles in the English and Japanese interface, and puzzle details
-  show PUZZLE / ORIGINAL SERIES in all three languages.
-- On iPad, **Dismiss keyboard** and the s/l/r keys work again after the landscape keyboard
-  reflows a puzzle.
-- The Guide credits and rule links are translated into English and Japanese.
-- Since 0.3.9, the project also credits Wild Noodle Corporation for the original Herbert
-  challenge and its founder Brian Conte for the `h` language, distinct from the later quolc-led
-  Herbert Online Judge community archive.
+- **20 new original lessons.** Master lessons L31–L40 and synthesis lessons L41–L50 add four
+  chapters on wall-assisted synchronization, argument swaps, mutual recursion, inverse paths and
+  layered recursive composition. The course now has 50 puzzles in ten chapters; earlier lessons,
+  their IDs and saves are unchanged.
+- **3D board style.** Beside Modern and Classic, the board can be drawn as a lit diorama with stone
+  walls and glowing discs. Drag to turn it, pinch to zoom, double-tap to reset, or use the turn and
+  tilt buttons. **Enlarge board** opens a stage with camera controls, follow-Herbert, progress, a
+  program preview and the run controls. It is only a view; scores and saves are unaffected.
+- **AI Battlefield:** cancel a single puzzle while a model is generating it and retry it later;
+  model columns stay in place during a match; headers and share images show average output speed;
+  **New match** starts from the previous match's choices. With token limits off, requests ask for
+  each model's whole output capacity, and automatic thinking uses the highest effort DeepSeek
+  advertises. Very long answers no longer stall the answer view, and the retry button can be
+  tapped on iPad and iPhone.
+- `a():` is accepted for a procedure without parameters; byte counts are unchanged.
+- The Guide ends with the app version and build, such as Version 1.1.0 (15), to quote in bug
+  reports.
 
-This build includes **30 original puzzles + 1,769 archived community problems**, automatic
-English/Chinese/Japanese UI, Modern and Classic boards, movement trails, grid dots and local
-progress with JSON backups. Original puzzles are numbered L01–L30.
+This build includes **50 original puzzles + 1,769 archived community problems**, automatic
+English/Chinese/Japanese UI, Modern, Classic and 3D boards, movement trails, grid dots and local
+progress with JSON backups. Original puzzles are numbered L01–L50.
 
 **AI Battlefield** pits models from OpenRouter, SiliconFlow, Google Gemini and OpenAI- or
 Anthropic-compatible APIs against the puzzles. Programs are judged by the native engine with
 normalized coverage/code-efficiency scores, retries, timing, token usage and shareable result
 cards. AI is optional and uses your own API key and credits. Keys stay in Keychain; settings and
 history stay local. Streaming estimates and cancellation cannot guarantee provider billing. See
-[setup and scoring](https://github.com/hugogu/herbert/blob/v1.0.0/docs/ai-battlefield.md) and
-[privacy](https://github.com/hugogu/herbert/blob/v1.0.0/PRIVACY.md).
+[setup and scoring](https://github.com/hugogu/herbert/blob/v1.1.0/docs/ai-battlefield.md) and
+[privacy](https://github.com/hugogu/herbert/blob/v1.1.0/PRIVACY.md).
 
 **Signing:** this DMG is ad-hoc signed and has not been notarized by Apple.
 If macOS blocks the first launch, follow [Apple's instructions](https://support.apple.com/en-us/102445)
@@ -43,15 +48,15 @@ bundled catalogs, mounts the DMG read-only to verify it, and publishes after Mac
 builds pass. Native Mac UI tests use deterministic fixtures; paid provider calls and
 real iPhone/iPad devices remain manual verification work.
 
-Code and the 30 originals are MIT licensed. Community content has separate, unconfirmed
-redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v1.0.0/NOTICE.md).
+Code and the 50 originals are MIT licensed. Community content has separate, unconfirmed
+redistribution rights. See [NOTICE.md](https://github.com/hugogu/herbert/blob/v1.1.0/NOTICE.md).
 The App Store edition contains only the originals; this DMG is the open-source edition.
 
-中文：Herbert 1.0.0 发布。仅含原创关卡的 App Store 版 **Herbot Bot** 已备齐 iPhone、iPad 与 Mac 的中英日商店文案、带说明的截图、支持页面和覆盖两个版本的隐私政策；本 DMG 仍是开源版 **Herbert**。英文和日文界面将 30 道原创关卡称为谜题（puzzle），题目说明显示「关卡 / 原创系列」。修复 iPad 横屏键盘弹出后「收起键盘」和 s/l/r 键失效的问题，补齐手册致谢与规则链接的英日翻译，并沿用 0.4.0 对 Herbert 挑战与 H 语言来源的更正。
+中文：Herbert 1.1.0 发布。新增 20 道原创关卡：L31–L40 大师课与 L41–L50 综合课，课程扩展为十章 50 题，原有关卡、编号与存档不变。新增 3D 棋盘风格，可拖动旋转、双指缩放、双击复原；「放大棋盘」进入大舞台，镜头可跟随 Herbert，计分与存档不受影响。AI Battlefield 可在生成中取消单题并稍后重试，比赛中模型列保持原位，模型标题与分享图显示平均输出速度，新比赛沿用上一场的选择；不限 Token 时请求模型的全部输出容量，自动推理使用 DeepSeek 公布的最高强度；超长回答不再卡住界面，iPad 与 iPhone 上的重试按钮可以正常点按。无参数过程可写作 `a():`，byte 计数不变。手册末尾显示版本号与 build，便于反馈问题。
 
-下载下方 DMG 后将 Herbert 拖入“应用程序”。支持 macOS 14+，包含 30 道原创和 1,769 道社区题，
-中英日界面、连续墙、轨迹与网格、本地历史和 PNG 分享。此 DMG 尚未经过 Apple 公证。
+下载下方 DMG 后将 Herbert 拖入“应用程序”。支持 macOS 14+，包含 50 道原创和 1,769 道社区题，
+中英日界面、Modern / Classic / 3D 棋盘、轨迹与网格、本地历史和 PNG 分享。此 DMG 尚未经过 Apple 公证。
 AI 使用自己的 API 额度；密钥留在钥匙串，本地预算与取消请求无法保证最终账单。
 
-See the [changelog](https://github.com/hugogu/herbert/blob/v1.0.0/CHANGELOG.md)
-and [README](https://github.com/hugogu/herbert/tree/v1.0.0#readme) for screenshots and controls.
+See the [changelog](https://github.com/hugogu/herbert/blob/v1.1.0/CHANGELOG.md)
+and [README](https://github.com/hugogu/herbert/tree/v1.1.0#readme) for screenshots and controls.

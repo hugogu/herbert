@@ -2,6 +2,14 @@
 
 日期：2026-10-07–09（Asia/Shanghai）。环境：Apple Silicon Mac，Xcode 27.0，Swift 6.4。未使用第三方依赖。
 
+## 1.1.0 发布校验（10 月 19 日）
+
+- 版本号更新为 1.1.0（build 15）。`scripts/check.sh` 通过：严格格式检查、41 项 Python 检查、88 项 HerbertCore 与 141 项 Battlefield 测试；工程重复生成一致。
+- 手册末尾新增版本号：`AppVersionTests` 覆盖格式、缺失 build 与三语文案；`testGuideShowsTheAppVersion` 在 iOS 27 模拟器 iPhone 18 Pro（标签栏）和 iPad Pro 13 英寸（M5，侧栏）上通过，并在 iPhone 18 Pro 模拟器中目视确认该行显示为「Version 1.0.0 (14)」（版本号提升前的构建）。不是实机验证；没有运行会接管桌面的原生 Mac 界面测试。
+- 本机按 CI 参数构建通用 Mac Release 版：`scripts/package_macos.py` 生成 DMG 并挂载校验，确认 Herbert 1.1.0 (15)、arm64 + x86_64、macOS 14+、沙盒、50 道原创与 1,769 道社区题。iOS 通用构建（无签名）通过。
+- `scripts/archive_app_store.sh ios --check` 和 `macos --check` 生成 Herbot Bot 1.1.0 (15) 的无签名归档，资源检查通过（仅 50 道原创，无社区数据或参考答案），含 `ITSAppUsesNonExemptEncryption = NO`，Mac 版类别为 Education。没有进行签名导出或上传。
+- 隐私政策对照 1.1.0 的改动复核，内容不变。描述当前应用的文档统一为 50 道原创、共 1,819 题。
+
 ## 1.0.0 发布校验（10 月 13 日）
 
 - 版本号更新为 1.0.0（build 14）。`scripts/check.sh` 通过：严格格式检查、34 项 Python 检查和 Swift 测试；工程与课程重复生成一致，商店资料检查通过。

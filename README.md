@@ -34,11 +34,12 @@ while preserving the previous forty lessons.
 
 ## Download for Mac
 
-**[Download the 1.0.0 DMG](https://github.com/hugogu/herbert/releases/download/v1.0.0/Herbert-macOS-universal.dmg)**
+**[Download the 1.1.0 DMG](https://github.com/hugogu/herbert/releases/download/v1.1.0/Herbert-macOS-universal.dmg)**
 — macOS 14+, Apple Silicon and Intel. Open the DMG and drag Herbert to Applications;
-no Xcode is needed. This published release includes 1,799 problems; the source course above includes the new lessons.
+no Xcode is needed. Includes all 1,819 problems.
 
-Screenshots below match the 1.0.0 source.
+Screenshots below are captures of the 1.0.0 app, except the 3D board, which was captured during
+1.1.0 development.
 
 This DMG is ad-hoc signed and **not Apple notarized**. macOS may block its first
 launch; follow [Apple's instructions](https://support.apple.com/en-us/102445) for
@@ -78,7 +79,7 @@ full game screen:
 *These original puzzles and their screenshots are MIT licensed. Budgets are verified
 achievable, not proven minima. Our [community study and design notes](docs/advanced-course-design.md)
 explain the progression and the simple-loop shortcuts removed during design.
-The redesigned course is included in the 1.0.0 release.*
+The redesigned course is included in the 1.1.0 release.*
 
 | L07 · Turning rose | L08 · Tandem lanterns |
 | --- | --- |
@@ -369,10 +370,10 @@ xcodebuild -project Herbert.xcodeproj -scheme Herbert \
   -destination 'platform=macOS' CODE_SIGN_IDENTITY=- test
 ```
 
-**Status: 1.0.0.** Core tests, native Mac UI flows, and iOS compilation have been verified,
-and the App Store screenshot flows run in the iPhone and iPad simulators. Real-device testing
-remains open; the App Store submission and a notarized Mac build are still to come. See
-[verification details](docs/verification.md).
+**Status: 1.1.0.** Core tests and the Mac and iOS builds pass, and UI tests have run in the
+iPhone and iPad simulators. The full native Mac UI suite and real-device testing have not been
+rerun for 1.1.0. Herbot Bot 1.0.0 has been submitted to App Review; a notarized Mac build is
+still to come. See [verification details](docs/verification.md).
 
 ## How it is built
 

@@ -3,7 +3,7 @@
 This project follows semantic versioning. Versions below 1.0 are previews and may change
 save or API formats through documented migrations.
 
-## Unreleased
+## [1.1.0] - 2026-10-19
 
 - The Guide ends with the app version and build, such as Version 1.1.0 (15), on iPhone, iPad and
   Mac, so bug reports can quote it. The support page and bug report form point to it.
@@ -36,8 +36,20 @@ save or API formats through documented migrations.
   token budget is larger. Discovery reads published limits under common field names, such as
   DeepSeek's `max_output_tokens` and `context_window`; when a provider publishes none and rejects
   an oversized cap with its maximum, the request is sent again within that maximum.
+- An attempt whose output cap changed after a provider rejected it keeps that rejection in its
+  details, so the new cap is explained.
+- AI Battlefield stays responsive with very long answers. Raw provider output is shown as lazily
+  loaded text blocks in one continuous scroll, so a MiniMax answer that carries its whole reasoning
+  trace no longer stalls and draws blank; nothing is cut. Streaming updates are coalesced, so a busy
+  match redraws the dashboard far less often.
 - Accept `a():` for a procedure without parameters, matching the `a()` call already accepted.
   Punctuation stays free, so byte counts and the original `a:` form are unchanged.
+- Add 20 original lessons in four new chapters, bringing the course to 50 puzzles in ten chapters:
+  master lessons L31–L40 (Advanced fractal topology, Grandmaster recursive synthesis) and synthesis
+  lessons L41–L50 (Transformations and inverse paths, Layered recursive synthesis). Each has goals
+  and two hints in English, Chinese and Japanese and a reference program verified within its byte
+  limit. L01–L30, their IDs and saves are unchanged. The open-source edition now has 1,819 problems,
+  and AI Battlefield's original puzzle set covers all 50.
 - Add a 3D board style beside Modern and Classic. It draws the same board, trail and Herbert as a lit
   diorama: charcoal stone walls with soft shadows, glowing amber discs for targets (cyan once lit), holes
   for traps, a glowing cyan trail and a white robot whose face turns with him. A perspective camera orbits
@@ -48,10 +60,15 @@ save or API formats through documented migrations.
   editor, and the view opens nearly straight on when it is tall or square, which gives about a fifth
   larger cells than the diagonal. Enlarge board opens a stage that gives the window to the board, with
   turn, tilt, zoom, follow-Herbert, focus and reset buttons, progress, a read-only program preview and the
-  run controls beside or below it.
+  run controls beside or below it. Turning on follow-Herbert zooms in to at least 2.2×, since following
+  only helps when zoomed in.
 - Move the camera model into HerbertCore (`BoardCamera`, `BoardCameraRig`, `Board.focusRegion`) with unit
   tests, and extract the run controls and status line from the game screen so the stage can reuse them.
 - Localize the 3D controls, legend wording and guide tip in English, Simplified Chinese and Japanese.
+- Add the 6.3-inch iPhone App Store screenshots that App Store Connect now requires, keeping the
+  6.9-inch set as an optional upload, and answer App Review's information request in the review notes.
+- Add a bilingual analysis of what Herbert Benchmark measures and why it is hard for models.
+- Bump the app marketing version to 1.1.0 and build number to 15.
 
 ## [1.0.0] - 2026-10-13
 

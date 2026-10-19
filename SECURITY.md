@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-Security fixes currently target the latest `main` branch and the latest preview release.
-Older preview versions do not receive separate backports.
+Security fixes currently target the latest `main` branch and the latest release.
+Older versions do not receive separate backports.
 
 ## Report privately
 
