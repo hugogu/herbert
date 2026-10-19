@@ -14,6 +14,17 @@ final class CloudClientTests: XCTestCase {
         }
         XCTAssertNoThrow(try CloudClient(endpoint: XCTUnwrap(URL(string: "https://api.example.com"))))
     }
+    func testSubmissionIdentityIsStableAcrossRetriesAndChangesWithContent() throws {
+        let puzzle = try XCTUnwrap(ProblemCatalog.bundled().first)
+        let id = CloudPuzzle.submissionID(problem: puzzle, source: "s")
+        XCTAssertEqual(id.count, 64)
+        XCTAssertEqual(id, CloudPuzzle.submissionID(problem: puzzle, source: "s"))
+        XCTAssertNotEqual(id, CloudPuzzle.submissionID(problem: puzzle, source: "r"))
+        let changed = Problem(
+            id: puzzle.id, title: puzzle.title, author: puzzle.author,
+            byteLimit: puzzle.byteLimit + 1, rows: puzzle.rows)
+        XCTAssertNotEqual(id, CloudPuzzle.submissionID(problem: changed, source: "s"))
+    }
     func testPuzzleIdentityIncludesBoardLimitAndID() throws {
         let puzzle = try XCTUnwrap(ProblemCatalog.bundled().first)
         let version = CloudPuzzle.version(puzzle)
@@ -41,7 +52,7 @@ final class CloudClientTests: XCTestCase {
         let client = try CloudClient(
             endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
         let puzzle = try XCTUnwrap(ProblemCatalog.bundled().first)
-        let result = try await client.submit(problem: puzzle, source: "s", requestID: UUID(), token: "test-session")
+        let result = try await client.submit(problem: puzzle, source: "s", token: "test-session")
         XCTAssertTrue(result.accepted)
         XCTAssertEqual(result.points, 80)
     }
@@ -139,6 +150,8 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
             XCTAssertEqual(
                 Set(body?.keys.map { $0 } ?? []), Set(["source", "problem_id", "puzzle_version", "request_id"]))
             XCTAssertEqual(body?["source"] as? String, "s")
+            XCTAssertEqual(body?["request_id"] as? String,
+                CloudPuzzle.submissionID(problem: try! ProblemCatalog.bundled()[0], source: "s"))
             reply = #"{"accepted":true,"bytes":1,"points":80,"feedback":"Accepted"}"#
         }
         let response = HTTPURLResponse(

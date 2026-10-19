@@ -4,6 +4,10 @@ import HerbertCore
 
 public enum CloudPuzzle {
     public static let rulesVersion = "herbert-h-v1"
+    public static func submissionID(problem: Problem, source: String) -> String {
+        SHA256.hash(data: Data((version(problem) + "\n" + source).utf8))
+            .map { String(format: "%02x", $0) }.joined()
+    }
     public static func version(_ problem: Problem) -> String {
         let identity = "\(rulesVersion)\n\(problem.id)\n\(problem.byteLimit)\n" + problem.rows.joined(separator: "\n")
         return SHA256.hash(data: Data(identity.utf8)).map { String(format: "%02x", $0) }.joined()
