@@ -59,6 +59,16 @@ describe("native H compatibility", () => {
             "Expansion work limit",
         );
     });
+    it("reserves compression bonuses for complete answers", () => {
+        const rows = Array(25).fill(".".repeat(25));
+        rows[12] = "............uoo..........";
+        const partial = evaluate("rs", { id: 1, byteLimit: 20, rows });
+        expect(partial.accepted).toBe(false);
+        expect(partial.points).toBe(40);
+        expect(
+            evaluate("rss", { id: 1, byteLimit: 20, rows }).points,
+        ).toBeGreaterThanOrEqual(80);
+    });
     it("walls block and traps reset lights", () => {
         const rows = Array(25).fill(".".repeat(25));
         rows[12] = "............uo*o.........";

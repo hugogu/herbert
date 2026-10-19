@@ -63,3 +63,19 @@ test("local scripts force local storage even with an ambient Cloudflare environm
     assert.equal(scripts.deploy, undefined);
     assert.equal(scripts["migrate:remote"], undefined);
 });
+
+test("edge IP limiter namespaces are isolated and CPU budgets explicit", () => {
+    assert.equal(
+        new Set(configs.map((config) => config.ratelimits[0].namespace_id))
+            .size,
+        configs.length,
+    );
+    for (const config of configs) {
+        assert.equal(config.ratelimits[0].name, "IP_LIMITER");
+        assert.deepEqual(config.ratelimits[0].simple, {
+            limit: 120,
+            period: 60,
+        });
+        assert.equal(config.limits.cpu_ms, 1000);
+    }
+});

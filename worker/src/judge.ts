@@ -414,7 +414,9 @@ export function evaluate(source: string, puzzle: Puzzle): Evaluation {
         result.points =
             Math.round(
                 (lit.size / targets.size) *
-                    (100 - (20 * result.bytes) / puzzle.byteLimit) *
+                    (result.accepted
+                        ? 100 - (20 * result.bytes) / puzzle.byteLimit
+                        : 80) *
                     100,
             ) / 100;
     return result;
