@@ -9,6 +9,7 @@ save or API formats through documented migrations.
   `/models` doesn't publish it, instead of leaving the cap to the provider's default. DeepSeek, for
   one, defaults to 64K tokens in thinking mode but accepts 393,216, so unlimited answers burned out
   at 64K. A provider that rejects the request without stating its maximum gets the old behavior.
+  Rejections worded like MiniMax's "does not support max tokens > 524288" now count as stating it.
 - AI Battlefield reads the thinking effort levels DeepSeek advertises in `/models`
   (`effort.supported_levels`) and ranks them, so automatic thinking sends the highest, such as
   `reasoning_effort: max`, instead of leaving DeepSeek at its default effort. Levels outside the

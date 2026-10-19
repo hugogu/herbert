@@ -38,8 +38,9 @@ for example, generates 64K tokens in thinking mode when `max_tokens` is omitted,
 accepts 393,216. So when no maximum is advertised, an unlimited request asks for
 100,000,000 tokens (shown as “No token limit”), and a limited one for the remaining
 budget. A provider then applies the model's own maximum or rejects the request; when the
-rejection states its maximum, for example “supports at most 131072 completion tokens” or
-“the valid range of max_tokens is [1, 393216]”, the request is sent again within it, and
+rejection states its maximum, for example “supports at most 131072 completion tokens”,
+“the valid range of max_tokens is [1, 393216]” or MiniMax's “does not support max tokens >
+524288”, the request is sent again within it, and
 the entrant's later requests in the match use it. Only when a provider rejects that
 request without stating a maximum does Herbert fall back to the provider's default: Chat
 Completions omits the cap, and Anthropic Messages, which requires `max_tokens`, uses

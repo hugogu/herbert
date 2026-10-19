@@ -8,6 +8,10 @@ final class ModelOutputLimitTests: XCTestCase {
     private let gatewayRejection =
         #"{"error":{"code":"400","message":"Param Incorrect","param":"max_tokens is too large: 390861. This model supports at most 131072 completion tokens, whereas you provided 390861.","type":""}}"#
 
+    // MiniMax's own wording, with its documented 512K maximum for M3.1-Flash-Preview.
+    private let minimaxRejection =
+        #"{"type":"error","error":{"type":"invalid_request_error","message":"invalid params, model[MiniMax-M3.1-Flash-Preview] does not support max tokens > 524288 (2013)"}}"#
+
     private func problems() throws -> [Problem] {
         let first = try XCTUnwrap(ProblemCatalog.bundled().first)
         return [first, Problem(id: 90002, title: "Same board", author: "Test", byteLimit: 1, rows: first.rows)]
@@ -73,6 +77,17 @@ final class ModelOutputLimitTests: XCTestCase {
                 32_768
             ),
             ("max_completion_tokens must be <= 8,192", 8192),
+            (minimaxRejection, 524_288),
+            (
+                #"{"base_resp":{"status_code":2013,"status_msg":"invalid params, model[MiniMax-M3] does not support max tokens > 524288 (2013)"}}"#,
+                524_288
+            ),
+            (#"{"error":{"message":"Range of max_tokens should be (0, 245760]"}}"#, 245_760),
+            (#"{"error":{"message":"max_tokens must be in [1, 65537)"}}"#, 65_536),
+            (#"{"error":{"message":"max_tokens must not exceed 8192"}}"#, 8192),
+            (#"{"error":{"message":"The maximum value for `max_tokens` is 32768."}}"#, 32_768),
+            // Another parameter's range in the same message is not an output limit.
+            (#"{"error":{"message":"temperature must be in (0, 1], max_tokens must be in [1, 4096]"}}"#, 4096),
             (#"{"error":{"message":"assistant content is empty at index 2","type":"invalid_request_error"}}"#, nil),
             (
                 #"{"error":{"code":402,"message":"This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 1234."}}"#,
@@ -115,20 +130,25 @@ final class ModelOutputLimitTests: XCTestCase {
     }
 
     func testUnlimitedRequestAsksForEverythingAndKeepsTheStatedMaximum() async throws {
-        // DeepSeek defaults to 64K in thinking mode when max_tokens is omitted, but accepts up to 393,216.
-        let rejection = AIHTTPError(
-            status: 400,
-            providerResponse:
-                #"{"error":{"message":"Invalid max_tokens value, the valid range of max_tokens is [1, 393216]","type":"invalid_request_error"}}"#
-        )
-        let client = ScriptedLimitClient([.reject(rejection)])
-        let result = try await BattlefieldEngine(client: client).run(
-            configuration: CompetitionConfiguration(), problems: problems(), participants: [participant()]
-        ) { _ in }
-        let caps = await client.caps
-        XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, 393_216, 393_216])
-        XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
-        XCTAssertEqual(result.entrants[0].answers[0].attempts.map(\.requestedMaxOutputTokens), [393_216])
+        // Both stop at 64K when the cap is omitted: DeepSeek in thinking mode, and MiniMax-M3.1-Flash-Preview.
+        let rejections: [(body: String, maximum: Int)] = [
+            (
+                #"{"error":{"message":"Invalid max_tokens value, the valid range of max_tokens is [1, 393216]","type":"invalid_request_error"}}"#,
+                393_216
+            ),
+            (minimaxRejection, 524_288),
+        ]
+        for rejection in rejections {
+            let client = ScriptedLimitClient([.reject(AIHTTPError(status: 400, providerResponse: rejection.body))])
+            let result = try await BattlefieldEngine(client: client).run(
+                configuration: CompetitionConfiguration(), problems: problems(), participants: [participant()]
+            ) { _ in }
+            let caps = await client.caps
+            XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, rejection.maximum, rejection.maximum])
+            XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
+            XCTAssertEqual(
+                result.entrants[0].answers[0].attempts.map(\.requestedMaxOutputTokens), [rejection.maximum])
+        }
     }
 
     func testGuessedCapFallsBackToTheProviderDefaultWhenNoMaximumIsStated() async throws {

@@ -192,9 +192,10 @@ extension ProviderDiagnostics {
         if let object = try? JSONSerialization.jsonObject(with: Data(detail.utf8)) {
             let target = (object as? [[String: Any]])?.first ?? object as? [String: Any]
             let error = target?["error"] as? [String: Any]
+            let status = target?["base_resp"] as? [String: Any]  // MiniMax's own envelope
             // Only inspect the provider error text, never retained model output.
-            text = [error?["message"], error?["param"], target?["message"]].compactMap { $0 as? String }
-                .joined(separator: "\n")
+            text = [error?["message"], error?["param"], target?["message"], status?["status_msg"]]
+                .compactMap { $0 as? String }.joined(separator: "\n")
         } else {
             text = detail
         }
@@ -206,9 +207,14 @@ extension ProviderDiagnostics {
         let number = #"(\d{1,3}(?:,\d{3})+|\d+)"#
         let patterns: [(pattern: String, adjustment: Int)] = [
             (#"(?i)at most\s+`?"# + number, 0),  // supports at most 131072 completion tokens
-            (#"\[\s*\d+\s*,\s*"# + number + #"\s*\]"#, 0),  // the valid range of max_tokens is [1, 393216]
+            (#"[\[(]\s*\d+\s*,\s*"# + number + #"\s*\]"#, 0),  // the valid range of max_tokens is [1, 393216]
+            (#"[\[(]\s*\d+\s*,\s*"# + number + #"\s*\)"#, -1),  // an exclusive upper bound: [1, 65537)
             (#"(?i)less than or equal to\s+`?"# + number, 0),
             (#"(?:<=|≤)\s*`?"# + number, 0),
+            // MiniMax: model[MiniMax-M3] does not support max tokens > 524288 (2013)
+            (#"(?i)max(?:imum)?[ _]?(?:(?:completion|output|new)[ _]?)?tokens\W{0,2}\s*>\s*`?"# + number, 0),
+            (#"(?i)(?:not|cannot|can't) exceed\s+`?"# + number, 0),
+            (#"(?i)maximum(?: allowed)?(?: value)?(?: for \S+)? is\s+`?"# + number, 0),
             (#"(?i)"# + number + #",?\s+which is the maximum"#, 0),  // max_tokens: 100000 > 64000, which is the maximum
             (#"(?i)to\s+"# + number + #"\s*\(exclusive\)"#, -1),  // from 1 (inclusive) to 65537 (exclusive)
         ]
@@ -219,7 +225,8 @@ extension ProviderDiagnostics {
                 return Int(text[range].replacingOccurrences(of: ",", with: "")).map { $0 + item.adjustment }
             }
         }
-        return limits.filter { $0 > 0 }.min()
+        // Ranges of other parameters, such as top_p (0, 1], are far below any model's output limit.
+        return limits.filter { $0 >= 256 }.min()
     }
 }
 
