@@ -1,13 +1,13 @@
 INFORMATION FOR APP REVIEW (Guideline 2.1)
 
 1. SCREEN RECORDING
-A physical-iPhone recording of the 1.0.0 workflow is attached to our App Store Connect reply. It shows launch from the Home Screen, solving L01, correcting L02, Problems, Guide, Progress, and AI Battlefield (provider/model setup, an L01-L03 match, a judged answer, stopping, history and sharing). iOS hides the API key in secure fields; waiting and model-list browsing were trimmed. Version 2.0.0 adds the optional leaderboard described below. There are no in-app purchases or paid features.
+A physical-iPhone recording of the 1.0.0 workflow is attached to our App Store Connect reply. It shows launch from the Home Screen, solving L01, correcting L02, Problems, Guide, Progress, and AI Battlefield (provider/model setup, an L01-L03 match, a judged answer, stopping, history and sharing). iOS hides the API key in secure fields; waiting and model-list browsing were trimmed. Version 2.0.0 adds the optional leaderboard described below. No in-app purchases.
 
 2. PURPOSE AND AUDIENCE
-Herbot Bot is an educational programming puzzle game for anyone learning to program, from older children and students to teachers and professional developers. Players guide a robot to light every target on a 25 x 25 board by writing very short programs in H, a language with three commands: s (forward), l (turn left) and r (turn right). Fifty original puzzles in ten chapters introduce sequencing, procedures, parameters and recursion, ideas that many learners find hard to grasp from text alone. Every puzzle has a goal and two optional hints, programs run step by step with immediate visual feedback, and the game rewards the shortest correct program. It works fully offline, without an account, ads, tracking or purchases.
+Herbot Bot is an educational programming puzzle game for anyone learning to program, from older children and students to teachers and professional developers. Players guide a robot to light every target on a 25 x 25 board by writing very short programs in H, a language with three commands: s (forward), l (turn left) and r (turn right). Fifty original puzzles introduce procedures, parameters and recursion. Every puzzle has a goal and two optional hints, programs run step by step with immediate visual feedback, and the game rewards the shortest correct program. It works fully offline, without an account, ads, tracking or purchases.
 
 3. HOW TO USE THE MAIN FEATURES
-No login, setup or sample files are required.
+Offline play requires no login or setup.
 - Problems: tap "Take the first step" to open L01, type s (or tap the s key) and tap Run; the puzzle is solved. L02 is solved by: rsslsslss. Each puzzle shows its goal above the board; "Show the next hint" reveals a hint, and "Rules" explains H.
 - Guide: the second tab explains the language with examples.
 - My > Progress: lists solved puzzles; Export and Import save and restore a JSON backup.
@@ -21,7 +21,9 @@ The puzzle game uses no external service. Only the optional AI Battlefield conta
 None. Features and content are the same in every region; only the interface language follows the device (English, Simplified Chinese or Japanese).
 
 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-Not applicable. The app does not operate in a regulated industry and contains no protected third-party material. All 50 puzzles, texts and artwork are original and published under the MIT license at https://github.com/hugogu/herbert. The game independently implements the publicly documented rules of the Herbert programming challenge and is not affiliated with Wild Noodle or Microsoft.
+Not applicable. The app does not operate in a regulated industry and contains no protected third-party material. All 50 puzzles, texts and artwork are original and published under the MIT license at https://github.com/hugogu/herbert. It independently implements Herbert rules and is not affiliated with Wild Noodle or Microsoft.
 
 7. OPTIONAL LEADERBOARD (2.0.0)
 When a service URL is configured, My > Account provides Sign in with Apple, nickname editing and account deletion. Puzzle pages offer explicit solution uploads; the server replays programs to verify scores. Only nicknames and verified scores/metrics are public, not solution programs. Offline play still needs no account.
+
+Public nicknames are screened. Ranking-row menus offer Report nickname (email draft to support) and Hide player on this device, with an undo list. Operators can auditably reset names, hide scores or block users.
