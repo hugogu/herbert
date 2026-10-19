@@ -83,3 +83,5 @@
 - At 50 originals, binding an ID and version per puzzle exceeds D1’s 100-parameter limit once other arguments are added. Aggregate ranking queries bind the canonical pairs as one JSON value and expand it with `json_each`; keep Worker parity fixtures and runtime catalog checks aligned with the native catalog.
 
 - The `obscenity` filter ships an ESM wrapper over CommonJS. Worker Vitest needs `test.deps.optimizer.ssr` to bundle it, matching Wrangler; otherwise the wrapper imports an undefined default. Verify both the real Wrangler startup and workerd test suite.
+
+- Ad-hoc sandboxed macOS previews lack an application-identifier entitlement: Data Protection Keychain add/delete return `errSecMissingEntitlement` (-34018), while a missing read can return item-not-found. Preserve readable legacy keys and fall back only for that entitlement error on macOS. `scripts/check_keychain_macos.sh` tests the real helper with isolated throwaway items and the DMG entitlements, without Mac UI automation.
