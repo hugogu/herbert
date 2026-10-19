@@ -18,6 +18,11 @@ struct Input: Codable {
 let references = try JSONDecoder().decode(
     [Reference].self,
     from: Data(contentsOf: URL(fileURLWithPath: "Tests/HerbertCoreTests/Fixtures/original-solutions.json")))
+let passThroughPrograms = [13, 26].map { arity in
+    let parameters = (0..<arity).map { String(UnicodeScalar(65 + $0)!) }.joined(separator: ",")
+    let initial = Array(repeating: "s", count: arity).joined(separator: ",")
+    return "a(\(parameters)):a(\(parameters))\na(\(initial))"
+}
 let puzzles = try ProblemCatalog.bundled()
 var results: [Input] = []
 for reference in references {
@@ -25,7 +30,7 @@ for reference in references {
     for source in [reference.source] + (reference.alternateSources ?? []) + [
         "s", "a:sa\na", "a:a\na", "b(X):b(Xs)\nb(s)",
         "a(A):a(" + Array(repeating: "A-A", count: 10).joined(separator: "+") + "+A)\na(1)",
-    ] {
+    ] + passThroughPrograms {
         var session = try GameSession(problem: problem)
         do {
             try session.prepare(source: source)

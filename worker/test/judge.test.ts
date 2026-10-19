@@ -71,6 +71,18 @@ describe("native H compatibility", () => {
             );
         },
     );
+    it.each([13, 26])(
+        "bounds pass-through recursion with %i parameters",
+        (arity) => {
+            const parameters = Array.from({ length: arity }, (_, i) =>
+                String.fromCharCode(65 + i),
+            ).join(",");
+            const initial = Array(arity).fill("s").join(",");
+            expect(() => [
+                ...commands(`a(${parameters}):a(${parameters})\na(${initial})`),
+            ]).toThrow("Expansion work limit");
+        },
+    );
     it("reserves compression bonuses for complete answers", () => {
         const rows = Array(25).fill(".".repeat(25));
         rows[12] = "............uoo..........";

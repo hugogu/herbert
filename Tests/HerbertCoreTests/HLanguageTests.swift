@@ -23,6 +23,18 @@ final class HLanguageTests: XCTestCase {
             XCTAssertEqual(error.localizedDescription, HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
         }
     }
+    func testPassThroughCallsChargeTheirArity() throws {
+        for arity in [13, 26] {
+            let parameters = (0..<arity).map { String(UnicodeScalar(65 + $0)!) }.joined(separator: ",")
+            let initial = Array(repeating: "s", count: arity).joined(separator: ",")
+            var machine = HMachine(
+                program: try HProgram.compile("a(\(parameters)):a(\(parameters))\na(\(initial))"),
+                expansionLimit: 1000, expansionWorkLimit: 100)
+            XCTAssertThrowsError(try machine.nextCommand()) { error in
+                XCTAssertEqual(error.localizedDescription, HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
+            }
+        }
+    }
     func testExpansionWorkErrorsAreTranslated() {
         let key = "命令展开的累计工作量达到上限，请简化程序。"
         XCTAssertEqual(HerbertStrings.text(key, language: "en"), "Expansion work limit")

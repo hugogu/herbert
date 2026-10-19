@@ -63,7 +63,7 @@ source. The Worker loads its own canonical board and byte limit, compiles and ru
 the program, and calculates verified points: partial answers earn 80 × target coverage; only accepted answers earn the length bonus, 80 + 20 × (1 − bytes / limit). Migration 0004 recalculates legacy partial scores. AI Battlefield keeps its separately versioned benchmark scoring policy. Client scores, target
 counts, user IDs and timestamps are ignored. Limits match the native judge:
 16 KiB source, 64 argument nesting, 128 expanded nesting, 4,096 frames, one million
-expansions/steps, bounded pending memory and ten million cumulative expansion-work units in both Swift and the Worker. Copying and validation consume this budget across the entire run, including tail calls. The 76 accepted native differential fixtures peak at 1,784 units (over 5,600× headroom); the reported growing-argument attack is covered in both VMs. Local timing is diagnostic only, not a deployed Worker CPU guarantee. Walls leave the robot in place;
+expansions/steps, bounded pending memory and two million cumulative expansion-work units in both Swift and the Worker. Argument resolution, callee arity, copying and validation consume this budget across the entire run, including pass-through tail calls. The 76 accepted native differential fixtures peak at 3,070 units (over 650× headroom); the reported growing-argument attack is covered in both VMs. Local timing is diagnostic only, not a deployed Worker CPU guarantee. Walls leave the robot in place;
 traps clear all lit targets. Success stops execution immediately.
 
 Puzzle identity is SHA-256 of `herbert-h-v1\n{id}\n{byteLimit}\n{rows joined by \n}`.
