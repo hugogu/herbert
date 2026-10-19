@@ -48,6 +48,7 @@ struct BattlefieldDashboard: View {
     @State private var inspecting = false
     @State private var showingProgressHelp = false
     @State private var trial: BattlefieldTrial?
+    @State private var columnOrder: [UUID] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -186,7 +187,8 @@ struct BattlefieldDashboard: View {
     }
 
     private var progressTable: some View {
-        let ranking = result.ranked
+        // Keeping the order last shown also holds tied columns in place when a retry resumes a finished match.
+        let ranking = result.ranked(keepingTiesIn: columnOrder)
         let answers = Dictionary(
             uniqueKeysWithValues: ranking.map { entrant in
                 (entrant.id, Dictionary(uniqueKeysWithValues: entrant.answers.map { ($0.id, $0) }))
@@ -244,6 +246,7 @@ struct BattlefieldDashboard: View {
                 }
             }
         }.panel()
+            .onChange(of: ranking.map(\.id), initial: true) { _, order in columnOrder = order }
     }
 
     private func modelHeader(_ entrant: EntrantResult, rank: Int) -> some View {

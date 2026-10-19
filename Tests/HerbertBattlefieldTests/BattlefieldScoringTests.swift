@@ -109,6 +109,69 @@ final class BattlefieldScoringTests: XCTestCase {
         XCTAssertEqual(result.score(for: result.entrants[1]), 94)
     }
 
+    private func entrants(_ count: Int) -> [Entrant] {
+        (0..<count).map {
+            Entrant(
+                provider: ProviderConfiguration(kind: .compatible), preset: ModelPreset(model: AIModel(id: "m\($0)")))
+        }
+    }
+
+    private func streaming(_ tokens: Int, number: Int = 1) -> AnswerAttempt {
+        var attempt = AnswerAttempt(number: number)
+        attempt.usage = TokenUsage(output: tokens)
+        return attempt
+    }
+
+    func testRunningColumnsMoveOnlyWhenScoresChange() throws {
+        let problem = puzzle()
+        let lineup = entrants(3)
+        let ids = lineup.map(\.id)
+        var result = CompetitionResult(
+            configuration: CompetitionConfiguration(), problems: [problem], entrants: lineup)
+        var shown = result.ranked(keepingTiesIn: []).map(\.id)
+        XCTAssertEqual(shown, ids)
+        for tokens in [[300, 200, 100], [100, 300, 200]] {
+            for (index, total) in tokens.enumerated() {
+                result.entrants[index].answers[0].status = .requesting
+                result.entrants[index].answers[0].attempts = [streaming(total)]
+            }
+            XCTAssertNotEqual(result.ranked.map(\.id), ids)
+            shown = result.ranked(keepingTiesIn: shown).map(\.id)
+            XCTAssertEqual(shown, ids)
+        }
+        result.entrants[2].answers[0].attempts = [try attempt("s", problem: problem, tokens: 500)]
+        shown = result.ranked(keepingTiesIn: shown).map(\.id)
+        XCTAssertEqual(shown, [ids[2], ids[0], ids[1]])
+        // A later tie stays behind the entrant that reached the score first, despite entrant order and fewer tokens.
+        result.entrants[1].answers[0].attempts = [try attempt("s", problem: problem, tokens: 50)]
+        shown = result.ranked(keepingTiesIn: shown).map(\.id)
+        XCTAssertEqual(shown, [ids[2], ids[1], ids[0]])
+        result.finish(.completed)
+        XCTAssertEqual(result.ranked(keepingTiesIn: shown).map(\.id), [ids[1], ids[2], ids[0]])
+        XCTAssertEqual(result.ranked(keepingTiesIn: shown).map(\.id), result.ranked.map(\.id))
+    }
+
+    func testRetryResumingAFinishedMatchKeepsTiedColumnsInPlace() throws {
+        let problem = puzzle()
+        let lineup = entrants(3)
+        let ids = lineup.map(\.id)
+        var result = CompetitionResult(
+            configuration: CompetitionConfiguration(), problems: [problem], entrants: lineup)
+        for (index, tokens) in [300, 200, 100].enumerated() {
+            result.entrants[index].answers[0].status = .failed
+            result.entrants[index].answers[0].attempts = [try attempt("z", problem: problem, tokens: tokens)]
+        }
+        result.finish(.completed)
+        let shown = result.ranked(keepingTiesIn: []).map(\.id)
+        XCTAssertEqual(shown, [ids[2], ids[1], ids[0]])
+        result.resume()
+        result.entrants[2].answers[0].status = .requesting
+        result.entrants[2].answers[0].attempts.append(streaming(1000, number: 2))
+        XCTAssertEqual(result.ranked(keepingTiesIn: shown).map(\.id), shown)
+        // Without the order last shown, the tied columns would jump to entrant order as the retry starts.
+        XCTAssertEqual(result.ranked(keepingTiesIn: []).map(\.id), ids)
+    }
+
     func testEngineAwardsPartialPointsAfterRetriesAndReturnsScoreFeedback() async throws {
         let problem = puzzle()
         let client = ScriptedAI(behavior: .correct)
