@@ -16,7 +16,7 @@ private struct BattlefieldTrial: Hashable {
     let source: String
 }
 
-private struct BattlefieldRetryAnchor: PreferenceKey {
+private struct BattlefieldAnswerActionAnchor: PreferenceKey {
     static var defaultValue: Anchor<CGRect>? { nil }
     static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
         value = nextValue() ?? value
@@ -296,12 +296,12 @@ struct BattlefieldDashboard: View {
                 resultID: result.id, entrant: entrant, answer: answer, problem: problem,
                 scoring: result.scoringPolicy)
         } label: {
-            answerSummary(answer, attempt: attempt, score: score, showsRetry: showsRetry)
+            answerSummary(answer, attempt: attempt, score: score, showsAction: showsRetry)
                 .contentShape(Rectangle())
         }.buttonStyle(.plain)
             .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
             .accessibilityLabel(Text(label))
-            .overlayPreferenceValue(BattlefieldRetryAnchor.self) { anchor in
+            .overlayPreferenceValue(BattlefieldAnswerActionAnchor.self) { anchor in
                 if let anchor {
                     GeometryReader { geometry in
                         Button {
@@ -328,16 +328,16 @@ struct BattlefieldDashboard: View {
         String(program.prefix(180)).replacingOccurrences(of: "\n", with: " ⏎ ")
     }
 
-    private func answerSummary(_ answer: ProblemAnswer, attempt: AnswerAttempt?, score: String, showsRetry: Bool)
+    private func answerSummary(_ answer: ProblemAnswer, attempt: AnswerAttempt?, score: String, showsAction: Bool)
         -> some View
     {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: answer.status.symbol)
                 Text(answer.status.title).font(.caption.bold()).lineLimit(1)
-                if showsRetry {
+                if showsAction {
                     Color.clear.frame(width: 24, height: 16).accessibilityHidden(true)
-                        .anchorPreference(key: BattlefieldRetryAnchor.self, value: .bounds) { $0 }
+                        .anchorPreference(key: BattlefieldAnswerActionAnchor.self, value: .bounds) { $0 }
                 }
                 Spacer(minLength: 4)
                 if let attempt {
