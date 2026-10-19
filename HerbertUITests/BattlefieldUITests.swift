@@ -283,10 +283,10 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertFalse(app.descendants(matching: .any)["problemChoice-10001"].firstMatch.exists)
         app.descendants(matching: .any)["problemChoice-10012"].firstMatch.battlefieldTap()
         XCTAssertFalse(app.descendants(matching: .any)["problemChoice-10012"].firstMatch.exists)
-        app.buttons["30 original puzzles"].battlefieldTap()
+        app.buttons["50 original puzzles"].battlefieldTap()
         XCTAssertTrue(app.descendants(matching: .any)["problemChoice-10001"].firstMatch.waitForExistence(timeout: 5))
         app.buttons["Close"].battlefieldTap()
-        XCTAssertTrue(app.buttons["chooseBattlefieldProblems"].label.contains("30 puzzles selected"))
+        XCTAssertTrue(app.buttons["chooseBattlefieldProblems"].label.contains("50 puzzles selected"))
         app.terminate()
     }
 
@@ -294,7 +294,7 @@ final class BattlefieldUITests: XCTestCase {
     func testNewMatchStartsFromThePreviousEntrantsPuzzlesAndSettings() {
         var app = launch()
         openSection("AI Battlefield", in: app)
-        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("30 puzzles selected"))
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("50 puzzles selected"))
         let skipped = toggle("entrant-fixture-2", in: app)
         XCTAssertTrue(skipped.waitForExistence(timeout: 5))
         skipped.battlefieldTap()
@@ -626,7 +626,7 @@ final class BattlefieldUITests: XCTestCase {
     func testParallelMatchRetryNativeJudgingHistoryAndShareImage() {
         var app = launch(accounting: true)
         openSection("AI Battlefield", in: app)
-        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("30 puzzles selected"))
+        XCTAssertTrue(reveal("chooseBattlefieldProblems", in: app).label.contains("50 puzzles selected"))
 
         reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
         app.buttons["clearBattlefieldProblems"].battlefieldTap()
