@@ -6,8 +6,9 @@ on iPhone, iPad and Mac.
 ## Contact
 
 - Report a problem or suggest an idea in [GitHub Issues](https://github.com/hugogu/herbert/issues/new/choose).
-  Include the device, operating system and app version, the interface language and the steps that
-  lead to the problem. Leave out personal information and API keys.
+  Include the device, operating system and app version (shown at the end of the Guide), the
+  interface language and the steps that lead to the problem. Leave out personal information and
+  API keys.
 - Email [hugogu@outlook.com](mailto:hugogu@outlook.com) if you prefer not to use GitHub.
 - Report security issues privately as described in [SECURITY.md](SECURITY.md).
 - Privacy questions are answered in [PRIVACY.md](PRIVACY.md).
