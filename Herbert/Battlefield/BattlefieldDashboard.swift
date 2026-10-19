@@ -23,6 +23,22 @@ private struct BattlefieldAnswerActionAnchor: PreferenceKey {
     }
 }
 
+/// An answer cell's hit area without the target of the action button drawn over it. iOS hit testing weighs the
+/// size of a touch, so without this hole the cell takes taps aimed at the button.
+private struct BattlefieldAnswerHitShape: Shape {
+    static let actionTarget: CGFloat = 44
+    var actionSlot: CGRect?
+    func path(in rect: CGRect) -> Path {
+        var path = Path(rect)
+        if let actionSlot {
+            let side = Self.actionTarget
+            path.addRect(
+                CGRect(x: actionSlot.midX - side / 2, y: actionSlot.midY - side / 2, width: side, height: side))
+        }
+        return path
+    }
+}
+
 struct BattlefieldDashboard: View {
     @EnvironmentObject private var battlefield: BattlefieldModel
     @EnvironmentObject private var store: AppStore
@@ -297,7 +313,12 @@ struct BattlefieldDashboard: View {
                 scoring: result.scoringPolicy)
         } label: {
             answerSummary(answer, attempt: attempt, score: score, showsAction: showsRetry)
-                .contentShape(Rectangle())
+                .backgroundPreferenceValue(BattlefieldAnswerActionAnchor.self) { anchor in
+                    GeometryReader { geometry in
+                        Color.clear.contentShape(
+                            BattlefieldAnswerHitShape(actionSlot: anchor.map { geometry[$0] }), eoFill: true)
+                    }
+                }
         }.buttonStyle(.plain)
             .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
             .accessibilityLabel(Text(label))
@@ -308,7 +329,11 @@ struct BattlefieldDashboard: View {
                             battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
                         } label: {
                             Image(systemName: retryPending ? "clock.arrow.circlepath" : "arrow.clockwise")
-                                .frame(width: 24, height: 24).contentShape(Rectangle())
+                                .frame(
+                                    width: BattlefieldAnswerHitShape.actionTarget,
+                                    height: BattlefieldAnswerHitShape.actionTarget
+                                )
+                                .contentShape(Rectangle())
                         }.buttonStyle(.plain).foregroundStyle(Palette.mint)
                             .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
                             .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
@@ -335,16 +360,17 @@ struct BattlefieldDashboard: View {
             HStack(spacing: 6) {
                 Image(systemName: answer.status.symbol)
                 Text(answer.status.title).font(.caption.bold()).lineLimit(1)
-                if showsAction {
-                    Color.clear.frame(width: 24, height: 16).accessibilityHidden(true)
-                        .anchorPreference(key: BattlefieldAnswerActionAnchor.self, value: .bounds) { $0 }
-                }
                 Spacer(minLength: 4)
                 if let attempt {
                     Text(L10n.text("第 %ld 次尝试", attempt.id)).font(.caption2.monospaced()).foregroundStyle(
                         Palette.muted)
                 }
                 Text(score).font(.caption.monospaced().bold())
+                // At the trailing end, the action's touch target stays clear of the middle of the cell.
+                if showsAction {
+                    Color.clear.frame(width: 24, height: 16).accessibilityHidden(true)
+                        .anchorPreference(key: BattlefieldAnswerActionAnchor.self, value: .bounds) { $0 }
+                }
             }.foregroundStyle(answer.status.color)
             HStack(spacing: 6) {
                 if let retryAt = answer.retryAt {

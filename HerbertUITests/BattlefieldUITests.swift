@@ -134,8 +134,10 @@ final class BattlefieldUITests: XCTestCase {
         let retry = reveal("retry-fixture-2-10001", in: app)
         let answerFrame = app.buttons["answer-fixture-2-10001"].frame
         XCTAssertEqual(answerFrame.width, 248, accuracy: 2)
+        // A full touch target at the trailing end of the first line, clear of the middle of the cell.
+        XCTAssertEqual(retry.frame.width, 44, accuracy: 1)
         XCTAssertLessThan(retry.frame.midY, answerFrame.midY)
-        XCTAssertLessThan(retry.frame.maxX, answerFrame.midX)
+        XCTAssertGreaterThan(retry.frame.minX, answerFrame.midX)
         retry.battlefieldTap()
         let accepted = XCTNSPredicateExpectation(
             predicate: NSPredicate(format: "label CONTAINS %@", "Accepted"),

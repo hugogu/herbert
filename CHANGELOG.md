@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield's retry button works on iPad and iPhone. It moves to the trailing end of an answer's
+  first line with a 44 pt target; before, the answer cell took every tap aimed at it.
 - AI Battlefield model headers and share images show average output speed in place of the input
   cache rate: output tokens, reasoning included, per second of the model's total attempt time.
   It updates live during a match, so models can be compared on how fast they answer.
