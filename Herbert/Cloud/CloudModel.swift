@@ -108,11 +108,14 @@
         func totalLeaderboard() async throws -> Leaderboard? {
             #if DEBUG
                 if Self.previewAccount {
+                    let count = try ProblemCatalog.bundled().count
                     return try JSONDecoder().decode(
                         Leaderboard.self,
                         from: Data(
-                            #"{"puzzle_count":30,"entries":[{"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"percentage":2.67,"solved":1}]}"#
-                                .utf8))
+                            """
+                            {"puzzle_count":\(count),"entries":[{"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"percentage":\(80 / Double(count)),"solved":1}]}
+                            """
+                            .utf8))
                 }
             #endif
             guard let client else { return nil }

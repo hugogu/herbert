@@ -267,6 +267,41 @@ describe("Worker + real D1 bindings", () => {
         expect(bests.entries).toHaveLength(1);
         expect(bests.entries[0].bytes).toBe(4);
     });
+    it("ranks the newest puzzle without exceeding D1's 100 bound-parameter limit", async () => {
+        const token = await user();
+        await submit(token);
+        const puzzle = puzzles[puzzles.length - 1];
+        await bindings.DB.prepare(
+            "UPDATE submissions SET problem_id=?,puzzle_version=?",
+        )
+            .bind(puzzle.id, await hash(puzzleIdentity(puzzle)))
+            .run();
+        const prepare = bindings.DB.prepare.bind(bindings.DB);
+        const counts: number[] = [];
+        vi.spyOn(bindings.DB, "prepare").mockImplementation((sql) => {
+            const statement = prepare(sql);
+            const bind = statement.bind.bind(statement);
+            statement.bind = (...values: unknown[]) => {
+                counts.push(values.length);
+                if (values.length > 100)
+                    throw new Error("D1 bound parameter limit exceeded");
+                return bind(...values);
+            };
+            return statement;
+        });
+        const bests = await request("/v1/problems/bests");
+        expect(bests.status).toBe(200);
+        expect(await bests.json()).toMatchObject({
+            entries: [{ problem_id: puzzle.id, bytes: 1 }],
+        });
+        const ranking = await request("/v1/leaderboard");
+        expect(ranking.status).toBe(200);
+        expect(await ranking.json()).toMatchObject({
+            puzzle_count: puzzles.length,
+            entries: [{ points: 80, solved: 1 }],
+        });
+        expect(Math.max(...counts)).toBeLessThanOrEqual(100);
+    });
     it("breaks problem ranking ties by answer length and stable user ID", async () => {
         for (const name of ["c", "b", "a"]) await submit(await user(name));
         // Equal-score length ties can occur at zero and after score rounding.
@@ -358,7 +393,9 @@ describe("Worker + real D1 bindings", () => {
         const board = await (
             await request("/v1/leaderboard")
         ).json<{ entries: { percentage: number }[] }>();
-        expect(board.entries[0].percentage).toBe(2.67);
+        expect(board.entries[0].percentage).toBe(
+            Math.round((80 / puzzles.length) * 100) / 100,
+        );
     });
     it("keeps one best score per puzzle and rejects stale boards", async () => {
         const token = await user();

@@ -282,9 +282,12 @@ async function route(request: Request, env: Env): Promise<Response> {
     }
     if (method === "GET" && path === "/v1/problems/bests") {
         const puzzles = await catalog;
-        const valid = puzzles.map(() => "(?,?)").join(",");
+        const valid = JSON.stringify(
+            puzzles.map((p) => [p.id, p.puzzle_version]),
+        );
         const data = await env.DB.prepare(
-            `WITH current_puzzles(problem_id,puzzle_version) AS (VALUES ${valid})
+            `WITH current_puzzles(problem_id,puzzle_version) AS (
+              SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?))
             SELECT s.problem_id,s.puzzle_version,MIN(s.bytes) bytes
             FROM submissions s JOIN current_puzzles p
               ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version
@@ -292,10 +295,7 @@ async function route(request: Request, env: Env): Promise<Response> {
             WHERE s.accepted=1 AND s.hidden_at IS NULL AND s.rules_version=? AND u.status='active'
             GROUP BY s.problem_id,s.puzzle_version ORDER BY s.problem_id`,
         )
-            .bind(
-                ...puzzles.flatMap((p) => [p.id, p.puzzle_version]),
-                RULES_VERSION,
-            )
+            .bind(valid, RULES_VERSION)
             .all();
         return json({ rules_version: RULES_VERSION, entries: data.results });
     }
@@ -335,20 +335,18 @@ async function route(request: Request, env: Env): Promise<Response> {
             Math.min(100, Number(url.searchParams.get("limit")) || 50),
         );
         const puzzles = await catalog;
-        const valid = puzzles.map(() => "(?,?)").join(",");
+        const valid = JSON.stringify(
+            puzzles.map((p) => [p.id, p.puzzle_version]),
+        );
         const data = await env.DB.prepare(
-            `WITH current_puzzles(problem_id,puzzle_version) AS (VALUES ${valid}),
+            `WITH current_puzzles(problem_id,puzzle_version) AS (
+              SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?)),
       best AS (SELECT s.user_id,s.problem_id,MAX(s.points) points,MAX(s.accepted) accepted FROM submissions s JOIN current_puzzles p
       ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version WHERE s.hidden_at IS NULL AND s.rules_version=? GROUP BY s.user_id,s.problem_id),
       totals AS (SELECT u.user_id,u.display_name,ROUND(SUM(b.points),2) points,SUM(b.accepted) solved FROM best b JOIN users u ON u.user_id=b.user_id WHERE u.status='active' GROUP BY u.user_id)
       SELECT ROW_NUMBER() OVER(ORDER BY points DESC,solved DESC,user_id) rank,*,ROUND(points/?,2) percentage FROM totals ORDER BY points DESC,solved DESC,user_id LIMIT ?`,
         )
-            .bind(
-                ...puzzles.flatMap((p) => [p.id, p.puzzle_version]),
-                RULES_VERSION,
-                puzzles.length,
-                Math.floor(limit),
-            )
+            .bind(valid, RULES_VERSION, puzzles.length, Math.floor(limit))
             .all();
         return json({
             rules_version: RULES_VERSION,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -51,7 +51,19 @@ test(
             assert.equal(response.headers.get("Cache-Control"), "no-store");
             const catalog = await response.json();
             assert.equal(catalog.rules_version, "herbert-h-v1");
-            assert.equal(catalog.problems.length, 30);
+            const originals = JSON.parse(
+                await readFile(
+                    new URL(
+                        "../../Sources/HerbertCore/Resources/original-problems.json",
+                        import.meta.url,
+                    ),
+                    "utf8",
+                ),
+            );
+            assert.deepEqual(
+                catalog.problems.map((p) => p.problem_id),
+                originals.map((p) => p.id),
+            );
 
             const ranking = await worker.fetch("/v1/leaderboard");
             assert.equal(ranking.status, 200);
