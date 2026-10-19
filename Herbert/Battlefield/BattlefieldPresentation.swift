@@ -98,20 +98,37 @@ func battlefieldTotalTokens(_ entrant: EntrantResult) -> String {
     (entrant.hasEstimatedUsage ? "≈ " : "") + entrant.totalTokens.formatted()
 }
 
+/// Measures an entrant's figures at a share snapshot, or every second while one of its attempts is running.
+struct BattlefieldEntrantClock<Content: View>: View {
+    let entrant: EntrantResult
+    let snapshotAt: Date?
+    let content: (Date) -> Content
+
+    init(entrant: EntrantResult, snapshotAt: Date? = nil, @ViewBuilder content: @escaping (Date) -> Content) {
+        self.entrant = entrant
+        self.snapshotAt = snapshotAt
+        self.content = content
+    }
+
+    var body: some View {
+        Group {
+            if let snapshotAt {
+                content(snapshotAt)
+            } else if entrant.answers.contains(where: { $0.attempts.contains { $0.finishedAt == nil } }) {
+                TimelineView(.periodic(from: .now, by: 1)) { context in content(context.date) }
+            } else {
+                content(.now)
+            }
+        }
+    }
+}
+
 struct BattlefieldModelTime: View {
     let entrant: EntrantResult
     var snapshotAt: Date?
 
     var body: some View {
-        Group {
-            if let snapshotAt {
-                timing(at: snapshotAt)
-            } else if entrant.answers.contains(where: { $0.attempts.contains { $0.finishedAt == nil } }) {
-                TimelineView(.periodic(from: .now, by: 1)) { context in timing(at: context.date) }
-            } else {
-                timing(at: .now)
-            }
-        }
+        BattlefieldEntrantClock(entrant: entrant, snapshotAt: snapshotAt) { timing(at: $0) }
     }
 
     private func timing(at now: Date) -> some View {
