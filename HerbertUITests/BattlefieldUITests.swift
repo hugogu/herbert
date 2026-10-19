@@ -4,7 +4,7 @@ final class BattlefieldUITests: XCTestCase {
     @MainActor
     private func launch(
         reset: Bool = true, diagnostics: Bool = false, threeModels: Bool = false, streamErrors: Bool = false,
-        specialErrors: Bool = false, recovery: Bool = false, accounting: Bool = false
+        specialErrors: Bool = false, recovery: Bool = false, accounting: Bool = false, longResponse: Bool = false
     ) -> XCUIApplication {
         continueAfterFailure = false
         let app = XCUIApplication()
@@ -17,6 +17,10 @@ final class BattlefieldUITests: XCTestCase {
             + (specialErrors ? ["--battlefield-special-errors"] : [])
             + (recovery ? ["--battlefield-recovery"] : [])
             + (accounting ? ["--battlefield-accounting"] : [])
+            + (longResponse ? ["--battlefield-long-response"] : [])
+        if let source = ProcessInfo.processInfo.environment["HERBERT_TEST_RESPONSE"] {
+            app.launchEnvironment["HERBERT_TEST_RESPONSE"] = source
+        }
         app.launch()
         app.activate()
         #if os(macOS)
@@ -510,6 +514,50 @@ final class BattlefieldUITests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["answer-interrupted-1"].firstMatch.exists)
         XCTAssertFalse(app.staticTexts["Thinking…"].exists)
         XCTAssertFalse(app.staticTexts["Rejected"].exists)
+        app.terminate()
+    }
+
+    @MainActor
+    func testLongMultilineResponseOpensAndScrollsContinuously() {
+        let app = launch(longResponse: true)
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15))
+        let answer = reveal("answer-fixture-1-10001", in: app)
+        let started = Date()
+        answer.battlefieldTap()
+        let firstBlock = app.staticTexts["answer-response-1"]
+        XCTAssertTrue(firstBlock.waitForExistence(timeout: 5))
+        let openingTime = Date().timeIntervalSince(started)
+        XCTAssertLessThan(openingTime, 5)
+        let first = (firstBlock.value as? String).flatMap { $0.isEmpty ? nil : $0 } ?? firstBlock.label
+        XCTAssertTrue(first.hasPrefix("<think>"))
+        XCTAssertLessThanOrEqual(first.count, 4096)
+        if let path = ProcessInfo.processInfo.environment["HERBERT_TEST_RESPONSE"],
+            let source = try? String(contentsOfFile: path, encoding: .utf8)
+        {
+            XCTAssertTrue(source.hasPrefix(first))
+            print("Opened original response (\(source.utf8.count) bytes) in \(openingTime) seconds")
+        }
+        capture(app, "ai-long-response-open")
+        let next = app.staticTexts["answer-response-1-block-1"]
+        for _ in 0..<10 where !next.exists || !next.isHittable {
+            #if os(macOS)
+                app.sheets.firstMatch.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -500)
+            #else
+                app.swipeUp()
+            #endif
+        }
+        XCTAssertTrue(next.waitForExistence(timeout: 5))
+        XCTAssertTrue(next.isHittable)
+        XCTAssertGreaterThan(next.frame.height, 0)
+        capture(app, "ai-long-response")
+        closeTopSheet(in: app)
+        XCTAssertTrue(app.buttons["answer-fixture-1-10001"].exists)
         app.terminate()
     }
 

@@ -45,6 +45,7 @@ final class BattlefieldModel: ObservableObject {
                         specialErrors: ProcessInfo.processInfo.arguments.contains("--battlefield-special-errors"),
                         recovery: ProcessInfo.processInfo.arguments.contains("--battlefield-recovery"),
                         accounting: ProcessInfo.processInfo.arguments.contains("--battlefield-accounting"),
+                        longResponse: ProcessInfo.processInfo.arguments.contains("--battlefield-long-response"),
                         showcase: ProcessInfo.processInfo.arguments.contains("--battlefield-showcase"))
                 }
             }
@@ -399,17 +400,19 @@ func battlefieldError(_ error: Error) -> String {
         let specialErrors: Bool
         let recovery: Bool
         let accounting: Bool
+        let longResponse: Bool
         let showcase: Bool
         private var calls: [String: Int] = [:]
         init(
             diagnostics: Bool = false, streamErrors: Bool = false, specialErrors: Bool = false,
-            recovery: Bool = false, accounting: Bool = false, showcase: Bool = false
+            recovery: Bool = false, accounting: Bool = false, longResponse: Bool = false, showcase: Bool = false
         ) {
             self.diagnostics = diagnostics
             self.streamErrors = streamErrors
             self.specialErrors = specialErrors
             self.recovery = recovery
             self.accounting = accounting
+            self.longResponse = longResponse
             self.showcase = showcase
         }
         func models(provider: ProviderConfiguration, apiKey: String) async throws -> [AIModel] {
@@ -427,6 +430,14 @@ func battlefieldError(_ error: Error) -> String {
         ) async throws -> AIReply {
             let problem = request.messages.first { $0.role == "user" }?.content ?? ""
             let firstAttempt = request.messages.count == 2 && !problem.contains("Judge feedback:")
+            if longResponse {
+                let source =
+                    ProcessInfo.processInfo.environment["HERBERT_TEST_RESPONSE"].flatMap {
+                        try? String(contentsOfFile: $0, encoding: .utf8)
+                    } ?? "<think>" + String(repeating: "Let me trace (6,12) → (7,12).\n\n", count: 6091)
+                    + "\nEND OF LONG RESPONSE"
+                return AIReply(text: source, usage: TokenUsage(input: 2452, output: 97645), finishReason: "stop")
+            }
             if recovery {
                 let model = request.participant.entrant.preset.model.id
                 calls[model, default: 0] += 1
