@@ -12,6 +12,7 @@ import {
 } from "vitest";
 import { exportJWK, exportPKCS8, generateKeyPair, SignJWT } from "jose";
 import worker from "../src/index";
+import { drainRevocations } from "../src/revocations";
 import { puzzleIdentity } from "../src/puzzles";
 import { accessToken, Env, hash, now, seal, unseal } from "../src/auth";
 import puzzles from "../../Sources/HerbertCore/Resources/original-problems.json";
@@ -86,8 +87,10 @@ async function appleJWT(
 }
 let mockFetch: ReturnType<typeof vi.spyOn>;
 beforeEach(async () => {
+    bindings.TOKEN_ENCRYPTION_KEY = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     await bindings.DB.batch(
         [
+            "apple_revocations",
             "admin_audit",
             "submissions",
             "sessions",
@@ -105,6 +108,124 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 describe("Worker + real D1 bindings", () => {
+    it.each(["network", "invalid_client", "rotated_key"])(
+        "deletes locally despite Apple %s failures and bounds background retries",
+        async (failure) => {
+            const token = await user();
+            await submit(token);
+            const keys = await generateKeyPair("ES256", { extractable: true });
+            bindings.APPLE_PRIVATE_KEY = await exportPKCS8(keys.privateKey);
+            const cipher = await seal("private-refresh", bindings);
+            await bindings.DB.prepare(
+                "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+            )
+                .bind(cipher)
+                .run();
+            if (failure === "rotated_key")
+                bindings.TOKEN_ENCRYPTION_KEY =
+                    "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=";
+            if (failure === "invalid_client")
+                mockFetch.mockResolvedValue(
+                    Response.json({ error: "invalid_client" }, { status: 400 }),
+                );
+            expect(
+                (await request("/v1/me", "DELETE", undefined, token)).status,
+            ).toBe(200);
+            expect(mockFetch).not.toHaveBeenCalled();
+            expect(
+                (await request("/v1/me", "GET", undefined, token)).status,
+            ).toBe(401);
+            expect(
+                await bindings.DB.prepare(
+                    "SELECT source FROM submissions",
+                ).first(),
+            ).toEqual({ source: "" });
+            await drainRevocations(bindings);
+            const job = await bindings.DB.prepare(
+                "SELECT status,cipher,attempts,next_attempt_at FROM apple_revocations",
+            ).first<{
+                status: string;
+                cipher: string | null;
+                attempts: number;
+                next_attempt_at: number;
+            }>();
+            expect(job!.attempts).toBe(1);
+            expect(job!.status).toBe(
+                failure === "rotated_key" ? "unrevocable" : "pending",
+            );
+            if (failure === "rotated_key") expect(job!.cipher).toBeNull();
+            else {
+                expect(job!.next_attempt_at).toBeGreaterThan(now());
+                // Not due yet: avoid retrying on every scheduler tick.
+                await drainRevocations(bindings);
+                expect(
+                    await bindings.DB.prepare(
+                        "SELECT attempts FROM apple_revocations",
+                    ).first(),
+                ).toEqual({ attempts: 1 });
+                await bindings.DB.prepare(
+                    "UPDATE apple_revocations SET next_attempt_at=0",
+                ).run();
+                mockFetch.mockResolvedValue(
+                    new Response(null, { status: 200 }),
+                );
+                await drainRevocations(bindings);
+                expect(
+                    await bindings.DB.prepare(
+                        "SELECT status,cipher,attempts FROM apple_revocations",
+                    ).first(),
+                ).toEqual({ status: "revoked", cipher: null, attempts: 2 });
+            }
+        },
+    );
+    it("gives up after eight Apple failures without retaining credentials", async () => {
+        const token = await user();
+        const cipher = await seal("private-refresh", bindings);
+        await bindings.DB.prepare(
+            "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+        )
+            .bind(cipher)
+            .run();
+        expect(
+            (await request("/v1/me", "DELETE", undefined, token)).status,
+        ).toBe(200);
+        await bindings.DB.prepare(
+            "UPDATE apple_revocations SET attempts=7",
+        ).run();
+        await drainRevocations(bindings);
+        expect(
+            await bindings.DB.prepare(
+                "SELECT status,cipher,attempts FROM apple_revocations",
+            ).first(),
+        ).toEqual({ status: "exhausted", cipher: null, attempts: 8 });
+    });
+    it("rolls back the revocation outbox when local erasure cannot commit", async () => {
+        const token = await user();
+        const cipher = await seal("private-refresh", bindings);
+        await bindings.DB.prepare(
+            "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+        )
+            .bind(cipher)
+            .run();
+        await bindings.DB.exec(
+            "CREATE TRIGGER fail_erasure BEFORE UPDATE OF status ON users WHEN NEW.status='deleted' BEGIN SELECT RAISE(ABORT,'test erasure failure'); END;",
+        );
+        try {
+            expect(
+                (await request("/v1/me", "DELETE", undefined, token)).status,
+            ).toBe(500);
+            expect(
+                await bindings.DB.prepare(
+                    "SELECT COUNT(*) count FROM apple_revocations",
+                ).first(),
+            ).toEqual({ count: 0 });
+            expect(
+                (await request("/v1/me", "GET", undefined, token)).status,
+            ).toBe(200);
+        } finally {
+            await bindings.DB.exec("DROP TRIGGER fail_erasure;");
+        }
+    });
     it("ranks each player's best verified attempt for one problem without exposing programs", async () => {
         const alice = await user(),
             bob = await user("bob");

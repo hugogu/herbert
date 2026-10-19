@@ -44,7 +44,7 @@
                 "ADMIN_AUDIENCE": "",
                 "ADMIN_EMAILS": "",
             },
-            "triggers": { "crons": ["17 3 * * *"] },
+            "triggers": { "crons": ["*/5 * * * *"] },
         },
         "production": {
             "name": "herbert-leaderboard",
@@ -66,7 +66,7 @@
                 "ADMIN_AUDIENCE": "",
                 "ADMIN_EMAILS": "",
             },
-            "triggers": { "crons": ["17 3 * * *"] },
+            "triggers": { "crons": ["*/5 * * * *"] },
         },
     },
 }

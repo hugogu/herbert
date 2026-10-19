@@ -1,3 +1,4 @@
+import { drainRevocations } from "./revocations";
 import originals from "../../Sources/HerbertCore/Resources/original-problems.json";
 import { evaluate } from "./judge";
 import { puzzleIdentity, RULES_VERSION } from "./puzzles";
@@ -12,7 +13,6 @@ import {
     HTTPError,
     now,
     randomToken,
-    revokeApple,
     seal,
     verifyApple,
 } from "./auth";
@@ -135,8 +135,12 @@ export default {
         }
     },
     async scheduled(_event: ScheduledController, env: Env) {
+        await drainRevocations(env);
         // Tombstones remain; transient authentication/rate-limit state expires.
         await env.DB.batch([
+            env.DB.prepare(
+                "DELETE FROM apple_revocations WHERE finished_at<?",
+            ).bind(now() - 30 * 86400),
             env.DB.prepare("DELETE FROM challenges WHERE expires_at<?").bind(
                 now(),
             ),
@@ -400,9 +404,10 @@ async function route(request: Request, env: Env): Promise<Response> {
         return json({ ok: true });
     }
     if (method === "DELETE" && path === "/v1/me") {
-        if (user.apple_refresh_cipher)
-            await revokeApple(user.apple_refresh_cipher, env);
         await env.DB.batch([
+            env.DB.prepare(
+                "INSERT OR IGNORE INTO apple_revocations(revocation_id,cipher,next_attempt_at,created_at) SELECT ?,apple_refresh_cipher,?,? FROM users WHERE user_id=? AND apple_refresh_cipher IS NOT NULL AND status!='deleted'",
+            ).bind(crypto.randomUUID(), now(), now(), user.user_id),
             env.DB.prepare(
                 "UPDATE users SET status='deleted',apple_subject=NULL,apple_refresh_cipher=NULL,display_name='Deleted user',deleted_at=? WHERE user_id=?",
             ).bind(now(), user.user_id),
