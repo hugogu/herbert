@@ -254,13 +254,7 @@ public actor BattlefieldEngine {
     private static func providerDefault(for entrant: Entrant) -> Int? { entrant.kind == .anthropic ? 65_536 : nil }
 
     private func burnOut(entrant: Int, problem: Int) {
-        result!.entrants[entrant].answers[problem].status = .burnout
-        if let a = result!.entrants[entrant].answers[problem].attempts.indices.last,
-            result!.entrants[entrant].answers[problem].attempts[a].finishedAt == nil
-        {
-            result!.entrants[entrant].answers[problem].attempts[a].finishedAt = .now
-            result!.entrants[entrant].answers[problem].attempts[a].usage.partial = true
-        }
+        result!.entrants[entrant].answers[problem].end(.burnout)
     }
 
     private func record(_ progress: AIProgress, entrant: Int, problem: Int, attempt: Int) async {
@@ -538,13 +532,7 @@ public actor BattlefieldEngine {
             for p in result!.entrants[e].answers.indices where only == nil || only == p {
                 result!.entrants[e].answers[p].retryAt = nil
                 if [.queued, .requesting, .judging].contains(result!.entrants[e].answers[p].status) {
-                    result!.entrants[e].answers[p].status = .cancelled
-                    if let a = result!.entrants[e].answers[p].attempts.indices.last,
-                        result!.entrants[e].answers[p].attempts[a].finishedAt == nil
-                    {
-                        result!.entrants[e].answers[p].attempts[a].finishedAt = .now
-                        result!.entrants[e].answers[p].attempts[a].usage.partial = true
-                    }
+                    result!.entrants[e].answers[p].end(.cancelled)
                 }
             }
             await publish()

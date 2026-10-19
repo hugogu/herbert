@@ -327,6 +327,15 @@ public struct ProblemAnswer: Codable, Identifiable, Equatable, Sendable {
     public var retryAt: Date?
     public init(problemID: Int) { id = problemID }
     public var acceptedBytes: Int? { attempts.first { $0.evaluation?.accepted == true }?.evaluation?.bytes }
+
+    /// Ends the answer early; an attempt still in flight keeps its partial output and is marked partial.
+    mutating func end(_ status: ProblemAnswerStatus, at time: Date = .now) {
+        self.status = status
+        if let last = attempts.indices.last, attempts[last].finishedAt == nil {
+            attempts[last].finishedAt = time
+            attempts[last].usage.partial = true
+        }
+    }
 }
 
 public struct EntrantResult: Codable, Identifiable, Equatable, Sendable {
@@ -460,13 +469,7 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
             for p in entrants[e].answers.indices {
                 entrants[e].answers[p].retryAt = nil
                 if [.queued, .requesting, .judging].contains(entrants[e].answers[p].status) {
-                    entrants[e].answers[p].status = .cancelled
-                    if let a = entrants[e].answers[p].attempts.indices.last,
-                        entrants[e].answers[p].attempts[a].finishedAt == nil
-                    {
-                        entrants[e].answers[p].attempts[a].usage.partial = true
-                        entrants[e].answers[p].attempts[a].finishedAt = time
-                    }
+                    entrants[e].answers[p].end(.cancelled, at: time)
                 }
             }
         }
