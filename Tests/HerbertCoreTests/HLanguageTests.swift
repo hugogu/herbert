@@ -3,6 +3,17 @@ import XCTest
 @testable import HerbertCore
 
 final class HLanguageTests: XCTestCase {
+    func testGrowingArgumentsHaveACumulativeWorkLimit() throws {
+        var machine = HMachine(program: try HProgram.compile("b(X):b(Xs)\nb(s)"))
+        XCTAssertThrowsError(
+            try {
+                while !machine.finished { _ = try machine.nextCommand() }
+            }()
+        ) { error in
+            XCTAssertTrue(error.localizedDescription.contains("Expansion work limit"))
+        }
+    }
+
     private func commands(_ source: String, maximum: Int = 100) throws -> String {
         var machine = HMachine(program: try HProgram.compile(source))
         var output = ""

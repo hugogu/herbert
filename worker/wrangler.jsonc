@@ -4,6 +4,7 @@
     "main": "src/index.ts",
     "compatibility_date": "2026-10-10",
     "compatibility_flags": ["nodejs_compat"],
+    "limits": { "cpu_ms": 1000 },
     "d1_databases": [
         {
             "binding": "DB",
@@ -25,6 +26,7 @@
     "env": {
         "staging": {
             "name": "herbert-leaderboard-staging",
+            "limits": { "cpu_ms": 1000 },
             "d1_databases": [
                 {
                     "binding": "DB",
@@ -46,6 +48,7 @@
         },
         "production": {
             "name": "herbert-leaderboard",
+            "limits": { "cpu_ms": 1000 },
             "d1_databases": [
                 {
                     "binding": "DB",

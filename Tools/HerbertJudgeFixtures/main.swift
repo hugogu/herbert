@@ -22,7 +22,7 @@ let puzzles = try ProblemCatalog.bundled()
 var results: [Input] = []
 for reference in references {
     let problem = puzzles.first { $0.id == reference.id }!
-    for source in [reference.source] + (reference.alternateSources ?? []) + ["s", "a:sa\na", "a:a\na"] {
+    for source in [reference.source] + (reference.alternateSources ?? []) + ["s", "a:sa\na", "a:a\na", "b(X):b(Xs)\nb(s)"] {
         var session = try GameSession(problem: problem)
         do {
             try session.prepare(source: source)

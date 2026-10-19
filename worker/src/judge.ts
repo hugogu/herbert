@@ -189,6 +189,12 @@ export function compile(source: string) {
 export function* commands(source: string, limit = 1000000): Generator<string> {
     const program = compile(source);
     const memoryLimit = 1000000;
+    // Bound cumulative copying and validation, including tail calls that retain little memory.
+    let expansionWork = 0;
+    const charge = (amount: number) => {
+        expansionWork += amount;
+        assert(expansionWork <= 10000000, "Expansion work limit");
+    };
     type Frame = {
         code: Instruction[];
         env: Map<string, Value>;
@@ -253,16 +259,20 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
                     v && "code" in v,
                     "Numeric parameter used as instructions",
                 );
+                charge(v.size);
                 size.n += v.size;
                 assert(size.n <= memoryLimit, "Expanded memory limit");
                 for (const item of v.code) result.push(item);
             } else if (primitive(instruction.name)) {
+                charge(1);
                 size.n++;
                 result.push(instruction);
             } else {
+                charge(1);
                 size.n++;
                 const args = (instruction.args ?? []).map((a): Argument => {
                     if ("terms" in a) {
+                        charge(a.terms.length);
                         size.n += a.terms.length;
                         return {
                             terms: a.terms.map((t) => {
@@ -279,6 +289,7 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
                     if (a.code.length === 1 && upper(a.code[0].name)) {
                         const v = env.get(a.code[0].name);
                         if (v && "number" in v) {
+                            charge(1);
                             size.n++;
                             return { terms: [{ sign: 1, value: v.number }] };
                         }
@@ -304,6 +315,7 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
         while (pending.length) {
             const p = pending.pop()!;
             assert(p.depth <= 128, "Expanded argument nesting limit");
+            charge(p.code.length);
             for (const i of p.code)
                 for (const arg of i.args ?? [])
                     if ("code" in arg)
