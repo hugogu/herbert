@@ -206,7 +206,7 @@
 "Token 总预算：" = "Token budget: ";
 "Token 预算用完" = "Token budget exhausted";
 "≈ 包含估算或部分用量；实际账单以服务商为准。" = "≈ includes estimated or partial usage; provider billing is authoritative.";
-"≈ 表示包含实时估算或取消请求的部分用量。缓存率仅在全部尝试均返回准确缓存用量时显示。最终账单以服务商为准。" = "≈ includes live estimates or partial usage from cancelled requests. Cache rate appears only when every attempt reports complete cache usage. Provider billing is authoritative.";
+"≈ 表示包含实时估算或取消请求的部分用量。最终账单以服务商为准。" = "≈ includes live estimates or partial usage from cancelled requests. Provider billing is authoritative.";
 "上下文 %ld tokens" = "Context: %ld tokens";
 "不限比赛时间和总 Token；全部题目完成尝试后结束，也可以随时终止。" = "No match time or total token limit. Ends when all attempts finish; you can stop at any time.";
 "代码总 byte" = "Accepted code bytes";
@@ -238,6 +238,7 @@
 "已确认 Token" = "Confirmed tokens";
 "已选择 %ld 道" = "%ld puzzles selected";
 "已通过" = "Solved";
+"平均输出速度" = "Average output speed";
 "开始比赛" = "Start match";
 "当前比赛" = "Current match";
 "搜索模型" = "Search models";
@@ -252,7 +253,6 @@
 "服务商响应无效或过大，请检查是否兼容 Chat Completions。" = "Invalid or oversized response. Check Chat Completions compatibility.";
 "服务商设置" = "Provider settings";
 "服务类型" = "Provider type";
-"未提供" = "Unavailable";
 "未通过" = "Rejected";
 "本地 AI 数据无法安全读写，原文件已保留。" = "Could not safely read or write local AI data. Original files are preserved.";
 "查看统一规则提示词" = "View shared rules prompt";
@@ -296,7 +296,6 @@
 "请选择 1–32 个模型和至少一道题，并检查比赛限制。" = "Select 1–32 models and at least one puzzle, then check the match limits.";
 "调用失败" = "Request failed";
 "输入 / 输出 Token" = "Input / output tokens";
-"输入缓存率" = "Input cache rate";
 "输出 Token 包括模型的推理 Token。部分模型不支持采样参数，留空可提高兼容性。" = "Output tokens include reasoning tokens. Some models do not support sampling parameters; leave them blank for compatibility.";
 "输出上限参数" = "Output limit parameter";
 "还没有服务商" = "No providers yet";
@@ -450,6 +449,7 @@
 
 "总用时 %@" = "Total time %@";
 "所有尝试的用时之和，包含重试和失败，不包含等待重试或比赛间隔。" = "Sum of all attempt durations, including retries and failures; excludes cooldowns and idle time between matches.";
+"输出 Token（含推理）除以所有尝试的用时之和；用时包含等待首个 Token、重试和失败。" = "Output tokens, reasoning included, divided by the sum of all attempt durations, which include waiting for the first token, retries and failures.";
 
 "导出" = "Export";
 "导入" = "Import";

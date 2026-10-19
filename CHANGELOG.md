@@ -5,6 +5,9 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield model headers and share images show average output speed in place of the input
+  cache rate: output tokens, reasoning included, per second of the model's total attempt time.
+  It updates live during a match, so models can be compared on how fast they answer.
 - With token limits off, AI Battlefield asks for the model's whole output capacity even when
   `/models` doesn't publish it, instead of leaving the cap to the provider's default. DeepSeek, for
   one, defaults to 64K tokens in thinking mode but accepts 393,216, so unlimited answers burned out

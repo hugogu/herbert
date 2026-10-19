@@ -334,7 +334,7 @@ do not publish a composite points formula. The above formula is our independent 
 policy, not a claim of identical original-site scoring.
 
 The progress table itself is the live ranking: model columns move with the standings.
-Headers show normalized benchmark percentages, input/output/total tokens and cache rate.
+Headers show normalized benchmark percentages, input/output/total tokens and average output speed.
 Solved counts sit alongside provider names. Provider prefixes before the first `:` and
 pricing suffixes such as `(free)` are omitted from model display names; request IDs and saved provider metadata remain intact. Errors appear in
 a corner indicator. Total points appear beside the primary normalized percentage.
@@ -365,11 +365,9 @@ Providers often return exact usage only at the end of a stream. During generatio
 Herbert estimates tokens from UTF-8 bytes and includes prompt/message overhead; **≈**
 means estimated or partial usage. Final reported usage replaces estimates rather than
 being added a second time. Output includes reasoning tokens; they are not double-counted.
-Input cache rate is cached input / total input and appears only when **every attempt**
-reports complete cache usage. Missing data displays **Unavailable** in the dashboard,
-distinct from 0%; share images omit it. Model headers and share images use the same
-input/output and total token figures, including all retries. Total tokens preserve the
-provider-reported total when it exceeds input plus output, rather than recomputing it.
+Model headers and share images use the same input/output and total token figures,
+including all retries. Total tokens preserve the provider-reported total when it exceeds
+input plus output, rather than recomputing it.
 
 Each model also shows **total attempt time** above its points: the sum of request
 durations across all puzzles, including retries, failures and cancelled attempts. Active
@@ -377,6 +375,12 @@ attempts update live; finished durations remain fixed in history. Cooldowns, que
 and idle time before a manual history retry are excluded. This differs from the match
 wall-clock duration, since models run in parallel. Share images include both match
 duration and each model's total attempt time.
+
+**Average output speed** divides a model's output tokens, reasoning included, by its total
+attempt time. That time includes waiting for the first token and failed requests, so the
+figure reflects speed as experienced in a match rather than a provider's peak decoding rate.
+It updates live with the time and carries **≈** when the token figures do. Before a model's
+first attempt its header shows —, and share images omit the figure.
 
 A limited request receives an output allowance no larger than its remaining problem
 budget minus estimated input and any known or provider-stated model capacity/context constraints. Each
@@ -408,7 +412,7 @@ Removing a provider removes its key and configuration, while keeping past matche
 Progress JSON backups cover human game progress, not AI credentials or match history.
 
 Completed matches offer **Share result image**: a locally rendered 1080-pixel-wide PNG
-with every entrant's rank, normalized percentage, solved count, accepted bytes, token usage and cache rate.
+with every entrant's rank, normalized percentage, solved count, accepted bytes, token usage and output speed.
 It includes model and provider display names; review those before sharing. Images omit
 API keys, endpoint URLs, raw responses and custom prompts. The system share sheet sends
 the image only to the destination you choose. No public leaderboard or upload service exists.

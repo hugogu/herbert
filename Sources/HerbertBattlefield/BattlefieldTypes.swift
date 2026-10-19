@@ -354,11 +354,10 @@ public struct EntrantResult: Codable, Identifiable, Equatable, Sendable {
             total + answer.attempts.reduce(0) { $0 + $1.elapsedTime(at: now) }
         }
     }
-    public var cacheRate: Double? {
-        guard !usages.isEmpty, inputTokens > 0,
-            usages.allSatisfy({ !$0.estimated && !$0.partial && $0.cached != nil })
-        else { return nil }
-        return Double(usages.compactMap(\.cached).reduce(0, +)) / Double(inputTokens)
+    /// Output tokens, reasoning included, per second of total attempt time; nil until any attempt time accrues.
+    public func outputTokensPerSecond(at now: Date = .now) -> Double? {
+        let time = totalAttemptTime(at: now)
+        return time > 0 ? Double(outputTokens) / time : nil
     }
 }
 

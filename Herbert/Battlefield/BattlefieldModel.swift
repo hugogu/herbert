@@ -505,10 +505,7 @@ func battlefieldError(_ error: Error) -> String {
             let known = model == "fixture-1" ? examples : showcase && model == "fixture-2" ? [examples[0]] : []
             let program = known.first { problem.contains("ID \($0.0)") }?.1 ?? "s"
             let text = firstAttempt ? "z" : "```h\n\(program)\n```"
-            let usage = TokenUsage(
-                input: 900, output: 12, total: accounting ? 1200 : nil,
-                cached: accounting && request.participant.entrant.preset.model.id == "fixture-2" ? nil : 450,
-                estimated: false)
+            let usage = TokenUsage(input: 900, output: 12, total: accounting ? 1200 : nil, estimated: false)
             await progress(AIProgress(text: text, usage: usage, isFinal: true))
             return AIReply(text: text, usage: usage)
         }

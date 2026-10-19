@@ -586,6 +586,7 @@ final class BattlefieldUITests: XCTestCase {
         app.buttons["Close"].battlefieldTap()
         reveal("startBattlefield", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Match complete"].waitForExistence(timeout: 15), app.debugDescription)
+        var outputSpeeds: [String: String] = [:]
         for model in ["fixture-1", "fixture-2"] {
             let score = app.staticTexts["score-\(model)"]
             XCTAssertEqual(score.value as? String ?? score.label, "80%")
@@ -596,6 +597,11 @@ final class BattlefieldUITests: XCTestCase {
             XCTAssertNotEqual(time.label, "Total time 00:00:00")
             XCTAssertEqual(time.frame.minY, score.frame.minY, accuracy: 2)
             XCTAssertLessThan(time.frame.maxY, points.frame.minY)
+            // Speed follows real attempt time, so only its format is fixed.
+            let speed = app.descendants(matching: .any)["output-speed-\(model)"].firstMatch.label
+            XCTAssertNotNil(
+                speed.range(of: #"^Average output speed: \d+\.\d tokens/s$"#, options: .regularExpression), speed)
+            outputSpeeds[model] = speed
         }
         let modelTime = app.descendants(matching: .any)["model-time-fixture-1"].firstMatch.label
         XCTAssertFalse(app.staticTexts["Benchmark score"].exists)
@@ -659,12 +665,11 @@ final class BattlefieldUITests: XCTestCase {
             XCTAssertEqual(inputOutput.value as? String ?? inputOutput.label, "Input / output tokens: 1,800 / 24")
             let total = app.staticTexts["share-total-tokens-\(model)"]
             XCTAssertEqual(total.value as? String ?? total.label, "Total tokens: 2,400")
+            let speed = app.staticTexts["share-output-speed-\(model)"]
+            XCTAssertEqual(speed.value as? String ?? speed.label, outputSpeeds[model])
         }
         let sharedTime = app.descendants(matching: .any)["share-model-time-fixture-1"].firstMatch
         XCTAssertEqual(sharedTime.label, modelTime)
-        let cache = app.staticTexts["share-cache-fixture-1"]
-        XCTAssertEqual(cache.value as? String ?? cache.label, "Input cache rate: 50%")
-        XCTAssertFalse(app.staticTexts["share-cache-fixture-2"].exists)
         capture(app, "ai-share")
         app.buttons["Close"].battlefieldTap()
         app.terminate()
@@ -679,6 +684,8 @@ final class BattlefieldUITests: XCTestCase {
         let restoredPoints = app.staticTexts["points-fixture-1"]
         XCTAssertEqual(restoredPoints.value as? String ?? restoredPoints.label, "80 points")
         XCTAssertEqual(app.descendants(matching: .any)["model-time-fixture-1"].firstMatch.label, modelTime)
+        XCTAssertEqual(
+            app.descendants(matching: .any)["output-speed-fixture-1"].firstMatch.label, outputSpeeds["fixture-1"])
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertEqual(reveal("attempt-time-1", in: app).label, firstDuration)
         XCTAssertEqual(reveal("attempt-time-2", in: app).label, retryDuration)

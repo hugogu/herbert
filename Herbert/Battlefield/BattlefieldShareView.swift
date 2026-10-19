@@ -121,9 +121,9 @@ private struct BattlefieldShareCard: View {
                         HStack(spacing: 16) {
                             Text(L10n.text("总 Token") + ": " + battlefieldTotalTokens(entrant))
                                 .accessibilityIdentifier("share-total-tokens-\(entrant.entrant.preset.model.id)")
-                            if entrant.cacheRate != nil {
-                                Text(L10n.text("输入缓存率") + ": " + battlefieldCache(entrant))
-                                    .accessibilityIdentifier("share-cache-\(entrant.entrant.preset.model.id)")
+                            if let speed = battlefieldOutputSpeed(entrant, at: snapshotAt) {
+                                Text(L10n.text("平均输出速度") + ": " + speed)
+                                    .accessibilityIdentifier("share-output-speed-\(entrant.entrant.preset.model.id)")
                             }
                         }.font(.system(size: 16, design: .monospaced)).foregroundStyle(Palette.muted)
                     }

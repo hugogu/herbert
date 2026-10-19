@@ -114,7 +114,7 @@ cancels its remaining retries. Other problems and entrants continue.
   native authentication, model discovery, streamed thinking, signed-block retries and
   cache-aware usage. Select it in AI Providers and enter the base URL ending in `/v1`.
 - Model headers show normalized percentages with total points as a reference,
-  input/output/total tokens and cache rates. Each attempt has its own elapsed timer;
+  input/output/total tokens and average output speed. Each attempt has its own elapsed timer;
   live timers advance and finished durations remain fixed in history.
 - Rate limits (429) appear as **Overloaded**. Transient retries honor provider wait
   hints and use exponential backoff with jitter; the countdown can be cancelled with Stop.
@@ -129,7 +129,7 @@ cancels its remaining retries. Other problems and entrants continue.
   native-verified worked boards, including a recursive pinwheel separate from scored L30.
 - Stop cancels active calls. Matches save locally and can be shared as PNG cards.
   Model headers and share cards show the same input/output and reported total tokens,
-  plus cumulative attempt time and points. Share cards omit unavailable cache rates.
+  average output speed, cumulative attempt time and points.
   Token accounting notes sit below puzzle progress.
 
 AI is optional and uses **your own API credits**. Streaming usage can be estimated or

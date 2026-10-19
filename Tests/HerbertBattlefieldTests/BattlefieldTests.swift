@@ -145,7 +145,28 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(decoded.totalAttemptTime(at: start.addingTimeInterval(5000)), 23.5)
     }
 
-    func testModelTokenSummaryPreservesReportedTotalsAndMissingCache() throws {
+    func testOutputSpeedDividesOutputByTotalAttemptTime() throws {
+        let start = Date(timeIntervalSince1970: 1000)
+        var entrant = EntrantResult(entrant: participants(1)[0].entrant, problems: try first(2))
+        XCTAssertNil(entrant.outputTokensPerSecond(at: start))
+        var failed = AnswerAttempt(number: 1, startedAt: start)
+        failed.finishedAt = start.addingTimeInterval(4)
+        failed.usage = TokenUsage(input: 500, estimated: false, partial: true)
+        failed.error = "Provider disconnected"
+        var retry = AnswerAttempt(number: 2, startedAt: start.addingTimeInterval(30))
+        retry.finishedAt = start.addingTimeInterval(46)
+        retry.usage = TokenUsage(input: 600, output: 400, reasoning: 300, estimated: false)
+        entrant.answers[0].attempts = [failed, retry]
+        // 400 output tokens in 4 + 16 seconds: the failure counts, the cooldown between attempts does not.
+        XCTAssertEqual(entrant.outputTokensPerSecond(at: start.addingTimeInterval(500)), 20)
+        var running = AnswerAttempt(number: 1, startedAt: start.addingTimeInterval(100))
+        running.usage = TokenUsage(input: 600, output: 200)
+        entrant.answers[1].attempts = [running]
+        XCTAssertEqual(entrant.outputTokensPerSecond(at: start.addingTimeInterval(110)), 20)
+        XCTAssertEqual(entrant.outputTokensPerSecond(at: start.addingTimeInterval(130)), 12)
+    }
+
+    func testModelTokenSummaryPreservesReportedTotals() throws {
         var entrant = EntrantResult(entrant: participants(1)[0].entrant, problems: try first())
         var first = AnswerAttempt(number: 1)
         first.usage = TokenUsage(input: 100, output: 20, total: 180, cached: 50, estimated: false)
@@ -155,10 +176,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(entrant.inputTokens, 300)
         XCTAssertEqual(entrant.outputTokens, 30)
         XCTAssertEqual(entrant.totalTokens, 480)
-        XCTAssertEqual(try XCTUnwrap(entrant.cacheRate), 50.0 / 300)
         XCTAssertFalse(entrant.hasEstimatedUsage)
-        entrant.answers[0].attempts[1].usage.cached = nil
-        XCTAssertNil(entrant.cacheRate)
         entrant.answers[0].attempts[1].usage.partial = true
         XCTAssertTrue(entrant.hasEstimatedUsage)
         XCTAssertEqual(entrant.totalTokens, 480)
@@ -290,7 +308,7 @@ final class BattlefieldTests: XCTestCase {
         let data = try JSONEncoder().encode(result)
         XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("test-secret"))
         XCTAssertEqual(result.entrants[0].totalTokens, 42)
-        XCTAssertEqual(result.entrants[0].cacheRate, 0.5)
+        XCTAssertEqual(result.entrants[0].usages.map(\.cached), [10, 10])
     }
 
     func testRetriesAreBoundedAndInvalidProgramsNeverEarnPoints() async throws {

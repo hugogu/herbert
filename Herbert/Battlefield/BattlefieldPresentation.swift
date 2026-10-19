@@ -85,8 +85,10 @@ extension ProblemAnswerStatus {
     }
 }
 
-func battlefieldCache(_ entrant: EntrantResult) -> String {
-    entrant.cacheRate.map { $0.formatted(.percent.precision(.fractionLength(0))) } ?? L10n.text("未提供")
+func battlefieldOutputSpeed(_ entrant: EntrantResult, at now: Date) -> String? {
+    entrant.outputTokensPerSecond(at: now).map {
+        (entrant.hasEstimatedUsage ? "≈ " : "") + $0.formatted(.number.precision(.fractionLength(1))) + " tokens/s"
+    }
 }
 
 func battlefieldInputOutputTokens(_ entrant: EntrantResult) -> String {

@@ -38,7 +38,7 @@ struct BattlefieldDashboard: View {
             header
             progressTable
             if result.entrants.contains(where: \.hasEstimatedUsage) {
-                BattlefieldNotice(text: L10n.text("≈ 表示包含实时估算或取消请求的部分用量。缓存率仅在全部尝试均返回准确缓存用量时显示。最终账单以服务商为准。"))
+                BattlefieldNotice(text: L10n.text("≈ 表示包含实时估算或取消请求的部分用量。最终账单以服务商为准。"))
             }
         }
         .navigationDestination(item: $trial) { trial in
@@ -243,7 +243,14 @@ struct BattlefieldDashboard: View {
                 Text(L10n.text("通过 %ld/%ld", entrant.solved, result.problems.count))
             }.font(.caption).foregroundStyle(Palette.muted)
             metric(L10n.text("输入 / 输出 Token"), battlefieldInputOutputTokens(entrant))
-            metric(L10n.text("输入缓存率"), battlefieldCache(entrant))
+            BattlefieldEntrantClock(entrant: entrant) { now in
+                let speed = battlefieldOutputSpeed(entrant, at: now) ?? "—"
+                metric(L10n.text("平均输出速度"), speed)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(L10n.text("平均输出速度") + ": " + speed)
+            }
+            .accessibilityIdentifier("output-speed-\(entrant.entrant.preset.model.id)")
+            .help(L10n.text("输出 Token（含推理）除以所有尝试的用时之和；用时包含等待首个 Token、重试和失败。"))
             metric(L10n.text("总 Token"), battlefieldTotalTokens(entrant))
             Divider()
             HStack(alignment: .top) {
