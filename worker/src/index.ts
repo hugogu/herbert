@@ -102,8 +102,27 @@ export default {
             return await route(request, env);
         } catch (error) {
             const status = error instanceof HTTPError ? error.status : 500;
+            const reference =
+                error instanceof HTTPError
+                    ? error.reference
+                    : crypto.randomUUID();
+            if (!(error instanceof HTTPError)) {
+                // Never log exception messages: database/transport errors can include submitted data.
+                console.error(
+                    JSON.stringify({
+                        event: "request_failed",
+                        code: "internal_error",
+                        reference,
+                    }),
+                );
+            }
             const response = json(
                 {
+                    code:
+                        error instanceof HTTPError
+                            ? error.code
+                            : "internal_error",
+                    reference,
                     error:
                         error instanceof HTTPError
                             ? error.message

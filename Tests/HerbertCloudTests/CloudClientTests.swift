@@ -5,6 +5,20 @@ import XCTest
 @testable import HerbertCloud
 
 final class CloudClientTests: XCTestCase {
+    func testStructuredServiceErrorIsLocalizedAndRetainsSafeReference() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [ErrorProtocol.self]
+        let client = try CloudClient(
+            endpoint: XCTUnwrap(URL(string: "https://api.example.com")), session: URLSession(configuration: config))
+        do {
+            _ = try await client.challenge()
+            XCTFail("Expected service failure")
+        } catch {
+            XCTAssertTrue(error.localizedDescription.contains("67A82D97-320C-4987-BFE0-397C46775F70"))
+            XCTAssertFalse(error.localizedDescription.contains("PRIVATE_KEY"))
+            XCTAssertFalse(error.localizedDescription.contains("apple_client_invalid"))
+        }
+    }
     func testRejectsUnsafeOrAmbiguousEndpoints() throws {
         for value in [
             "http://example.com", "https://user:pass@example.com", "https://example.com?token=secret",
@@ -158,6 +172,19 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
             url: request.url!, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Data(reply.utf8))
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+private final class ErrorProtocol: URLProtocol, @unchecked Sendable {
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let response = HTTPURLResponse(url: request.url!, statusCode: 503, httpVersion: nil, headerFields: nil)!
+        let body =
+            #"{"error":"PRIVATE_KEY operator details","code":"apple_client_invalid","reference":"67A82D97-320C-4987-BFE0-397C46775F70"}"#
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: Data(body.utf8))
         client?.urlProtocolDidFinishLoading(self)
     }
     override func stopLoading() {}

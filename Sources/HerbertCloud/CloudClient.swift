@@ -75,12 +75,28 @@ public struct CloudClient: Sendable {
         let (data, response) = try await session.data(for: request, delegate: CloudNoRedirects())
         guard let http = response as? HTTPURLResponse, data.count <= 1_048_576 else { throw CloudError.invalidResponse }
         guard (200..<300).contains(http.statusCode) else {
-            let message = (try? JSONDecoder().decode(ServiceError.self, from: data))?.error ?? "Request failed"
+            let failure = try? JSONDecoder().decode(ServiceError.self, from: data)
+            var message = failure?.error ?? HerbertStrings.text("排行榜请求失败，请稍后重试。")
+            if let code = failure?.code {
+                message = HerbertStrings.text(
+                    code == "nickname_not_allowed"
+                        ? "昵称不适合公开展示，请选择其他昵称。"
+                        : code.hasPrefix("apple_")
+                            ? (http.statusCode == 401 ? "Apple 登录验证失败，请重新登录。" : "Apple 登录暂时不可用，请稍后重试。")
+                            : "排行榜请求失败，请稍后重试。")
+            }
+            if let reference = failure?.reference, UUID(uuidString: reference) != nil {
+                message += " · " + HerbertStrings.text("参考编号：%@", reference)
+            }
             throw CloudError.request(http.statusCode, message)
         }
         return try JSONDecoder().decode(T.self, from: data)
     }
-    private struct ServiceError: Decodable { let error: String }
+    private struct ServiceError: Decodable {
+        let error: String
+        let code: String?
+        let reference: String?
+    }
 }
 
 /// Never forward an account token or uploaded program through an HTTP redirect.
