@@ -107,7 +107,7 @@ public struct HMachine {
 
     private mutating func charge(_ amount: Int) throws {
         guard amount <= expansionWorkLimit - expansionWork else {
-            throw HError("Expansion work limit")
+            throw HError(HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
         }
         expansionWork += amount
     }
@@ -115,6 +115,7 @@ public struct HMachine {
     private mutating func resolve(_ argument: HArgument, environment: [Character: HValue]) throws -> HValue {
         switch argument {
         case .number(let terms):
+            try charge(terms.count)
             var sum = 0
             for term in terms {
                 let number: Int
