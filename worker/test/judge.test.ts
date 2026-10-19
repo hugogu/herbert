@@ -54,6 +54,11 @@ describe("native H compatibility", () => {
                 .accepted,
         ).toBe(false);
     });
+    it("bounds cumulative copying in growing tail-recursive arguments", () => {
+        expect(() => [...commands("b(X):b(Xs)\nb(s)")]).toThrow(
+            "Expansion work limit",
+        );
+    });
     it("walls block and traps reset lights", () => {
         const rows = Array(25).fill(".".repeat(25));
         rows[12] = "............uo*o.........";
