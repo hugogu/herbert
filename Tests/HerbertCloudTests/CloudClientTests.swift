@@ -5,6 +5,14 @@ import XCTest
 @testable import HerbertCloud
 
 final class CloudClientTests: XCTestCase {
+    func testReportDraftEncodesPlayerTextWithoutAddingRecipients() throws {
+        let url = try XCTUnwrap(
+            LeaderboardSafety.reportURL(userID: "player-123", displayName: "A&B?bcc=other@example.com"))
+        let components = try XCTUnwrap(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        XCTAssertEqual(components.path, "hugogu@outlook.com")
+        XCTAssertEqual(components.queryItems?.map(\.name), ["subject", "body"])
+        XCTAssertTrue(components.queryItems?.last?.value?.contains("player-123") == true)
+    }
     func testStructuredServiceErrorIsLocalizedAndRetainsSafeReference() async throws {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [ErrorProtocol.self]
@@ -164,7 +172,8 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
             XCTAssertEqual(
                 Set(body?.keys.map { $0 } ?? []), Set(["source", "problem_id", "puzzle_version", "request_id"]))
             XCTAssertEqual(body?["source"] as? String, "s")
-            XCTAssertEqual(body?["request_id"] as? String,
+            XCTAssertEqual(
+                body?["request_id"] as? String,
                 CloudPuzzle.submissionID(problem: try! ProblemCatalog.bundled()[0], source: "s"))
             reply = #"{"accepted":true,"bytes":1,"points":80,"feedback":"Accepted"}"#
         }
@@ -176,6 +185,7 @@ private final class MockProtocol: URLProtocol, @unchecked Sendable {
     }
     override func stopLoading() {}
 }
+
 private final class ErrorProtocol: URLProtocol, @unchecked Sendable {
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }

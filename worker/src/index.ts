@@ -1,3 +1,4 @@
+import { nicknameAllowed } from "./nicknames";
 import { drainRevocations } from "./revocations";
 import originals from "../../Sources/HerbertCore/Resources/original-problems.json";
 import { evaluate } from "./judge";
@@ -113,6 +114,12 @@ export default {
                         event: "request_failed",
                         code: "internal_error",
                         reference,
+                        kind:
+                            error instanceof TypeError
+                                ? "TypeError"
+                                : error instanceof RangeError
+                                  ? "RangeError"
+                                  : "Error",
                     }),
                 );
             }
@@ -390,6 +397,12 @@ async function route(request: Request, env: Env): Promise<Response> {
                 400,
                 "Display name must contain 1–32 characters without control characters",
             );
+        if (!nicknameAllowed(name))
+            throw new HTTPError(
+                400,
+                "Choose a different public nickname",
+                "nickname_not_allowed",
+            );
         await env.DB.prepare("UPDATE users SET display_name=? WHERE user_id=?")
             .bind(name, user.user_id)
             .run();
@@ -546,12 +559,16 @@ async function admin(request: Request, env: Env, path: string) {
     if (request.method !== "PATCH" || !match)
         throw new HTTPError(404, "Not found");
     const data = await body(request),
-        reason = string(data, "reason", 500),
+        reason = string(data, "reason", 500).trim(),
         id = match[2];
+    if (!reason) throw new HTTPError(400, "A moderation reason is required");
     let statement: D1PreparedStatement, action: string;
     if (match[1] === "users") {
-        const status = string(data, "status", 10);
-        if (!["active", "blocked"].includes(status))
+        const resetName = data.reset_name === true;
+        if (resetName && data.status !== undefined)
+            throw new HTTPError(400, "Choose one moderation action");
+        const status = resetName ? undefined : string(data, "status", 10);
+        if (!resetName && !["active", "blocked"].includes(status!))
             throw new HTTPError(400, "Invalid status");
         const found = await env.DB.prepare(
             "SELECT user_id FROM users WHERE user_id=? AND status!='deleted'",
@@ -559,10 +576,14 @@ async function admin(request: Request, env: Env, path: string) {
             .bind(id)
             .first();
         if (!found) throw new HTTPError(404, "User not found");
-        statement = env.DB.prepare(
-            "UPDATE users SET status=? WHERE user_id=? AND status!='deleted'",
-        ).bind(status, id);
-        action = `user.${status}`;
+        statement = resetName
+            ? env.DB.prepare(
+                  "UPDATE users SET display_name=? WHERE user_id=? AND status!='deleted'",
+              ).bind(`Learner ${id.slice(0, 8)}`, id)
+            : env.DB.prepare(
+                  "UPDATE users SET status=? WHERE user_id=? AND status!='deleted'",
+              ).bind(status!, id);
+        action = resetName ? "user.reset_name" : `user.${status}`;
     } else {
         if (typeof data.hidden !== "boolean")
             throw new HTTPError(400, "Invalid hidden");
