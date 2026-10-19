@@ -1,4 +1,5 @@
 import Foundation
+import HerbertCore
 import Security
 
 @MainActor
@@ -14,51 +15,17 @@ struct KeychainError: Error, LocalizedError {
 }
 
 struct KeychainAPIKeyStore: APIKeyStore {
-    private func query(_ provider: UUID) -> [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: "info.hugogu.Herbert.Battlefield",
-            kSecAttrAccount as String: provider.uuidString,
-            kSecAttrSynchronizable as String: false,
-        ]
+    private func credentials(_ provider: UUID) -> DeviceKeychain {
+        DeviceKeychain(service: "info.hugogu.Herbert.Battlefield", account: provider.uuidString)
     }
-
-    func hasKey(for provider: UUID) throws -> Bool {
-        let status = SecItemCopyMatching(query(provider) as CFDictionary, nil)
-        guard status == errSecSuccess || status == errSecItemNotFound else { throw KeychainError(status: status) }
-        return status == errSecSuccess
-    }
-
+    func hasKey(for provider: UUID) throws -> Bool { try key(for: provider) != nil }
     func key(for provider: UUID) throws -> String? {
-        var query = query(provider)
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-        if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess, let data = item as? Data, let value = String(data: data, encoding: .utf8) else {
-            throw KeychainError(status: status)
-        }
+        guard let data = try credentials(provider).read() else { return nil }
+        guard let value = String(data: data, encoding: .utf8) else { throw KeychainError(status: errSecDecode) }
         return value
     }
-
     func setKey(_ value: String?, for provider: UUID) throws {
-        guard let value, !value.isEmpty else {
-            let status = SecItemDelete(query(provider) as CFDictionary)
-            guard status == errSecSuccess || status == errSecItemNotFound else { throw KeychainError(status: status) }
-            return
-        }
-        let data = Data(value.utf8)
-        let status = SecItemUpdate(query(provider) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
-        if status == errSecItemNotFound {
-            var item = query(provider)
-            item[kSecValueData as String] = data
-            item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-            let added = SecItemAdd(item as CFDictionary, nil)
-            guard added == errSecSuccess else { throw KeychainError(status: added) }
-        } else if status != errSecSuccess {
-            throw KeychainError(status: status)
-        }
+        try credentials(provider).write(value.flatMap { $0.isEmpty ? nil : Data($0.utf8) })
     }
 }
 

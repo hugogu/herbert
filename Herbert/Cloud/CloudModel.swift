@@ -47,15 +47,9 @@
             }
             if Self.offlinePreview { return }
             do {
-                var query = keychainQuery
-                query[kSecReturnData as String] = true
-                var item: CFTypeRef?
-                let status = SecItemCopyMatching(query as CFDictionary, &item)
-                if status == errSecSuccess, let data = item as? Data {
+                if let data = try credentials.read() {
                     session = try JSONDecoder().decode(CloudSession.self, from: data)
                     user = session?.user
-                } else if status != errSecItemNotFound {
-                    throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
                 }
             } catch { handle(error) }
         }
@@ -125,34 +119,11 @@
             if case CloudError.request(401, _) = error { try? persist(nil) }
             message = error.localizedDescription
         }
-        private var keychainQuery: [String: Any] {
-            [
-                kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: keychainService,
-                kSecAttrAccount as String: "session",
-            ]
+        private var credentials: DeviceKeychain {
+            DeviceKeychain(service: keychainService, account: "session")
         }
         private func persist(_ next: CloudSession?) throws {
-            if let next {
-                let data = try JSONEncoder().encode(next)
-                let result = SecItemUpdate(
-                    keychainQuery as CFDictionary, [kSecValueData as String: data] as CFDictionary)
-                if result == errSecItemNotFound {
-                    var query = keychainQuery
-                    query[kSecValueData as String] = data
-                    query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-                    let status = SecItemAdd(query as CFDictionary, nil)
-                    guard status == errSecSuccess else {
-                        throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
-                    }
-                } else if result != errSecSuccess {
-                    throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
-                }
-            } else {
-                let result = SecItemDelete(keychainQuery as CFDictionary)
-                guard result == errSecSuccess || result == errSecItemNotFound else {
-                    throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
-                }
-            }
+            try credentials.write(next.map { try JSONEncoder().encode($0) })
             session = next
             user = next?.user
         }
