@@ -49,8 +49,7 @@ API pricing. Review them before configuring a provider or starting a match. Open
 can route requests to downstream model providers. You can use the ordinary game without
 configuring or using any AI service. There are no embedded API keys or shared credits.
 
-API keys are stored in the system Keychain with synchronization disabled and device-only
-accessibility. They are sent only in authentication headers to the configured HTTPS
+API keys are stored in the system Keychain with synchronization disabled. Entitled iOS/macOS builds use device-only Data Protection Keychain storage. Ad-hoc Mac previews without the required application identifier use the login Keychain instead; its backup/accessibility guarantees differ from device-only storage. Readable legacy keys are retained if migration cannot complete. They are sent only in authentication headers to the configured HTTPS
 endpoint. Changing endpoints requires re-entering the key; redirects are rejected.
 Settings and match history are local JSON files. History contains full AI responses,
 programs, feedback, the full shared prompt with its version, puzzle snapshots, model parameters and usage. From 0.3.2 it also

@@ -256,3 +256,17 @@ Publish a monitored contact and moderation process before release; a text filter
 
 [Cloudflare Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/)
 describes namespace isolation, local counters and their approximate enforcement.
+
+## macOS Keychain compatibility check
+
+The App Store uses device-only Data Protection Keychain storage. Ad-hoc DMG/local builds have no
+application-identifier entitlement and cannot use that store (`errSecMissingEntitlement`, -34018).
+On macOS only, this specific error falls back to the non-synchronizing login Keychain for read/write/delete.
+Other write/read authorization errors remain visible. Legacy reads remain usable when an attempted
+migration fails; the old item is removed only after a protected write succeeds.
+
+Run `scripts/check_keychain_macos.sh` on an unlocked Mac to test the actual Security framework with the
+DMG's `Config/MacPreview.entitlements`, or pass a built ad-hoc `.app` path to extract its actual entitlements. It creates an isolated ad-hoc sandbox, compiles the real
+`DeviceKeychain` source, and checks legacy read/create/update/delete with fresh throwaway values.
+It never reads existing provider/session items or automates the desktop. This complements fake-backend
+unit tests; it is a signing-configuration integration check, not an end-to-end test of the packaged DMG UI.

@@ -24,7 +24,8 @@ private struct SystemKeychain: KeychainBackend {
     func delete(_ query: [String: Any]) -> OSStatus { SecItemDelete(query as CFDictionary) }
 }
 
-/// Device-bound credentials. Legacy macOS items migrate only after a protected copy succeeds.
+/// Prefer device-bound credentials. Ad-hoc macOS apps without the required entitlement
+/// use the non-synchronizing login Keychain; legacy items migrate only after a protected copy succeeds.
 public struct DeviceKeychain {
     private let service: String
     private let account: String
@@ -56,35 +57,47 @@ public struct DeviceKeychain {
             throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
         }
     }
+    private func save(_ data: Data, query: [String: Any], deviceOnly: Bool) -> OSStatus {
+        var attributes: [String: Any] = [kSecValueData as String: data]
+        if deviceOnly {
+            attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        }
+        let status = backend.update(query, attributes: attributes)
+        return status == errSecItemNotFound
+            ? backend.add(query.merging(attributes) { _, new in new }) : status
+    }
     public func read() throws -> Data? {
         let (status, data) = backend.read(query)
         if status == errSecSuccess { return data }
-        try check(status, allowingMissing: true)
         #if os(macOS)
+            if status != errSecMissingEntitlement { try check(status, allowingMissing: true) }
             let (legacyStatus, legacyData) = backend.read(legacyQuery)
             try check(legacyStatus, allowingMissing: true)
             if let legacyData {
-                try write(legacyData)
+                // Migration is best effort; a signing/authorization failure must not hide a readable key.
+                if save(legacyData, query: query, deviceOnly: true) == errSecSuccess {
+                    try? check(backend.delete(legacyQuery), allowingMissing: true)
+                }
                 return legacyData
             }
+        #else
+            try check(status, allowingMissing: true)
         #endif
         return nil
     }
     public func write(_ data: Data?) throws {
-        if let data {
-            let attributes: [String: Any] = [
-                kSecValueData as String: data,
-                kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-            ]
-            let status = backend.update(query, attributes: attributes)
-            if status == errSecItemNotFound {
-                try check(backend.add(query.merging(attributes) { _, new in new }))
-            } else {
-                try check(status)
+        let status = data.map { save($0, query: query, deviceOnly: true) } ?? backend.delete(query)
+        #if os(macOS)
+            if status == errSecMissingEntitlement {
+                if let data {
+                    try check(save(data, query: legacyQuery, deviceOnly: false))
+                } else {
+                    try check(backend.delete(legacyQuery), allowingMissing: true)
+                }
+                return
             }
-        } else {
-            try check(backend.delete(query), allowingMissing: true)
-        }
+        #endif
+        try check(status, allowingMissing: data == nil)
         #if os(macOS)
             try check(backend.delete(legacyQuery), allowingMissing: true)
         #endif
