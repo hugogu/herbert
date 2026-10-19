@@ -50,6 +50,7 @@ extension ProblemAnswerStatus {
         case .failed: L10n.text("未通过")
         case .error: L10n.text("调用失败")
         case .cancelled: L10n.text("已停止")
+        case .userCancelled: L10n.text("已取消")
         case .burnout: "Burnout"
         case .overloaded: L10n.text("过载")
         case .timedout: L10n.text("超时")
@@ -67,6 +68,7 @@ extension ProblemAnswerStatus {
         case .failed: "xmark"
         case .error: "exclamationmark"
         case .cancelled: "stop.fill"
+        case .userCancelled: "stop.circle"
         case .burnout: "flame.fill"
         case .overloaded: "exclamationmark.triangle"
         case .timedout: "clock.badge.exclamationmark"
@@ -80,7 +82,7 @@ extension ProblemAnswerStatus {
         case .solved: Palette.mint
         case .failed, .error, .accessDenied: Palette.danger
         case .requesting, .judging, .burnout, .overloaded, .timedout, .tempUnavailable: Palette.amber
-        case .queued, .cancelled: Palette.muted
+        case .queued, .cancelled, .userCancelled: Palette.muted
         }
     }
 }

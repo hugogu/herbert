@@ -291,6 +291,8 @@ public struct TokenUsage: Codable, Equatable, Sendable {
 public enum ProblemAnswerStatus: String, Codable, Sendable {
     case queued, requesting, judging, solved, failed, error, cancelled, burnout
     case overloaded, timedout, tempUnavailable, accessDenied
+    /// The user cancelled this puzzle while it was generating; unlike `cancelled`, the match went on.
+    case userCancelled
 }
 
 public struct AnswerAttempt: Codable, Identifiable, Equatable, Sendable {

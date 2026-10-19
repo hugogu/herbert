@@ -281,6 +281,16 @@ final class BattlefieldModel: ObservableObject {
         } catch { message = battlefieldError(error) }
     }
 
+    func canCancel(_ result: CompetitionResult, entrant: UUID, problem: Int) -> Bool {
+        guard busy, let live = liveResult, live.id == result.id, live.status == .running else { return false }
+        return live.entrants.first { $0.id == entrant }?.answers.first { $0.id == problem }?.status == .requesting
+    }
+
+    func cancel(_ result: CompetitionResult, entrantID: UUID, problemID: Int) {
+        guard canCancel(result, entrant: entrantID, problem: problemID), let engine else { return }
+        Task { await engine.cancelAnswer(entrantID: entrantID, problemID: problemID) }
+    }
+
     private func receive(_ result: CompetitionResult, engine: BattlefieldEngine) async {
         guard self.engine === engine else { return }
         liveResult = result

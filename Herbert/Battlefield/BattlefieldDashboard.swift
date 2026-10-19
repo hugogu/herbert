@@ -307,46 +307,67 @@ struct BattlefieldDashboard: View {
         let label =
             problem.number + " " + entrant.entrant.preset.model.displayName + " " + answer.status.title + " " + score
         let showsRetry = ![.solved, .queued, .requesting, .judging].contains(answer.status)
+        let cancellable = battlefield.canCancel(result, entrant: entrant.id, problem: problem.id)
+        let hasAction = showsRetry || cancellable
         Button {
             selectedAnswer = BattlefieldAnswerSelection(
                 resultID: result.id, entrant: entrant, answer: answer, problem: problem,
                 scoring: result.scoringPolicy)
         } label: {
-            answerSummary(answer, attempt: attempt, score: score, showsAction: showsRetry)
+            // Judging keeps the slot so the attempt and score don't shift between attempts.
+            answerSummary(answer, attempt: attempt, score: score, showsAction: hasAction || answer.status == .judging)
                 .backgroundPreferenceValue(BattlefieldAnswerActionAnchor.self) { anchor in
                     GeometryReader { geometry in
                         Color.clear.contentShape(
-                            BattlefieldAnswerHitShape(actionSlot: anchor.map { geometry[$0] }), eoFill: true)
+                            BattlefieldAnswerHitShape(actionSlot: hasAction ? anchor.map { geometry[$0] } : nil),
+                            eoFill: true)
                     }
                 }
         }.buttonStyle(.plain)
             .accessibilityIdentifier("answer-\(entrant.entrant.preset.model.id)-\(problem.id)")
             .accessibilityLabel(Text(label))
             .overlayPreferenceValue(BattlefieldAnswerActionAnchor.self) { anchor in
-                if let anchor {
+                if let anchor, hasAction {
                     GeometryReader { geometry in
-                        Button {
-                            battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
-                        } label: {
-                            Image(systemName: retryPending ? "clock.arrow.circlepath" : "arrow.clockwise")
-                                .frame(
-                                    width: BattlefieldAnswerHitShape.actionTarget,
-                                    height: BattlefieldAnswerHitShape.actionTarget
-                                )
-                                .contentShape(Rectangle())
-                        }.buttonStyle(.plain).foregroundStyle(Palette.mint)
-                            .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
-                            .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
-                            .accessibilityLabel(
-                                L10n.text("重试 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
-                            )
-                            .accessibilityIdentifier("retry-\(entrant.entrant.preset.model.id)-\(problem.id)")
-                            .position(x: geometry[anchor].midX, y: geometry[anchor].midY)
+                        Group {
+                            if cancellable {
+                                Button {
+                                    battlefield.cancel(result, entrantID: entrant.id, problemID: problem.id)
+                                } label: {
+                                    actionIcon("stop.circle")
+                                }.buttonStyle(.plain).foregroundStyle(Palette.danger)
+                                    .help(L10n.text("取消此题，模型继续作答下一题。之后可以手动重试。"))
+                                    .accessibilityLabel(
+                                        L10n.text(
+                                            "取消 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
+                                    )
+                                    .accessibilityIdentifier("cancel-\(entrant.entrant.preset.model.id)-\(problem.id)")
+                            } else {
+                                Button {
+                                    battlefield.retry(result, entrantID: entrant.id, problemID: problem.id)
+                                } label: {
+                                    actionIcon(retryPending ? "clock.arrow.circlepath" : "arrow.clockwise")
+                                }.buttonStyle(.plain).foregroundStyle(Palette.mint)
+                                    .disabled(!battlefield.canRetry(result, entrant: entrant.id, problem: problem.id))
+                                    .help(L10n.text("追加一次尝试，沿用原设置与剩余预算。"))
+                                    .accessibilityLabel(
+                                        L10n.text(
+                                            "重试 %@ 的 %@", entrant.entrant.preset.model.displayName, problem.number)
+                                    )
+                                    .accessibilityIdentifier("retry-\(entrant.entrant.preset.model.id)-\(problem.id)")
+                            }
+                        }.position(x: geometry[anchor].midX, y: geometry[anchor].midY)
                     }
                 }
             }
             .frame(width: 248)
             .background(answer.status.color.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func actionIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .frame(width: BattlefieldAnswerHitShape.actionTarget, height: BattlefieldAnswerHitShape.actionTarget)
+            .contentShape(Rectangle())
     }
 
     private func preview(_ program: String) -> String {
@@ -431,7 +452,7 @@ private struct BattlefieldAnswerView: View {
                         let current = selection.answer.status
                         if [
                             .overloaded, .timedout, .tempUnavailable, .accessDenied, .burnout, .solved, .failed,
-                            .cancelled, .error,
+                            .cancelled, .userCancelled, .error,
                         ].contains(current) {
                             return current
                         }
@@ -480,8 +501,11 @@ private struct BattlefieldAnswerView: View {
                             } else if attempt.error != nil || providerFailed(attempt) {
                                 BattlefieldNotice(text: L10n.text("请求已结束。下方是中断前收到的部分内容，这些文字不代表仍在生成。"))
                                     .accessibilityIdentifier("answer-interrupted-\(attempt.id)")
-                            } else if attempt.evaluation == nil && selection.answer.status == .cancelled {
+                            } else if attempt.evaluation == nil,
+                                [.cancelled, .userCancelled].contains(selection.answer.status)
+                            {
                                 BattlefieldNotice(text: L10n.text("请求已停止，已收到的部分内容已保留。"))
+                                    .accessibilityIdentifier("answer-stopped-\(attempt.id)")
                             }
                             Text(
                                 (attempt.usage.estimated || attempt.usage.partial ? "≈ " : "")

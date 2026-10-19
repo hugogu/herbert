@@ -5,6 +5,10 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- AI Battlefield can cancel one puzzle while a model is generating it. The stop button at the end of
+  the answer's first line ends that request and keeps its partial output; the model moves on to its
+  next puzzle and the match continues. The answer shows Canceled and can be retried manually, during
+  the match or afterwards. Stopping the whole match still marks unfinished answers as Stopped.
 - AI Battlefield's retry button works on iPad and iPhone. It moves to the trailing end of an answer's
   first line with a 44 pt target; before, the answer cell took every tap aimed at it.
 - AI Battlefield model headers and share images show average output speed in place of the input

@@ -113,6 +113,21 @@ public actor BattlefieldEngine {
         if workers[entrantID] == nil { launchWorker(participant, retriesOnly: true) }
     }
 
+    /// Cancel the puzzle a model is generating, keeping its partial output; the model moves on to its next puzzle
+    /// and a manual retry can resume this one. Returns false once the puzzle is no longer generating.
+    @discardableResult
+    public func cancelAnswer(entrantID: UUID, problemID: Int) async -> Bool {
+        guard result?.status == .running,
+            let e = result!.entrants.firstIndex(where: { $0.id == entrantID }),
+            let p = result!.problems.firstIndex(where: { $0.id == problemID }),
+            result!.entrants[e].answers[p].status == .requesting
+        else { return false }
+        result!.entrants[e].answers[p].end(.userCancelled)
+        requests[entrantID]?.cancel()
+        await publish()
+        return true
+    }
+
     /// Resume a saved result with one extra attempt, retaining snapshots, scores and cumulative budgets.
     public func retry(
         _ saved: CompetitionResult, participant: CompetitionParticipant, problemID: Int,
@@ -258,7 +273,7 @@ public actor BattlefieldEngine {
     }
 
     private func record(_ progress: AIProgress, entrant: Int, problem: Int, attempt: Int) async {
-        guard await active(), result!.entrants[entrant].answers[problem].status != .burnout,
+        guard await active(), ![.burnout, .userCancelled].contains(result!.entrants[entrant].answers[problem].status),
             result!.entrants[entrant].answers[problem].attempts.indices.contains(attempt)
         else {
             return
@@ -317,7 +332,8 @@ public actor BattlefieldEngine {
                 // Only a rejection of the request itself qualifies: not an overload, a timeout or an access error.
                 guard resends < 2, let current = cap, [200, 400, 422].contains(error.status),
                     case .generic = ProviderDiagnostics.classify(error),
-                    error.partialReply.map({ $0.text.isEmpty && $0.reasoning == nil }) ?? true, await active()
+                    error.partialReply.map({ $0.text.isEmpty && $0.reasoning == nil }) ?? true, await active(),
+                    result!.entrants[e].answers[p].status == .requesting
                 else { throw error }
                 if let limit = ProviderDiagnostics.outputTokenLimit(in: error.providerResponse), limit < current {
                     (correction, cap) = (.limit(limit), limit)
@@ -388,13 +404,15 @@ public actor BattlefieldEngine {
                 result!.entrants[e].answers[p].attempts.append(attempt)
                 result!.entrants[e].answers[p].status = .requesting
                 await publish()
+                // A cancellation while publishing must not send the request.
+                if result!.entrants[e].answers[p].status == .userCancelled { break }
                 do {
                     try Task.checkCancellation()
                     let reply = try await complete(
                         participant, messages: messages, cap: cap, guessed: guessed, entrant: e, problem: p, attempt: a)
                     requests[participant.entrant.id] = nil
                     guard await active() else { break }
-                    if result!.entrants[e].answers[p].status == .burnout { break }
+                    if [.burnout, .userCancelled].contains(result!.entrants[e].answers[p].status) { break }
                     result!.entrants[e].answers[p].attempts[a].usage = reply.usage
                     result!.entrants[e].answers[p].attempts[a].finishReason = reply.finishReason
                     result!.entrants[e].answers[p].attempts[a].response = reply.text
@@ -454,6 +472,7 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[p].status =
                         evaluation.accepted ? .solved : (a + 1 == maxAttempts ? .failed : .requesting)
                     await publish()
+                    if result!.entrants[e].answers[p].status == .userCancelled { break }
                     if !evaluation.accepted && remainingBudget(entrant: e, problem: p) == 0 {
                         burnOut(entrant: e, problem: p)
                         await publish()
@@ -468,7 +487,7 @@ public actor BattlefieldEngine {
                 } catch {
                     requests[participant.entrant.id] = nil
                     guard result?.status == .running else { return }
-                    if result!.entrants[e].answers[p].status == .burnout { break }
+                    if [.burnout, .userCancelled].contains(result!.entrants[e].answers[p].status) { break }
                     if let partial = (error as? AIHTTPError)?.partialReply {
                         result!.entrants[e].answers[p].attempts[a].response = partial.text
                         result!.entrants[e].answers[p].attempts[a].reasoning = partial.reasoning

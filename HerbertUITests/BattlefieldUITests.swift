@@ -852,6 +852,58 @@ final class BattlefieldUITests: XCTestCase {
     }
 
     @MainActor
+    func testCancelGeneratingPuzzleShowsCanceledAndAllowsManualRetry() {
+        let app = launch(streamErrors: true)
+        openSection("AI Battlefield", in: app)
+        reveal("chooseBattlefieldProblems", in: app).battlefieldTap()
+        app.buttons["clearBattlefieldProblems"].battlefieldTap()
+        app.descendants(matching: .any)["problemChoice-10001"].firstMatch.battlefieldTap()
+        app.buttons["Close"].battlefieldTap()
+        reveal("startBattlefield", in: app).battlefieldTap()
+
+        let answer = reveal("answer-fixture-1-10001", in: app)
+        XCTAssertTrue(waitUntil(answer, "label CONTAINS %@", "Generating"), answer.label)
+        XCTAssertFalse(app.buttons["retry-fixture-1-10001"].exists)
+        reveal("cancel-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(waitUntil(answer, "label CONTAINS %@", "Canceled"), answer.label)
+        XCTAssertFalse(app.buttons["cancel-fixture-1-10001"].exists)
+        // Only the cancelled puzzle stops; the other model and the match keep running.
+        XCTAssertFalse(app.buttons["answer-fixture-2-10001"].label.contains("Canceled"))
+        XCTAssertTrue(app.buttons["stopBattlefield"].exists)
+
+        answer.coordinate(withNormalizedOffset: CGVector(dx: 0.7, dy: 0.75)).tap()
+        XCTAssertTrue(app.staticTexts["Canceled"].waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(app.descendants(matching: .any)["answer-stopped-1"].firstMatch.exists)
+        closeTopSheet(in: app)
+
+        let retry = reveal("retry-fixture-1-10001", in: app)
+        XCTAssertTrue(retry.isEnabled)
+        retry.battlefieldTap()
+        XCTAssertTrue(waitUntil(answer, "label CONTAINS %@", "Generating"), answer.label)
+        // The middle of a generating cell opens the answer; only the trailing button cancels.
+        answer.battlefieldTap()
+        XCTAssertTrue(app.buttons["closeBattlefieldSheet"].waitForExistence(timeout: 5), app.debugDescription)
+        closeTopSheet(in: app)
+        XCTAssertTrue(answer.label.contains("Generating"), answer.label)
+        reveal("cancel-fixture-1-10001", in: app).battlefieldTap()
+        XCTAssertTrue(waitUntil(answer, "label CONTAINS %@", "Canceled"), answer.label)
+
+        app.buttons["stopBattlefield"].battlefieldTap()
+        XCTAssertTrue(app.staticTexts["Stopped by user"].waitForExistence(timeout: 5))
+        XCTAssertTrue(answer.label.contains("Canceled"), answer.label)
+        XCTAssertFalse(reveal("answer-fixture-2-10001", in: app).label.contains("Canceled"))
+        XCTAssertTrue(waitUntil(reveal("retry-fixture-1-10001", in: app), "isEnabled == true"))
+        app.terminate()
+    }
+
+    @MainActor
+    private func waitUntil(_ element: XCUIElement, _ format: String, _ arguments: Any...) -> Bool {
+        let expectation = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: format, argumentArray: arguments), object: element)
+        return XCTWaiter.wait(for: [expectation], timeout: 5) == .completed
+    }
+
+    @MainActor
     private func toggle(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
         #if os(macOS)
             let checkbox = app.checkBoxes[identifier].firstMatch
