@@ -891,6 +891,8 @@ final class AITransportTests: XCTestCase {
         let answer = try XCTUnwrap(result.entrants.first?.answers.first)
         XCTAssertEqual(answer.status, .solved)
         XCTAssertEqual(answer.attempts.map(\.requestedMaxOutputTokens), [393_216])
+        XCTAssertTrue(answer.attempts[0].providerResponse?.contains("[1, 393216]") == true)
+        XCTAssertNil(answer.attempts[0].error)
         let asked = try XCTUnwrap(
             JSONSerialization.jsonObject(with: XCTUnwrap(rejection.bodies.first)) as? [String: Any])
         XCTAssertEqual(asked["max_tokens"] as? Int, BattlefieldEngine.unlimitedOutputCap)

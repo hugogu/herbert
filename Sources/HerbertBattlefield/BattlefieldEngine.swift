@@ -317,6 +317,8 @@ public actor BattlefieldEngine {
                 }
                 resends += 1
                 result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens = cap
+                // Show why the cap differs from the one first asked for.
+                result!.entrants[e].answers[p].attempts[a].providerResponse = error.providerResponse
             }
         }
     }

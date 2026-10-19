@@ -46,8 +46,8 @@ request without stating a maximum does Herbert fall back to the provider's defau
 Completions omits the cap, and Anthropic Messages, which requires `max_tokens`, uses
 65,536. Only a rejection of the request itself before any output counts, never an
 overload, timeout or access error, and only the provider's error text is read. A
-correction is kept only once the provider accepts it, and attempt details show the cap
-actually sent. Manual retries of a saved match go through the same correction.
+correction is kept only once the provider accepts it. Attempt details show the cap
+actually sent and, under provider error details, the rejection that changed it. Manual retries of a saved match go through the same correction.
 
 Automatic thinking is **enabled by default** in Model Settings. OpenRouter uses
 `reasoning: {enabled: true, effort: ...}` for models advertising reasoning support,
