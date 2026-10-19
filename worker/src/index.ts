@@ -160,7 +160,8 @@ async function route(request: Request, env: Env): Promise<Response> {
     const ipKey = await hash(
         `${env.SESSION_SECRET}:${request.headers.get("CF-Connecting-IP") ?? "unknown"}`,
     );
-    await rateLimit(env, `ip:${ipKey}`, 120);
+    if (!(await env.IP_LIMITER.limit({ key: ipKey })).success)
+        throw new HTTPError(429, "Too many requests; retry in 60 seconds");
     if (path.startsWith("/admin/")) return admin(request, env, path);
     if (method === "GET" && path === "/v1/problems")
         return json({
@@ -311,11 +312,11 @@ async function route(request: Request, env: Env): Promise<Response> {
         const data = await env.DB.prepare(
             `WITH current_puzzles(problem_id,puzzle_version) AS (
               SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?))
-            SELECT s.problem_id,s.puzzle_version,MIN(s.bytes) bytes
-            FROM submissions s JOIN current_puzzles p
+            SELECT s.problem_id,s.puzzle_version,MIN(b.min_accepted_bytes) bytes
+            FROM best_submissions b JOIN submissions s ON s.submission_id=b.submission_id JOIN current_puzzles p
               ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version
               JOIN users u ON u.user_id=s.user_id
-            WHERE s.accepted=1 AND s.hidden_at IS NULL AND s.rules_version=? AND u.status='active'
+            WHERE b.min_accepted_bytes IS NOT NULL AND s.rules_version=? AND u.status='active'
             GROUP BY s.problem_id,s.puzzle_version ORDER BY s.problem_id`,
         )
             .bind(valid, RULES_VERSION)
@@ -336,13 +337,12 @@ async function route(request: Request, env: Env): Promise<Response> {
         );
         const data = await env.DB.prepare(
             `WITH attempts AS (
-              SELECT s.user_id,u.display_name,s.points,s.bytes,s.accepted,s.lit_targets,s.target_count,s.steps,
-                ROW_NUMBER() OVER(PARTITION BY s.user_id ORDER BY s.points DESC,s.bytes,s.steps,s.created_at,s.submission_id) attempt
-              FROM submissions s JOIN users u ON u.user_id=s.user_id
-              WHERE s.problem_id=? AND s.puzzle_version=? AND s.rules_version=? AND s.hidden_at IS NULL AND u.status='active')
-            SELECT ROW_NUMBER() OVER(ORDER BY points DESC,bytes,user_id) rank,
+              SELECT s.user_id,u.display_name,s.points,s.bytes,s.accepted,s.lit_targets,s.target_count,s.steps,s.created_at
+              FROM best_submissions b JOIN submissions s ON s.submission_id=b.submission_id JOIN users u ON u.user_id=s.user_id
+              WHERE s.problem_id=? AND s.puzzle_version=? AND s.rules_version=? AND u.status='active')
+            SELECT ROW_NUMBER() OVER(ORDER BY accepted DESC,points DESC,bytes,steps,created_at,user_id) rank,
               user_id,display_name,points,bytes,accepted,lit_targets,target_count,steps
-            FROM attempts WHERE attempt=1 ORDER BY points DESC,bytes,user_id LIMIT ?`,
+            FROM attempts ORDER BY accepted DESC,points DESC,bytes,steps,created_at,user_id LIMIT ?`,
         )
             .bind(puzzle.id, puzzle.puzzle_version, RULES_VERSION, limit)
             .all();
@@ -364,10 +364,10 @@ async function route(request: Request, env: Env): Promise<Response> {
         const data = await env.DB.prepare(
             `WITH current_puzzles(problem_id,puzzle_version) AS (
               SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?)),
-      best AS (SELECT s.user_id,s.problem_id,MAX(s.points) points,MAX(s.accepted) accepted FROM submissions s JOIN current_puzzles p
-      ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version WHERE s.hidden_at IS NULL AND s.rules_version=? GROUP BY s.user_id,s.problem_id),
-      totals AS (SELECT u.user_id,u.display_name,ROUND(SUM(b.points),2) points,SUM(b.accepted) solved FROM best b JOIN users u ON u.user_id=b.user_id WHERE u.status='active' GROUP BY u.user_id)
-      SELECT ROW_NUMBER() OVER(ORDER BY points DESC,solved DESC,user_id) rank,*,ROUND(points/?,2) percentage FROM totals ORDER BY points DESC,solved DESC,user_id LIMIT ?`,
+      best AS (SELECT s.user_id,s.problem_id,s.points,s.accepted,s.steps,s.created_at FROM best_submissions b JOIN submissions s ON s.submission_id=b.submission_id JOIN current_puzzles p
+      ON s.problem_id=p.problem_id AND s.puzzle_version=p.puzzle_version WHERE s.rules_version=?),
+      totals AS (SELECT u.user_id,u.display_name,ROUND(SUM(b.points),2) points,SUM(b.accepted) solved,SUM(b.steps) steps,MAX(b.created_at) achieved_at FROM best b JOIN users u ON u.user_id=b.user_id WHERE u.status='active' GROUP BY u.user_id)
+      SELECT ROW_NUMBER() OVER(ORDER BY points DESC,solved DESC,steps,achieved_at,user_id) rank,user_id,display_name,points,solved,ROUND(points/?,2) percentage FROM totals ORDER BY points DESC,solved DESC,steps,achieved_at,user_id LIMIT ?`,
         )
             .bind(valid, RULES_VERSION, puzzles.length, Math.floor(limit))
             .all();

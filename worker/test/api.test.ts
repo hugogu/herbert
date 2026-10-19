@@ -18,6 +18,7 @@ import { accessToken, Env, hash, now, seal, unseal } from "../src/auth";
 import puzzles from "../../Sources/HerbertCore/Resources/original-problems.json";
 const bindings = env as unknown as Env & { TEST_MIGRATIONS: D1Migration[] };
 const url = "https://api.example.test";
+let testIP = "test";
 async function request(
     path: string,
     method = "GET",
@@ -31,6 +32,7 @@ async function request(
             body: body === undefined ? undefined : JSON.stringify(body),
             headers: {
                 "Content-Type": "application/json",
+                "CF-Connecting-IP": testIP,
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 ...headers,
             },
@@ -87,7 +89,9 @@ async function appleJWT(
 }
 let mockFetch: ReturnType<typeof vi.spyOn>;
 beforeEach(async () => {
-    bindings.TOKEN_ENCRYPTION_KEY = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    testIP = crypto.randomUUID();
+    bindings.TOKEN_ENCRYPTION_KEY =
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     await bindings.DB.batch(
         [
             "apple_revocations",
@@ -108,6 +112,97 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 describe("Worker + real D1 bindings", () => {
+    it("public reads do not write D1 rate-limit records or scan submission history", async () => {
+        const token = await user();
+        await submit(token);
+        const before = await bindings.DB.prepare(
+            "SELECT COUNT(*) count FROM rate_limits",
+        ).first();
+        for (const path of [
+            "/v1/problems",
+            "/v1/problems/bests",
+            "/v1/leaderboard",
+            `/v1/problems/${puzzles[0].id}/leaderboard`,
+        ]) {
+            expect((await request(path)).status).toBe(200);
+        }
+        expect(
+            await bindings.DB.prepare(
+                "SELECT COUNT(*) count FROM rate_limits",
+            ).first(),
+        ).toEqual(before);
+        expect(
+            await bindings.DB.prepare(
+                "SELECT COUNT(*) count FROM best_submissions",
+            ).first(),
+        ).toEqual({ count: 1 });
+    });
+    it("returns retry guidance when the edge IP limiter rejects a request", async () => {
+        vi.spyOn(bindings.IP_LIMITER, "limit").mockResolvedValueOnce({
+            success: false,
+        });
+        const response = await request("/v1/problems");
+        expect(response.status).toBe(429);
+        expect(response.headers.get("Retry-After")).toBe("60");
+    });
+    it("logs unexpected errors with a reference without exposing sensitive exception messages", async () => {
+        const log = vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.spyOn(bindings.DB, "prepare").mockImplementationOnce(() => {
+            throw new Error("private-source-and-token");
+        });
+        const response = await request("/v1/leaderboard");
+        expect(response.status).toBe(500);
+        const data = await response.json<{ code: string; reference: string }>();
+        expect(data.code).toBe("internal_error");
+        expect(JSON.parse(log.mock.calls[0][0]).reference).toBe(data.reference);
+        expect(
+            JSON.stringify(log.mock.calls) + JSON.stringify(data),
+        ).not.toContain("private-source-and-token");
+    });
+    it("prefers a complete answer over a shorter partial one and keeps totals from the same attempt", async () => {
+        const alice = await user();
+        await submit(alice, { request_id: "partial", source: "r" });
+        await bindings.DB.prepare(
+            "UPDATE submissions SET points=95,accepted=0,lit_targets=19,target_count=20 WHERE request_id='partial'",
+        ).run();
+        await submit(alice, { request_id: "complete", source: "s" });
+        const board = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+        ).json<{ entries: unknown[] }>();
+        expect(board.entries[0]).toMatchObject({ accepted: 1, points: 80 });
+        expect(await (await request("/v1/leaderboard")).json()).toMatchObject({
+            entries: [{ points: 80, solved: 1 }],
+        });
+        await bindings.DB.prepare(
+            "UPDATE submissions SET hidden_at=? WHERE request_id='complete'",
+        )
+            .bind(now())
+            .run();
+        expect(
+            await (
+                await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+            ).json(),
+        ).toMatchObject({ entries: [{ accepted: 0, points: 95 }] });
+        await bindings.DB.prepare(
+            "UPDATE submissions SET hidden_at=NULL WHERE request_id='complete'",
+        ).run();
+        expect(
+            await (
+                await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+            ).json(),
+        ).toMatchObject({ entries: [{ accepted: 1, points: 80 }] });
+    });
+    it("breaks equal-score ties by instructions then earliest achievement, before account IDs", async () => {
+        await submit(await user("a"));
+        await submit(await user("z"));
+        await bindings.DB.prepare(
+            "UPDATE submissions SET created_at=10 WHERE user_id='z'",
+        ).run();
+        const board = await (
+            await request(`/v1/problems/${puzzles[0].id}/leaderboard`)
+        ).json<{ entries: { user_id: string }[] }>();
+        expect(board.entries.map((e) => e.user_id)).toEqual(["z", "a"]);
+    });
     it.each(["network", "invalid_client", "rotated_key"])(
         "deletes locally despite Apple %s failures and bounds background retries",
         async (failure) => {

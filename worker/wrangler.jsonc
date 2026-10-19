@@ -5,6 +5,13 @@
     "compatibility_date": "2026-10-10",
     "compatibility_flags": ["nodejs_compat"],
     "limits": { "cpu_ms": 1000 },
+    "ratelimits": [
+        {
+            "name": "IP_LIMITER",
+            "namespace_id": "20401",
+            "simple": { "limit": 120, "period": 60 },
+        },
+    ],
     "d1_databases": [
         {
             "binding": "DB",
@@ -26,6 +33,13 @@
     "env": {
         "staging": {
             "name": "herbert-leaderboard-staging",
+            "ratelimits": [
+                {
+                    "name": "IP_LIMITER",
+                    "namespace_id": "20402",
+                    "simple": { "limit": 120, "period": 60 },
+                },
+            ],
             "limits": { "cpu_ms": 1000 },
             "d1_databases": [
                 {
@@ -48,6 +62,13 @@
         },
         "production": {
             "name": "herbert-leaderboard",
+            "ratelimits": [
+                {
+                    "name": "IP_LIMITER",
+                    "namespace_id": "20403",
+                    "simple": { "limit": 120, "period": 60 },
+                },
+            ],
             "limits": { "cpu_ms": 1000 },
             "d1_databases": [
                 {
