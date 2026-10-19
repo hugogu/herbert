@@ -1,1 +1,1 @@
-Write tiny programs and light every target. 30 original puzzles take you from a single step to recursion, and the optional AI Battlefield lets models try them too.
+Write tiny programs and light every target. 50 original puzzles take you from a single step to recursion, and the optional AI Battlefield lets models try them too.

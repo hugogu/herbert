@@ -3,7 +3,7 @@ Herbot Bot is a programming puzzle game about one idea: say more with less.
 Guide a little robot across a 25 × 25 board and light every target. You describe the route in H, a tiny language with three commands: s steps forward, l turns left and r turns right. Every letter and number costs one byte, so each puzzle asks for a program that is not only correct, but short.
 
 LEARN BY PLAYING
-• 30 original puzzles in six chapters, from a single step to recursive systems
+• 50 original puzzles in ten chapters, from a single step to recursive systems
 • Discover procedures, parameters, commands passed as arguments and recursion
 • Every puzzle has a clear goal and two optional hints, never a full answer
 • A built-in guide explains the whole language with examples

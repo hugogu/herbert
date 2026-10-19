@@ -50,7 +50,7 @@ struct GuideView: View {
                     Text("致谢与来源").font(.headline).foregroundStyle(Palette.ink)
                     #if APP_STORE
                         Text(
-                            "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 30 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。"
+                            "Herbert 挑战最初由 Wild Noodle Corporation 创作，H 语言由其创始人 Brian Conte 开发。本应用依据公开规则独立实现；本版本的 50 道关卡由本项目独立设计，非 Wild Noodle 或 Microsoft 官方作品。"
                         )
                     #else
                         Text(

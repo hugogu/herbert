@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 
-from advanced_course import LESSONS as ADVANCED_LESSONS
+from expert_course import LESSONS as ADVANCED_LESSONS
 from generate_original_problems import LESSONS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,12 +39,13 @@ def render(current, previous):
     data = []
     for problem in [p for p in current if p['lesson']['order'] in (4, 5, 6) or p['lesson']['order'] >= 10]:
         order = problem['lesson']['order']
-        before = old[order]
+        before = old.get(order)
         title, goal, _ = (LESSONS + ADVANCED_LESSONS)[order-1]
         counts = lambda p: {symbol: sum(row.count(symbol) for row in p['rows']) for symbol in 'xo*'}
         data.append(dict(order=order, name=title[1], goal=goal[1], limit=problem['byteLimit'],
-                         after=board_svg(problem['rows']), before=board_svg(before['rows']),
-                         counts=counts(problem), oldCounts=counts(before)))
+                         after=board_svg(problem['rows']),
+                         before=board_svg(before['rows']) if before else '<p>新增关卡</p>',
+                         counts=counts(problem), oldCounts=counts(before) if before else None))
     payload = json.dumps(data, ensure_ascii=False).replace('<', '\u003c')
     cards = ''.join(f'<button class="thumb" data-index="{i}">{p["after"]}'
                     f'<span>L{p["order"]:02} · {html.escape(p["name"])}</span></button>' for i, p in enumerate(data))
@@ -66,8 +67,8 @@ select{flex:1;min-width:240px}.comparison{display:grid;grid-template-columns:1fr
 .wall{background:#435e5e;border-radius:1px}.trap{background:none;border:2px solid #9b7369}
 .notice{font-size:13px;color:#617773;border-top:1px solid #dce3db;margin-top:32px;padding-top:16px}
 @media(max-width:650px){main{padding:20px 14px}.comparison{grid-template-columns:1fr}.panel{padding:12px}}
-</style><main><h1>Herbert · 开放几何关卡</h1>
-<p>L04–L06 重构；L10–L30 加强断续墙段和陷阱带，L23–L30 保留目标与起点。点击缩略图查看改版前后。</p>
+</style><main><h1>Herbert · 课程棋盘审阅</h1>
+<p>点击缩略图查看棋盘与学习目标；L41–L50 为新增的变换、逆程与多层递归综合课程。</p>
 <div class="bar"><button id="prev" aria-label="上一关">←</button><select id="select" aria-label="选择关卡"></select><button id="next" aria-label="下一关">→</button></div>
 <div class="legend"><span><i class="dot"></i>目标</span><span><i class="dot wall"></i>墙：挡住移动</span><span><i class="dot trap"></i>陷阱：可进入，但会熄灭已亮目标</span></div>
 <h2 id="name"></h2><p id="goal"></p><div class="comparison">
@@ -82,7 +83,7 @@ function show(i){i=(i+data.length)%data.length;select.value=i;const p=data[i];
 document.getElementById('name').textContent=`L${String(p.order).padStart(2,'0')} · ${p.name}`;
 document.getElementById('goal').textContent=p.goal+`（${p.limit} bytes）`;
 for(const key of ['before','after'])document.getElementById(key).innerHTML=p[key];
-document.getElementById('oldStats').textContent=`墙 ${p.oldCounts.x} · 陷阱 ${p.oldCounts['*']} · 目标 ${p.oldCounts.o}`;
+document.getElementById('oldStats').textContent=p.oldCounts?`墙 ${p.oldCounts.x} · 陷阱 ${p.oldCounts['*']} · 目标 ${p.oldCounts.o}`:'新增关卡';
 document.getElementById('stats').textContent=`墙 ${p.counts.x} · 陷阱 ${p.counts['*']} · 目标 ${p.counts.o}`;}
 select.onchange=()=>show(+select.value);document.getElementById('prev').onclick=()=>show(+select.value-1);
 document.getElementById('next').onclick=()=>show(+select.value+1);
@@ -99,7 +100,7 @@ def main():
     previous = json.loads(subprocess.check_output(['git', 'show', f'{args.baseline}:{CATALOG}'], cwd=ROOT))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(render(current, previous))
-    print(f'Wrote {args.output}: L04–L06 and L10–L30, offline before/after review, no answers or app screenshots.')
+    print(f'Wrote {args.output}: offline curriculum review, including new L41–L50, no answers or app screenshots.')
 
 
 if __name__ == '__main__':
