@@ -1,6 +1,14 @@
 import { type Env, HTTPError, now, revokeApple } from "./auth";
 
-const maximumAttempts = 8;
+const maximumAttempts = 10;
+const maximumAge = 7 * 86400;
+const configurationErrors = new Set([
+    "apple_credentials_missing",
+    "apple_private_key_invalid",
+    "apple_client_invalid",
+    "token_encryption_missing",
+    "token_encryption_invalid",
+]);
 
 // A failed external revocation must never prevent local account erasure.
 export async function drainRevocations(env: Env) {
@@ -11,40 +19,71 @@ export async function drainRevocations(env: Env) {
         .all<{ revocation_id: string }>();
     for (const item of due.results) {
         const job = await env.DB.prepare(
-            "UPDATE apple_revocations SET attempts=attempts+1,lease_until=? WHERE revocation_id=? AND status='pending' AND lease_until<=? AND next_attempt_at<=? RETURNING cipher,attempts",
+            "UPDATE apple_revocations SET attempts=attempts+1,lease_until=? WHERE revocation_id=? AND status='pending' AND lease_until<=? AND next_attempt_at<=? RETURNING cipher,attempts,created_at",
         )
             .bind(now() + 120, item.revocation_id, now(), now())
-            .first<{ cipher: string; attempts: number }>();
+            .first<{ cipher: string; attempts: number; created_at: number }>();
         if (!job) continue;
         let status = "revoked";
-        try {
-            if (job.attempts > maximumAttempts) status = "exhausted";
-            else await revokeApple(job.cipher, env);
-        } catch (error) {
-            // Revocation transport/configuration errors are retriable. Ciphertexts
-            // that no longer decrypt after key rotation cannot be recovered.
-            status =
-                error instanceof HTTPError
-                    ? job.attempts < maximumAttempts
-                        ? "pending"
-                        : "exhausted"
-                    : "unrevocable";
-            console.warn(
+        let attempts = job.attempts;
+        const expiresAt = job.created_at + maximumAge;
+        let nextAttempt = now() + Math.min(86400, 900 * 2 ** (attempts - 1));
+        if (now() >= expiresAt || attempts > maximumAttempts) {
+            status = "exhausted";
+            attempts--;
+            console.error(
                 JSON.stringify({
-                    event: "apple_revocation_failed",
+                    event: "apple_revocation_expired",
                     reference: item.revocation_id,
-                    status,
-                    attempt: job.attempts,
+                    attempt: attempts,
                 }),
             );
+        } else {
+            try {
+                await revokeApple(job.cipher, env);
+            } catch (error) {
+                if (
+                    error instanceof HTTPError &&
+                    configurationErrors.has(error.code ?? "")
+                ) {
+                    // Operator-fixable outages do not consume the retry allowance.
+                    attempts--;
+                    status = "pending";
+                    nextAttempt = now() + 3600;
+                    console.error(
+                        JSON.stringify({
+                            event: "apple_revocation_configuration_error",
+                            code: error.code,
+                            reference: item.revocation_id,
+                            attempt: attempts,
+                        }),
+                    );
+                } else {
+                    status =
+                        error instanceof HTTPError
+                            ? attempts < maximumAttempts
+                                ? "pending"
+                                : "exhausted"
+                            : "unrevocable";
+                    console.warn(
+                        JSON.stringify({
+                            event: "apple_revocation_failed",
+                            reference: item.revocation_id,
+                            status,
+                            attempt: attempts,
+                        }),
+                    );
+                }
+            }
         }
         await env.DB.prepare(
-            "UPDATE apple_revocations SET status=?,cipher=?,next_attempt_at=?,lease_until=0,finished_at=? WHERE revocation_id=?",
+            "UPDATE apple_revocations SET status=?,cipher=?,attempts=?,next_attempt_at=?,lease_until=0,finished_at=? WHERE revocation_id=?",
         )
             .bind(
                 status,
                 status === "pending" ? job.cipher : null,
-                now() + Math.min(21600, 60 * 2 ** (job.attempts - 1)),
+                attempts,
+                Math.min(expiresAt, nextAttempt),
                 status === "pending" ? null : now(),
                 item.revocation_id,
             )

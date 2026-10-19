@@ -244,7 +244,7 @@ describe("Worker + real D1 bindings", () => {
                 attempts: number;
                 next_attempt_at: number;
             }>();
-            expect(job!.attempts).toBe(1);
+            expect(job!.attempts).toBe(failure === "invalid_client" ? 0 : 1);
             expect(job!.status).toBe(
                 failure === "rotated_key" ? "unrevocable" : "pending",
             );
@@ -257,7 +257,7 @@ describe("Worker + real D1 bindings", () => {
                     await bindings.DB.prepare(
                         "SELECT attempts FROM apple_revocations",
                     ).first(),
-                ).toEqual({ attempts: 1 });
+                ).toEqual({ attempts: failure === "invalid_client" ? 0 : 1 });
                 await bindings.DB.prepare(
                     "UPDATE apple_revocations SET next_attempt_at=0",
                 ).run();
@@ -269,11 +269,17 @@ describe("Worker + real D1 bindings", () => {
                     await bindings.DB.prepare(
                         "SELECT status,cipher,attempts FROM apple_revocations",
                     ).first(),
-                ).toEqual({ status: "revoked", cipher: null, attempts: 2 });
+                ).toEqual({
+                    status: "revoked",
+                    cipher: null,
+                    attempts: failure === "invalid_client" ? 1 : 2,
+                });
             }
         },
     );
-    it("gives up after eight Apple failures without retaining credentials", async () => {
+    it("gives up after ten transient Apple failures without retaining credentials", async () => {
+        const keys = await generateKeyPair("ES256", { extractable: true });
+        bindings.APPLE_PRIVATE_KEY = await exportPKCS8(keys.privateKey);
         const token = await user();
         const cipher = await seal("private-refresh", bindings);
         await bindings.DB.prepare(
@@ -285,14 +291,148 @@ describe("Worker + real D1 bindings", () => {
             (await request("/v1/me", "DELETE", undefined, token)).status,
         ).toBe(200);
         await bindings.DB.prepare(
-            "UPDATE apple_revocations SET attempts=7",
+            "UPDATE apple_revocations SET attempts=9",
         ).run();
         await drainRevocations(bindings);
         expect(
             await bindings.DB.prepare(
                 "SELECT status,cipher,attempts FROM apple_revocations",
             ).first(),
-        ).toEqual({ status: "exhausted", cipher: null, attempts: 8 });
+        ).toEqual({ status: "exhausted", cipher: null, attempts: 10 });
+    });
+    it("spreads ten transient failures over days rather than hours", async () => {
+        const keys = await generateKeyPair("ES256", { extractable: true });
+        bindings.APPLE_PRIVATE_KEY = await exportPKCS8(keys.privateKey);
+        const token = await user();
+        const cipher = await seal("private-refresh", bindings);
+        await bindings.DB.prepare(
+            "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+        )
+            .bind(cipher)
+            .run();
+        await request("/v1/me", "DELETE", undefined, token);
+        const started = now();
+        const clock = vi.spyOn(Date, "now");
+        let time = started;
+        for (let attempt = 1; attempt <= 10; attempt++) {
+            clock.mockReturnValue(time * 1000);
+            await drainRevocations(bindings);
+            const job = await bindings.DB.prepare(
+                "SELECT attempts,status,next_attempt_at,cipher FROM apple_revocations",
+            ).first<{
+                attempts: number;
+                status: string;
+                next_attempt_at: number;
+                cipher: string | null;
+            }>();
+            expect(job!.attempts).toBe(attempt);
+            expect(job!.status).toBe(attempt < 10 ? "pending" : "exhausted");
+            if (attempt < 10) {
+                expect(job!.next_attempt_at - time).toBe(
+                    Math.min(86400, 900 * 2 ** (attempt - 1)),
+                );
+                time = job!.next_attempt_at;
+            } else expect(job!.cipher).toBeNull();
+        }
+        expect(time - started).toBeGreaterThan(3 * 86400);
+        expect(time - started).toBeLessThan(4 * 86400);
+    });
+    it.each([
+        "missing_credentials",
+        "invalid_private_key",
+        "invalid_client",
+        "missing_encryption",
+        "invalid_encryption",
+    ])(
+        "preserves attempts and ciphertext during a multi-day %s outage",
+        async (failure) => {
+            const keys = await generateKeyPair("ES256", { extractable: true });
+            const privateKey = await exportPKCS8(keys.privateKey);
+            bindings.APPLE_PRIVATE_KEY = privateKey;
+            const token = await user();
+            const cipher = await seal("private-refresh", bindings);
+            await bindings.DB.prepare(
+                "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+            )
+                .bind(cipher)
+                .run();
+            await request("/v1/me", "DELETE", undefined, token);
+            if (failure === "missing_credentials")
+                bindings.APPLE_PRIVATE_KEY = "";
+            if (failure === "invalid_private_key")
+                bindings.APPLE_PRIVATE_KEY = "not-a-key";
+            if (failure === "invalid_client")
+                mockFetch.mockImplementation(async () =>
+                    Response.json({ error: "invalid_client" }, { status: 400 }),
+                );
+            if (failure === "missing_encryption")
+                bindings.TOKEN_ENCRYPTION_KEY = "";
+            if (failure === "invalid_encryption")
+                bindings.TOKEN_ENCRYPTION_KEY = "not-base64!";
+            const log = vi.spyOn(console, "error").mockImplementation(() => {});
+            const started = now(),
+                clock = vi.spyOn(Date, "now");
+            for (const days of [0, 1, 2, 3]) {
+                clock.mockReturnValue((started + days * 86400) * 1000);
+                await drainRevocations(bindings);
+                expect(
+                    await bindings.DB.prepare(
+                        "SELECT status,cipher,attempts FROM apple_revocations",
+                    ).first(),
+                ).toEqual({ status: "pending", cipher, attempts: 0 });
+            }
+            expect(log).toHaveBeenCalledTimes(4);
+            expect(JSON.stringify(log.mock.calls)).not.toMatch(
+                /private-refresh|not-a-key|not-base64/,
+            );
+            bindings.APPLE_PRIVATE_KEY = privateKey;
+            bindings.TOKEN_ENCRYPTION_KEY =
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+            clock.mockReturnValue((started + 4 * 86400) * 1000);
+            mockFetch.mockResolvedValue(new Response(null, { status: 200 }));
+            await drainRevocations(bindings);
+            expect(
+                await bindings.DB.prepare(
+                    "SELECT status,cipher,attempts FROM apple_revocations",
+                ).first(),
+            ).toEqual({ status: "revoked", cipher: null, attempts: 1 });
+        },
+    );
+    it("caps configuration retries at the seven-day deadline, then erases the grant without calling Apple", async () => {
+        const token = await user();
+        const cipher = await seal("private-refresh", bindings);
+        await bindings.DB.prepare(
+            "UPDATE users SET apple_refresh_cipher=? WHERE user_id='alice'",
+        )
+            .bind(cipher)
+            .run();
+        await request("/v1/me", "DELETE", undefined, token);
+        const started = now(),
+            deadline = started + 1800;
+        await bindings.DB.prepare("UPDATE apple_revocations SET created_at=?")
+            .bind(deadline - 7 * 86400)
+            .run();
+        bindings.APPLE_PRIVATE_KEY = "";
+        const clock = vi.spyOn(Date, "now").mockReturnValue(started * 1000);
+        await drainRevocations(bindings);
+        expect(
+            await bindings.DB.prepare(
+                "SELECT status,cipher,attempts,next_attempt_at FROM apple_revocations",
+            ).first(),
+        ).toEqual({
+            status: "pending",
+            cipher,
+            attempts: 0,
+            next_attempt_at: deadline,
+        });
+        clock.mockReturnValue(deadline * 1000);
+        await drainRevocations(bindings);
+        expect(mockFetch).not.toHaveBeenCalled();
+        expect(
+            await bindings.DB.prepare(
+                "SELECT status,cipher,attempts FROM apple_revocations",
+            ).first(),
+        ).toEqual({ status: "exhausted", cipher: null, attempts: 0 });
     });
     it("rolls back the revocation outbox when local erasure cannot commit", async () => {
         const token = await user();
