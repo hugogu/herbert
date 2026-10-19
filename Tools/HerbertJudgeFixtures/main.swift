@@ -24,6 +24,7 @@ for reference in references {
     let problem = puzzles.first { $0.id == reference.id }!
     for source in [reference.source] + (reference.alternateSources ?? []) + [
         "s", "a:sa\na", "a:a\na", "b(X):b(Xs)\nb(s)",
+        "a(A):a(" + Array(repeating: "A-A", count: 10).joined(separator: "+") + "+A)\na(1)",
     ] {
         var session = try GameSession(problem: problem)
         do {

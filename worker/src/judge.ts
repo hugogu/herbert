@@ -303,7 +303,10 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
         return result;
     };
     const resolve = (a: Argument, env: Map<string, Value>): Value => {
-        if ("terms" in a) return { number: numberValue(a.terms, env) };
+        if ("terms" in a) {
+            charge(a.terms.length);
+            return { number: numberValue(a.terms, env) };
+        }
         if (a.code.length === 1 && upper(a.code[0].name)) {
             const v = env.get(a.code[0].name);
             if (v) return v;

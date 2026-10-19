@@ -59,6 +59,18 @@ describe("native H compatibility", () => {
             "Expansion work limit",
         );
     });
+    it.each([21, 41, 81])(
+        "bounds repeated numeric expressions with %i terms",
+        (terms) => {
+            const expression =
+                Array((terms - 1) / 2)
+                    .fill("A-A")
+                    .join("+") + "+A";
+            expect(() => [...commands(`a(A):a(${expression})\na(1)`)]).toThrow(
+                "Expansion work limit",
+            );
+        },
+    );
     it("reserves compression bonuses for complete answers", () => {
         const rows = Array(25).fill(".".repeat(25));
         rows[12] = "............uoo..........";
