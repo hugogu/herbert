@@ -78,33 +78,7 @@ struct BattlefieldView: View {
         }.background(Palette.paper).navigationTitle("AI Battlefield")
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    #if os(iOS)
-                        HStack(spacing: 2) {
-                            ForEach(BattlefieldPage.allCases, id: \.self) { item in
-                                Button {
-                                    page = item
-                                } label: {
-                                    VStack(spacing: 3) {
-                                        Image(systemName: item.symbol).font(.callout)
-                                        Text(LocalizedStringKey(item.shortTitle)).font(.caption2.weight(.semibold))
-                                    }.frame(minWidth: 54).padding(.vertical, 5)
-                                        .foregroundStyle(page == item ? Palette.mint : Palette.muted)
-                                        .background(
-                                            page == item ? Palette.mintLight : .clear,
-                                            in: RoundedRectangle(cornerRadius: 8))
-                                }.buttonStyle(.plain)
-                                    .accessibilityLabel(L10n.text(item.rawValue))
-                                    .accessibilityAddTraits(page == item ? .isSelected : [])
-                            }
-                        }
-                    #else
-                        Picker("AI Battlefield", selection: $page) {
-                            ForEach(BattlefieldPage.allCases, id: \.self) {
-                                Text(LocalizedStringKey($0.rawValue)).tag($0)
-                            }
-                        }.pickerStyle(.segmented).labelsHidden()
-                            .frame(width: 520)
-                    #endif
+                    BattlefieldPagePicker(page: $page)
                 }
             }
             #if os(iOS)
@@ -507,5 +481,39 @@ private struct BattlefieldPuzzleToggleStyle: ToggleStyle {
             }.contentShape(Rectangle())
         }.buttonStyle(.plain).accessibilityValue(configuration.isOn ? L10n.text("已选题目") : L10n.text("选择题目"))
             .accessibilityAddTraits(configuration.isOn ? .isSelected : [])
+    }
+}
+
+private struct BattlefieldPagePicker: View {
+    @Binding var page: BattlefieldPage
+
+    var body: some View {
+        #if os(iOS)
+            HStack(spacing: 2) {
+                ForEach(BattlefieldPage.allCases, id: \.self) { item in
+                    Button {
+                        page = item
+                    } label: {
+                        VStack(spacing: 3) {
+                            Image(systemName: item.symbol).font(.callout)
+                            Text(LocalizedStringKey(item.shortTitle)).font(.caption2.weight(.semibold))
+                        }.frame(minWidth: 54).padding(.vertical, 5)
+                            .foregroundStyle(page == item ? Palette.mint : Palette.muted)
+                            .background(
+                                page == item ? Palette.mintLight : .clear,
+                                in: RoundedRectangle(cornerRadius: 8))
+                    }.buttonStyle(.plain)
+                        .accessibilityLabel(L10n.text(item.rawValue))
+                        .accessibilityAddTraits(page == item ? .isSelected : [])
+                }
+            }
+        #else
+            Picker("AI Battlefield", selection: $page) {
+                ForEach(BattlefieldPage.allCases, id: \.self) {
+                    Text(LocalizedStringKey($0.rawValue)).tag($0)
+                }
+            }.pickerStyle(.segmented).labelsHidden()
+                .frame(width: 520)
+        #endif
     }
 }

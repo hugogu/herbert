@@ -9,6 +9,7 @@ public actor BattlefieldEngine {
     private var result: CompetitionResult?
     private var workers: [UUID: Task<Void, Never>] = [:]
     private var timer: Task<Void, Never>?
+    private var progressUpdate: Task<Void, Never>?
     private var deadline: ContinuousClock.Instant?
     private var requests: [UUID: Task<AIReply, any Error>] = [:]
     private var observer: (@Sendable (CompetitionResult) async -> Void)?
@@ -198,7 +199,19 @@ public actor BattlefieldEngine {
         await publish()
     }
 
+    private func scheduleProgressUpdate() {
+        guard progressUpdate == nil else { return }
+        // Share one refresh across all entrants; still account for every token immediately.
+        progressUpdate = Task { [weak self] in
+            do { try await Task.sleep(for: .milliseconds(500)) } catch { return }
+            guard !Task.isCancelled else { return }
+            await self?.publish()
+        }
+    }
+
     private func publish() async {
+        progressUpdate?.cancel()
+        progressUpdate = nil
         guard var snapshot = result else { return }
         snapshot.updatedAt = .now
         result = snapshot
@@ -263,8 +276,12 @@ public actor BattlefieldEngine {
         if !progress.isFinal, remainingBudget(entrant: entrant, problem: problem) == 0 {
             burnOut(entrant: entrant, problem: problem)
             requests[result!.entrants[entrant].id]?.cancel()
+            await publish()
+        } else if progress.isFinal {
+            await publish()
+        } else {
+            scheduleProgressUpdate()
         }
-        await publish()
     }
 
     private func send(
