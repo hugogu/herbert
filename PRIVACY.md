@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated October 13, 2026, for version 2.0.0. This policy covers **Herbert**, the
+Last updated October 19, 2026, for version 2.0.0. This policy covers **Herbert**, the
 open-source app, and **Herbot Bot**, its App Store edition, on iPhone, iPad and Mac.
 
 Herbert supports offline use, optional user-configured AI providers, and an optional
@@ -25,14 +25,12 @@ not request your Apple email address. Your confirmed nickname,
 score, completion count, answer length and target coverage are public; submitted
 programs are private to you and authorized operators. You can upload the answer
 from a finished original-puzzle run or batch-upload saved shortest solutions.
-Other drafts, community solutions, AI histories and API keys are not uploaded. IP-derived hashes are retained briefly for rate limits.
+Other drafts, community solutions, AI histories and API keys are not uploaded. IP-derived hashes support rate limits; strict login quotas retain these hashes briefly in D1. You can report a nickname by opening an email draft to support; it contains the player alias and internal player ID, and is sent only if you send it. Hiding a player stores their public ID/alias locally for this service; you can undo this on the ranking page.
 
 Session credentials stay in device-only Keychain. The service runs on Cloudflare
 Workers/D1; the operator controls its configured database location and retention.
 Authentication uses Apple. In **My → Account**, you can sign out
-or delete your cloud account. Deletion revokes Apple authorization, removes the
-Apple identifier/credential, blanks uploaded programs, hides scores and revokes
-sessions. Internal numerical tombstones and operator audit records remain subject
+or delete your cloud account. Deletion immediately removes the Apple identifier/credential, blanks uploaded programs, hides scores and revokes sessions in one database transaction. Apple authorization revocation is queued separately with encrypted credentials and bounded retries; the encrypted grant is erased on success or terminal failure. Terminal revocation metadata expires after 30 days. Internal numerical tombstones and operator audit records remain subject
 to the published retention policy. Local progress and backups are preserved.
 Unconfigured builds and **HerbertLearning** have no cloud account service.
 

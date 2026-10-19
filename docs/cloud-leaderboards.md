@@ -60,22 +60,28 @@ available to the owner/admin, not anonymously published.
 
 `POST /v1/submissions` accepts only a request ID, problem ID, puzzle version and H
 source. The Worker loads its own canonical board and byte limit, compiles and runs
-the program, and calculates coverage-and-length-v1 points. Client scores, target
+the program, and calculates verified points: partial answers earn 80 × target coverage; only accepted answers earn the length bonus, 80 + 20 × (1 − bytes / limit). Migration 0004 recalculates legacy partial scores. AI Battlefield keeps its separately versioned benchmark scoring policy. Client scores, target
 counts, user IDs and timestamps are ignored. Limits match the native judge:
 16 KiB source, 64 argument nesting, 128 expanded nesting, 4,096 frames, one million
-expansions/steps and bounded pending memory. Walls leave the robot in place;
+expansions/steps, bounded pending memory and ten million cumulative expansion-work units in both Swift and the Worker. Copying and validation consume this budget across the entire run, including tail calls. The 76 accepted native differential fixtures peak at 1,282 units (over 7,800× headroom); the reported growing-argument attack is covered in both VMs. Local timing is diagnostic only, not a deployed Worker CPU guarantee. Walls leave the robot in place;
 traps clear all lit targets. Success stops execution immediately.
 
 Puzzle identity is SHA-256 of `herbert-h-v1\n{id}\n{byteLimit}\n{rows joined by \n}`.
 Retired/revised boards cannot inherit current scores. Rankings use each user's
 best non-hidden attempt per current puzzle, sum the points, then divide by the current puzzle count (50) for
-a percentage. Ties use solved count and user UUID for deterministic display;
-client timing cannot influence standings. Per-problem rankings include each
-active user's best visible attempt for the current board/rules version, ordered
-by points descending, bytes ascending and user UUID. Equal-scoring attempts for
-one user select shorter code, fewer steps, then earlier submission. Public rows
-include bytes and lit/total targets, never source programs. Results reflect program quality; they
-do not establish whether a human or AI authored a solution.
+a percentage. An accepted answer always takes precedence over an incomplete attempt for the same puzzle.
+Per-puzzle ties use points, shorter code, fewer executed instructions, then earlier server submission time;
+user ID is only a final deterministic fallback. Aggregate ties use solved count, fewer total instructions,
+then the time the selected results were achieved. Total points and solved count always come from the
+same selected attempts; client timing cannot influence standings.
+
+Migration 0004 maintains `best_submissions` atomically using submission triggers, including hide/restore,
+version changes and account erasure. Rankings scan one selected row per player/puzzle/version rather than
+all historical attempts; the independent minimum accepted size is retained for reference displays.
+Public rows never include source programs. Results reflect program quality, not whether a human or AI authored it.
+
+The client derives submission request IDs from SHA-256 of the puzzle version, newline and exact source.
+Single uploads, retries and batch uploads reuse the same identity; changed boards or programs get a new one.
 
 ## Local development
 
@@ -143,21 +149,30 @@ apps; a future signed DMG login would need a separately configured web flow.
 can take longer than the free plan's 10 ms; benchmark on the deployed plan before
 enabling submissions. Use a paid Worker CPU allowance or a queue-based judge if
 needed; never lower validation quality or trust a client score to fit the quota.
-The sample has no paid-only CPU override. D1 counters rate-limit IPs and users;
-public reads are not cacheable. Daily maintenance expires transient counters,
-challenges and sessions. The limits are an initial policy, not DDoS protection.
+The sample explicitly caps CPU at 1,000 ms per invocation (`limits.cpu_ms`) as a backstop and requires a paid Worker plan for this override.
+An environment-specific `IP_LIMITER` binding enforces 120 requests per minute per IP hash without D1 writes.
+Its namespace ID must be unique within your Cloudflare account; the sample uses distinct local/staging/production IDs.
+The edge limiter is approximate and local to a Cloudflare location, not an exact global quota.
+D1 retains strict per-user upload/profile and login quotas. Public reads remain uncached.
+Maintenance runs every five minutes. These limits are an initial policy, not DDoS protection.
 
 ## Account lifecycle
 
-Logout revokes the current Herbert session. Account deletion first revokes the
-Apple credential, then atomically removes the Apple subject/credential, revokes
-all sessions, blanks uploaded programs and hides scores. The retained records
-are tombstones containing internal identifiers and numerical results, not a
-recoverable user profile. The local app's exercises/backups remain untouched.
-If Apple revocation is unavailable, deletion returns an error and is retryable;
-it is never reported as successful prematurely. Choose and document a retention
-policy for tombstones/audit logs before deployment. Production logs must not log
-bodies, bearer tokens, Apple credentials or source programs.
+Logout revokes the current Herbert session. Account deletion atomically removes the Apple subject/credential,
+revokes all sessions, blanks uploaded programs, hides scores and queues encrypted Apple revocation in
+`apple_revocations` (migration 0003). Local erasure succeeds even when Apple credentials or networking fail.
+The outbox has no user/profile linkage; its ciphertext is retained only while retryable. A scheduled drain
+claims at most ten due jobs with leases, uses exponential backoff (60 seconds to six hours) and makes at
+most eight external attempts. Success, exhausted retries or an undecryptable grant clears the ciphertext.
+Rotated-away keys produce an `unrevocable` status, not a failed deletion. Operators must investigate
+terminal `apple_revocation_failed` logs; terminal outbox metadata expires after 30 days. Keep the old
+encryption key available until pending jobs drain when planning a key rotation.
+
+Retained user/submission records are tombstones with internal IDs and numerical results, not recoverable
+profiles. Local exercises/backups remain untouched. Choose and publish retention for tombstones/audits.
+Never log bodies, bearer tokens, Apple credentials or source programs. Unexpected failures have a safe
+`internal_error` code and reference logged server-side. Apple failures return generic localized client
+messages plus code/reference; curated configuration hints remain in operator logs.
 
 Signed Apple server notifications are verified against Apple's keys, issuer and
 this App ID. `consent-revoked` invalidates existing sessions and encrypted Apple
@@ -187,7 +202,7 @@ it must use the same intended audience, and be protected itself.
 - `GET /admin/v1/submissions`: latest 100 non-deleted users' submissions, including
   programs and judge results for inspection.
 - `PATCH /admin/v1/users/{user_id}`: `{ "status": "blocked" | "active", "reason": "…" }`.
-  Blocking also revokes sessions. Deleted accounts cannot be restored.
+  Blocking also revokes sessions. Alternatively `{ "reset_name": true, "reason": "…" }` replaces an abusive nickname with the generated Learner alias without blocking or changing scores. Choose one action per call. Deleted accounts cannot be restored.
 - `PATCH /admin/v1/submissions/{submission_id}`: `{ "hidden": true | false, "reason": "…" }`.
   Hiding removes the attempt from ranking; an earlier valid attempt can still count.
 
@@ -218,7 +233,7 @@ JSON request/response fields use snake_case. Authenticated calls use
 | `GET /v1/me/submissions`                             | Session            | Last 100 own judge results                                                                                      |
 | `POST /v1/submissions`                               | Session, throttled | `{ request_id, problem_id, puzzle_version, source }` → trusted judge result                                     |
 
-Errors return `{ "error": "…" }`; 401 means reauthenticate, 403 means forbidden,
+Errors return `{ "error": "…", "code": "…", "reference": "…" }` (code/reference are optional); 401 means reauthenticate, 403 means forbidden,
 409 means stale puzzle/reused request ID, 413 means body too large, and 429 includes
 `Retry-After`. Reuse the same submission request ID only with identical content.
 
@@ -228,3 +243,16 @@ Official references: [Apple identity verification](https://developer.apple.com/d
 [Developer ID limitation](https://developer.apple.com/forums/thread/793244),
 [D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/),
 [Workers limits](https://developers.cloudflare.com/workers/platform/limits/).
+
+## Public nickname safety
+
+New nicknames pass the pinned MIT `obscenity` English filter and a small Chinese/Japanese abuse baseline.
+This screening is imperfect and is complemented by reporting and human moderation. Each other player's
+ranking row has **Report nickname** (opens an email draft to the published support contact) and **Hide player
+on this device**. Hidden players can be restored in the same ranking page; preferences stay on that device,
+scoped to the service URL. Reports are sent only when the user chooses to send the draft. Operators review
+reports promptly and can reset names, hide submissions or block accounts through the audited admin API.
+Publish a monitored contact and moderation process before release; a text filter alone does not guarantee safety.
+
+[Cloudflare Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/)
+describes namespace isolation, local counters and their approximate enforcement.
