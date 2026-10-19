@@ -1,3 +1,4 @@
+import HerbertCore
 import SwiftUI
 
 struct GuideView: View {
@@ -63,6 +64,9 @@ struct GuideView: View {
                     #if !APP_STORE
                         Link("HOJ 社区题库 ↗", destination: URL(string: "http://herbert.tealang.info/problems.php")!)
                     #endif
+                    if let version = AppVersion.current {
+                        Text("版本 \(version.description)").monospacedDigit().accessibilityIdentifier("app-version")
+                    }
                 }.font(.system(size: 12)).foregroundStyle(Palette.muted).lineSpacing(4).padding(.vertical, 12)
             }.padding(24).frame(maxWidth: 760).frame(maxWidth: .infinity)
         }.background(Palette.paper).navigationTitle("玩法手册")

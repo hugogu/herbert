@@ -312,6 +312,19 @@ final class HerbertUITests: XCTestCase {
     }
 
     @MainActor
+    func testGuideShowsTheAppVersion() {
+        let app = launch(language: "en")
+        let section = app.descendants(matching: .any)["section-手册"].firstMatch
+        if section.exists { section.activateControl() } else { app.tabBars.buttons["Guide"].activateControl() }
+        let version = app.staticTexts["app-version"]
+        XCTAssertTrue(version.waitForExistence(timeout: 5))
+        XCTAssertNotNil(
+            version.displayedText.range(of: #"^Version \d+\.\d+\.\d+ \(\d+\)$"#, options: .regularExpression),
+            version.displayedText)
+        app.terminate()
+    }
+
+    @MainActor
     func testBoardGuideExplainsWallsAndTrapsInEveryLanguageAndStyle() {
         for (language, wall, trap) in [
             ("en", "stays put", "Herbert stays on the trap"),

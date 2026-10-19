@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## Unreleased
 
+- The Guide ends with the app version and build, such as Version 1.1.0 (15), on iPhone, iPad and
+  Mac, so bug reports can quote it. The support page and bug report form point to it.
 - AI Battlefield can cancel one puzzle while a model is generating it. The stop button at the end of
   the answer's first line ends that request and keeps its partial output; the model moves on to its
   next puzzle and the match continues. The answer shows Canceled and can be retried manually, during
