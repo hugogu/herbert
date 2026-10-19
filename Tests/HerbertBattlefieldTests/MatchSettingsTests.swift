@@ -58,7 +58,7 @@ final class MatchSettingsTests: XCTestCase, @unchecked Sendable {
             })
         let requests = await client.requests
         XCTAssertEqual(requests.count, 4)
-        XCTAssertTrue(requests.allSatisfy { $0.maxOutputTokens == nil })
+        XCTAssertTrue(requests.allSatisfy { $0.maxOutputTokens == BattlefieldEngine.unlimitedOutputCap })
     }
     func testStreamingProblemLimitCancelsOnlyCurrentRequestAndResetsForNextProblem() async throws {
         let client = BudgetClient(kind: .streamLimit)

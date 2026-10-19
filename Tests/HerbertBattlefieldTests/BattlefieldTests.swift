@@ -444,7 +444,7 @@ final class BattlefieldTests: XCTestCase {
         XCTAssertEqual(try repository.loadResult(result.id).entrants[0].entrant.preset.parameters.maxOutputTokens, 4096)
     }
 
-    func testUnlimitedRequestsUseDeclaredCapacityOrOmitCap() async throws {
+    func testUnlimitedRequestsAskForTheDeclaredOrWholeCapacity() async throws {
         for maximum in [nil, 8192] as [Int?] {
             let client = ScriptedAI(behavior: .correct)
             let engine = BattlefieldEngine(client: client)
@@ -457,7 +457,7 @@ final class BattlefieldTests: XCTestCase {
                 _ in
             }
             let requests = await client.requests
-            XCTAssertEqual(requests[0].maxOutputTokens, maximum)
+            XCTAssertEqual(requests[0].maxOutputTokens, maximum ?? BattlefieldEngine.unlimitedOutputCap)
         }
     }
 

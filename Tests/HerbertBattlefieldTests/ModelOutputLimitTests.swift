@@ -95,21 +95,66 @@ final class ModelOutputLimitTests: XCTestCase {
         XCTAssertNil(ProviderDiagnostics.outputTokenLimit(in: nil))
     }
 
-    func testProblemBudgetNeverRaisesRequestsAboveTheModelLimits() async throws {
+    func testRequestsNeverExceedTheModelLimitsWithOrWithoutABudget() async throws {
         let models: [(model: AIModel, accepted: ClosedRange<Int>)] = [
             (AIModel(id: "declared", contextLength: 1_048_576, maximumOutputTokens: 131_072), 131_072...131_072),
             (AIModel(id: "context-only", contextLength: 32_768), 1...32_767),
         ]
-        for item in models {
-            let client = ScriptedLimitClient([])
-            let result = try await BattlefieldEngine(client: client).run(
-                configuration: budget(400_000), problems: problems(), participants: [participant(item.model)]
-            ) { _ in }
-            XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
-            let caps = await client.caps
-            XCTAssertEqual(caps.count, 2)
-            XCTAssertTrue(caps.allSatisfy { item.accepted.contains($0 ?? 0) }, "\(item.model.id): \(caps)")
+        for configuration in [budget(400_000), CompetitionConfiguration()] {
+            for item in models {
+                let client = ScriptedLimitClient([])
+                let result = try await BattlefieldEngine(client: client).run(
+                    configuration: configuration, problems: problems(), participants: [participant(item.model)]
+                ) { _ in }
+                XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
+                let caps = await client.caps
+                XCTAssertEqual(caps.count, 2)
+                XCTAssertTrue(caps.allSatisfy { item.accepted.contains($0 ?? 0) }, "\(item.model.id): \(caps)")
+            }
         }
+    }
+
+    func testUnlimitedRequestAsksForEverythingAndKeepsTheStatedMaximum() async throws {
+        // DeepSeek defaults to 64K in thinking mode when max_tokens is omitted, but accepts up to 393,216.
+        let rejection = AIHTTPError(
+            status: 400,
+            providerResponse:
+                #"{"error":{"message":"Invalid max_tokens value, the valid range of max_tokens is [1, 393216]","type":"invalid_request_error"}}"#
+        )
+        let client = ScriptedLimitClient([.reject(rejection)])
+        let result = try await BattlefieldEngine(client: client).run(
+            configuration: CompetitionConfiguration(), problems: problems(), participants: [participant()]
+        ) { _ in }
+        let caps = await client.caps
+        XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, 393_216, 393_216])
+        XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
+        XCTAssertEqual(result.entrants[0].answers[0].attempts.map(\.requestedMaxOutputTokens), [393_216])
+    }
+
+    func testGuessedCapFallsBackToTheProviderDefaultWhenNoMaximumIsStated() async throws {
+        let unstated = AIHTTPError(status: 400, providerResponse: #"{"error":{"message":"max_tokens 参数非法"}}"#)
+        // Chat Completions can omit the cap; Messages requires one and uses 65,536.
+        for (kind, fallback) in [(ProviderKind.compatible, nil), (.anthropic, 65_536)] as [(ProviderKind, Int?)] {
+            let client = ScriptedLimitClient([.reject(unstated)])
+            let entrant = Entrant(
+                provider: ProviderConfiguration(kind: kind), preset: ModelPreset(model: AIModel(id: "m")))
+            let result = try await BattlefieldEngine(client: client).run(
+                configuration: CompetitionConfiguration(), problems: problems(),
+                participants: [CompetitionParticipant(entrant: entrant, apiKey: "fixture")]
+            ) { _ in }
+            let caps = await client.caps
+            XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, fallback, fallback], "\(kind)")
+            XCTAssertEqual(result.entrants[0].answers.map(\.status), [.solved, .solved])
+            XCTAssertEqual(result.entrants[0].answers[0].attempts.map(\.requestedMaxOutputTokens), [fallback])
+        }
+        // A request the provider rejects either way still fails, after one more try.
+        let client = ScriptedLimitClient([.reject(unstated), .reject(unstated)])
+        let result = try await BattlefieldEngine(client: client).run(
+            configuration: CompetitionConfiguration(), problems: problems(), participants: [participant()]
+        ) { _ in }
+        let caps = await client.caps
+        XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, nil])
+        XCTAssertEqual(result.entrants[0].answers[0].status, .error)
     }
 
     func testRejectedCapIsResentWithinTheStatedLimitAndKeptForTheMatch() async throws {
@@ -133,24 +178,51 @@ final class ModelOutputLimitTests: XCTestCase {
     }
 
     func testOtherRejectionsAndPartialOutputAreNotResent() async throws {
-        let failures = [
-            AIHTTPError(
-                status: 400, providerResponse: #"{"error":{"message":"assistant content is empty at index 2"}}"#),
-            AIHTTPError(status: 402, providerResponse: #"{"error":{"message":"max_tokens must be at most 1000"}}"#),
-            AIHTTPError(
-                status: 200, providerResponse: gatewayRejection,
-                partialReply: AIReply(text: "partial", usage: TokenUsage(), finishReason: "error")),
+        let declared = AIModel(id: "declared", maximumOutputTokens: 131_072)
+        let failures: [(error: AIHTTPError, model: AIModel)] = [
+            // Only a guessed cap falls back to the provider default.
+            (
+                AIHTTPError(
+                    status: 400, providerResponse: #"{"error":{"message":"assistant content is empty at index 2"}}"#),
+                declared
+            ),
+            (
+                AIHTTPError(status: 402, providerResponse: #"{"error":{"message":"max_tokens must be at most 1000"}}"#),
+                AIModel(id: "m")
+            ),
+            (
+                AIHTTPError(
+                    status: 200, providerResponse: gatewayRejection,
+                    partialReply: AIReply(text: "partial", usage: TokenUsage(), finishReason: "error")),
+                AIModel(id: "m")
+            ),
         ]
         for failure in failures {
-            let client = ScriptedLimitClient([.reject(failure)])
+            let client = ScriptedLimitClient([.reject(failure.error)])
             let result = try await BattlefieldEngine(client: client).run(
-                configuration: budget(400_000), problems: problems(), participants: [participant()]
+                configuration: budget(400_000), problems: problems(), participants: [participant(failure.model)]
             ) { _ in }
             let caps = await client.caps
-            XCTAssertEqual(caps.count, 1, "\(failure.status)")
+            XCTAssertEqual(caps.count, 1, "\(failure.error.status)")
             XCTAssertNotEqual(result.entrants[0].answers[0].status, .solved)
             XCTAssertNotNil(result.entrants[0].answers[0].attempts[0].error)
         }
+    }
+
+    func testOverloadDoesNotTurnAGuessedCapIntoTheProviderDefault() async throws {
+        let overloaded = AIHTTPError(
+            status: 200,
+            providerResponse:
+                #"{"error":{"code":503,"message":"This model is currently experiencing high demand. Please try again later."}}"#,
+            partialReply: AIReply(text: "", usage: TokenUsage(), finishReason: "error"))
+        let client = ScriptedLimitClient([.reject(overloaded)])
+        let result = try await BattlefieldEngine(client: client, retrySleep: { _ in }).run(
+            configuration: CompetitionConfiguration(), problems: Array(try problems().prefix(1)),
+            participants: [participant()]
+        ) { _ in }
+        let caps = await client.caps
+        XCTAssertEqual(caps, [BattlefieldEngine.unlimitedOutputCap, BattlefieldEngine.unlimitedOutputCap])
+        XCTAssertEqual(result.entrants[0].answers[0].status, .solved)
     }
 
     func testStatedLimitIsKeptOnlyAfterTheProviderAcceptsIt() async throws {

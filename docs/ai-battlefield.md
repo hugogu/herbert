@@ -28,21 +28,25 @@ Redirects are rejected; enter the final URL directly. HTTP endpoints are not acc
 
 **Match Settings** controls output allowances for every entrant; there is no per-model
 output-cap editor. A per-problem budget never raises a request above the model's own
-limits. With token limits off, requests use the provider-declared maximum
-output capacity, bounded by the remaining context when both limits are known. If no
-maximum is advertised, Chat Completions requests omit the output cap and let the
-provider choose its default. Anthropic Messages requires `max_tokens`: Herbert uses the
-advertised capacity, or 65,536 when discovery omits it. This fallback is recorded in
-attempt details. Discovery reads OpenRouter's `top_provider.max_completion_tokens` and the
-common `max_output_tokens` / `max_completion_tokens` and `context_length` /
-`context_window` / `max_context_length` / `max_model_len` fields; refresh models to pick up
-limits that earlier versions did not read. When an endpoint advertises no limit but
-rejects a cap and states its maximum, for example “supports at most 131072 completion
-tokens” or “the valid range of max_tokens is [1, 393216]”, the request is sent once more
-within that maximum, and the entrant's later requests in the match use it. Only the
-provider's error text is read, and only before any output arrives. “Unlimited” removes the
-app's arbitrary cap; it cannot infer undocumented model capacity or override a provider's
-limits/defaults.
+limits. With token limits off, each request asks for the model's whole output capacity:
+the advertised maximum, bounded by the remaining context when both limits are known.
+Discovery reads OpenRouter's `top_provider.max_completion_tokens` and the common
+`max_output_tokens` / `max_completion_tokens` and `context_length` / `context_window` /
+`max_context_length` / `max_model_len` fields; refresh models to pick up limits that
+earlier versions did not read. A provider's default is not the model's capacity: DeepSeek,
+for example, generates 64K tokens in thinking mode when `max_tokens` is omitted, but
+accepts 393,216. So when no maximum is advertised, an unlimited request asks for
+100,000,000 tokens (shown as “No token limit”), and a limited one for the remaining
+budget. A provider then applies the model's own maximum or rejects the request; when the
+rejection states its maximum, for example “supports at most 131072 completion tokens” or
+“the valid range of max_tokens is [1, 393216]”, the request is sent again within it, and
+the entrant's later requests in the match use it. Only when a provider rejects that
+request without stating a maximum does Herbert fall back to the provider's default: Chat
+Completions omits the cap, and Anthropic Messages, which requires `max_tokens`, uses
+65,536. Only a rejection of the request itself before any output counts, never an
+overload, timeout or access error, and only the provider's error text is read. A
+correction is kept only once the provider accepts it, and attempt details show the cap
+actually sent. Manual retries of a saved match go through the same correction.
 
 Automatic thinking is **enabled by default** in Model Settings. OpenRouter uses
 `reasoning: {enabled: true, effort: ...}` for models advertising reasoning support,

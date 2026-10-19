@@ -390,7 +390,7 @@
 "限制比赛时间" = "Time limit";
 "限制每题 Token 用量" = "Token limit per problem";
 "每模型每题 Token 上限" = "Tokens per model per problem";
-"所有模型使用相同的每题预算，累计该题所有尝试的输入与输出（含推理）。每次请求的输出额度不超过模型自身上限。不限用量时使用服务商声明的最大输出能力；能力未知时由服务商决定。" = "Every model gets the same budget per problem, including input, output and reasoning across all attempts. No request asks for more output than the model allows. Without a limit, use the declared model capacity; otherwise the provider decides.";
+"所有模型使用相同的每题预算，累计该题所有尝试的输入与输出（含推理）。每次请求的输出额度不超过模型自身上限。不限用量时请求模型的全部输出能力；未公布上限时以服务商的答复为准。" = "Every model gets the same budget per problem, including input, output and reasoning across all attempts. No request asks for more output than the model allows. Without a limit, each request asks for the model's full output capacity; if that capacity isn't published, the provider's response sets it.";
 "不限时" = "No time limit";
 "不限 Token" = "No token limit";
 "每题 %@ tokens" = "%@ tokens per problem";

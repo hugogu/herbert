@@ -191,7 +191,7 @@ private struct BattlefieldSetupView: View {
                             .accessibilityIdentifier("problemTokenLimit")
                     }
                 }
-                Text("所有模型使用相同的每题预算，累计该题所有尝试的输入与输出（含推理）。每次请求的输出额度不超过模型自身上限。不限用量时使用服务商声明的最大输出能力；能力未知时由服务商决定。")
+                Text("所有模型使用相同的每题预算，累计该题所有尝试的输入与输出（含推理）。每次请求的输出额度不超过模型自身上限。不限用量时请求模型的全部输出能力；未公布上限时以服务商的答复为准。")
                     .font(.caption).foregroundStyle(Palette.muted)
                 Stepper(value: $configuration.attemptsPerProblem, in: 1...10) {
                     Text(L10n.text("每题最多 %ld 次机会", configuration.attemptsPerProblem))

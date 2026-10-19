@@ -365,6 +365,11 @@ final class BattlefieldUITests: XCTestCase {
         capture(app, "ai-history")
         reveal("answer-fixture-1-10001", in: app).battlefieldTap()
         XCTAssertTrue(app.staticTexts["Attempt 1"].waitForExistence(timeout: 5))
+        // Fixture models publish no output limit, so an unlimited match asks for everything.
+        let uncapped = "max output: No token limit"
+        XCTAssertTrue(
+            app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", uncapped, uncapped))
+                .firstMatch.exists, app.debugDescription)
         #if os(macOS)
             resizeSheet(in: app)
         #endif

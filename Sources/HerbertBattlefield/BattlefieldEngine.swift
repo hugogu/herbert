@@ -15,8 +15,16 @@ public actor BattlefieldEngine {
     private var executing = false
     private var participants: [UUID: CompetitionParticipant] = [:]
     private var pendingRetries: [UUID: [Int]] = [:]
-    /// Output limits that providers stated when rejecting a larger cap, by entrant.
-    private var statedOutputLimits: [UUID: Int] = [:]
+    /// The cap a provider accepted after rejecting the one first sent, by entrant.
+    private var acceptedCaps: [UUID: AcceptedCap] = [:]
+    private enum AcceptedCap {
+        case limit(Int)
+        case providerDefault
+    }
+
+    /// Without a limit, a model of unknown capacity is asked for this many output tokens, so the provider applies
+    /// or states the model's own maximum rather than a lower default.
+    public static let unlimitedOutputCap = 100_000_000
 
     public init(client: any AIClient) {
         self.client = client
@@ -212,19 +220,25 @@ public actor BattlefieldEngine {
         return max(0, result.configuration.problemTokenLimit - used)
     }
 
-    /// A per-problem budget never raises a request above the model's own output and context limits.
-    private func allowance(entrant: Entrant, messages: [AIMessage], remaining: Int?) -> Int? {
+    /// A request asks for the model's whole output capacity, bounded by the problem budget and the context window.
+    /// When that capacity is unknown, the cap is a guess that `complete` corrects from the provider's response.
+    private func allowance(entrant: Entrant, messages: [AIMessage], remaining: Int?) -> (cap: Int?, guessed: Bool) {
         let model = entrant.preset.model
-        var cap = [model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }, statedOutputLimits[entrant.id]]
-            .compactMap { $0 }.min()
-        if cap == nil, entrant.kind == .anthropic { cap = 65_536 }
-        let input = TokenUsage.estimate(messages: messages).input
-        if let remaining { cap = min(cap ?? Int.max, max(1, remaining - input)) }
-        if let context = model.contextLength, let maximum = cap {
-            cap = min(maximum, max(1, context - input - max(256, input / 10)))
+        var known = model.maximumOutputTokens.flatMap { $0 > 0 ? $0 : nil }
+        switch acceptedCaps[entrant.id] {
+        case .providerDefault?: return (Self.providerDefault(for: entrant), false)
+        case .limit(let limit)?: known = min(known ?? limit, limit)
+        case nil: break
         }
-        return cap
+        let input = TokenUsage.estimate(messages: messages).input
+        var cap = known ?? Self.unlimitedOutputCap
+        if let remaining { cap = min(cap, max(1, remaining - input)) }
+        if let context = model.contextLength { cap = min(cap, max(1, context - input - max(256, input / 10))) }
+        return (cap, known == nil)
     }
+
+    /// Messages requires `max_tokens`; Chat Completions can leave the cap to the provider.
+    private static func providerDefault(for entrant: Entrant) -> Int? { entrant.kind == .anthropic ? 65_536 : nil }
 
     private func burnOut(entrant: Int, problem: Int) {
         result!.entrants[entrant].answers[problem].status = .burnout
@@ -271,24 +285,39 @@ public actor BattlefieldEngine {
         }
     }
 
-    /// Providers that publish no output limit reject a larger cap and state their maximum; ask again within it.
+    /// A provider that rejects a cap before any output gets the request again: within the maximum it states, or,
+    /// when the app had to guess the cap, with the provider's default.
     private func complete(
-        _ participant: CompetitionParticipant, messages: [AIMessage], cap: Int?, entrant e: Int, problem p: Int,
-        attempt a: Int
+        _ participant: CompetitionParticipant, messages: [AIMessage], cap: Int?, guessed: Bool, entrant e: Int,
+        problem p: Int, attempt a: Int
     ) async throws -> AIReply {
-        do {
-            return try await send(participant, messages: messages, cap: cap, entrant: e, problem: p, attempt: a)
-        } catch let error as AIHTTPError {
-            guard let cap, [200, 400, 422].contains(error.status),
-                error.partialReply.map({ $0.text.isEmpty && $0.reasoning == nil }) ?? true,
-                let limit = ProviderDiagnostics.outputTokenLimit(in: error.providerResponse), limit < cap,
-                await active()
-            else { throw error }
-            result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens = limit
-            let reply = try await send(participant, messages: messages, cap: limit, entrant: e, problem: p, attempt: a)
-            // Keep the limit only once the provider accepts it, so a misread rejection cannot shrink later requests.
-            statedOutputLimits[participant.entrant.id] = limit
-            return reply
+        let fallback = Self.providerDefault(for: participant.entrant)
+        var cap = cap
+        var correction: AcceptedCap?
+        var resends = 0
+        while true {
+            do {
+                let reply = try await send(
+                    participant, messages: messages, cap: cap, entrant: e, problem: p, attempt: a)
+                // Keep a correction only once the provider accepts it, so a misread rejection cannot shrink later requests.
+                if let correction { acceptedCaps[participant.entrant.id] = correction }
+                return reply
+            } catch let error as AIHTTPError {
+                // Only a rejection of the request itself qualifies: not an overload, a timeout or an access error.
+                guard resends < 2, let current = cap, [200, 400, 422].contains(error.status),
+                    case .generic = ProviderDiagnostics.classify(error),
+                    error.partialReply.map({ $0.text.isEmpty && $0.reasoning == nil }) ?? true, await active()
+                else { throw error }
+                if let limit = ProviderDiagnostics.outputTokenLimit(in: error.providerResponse), limit < current {
+                    (correction, cap) = (.limit(limit), limit)
+                } else if guessed, current != fallback {
+                    (correction, cap) = (.providerDefault, fallback)
+                } else {
+                    throw error
+                }
+                resends += 1
+                result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens = cap
+            }
         }
     }
 
@@ -338,7 +367,7 @@ public actor BattlefieldEngine {
                     result!.entrants[e].answers[pending.problem].retryAt = nil
                     guard await active() else { break }
                 }
-                let cap = allowance(entrant: participant.entrant, messages: messages, remaining: remaining)
+                let (cap, guessed) = allowance(entrant: participant.entrant, messages: messages, remaining: remaining)
                 var attempt = AnswerAttempt(number: (previous.last?.id ?? 0) + a - base + 1)
                 if only != nil { attempt.manual = true }
                 attempt.requestedMaxOutputTokens = cap
@@ -349,7 +378,7 @@ public actor BattlefieldEngine {
                 do {
                     try Task.checkCancellation()
                     let reply = try await complete(
-                        participant, messages: messages, cap: cap, entrant: e, problem: p, attempt: a)
+                        participant, messages: messages, cap: cap, guessed: guessed, entrant: e, problem: p, attempt: a)
                     requests[participant.entrant.id] = nil
                     guard await active() else { break }
                     if result!.entrants[e].answers[p].status == .burnout { break }
@@ -396,6 +425,7 @@ public actor BattlefieldEngine {
                         result!.entrants[e].answers[p].attempts[a].program = program
                     } catch is CancellationError { throw CancellationError() } catch {
                         let requested = result!.entrants[e].answers[p].attempts[a].requestedMaxOutputTokens
+                            .flatMap { $0 == Self.unlimitedOutputCap ? nil : $0 }
                         evaluation = JudgeEvaluation(
                             accepted: false, bytes: 0, steps: 0, litTargets: 0,
                             targetCount: try Board(problem: problem).targets.count,

@@ -130,6 +130,11 @@ func battlefieldPercentage(_ fraction: Double) -> String {
     fraction.formatted(.percent.precision(.fractionLength(0...2)))
 }
 
+func battlefieldMaximumOutput(_ tokens: Int?) -> String {
+    guard let tokens else { return L10n.text("服务商决定") }
+    return tokens == BattlefieldEngine.unlimitedOutputCap ? L10n.text("不限 Token") : tokens.formatted()
+}
+
 func battlefieldDuration(_ seconds: TimeInterval) -> String {
     let seconds = Int(max(0, seconds))
     return String(format: "%02d:%02d:%02d", seconds / 3600, seconds / 60 % 60, seconds % 60)

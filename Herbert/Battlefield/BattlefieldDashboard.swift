@@ -456,7 +456,7 @@ private struct BattlefieldAnswerView: View {
                             )
                             .font(.caption.monospaced()).foregroundStyle(Palette.muted)
                             Text(
-                                "max output: \(attempt.requestedMaxOutputTokens.map { $0.formatted() } ?? L10n.text("服务商决定")) · finish: \(attempt.finishReason ?? "—")"
+                                "max output: \(battlefieldMaximumOutput(attempt.requestedMaxOutputTokens)) · finish: \(attempt.finishReason ?? "—")"
                             )
                             .font(.caption.monospaced())
                             if attempt.finishReason == "length" {

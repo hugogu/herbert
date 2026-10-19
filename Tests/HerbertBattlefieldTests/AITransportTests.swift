@@ -191,7 +191,7 @@ final class AITransportTests: XCTestCase {
             XCTAssertEqual(answer.status, limit ? .burnout : .solved)
             XCTAssertEqual(answer.attempts.count, limit ? 1 : 2)
             XCTAssertEqual(answer.attempts.last?.contentBlocks?.last?.text, "```h\ns\n```")
-            XCTAssertEqual(answer.attempts.last?.requestedMaxOutputTokens, 65_536)
+            XCTAssertEqual(answer.attempts.last?.requestedMaxOutputTokens, BattlefieldEngine.unlimitedOutputCap)
             XCTAssertEqual(response.requests.count, 1)
             if !limit { XCTAssertNil(answer.attempts.first?.evaluation) }
             let restored = try JSONDecoder().decode(CompetitionResult.self, from: JSONEncoder().encode(result))
@@ -866,6 +866,37 @@ final class AITransportTests: XCTestCase {
                 JSONSerialization.jsonObject(with: XCTUnwrap(accepted.bodies.first)) as? [String: Any])
             XCTAssertEqual(resent["max_tokens"] as? Int, 131_072)
         }
+    }
+
+    func testUnlimitedRequestAsksForTheModelsWholeCapacity() async throws {
+        let provider = provider()
+        let rejection = HTTPStub(
+            body:
+                #"{"error":{"message":"Invalid max_tokens value, the valid range of max_tokens is [1, 393216]","type":"invalid_request_error","param":null,"code":"invalid_request_error"}}"#,
+            status: 400)
+        let accepted = HTTPStub(
+            body:
+                #"{"choices":[{"message":{"content":"```h\ns\n```"},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":20}}"#
+        )
+        BattlefieldURLProtocol.registry.addSequence(
+            [rejection, accepted], host: try XCTUnwrap(URL(string: provider.baseURL)?.host))
+        let result = try await BattlefieldEngine(client: client()).run(
+            configuration: CompetitionConfiguration(), problems: Array(try ProblemCatalog.bundled().prefix(1)),
+            participants: [
+                CompetitionParticipant(
+                    entrant: Entrant(provider: provider, preset: ModelPreset(model: AIModel(id: "deepseek-flash"))),
+                    apiKey: "fixture")
+            ]
+        ) { _ in }
+        let answer = try XCTUnwrap(result.entrants.first?.answers.first)
+        XCTAssertEqual(answer.status, .solved)
+        XCTAssertEqual(answer.attempts.map(\.requestedMaxOutputTokens), [393_216])
+        let asked = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: XCTUnwrap(rejection.bodies.first)) as? [String: Any])
+        XCTAssertEqual(asked["max_tokens"] as? Int, BattlefieldEngine.unlimitedOutputCap)
+        let resent = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: XCTUnwrap(accepted.bodies.first)) as? [String: Any])
+        XCTAssertEqual(resent["max_tokens"] as? Int, 393_216)
     }
 
     func testProviderErrorBodyIsBoundedAndOpenErrorStreamCanBeCancelled() async throws {
