@@ -162,11 +162,20 @@ Logout revokes the current Herbert session. Account deletion atomically removes 
 revokes all sessions, blanks uploaded programs, hides scores and queues encrypted Apple revocation in
 `apple_revocations` (migration 0003). Local erasure succeeds even when Apple credentials or networking fail.
 The outbox has no user/profile linkage; its ciphertext is retained only while retryable. A scheduled drain
-claims at most ten due jobs with leases, uses exponential backoff (60 seconds to six hours) and makes at
-most eight external attempts. Success, exhausted retries or an undecryptable grant clears the ciphertext.
-Rotated-away keys produce an `unrevocable` status, not a failed deletion. Operators must investigate
-terminal `apple_revocation_failed` logs; terminal outbox metadata expires after 30 days. Keep the old
-encryption key available until pending jobs drain when planning a key rotation.
+claims at most ten due jobs with leases. Transient failures allow ten attempts, starting with a 15-minute
+delay, doubling to a 24-hour ceiling; repeated failures span about 3-4 days rather than a single evening.
+Missing/invalid encryption keys, missing/malformed Apple credentials and Apple's `invalid_client` are
+operator-fixable configuration outages: they retry hourly without consuming that attempt allowance and
+emit error-level `apple_revocation_configuration_error` records. This can include repeated Apple requests
+while its client credentials are invalid; ten is not a cap on these configuration checks.
+
+Every job has a hard seven-day retention deadline measured from creation, including configuration outages;
+the next retry is never scheduled beyond it. Success, exhausted transient retries, expiry or an undecryptable
+grant clears the ciphertext. Rotated-away encryption keys produce `unrevocable`, not a failed deletion.
+Operators must monitor `apple_revocation_configuration_error`, terminal `apple_revocation_failed` and
+`apple_revocation_expired` events. Terminal outbox metadata expires after 30 days. Do not replace the
+single `TOKEN_ENCRYPTION_KEY` before pending jobs drain; existing user grants also need re-encryption or
+reauthorization when rotating that key. A valid but different key cannot decrypt old grants.
 
 Retained user/submission records are tombstones with internal IDs and numerical results, not recoverable
 profiles. Local exercises/backups remain untouched. Choose and publish retention for tombstones/audits.

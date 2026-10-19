@@ -273,16 +273,27 @@ export async function exchangeApple(code: string, env: Env) {
 }
 async function encryptionKey(env: Env) {
     if (!env.TOKEN_ENCRYPTION_KEY)
-        throw new HTTPError(503, "Token encryption is not configured");
-    const bytes = Uint8Array.from(atob(env.TOKEN_ENCRYPTION_KEY), (c) =>
-        c.charCodeAt(0),
-    );
-    if (bytes.length !== 32)
-        throw new HTTPError(503, "Token encryption is not configured");
-    return crypto.subtle.importKey("raw", bytes, "AES-GCM", false, [
-        "encrypt",
-        "decrypt",
-    ]);
+        throw new HTTPError(
+            503,
+            "Service temporarily unavailable",
+            "token_encryption_missing",
+        );
+    try {
+        const bytes = Uint8Array.from(atob(env.TOKEN_ENCRYPTION_KEY), (c) =>
+            c.charCodeAt(0),
+        );
+        if (bytes.length !== 32) throw new Error("Invalid key length");
+        return await crypto.subtle.importKey("raw", bytes, "AES-GCM", false, [
+            "encrypt",
+            "decrypt",
+        ]);
+    } catch {
+        throw new HTTPError(
+            503,
+            "Service temporarily unavailable",
+            "token_encryption_invalid",
+        );
+    }
 }
 export async function seal(text: string, env: Env) {
     const iv = crypto.getRandomValues(new Uint8Array(12));

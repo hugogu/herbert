@@ -30,7 +30,7 @@ Other drafts, community solutions, AI histories and API keys are not uploaded. I
 Session credentials stay in device-only Keychain. The service runs on Cloudflare
 Workers/D1; the operator controls its configured database location and retention.
 Authentication uses Apple. In **My → Account**, you can sign out
-or delete your cloud account. Deletion immediately removes the Apple identifier/credential, blanks uploaded programs, hides scores and revokes sessions in one database transaction. Apple authorization revocation is queued separately with encrypted credentials and bounded retries; the encrypted grant is erased on success or terminal failure. Terminal revocation metadata expires after 30 days. Internal numerical tombstones and operator audit records remain subject
+or delete your cloud account. Deletion immediately removes the Apple identifier/credential, blanks uploaded programs, hides scores and revokes sessions in one database transaction. Apple authorization revocation is queued separately with encrypted credentials and bounded retries; transient failures retry across several days, while configuration outages pause the attempt budget. Pending encrypted grants expire after seven days and are erased on success or terminal failure. Terminal revocation metadata expires after 30 days. Internal numerical tombstones and operator audit records remain subject
 to the published retention policy. Local progress and backups are preserved.
 Unconfigured builds and **HerbertLearning** have no cloud account service.
 
