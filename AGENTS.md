@@ -60,3 +60,5 @@
 - On iPhone, the keyboard and pinned Run controls cover an editor in the lower half of the lesson. UI tests should scroll the editor header to the top before typing. On iPad, wait for the keyboard reflow to settle (`waitForStableFrame`) before tapping editor controls.
 
 - Battlefield UI tests open sidebar `section-*` items, so run them on iPad or Mac; iPhone's tab bar has none. On the iPad simulator eight of them also fail on main: iOS reports static text `value` as `""` rather than nil, so `value as? String ?? label` never reaches the label; text fields keep their old text before typing; some sheet buttons need scrolling. Compare failures with a main baseline before attributing them to a change.
+
+- MiniMax can put its entire `<think>` trace in the final-response field. A saved L05 response had 388,735 characters and 12,182 lines; measuring it as one SwiftUI `Text` saturated the main thread in CoreText and drew blank. Keep raw responses intact and display bounded, lazily loaded text blocks in the same continuous scroll. In UI tests, scroll before looking up a block that has not been loaded yet.

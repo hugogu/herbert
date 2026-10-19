@@ -548,17 +548,18 @@ private struct BattlefieldAnswerView: View {
                                         }
                                     }
                                     Text("最终回答").font(.subheadline.bold())
-                                    Text(
-                                        attempt.response.isEmpty
+                                    BattlefieldResponseText(
+                                        source: attempt.response.isEmpty
                                             ? (attempt.trialSubmission?.source == .reasoning
                                                 ? L10n.text("最终答案位于模型推理中，已恢复为上方的程序。")
                                                 : L10n.text(attempt.finishedAt == nil ? "尚未收到最终回答。" : "本次请求未返回最终回答。"))
-                                            : attempt.response
+                                            : attempt.response,
+                                        identifier: "answer-response-\(attempt.id)"
                                     )
-                                    .accessibilityIdentifier("answer-response-\(attempt.id)")
                                     if let diagnostic = attempt.providerResponse {
                                         Text("服务商错误详情").font(.subheadline.bold())
-                                        Text(diagnostic).accessibilityIdentifier("answer-provider-error-\(attempt.id)")
+                                        BattlefieldResponseText(
+                                            source: diagnostic, identifier: "answer-provider-error-\(attempt.id)")
                                     }
                                 }.font(.system(.callout, design: .monospaced)).padding(.top, 8)
                             }
