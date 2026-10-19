@@ -72,7 +72,7 @@ curl -i http://127.0.0.1:8787/v1/leaderboard
 curl -i -X POST http://127.0.0.1:8787/v1/auth/challenge
 ```
 
-Expect HTTP 200, `Cache-Control: no-store`, 30 original problems, an initially empty
+Expect HTTP 200, `Cache-Control: no-store`, 50 original problems, an initially empty
 leaderboard and a fresh login challenge. Inspect the local database without
 changing it:
 

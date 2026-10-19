@@ -7,7 +7,7 @@ classification or a licensing exemption.
 ## Separate local learning product
 
 `HerbertLearning` is a separately identified, original-only build for evaluating
-a local programming learning tool. It contains the H editor/runtime, 30 original
+a local programming learning tool. It contains the H editor/runtime, 50 original
 exercises, explanations, local progress and JSON import/export. It does not link
 HerbertCloud, HerbertBattlefield or the community catalog. It has no online
 leaderboard, Apple login, Game Center, AI-provider calls, ads or in-app purchases.

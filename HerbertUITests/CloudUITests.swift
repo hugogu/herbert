@@ -70,7 +70,7 @@ final class CloudUITests: XCTestCase {
                     .firstMatch.waitForExistence(timeout: 5))
             XCTAssertTrue(
                 app.staticTexts.matching(
-                    NSPredicate(format: "value == %@ OR label == %@", "Solved 1/30", "Solved 1/30")
+                    NSPredicate(format: "value == %@ OR label == %@", "Solved 1/50", "Solved 1/50")
                 ).firstMatch.exists)
             app.terminate()
         #else

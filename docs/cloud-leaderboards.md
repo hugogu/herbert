@@ -3,7 +3,7 @@
 Herbert's optional online service runs on Cloudflare Workers and D1. Local play,
 progress backups and drafts do not depend on it. This is a separate service from
 AI Battlefield: the public leaderboard ranks users' H programs, not self-reported
-model tokens or benchmark timings. Only the 30 MIT-original exercises are scored.
+model tokens or benchmark timings. Only the 50 MIT-original exercises are scored.
 
 ## Trust and data boundaries
 
@@ -68,7 +68,7 @@ traps clear all lit targets. Success stops execution immediately.
 
 Puzzle identity is SHA-256 of `herbert-h-v1\n{id}\n{byteLimit}\n{rows joined by \n}`.
 Retired/revised boards cannot inherit current scores. Rankings use each user's
-best non-hidden attempt per current puzzle, sum the points, then divide by 30 for
+best non-hidden attempt per current puzzle, sum the points, then divide by the current puzzle count (50) for
 a percentage. Ties use solved count and user UUID for deterministic display;
 client timing cannot influence standings. Per-problem rankings include each
 active user's best visible attempt for the current board/rules version, ordered

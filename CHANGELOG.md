@@ -5,6 +5,8 @@ save or API formats through documented migrations.
 
 ## [2.0.0] - Unreleased
 
+- Support all 50 originals in leaderboard validation and native judge parity fixtures. Bind the
+  canonical puzzle identities as one JSON parameter so aggregate queries stay within D1 limits.
 - Add optional Apple-authenticated global and per-puzzle leaderboards backed by Cloudflare
   Workers and D1. The service reruns submitted programs against versioned original boards;
   submitted programs remain private and public rankings show verified scores and instructions.

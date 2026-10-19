@@ -1110,5 +1110,693 @@
     "litTargets" : 0,
     "source" : "a:a\na",
     "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 54,
+    "id" : 10098,
+    "litTargets" : 64,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\na(N,X,Y):Xa(N-1,Y,X)b(2)Ya(N-1,X,Y)b(2)a(N-1,X,Y)Yb(2)a(N-1,Y,X)X\nq(a(2,r,l)b(2)r)",
+    "steps" : 210
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10098,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10098,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10098,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 49,
+    "id" : 10099,
+    "litTargets" : 48,
+    "source" : "b(N):sb(N-1)\nh(P):PrrPrr\nf(N,D,T):b(D)Tf(N-1,D-2,rrT)rrf(N-2,D-3,T)Trrb(D)rr\nh(f(4,7,r))",
+    "steps" : 237
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10099,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10099,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10099,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 50,
+    "id" : 10100,
+    "litTargets" : 33,
+    "source" : "b(N):sb(N-1)\nm(P,Q):PQ\nf(N,D,T):b(D)Tf(N-1,D-2,rrT)rrf(N-2,D-3,T)Trrb(D)rr\nm(f(4,7,r),f(4,7,l))",
+    "steps" : 235
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10100,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10100,
+    "litTargets" : 7,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10100,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 45,
+    "id" : 10101,
+    "litTargets" : 48,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\np(N,S):b(S)rb(S)lb(S)p(N-1,S-2)rrb(S)rb(S)lb(S)rr\nq(p(2,3)r)",
+    "steps" : 139
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10101,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10101,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10101,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 42,
+    "id" : 10102,
+    "litTargets" : 84,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nk(N,D):b(D)lk(N-1,D-2)rrk(N-1,D-2)lrrb(D)rr\nq(k(3,6)r)",
+    "steps" : 372
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10102,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10102,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10102,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 48,
+    "id" : 10103,
+    "litTargets" : 68,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\na(N,D,T):b(D)Ta(N-1,D-2,rrT)rra(N-2,D-3,T)Trrb(D)rr\nq(a(4,6,r)r)",
+    "steps" : 377
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10103,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10103,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10103,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 46,
+    "id" : 10104,
+    "litTargets" : 44,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\np(A,B,T):b(A)Tb(B)Tp(A-1,B-2,rrT)Tb(B)rrTb(A)rr\nq(p(3,4,r)r)",
+    "steps" : 157
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10104,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10104,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10104,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 40,
+    "id" : 10105,
+    "litTargets" : 68,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\ng(N,T):g(N-1,rrT)b(N)Tg(N-1,T)Trrb(N)rr\nq(g(4,r)r)",
+    "steps" : 830
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10105,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10105,
+    "litTargets" : 4,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10105,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 51,
+    "id" : 10106,
+    "litTargets" : 64,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nd(N):srsld(N-1)\nm(S,N):b(S)rrb(S)rrd(N)rrd(N)rr\na(S,N):q(m(S,N)r)\na(6,4)",
+    "steps" : 202
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10106,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10106,
+    "litTargets" : 6,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10106,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 64,
+    "id" : 10107,
+    "litTargets" : 60,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(W):q(b(W)r)\nf(N,D,T):b(D)Tf(N-1,D-2,rrT)rrf(N-2,D-3,T)Trrb(D)rr\na(N,D,T):c(D)f(N,D,T)r\nq(a(3,5,r))",
+    "steps" : 310
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10107,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10107,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10107,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 69,
+    "id" : 10108,
+    "litTargets" : 136,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(W,H,T):b(W)Tb(H)Tb(W)Tb(H)T\na(N,W,H,T,U):c(W,H,T)b(2)Tb(2)Ua(N-1,H-2,W-2,U,T)Ub(2)Ub(2)rr\nq(a(3,8,6,r,l)r)",
+    "steps" : 422
+  },
+  {
+    "accepted" : true,
+    "bytes" : 70,
+    "id" : 10108,
+    "litTargets" : 136,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(W,H,T):b(W)Tb(H)Tb(W)Tb(H)T\na(N,W,H,T,U):c(W,H,T)b(2)Tb(2)Ua(N-1,H-2,W-2,U,T)Ub(2)Ub(2)rr\nrq(a(3,8,6,r,l)r)",
+    "steps" : 423
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10108,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10108,
+    "litTargets" : 8,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10108,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 44,
+    "id" : 10109,
+    "litTargets" : 112,
+    "source" : "q(X):XXXX\na(N,X,Y):a(N-1,XrY,XlY)c(2-N,X,Y)\nc(N,X,Y):q(Xq(ssr)rrYrrr)\na(6,s,s)",
+    "steps" : 502
+  },
+  {
+    "accepted" : true,
+    "bytes" : 45,
+    "id" : 10109,
+    "litTargets" : 112,
+    "source" : "q(X):XXXX\na(N,X,Y):a(N-1,XrY,XlY)c(2-N,X,Y)\nc(N,X,Y):q(Xq(ssr)rrYrrr)\nra(6,s,s)",
+    "steps" : 503
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10109,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10109,
+    "litTargets" : 0,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10109,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 72,
+    "id" : 10110,
+    "litTargets" : 147,
+    "source" : "b(N):sb(N-1)\nc(W,H):b(H)rb(W)rb(H)rb(W)r\nd(N,W,H):c(W,H)rb(W+2)ld(N-1,W-1,H+1)lb(W+2)r\na(N,W,H):d(3,W,H)b(7)a(N-1,W-1,H+1)rrb(7)rr\na(3,5,2)",
+    "steps" : 309
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10110,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10110,
+    "litTargets" : 21,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10110,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 60,
+    "id" : 10111,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(W,T):q(b(W)T)\na(N,D,W,T):Tb(D)c(W,T)rrb(D)Tb(3)a(N-1,D-1,W+1,rrT)rrb(3)rr\nq(a(3,5,1,r)r)",
+    "steps" : 534
+  },
+  {
+    "accepted" : true,
+    "bytes" : 61,
+    "id" : 10111,
+    "litTargets" : 112,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(W,T):q(b(W)T)\na(N,D,W,T):Tb(D)c(W,T)rrb(D)Tb(3)a(N-1,D-1,W+1,rrT)rrb(3)rr\nrq(a(3,5,1,r)r)",
+    "steps" : 535
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10111,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10111,
+    "litTargets" : 9,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10111,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 57,
+    "id" : 10112,
+    "litTargets" : 293,
+    "source" : "q(X):XXXX\na(N,T,U,P):Ta(N-1,U,T,P)PUa(N-1,T,U,P)Pa(N-1,T,U,P)UPa(N-1,U,T,P)T\nd:q(sr)sss\na(3,r,l,d)q(sr)",
+    "steps" : 780
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10112,
+    "litTargets" : 0,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10112,
+    "litTargets" : 16,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10112,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 74,
+    "id" : 10113,
+    "litTargets" : 128,
+    "source" : "q(X):XXXX\nd(N,T,U):sTsUd(N-1,T,U)\ne(N,T,U):TsUse(N-1,T,U)\na(N,D,T,U):d(D,T,U)Ta(N-1,D-1,U,T)rra(N-2,D-1,T,U)Trre(D,T,U)rr\nq(a(4,4,r,l)r)",
+    "steps" : 714
+  },
+  {
+    "accepted" : true,
+    "bytes" : 75,
+    "id" : 10113,
+    "litTargets" : 128,
+    "source" : "q(X):XXXX\nd(N,T,U):sTsUd(N-1,T,U)\ne(N,T,U):TsUse(N-1,T,U)\na(N,D,T,U):d(D,T,U)Ta(N-1,D-1,U,T)rra(N-2,D-1,T,U)Trre(D,T,U)rr\nrq(a(4,4,r,l)r)",
+    "steps" : 715
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10113,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10113,
+    "litTargets" : 3,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10113,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 60,
+    "id" : 10114,
+    "litTargets" : 131,
+    "source" : "b(N):sb(N-1)\nc(N,W,H,T,U):b(W)Ta(N-1,H-1,W-2,U,T)b(H)Ta(N-1,W-1,H-2,U,T)\na(N,W,H,T,U):c(N,W,H,T,U)c(N,W,H,T,U)\na(3,6,5,r,l)",
+    "steps" : 326
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10114,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10114,
+    "litTargets" : 10,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10114,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 81,
+    "id" : 10115,
+    "litTargets" : 115,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\nc(N,W):q(b(W)r)srslc(N-1,W-2)rrrslsrr\nd(N,W):c(2,W)rb(W+2)ld(N-1,W-1)lb(W+2)r\na(N,W):d(N,W)b(W+2)a(N-1,W+1)rrb(W+2)rr\na(3,3)",
+    "steps" : 362
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10115,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10115,
+    "litTargets" : 18,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10115,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 94,
+    "id" : 10116,
+    "litTargets" : 292,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\na(N,T,U,P):Ta(N-1,U,T,P)PUa(N-1,T,U,P)Pa(N-1,T,U,P)UPa(N-1,U,T,P)T\nd:q(sr)sss\ne:sssq(ls)\nc:b(2)ra(2,l,r,d)q(sr)rrq(ls)a(2,r,l,e)lb(2)rrr\ncccc",
+    "steps" : 1384
+  },
+  {
+    "accepted" : true,
+    "bytes" : 95,
+    "id" : 10116,
+    "litTargets" : 292,
+    "source" : "b(N):sb(N-1)\nq(X):XXXX\na(N,T,U,P):Ta(N-1,U,T,P)PUa(N-1,T,U,P)Pa(N-1,T,U,P)UPa(N-1,U,T,P)T\nd:q(sr)sss\ne:sssq(ls)\nc:b(2)ra(2,l,r,d)q(sr)rrq(ls)a(2,r,l,e)lb(2)rrr\nrcccc",
+    "steps" : 1385
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10116,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10116,
+    "litTargets" : 9,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10116,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
+  },
+  {
+    "accepted" : true,
+    "bytes" : 94,
+    "id" : 10117,
+    "litTargets" : 168,
+    "source" : "q(X):XXXX\nd(N,T,U):sTsUd(N-1,T,U)\ne(N,T,U):TsUse(N-1,T,U)\nc:q(sr)\nw:q(srslr)\na(N,D,T,U,P,Q):Pd(D,T,U)Ta(N-1,D-1,U,T,Q,P)rra(N-2,D-2,T,U,P,Q)Trre(D,T,U)rr\nq(a(4,4,r,l,c,w)r)",
+    "steps" : 1042
+  },
+  {
+    "accepted" : true,
+    "bytes" : 95,
+    "id" : 10117,
+    "litTargets" : 168,
+    "source" : "q(X):XXXX\nd(N,T,U):sTsUd(N-1,T,U)\ne(N,T,U):TsUse(N-1,T,U)\nc:q(sr)\nw:q(srslr)\na(N,D,T,U,P,Q):Pd(D,T,U)Ta(N-1,D-1,U,T,Q,P)rra(N-2,D-2,T,U,P,Q)Trre(D,T,U)rr\nrq(a(4,4,r,l,c,w)r)",
+    "steps" : 1043
+  },
+  {
+    "accepted" : false,
+    "bytes" : 1,
+    "id" : 10117,
+    "litTargets" : 1,
+    "source" : "s",
+    "steps" : 1
+  },
+  {
+    "accepted" : false,
+    "bytes" : 4,
+    "id" : 10117,
+    "litTargets" : 1,
+    "source" : "a:sa\na",
+    "steps" : 500000
+  },
+  {
+    "accepted" : false,
+    "bytes" : 3,
+    "id" : 10117,
+    "litTargets" : 0,
+    "source" : "a:a\na",
+    "steps" : 0
   }
 ]

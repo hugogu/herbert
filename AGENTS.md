@@ -79,3 +79,5 @@
 - For prefilled editors, use an identifiable draft with `sheet(item:)` and editor-owned `@State`. A boolean sheet capturing parent state can show the current text binding while its computed Save validation still uses the old empty value; assert Save is enabled on first presentation.
 
 - Native XCTest can be blocked by a System Settings input-source permission sheet asking to let `testmanagerd` enable a third-party keyboard. Decline this unrelated input-access request; do not grant it for app verification. Infinite element frames and later AX authorization errors can result from that sheet, rather than the app layout.
+
+- At 50 originals, binding an ID and version per puzzle exceeds D1’s 100-parameter limit once other arguments are added. Aggregate ranking queries bind the canonical pairs as one JSON value and expand it with `json_each`; keep Worker parity fixtures and runtime catalog checks aligned with the native catalog.
