@@ -251,13 +251,13 @@ accepted personal solution. Battlefield scoring still assigns zero to over-limit
 
 ## Run a match
 
-The first **New match** starts with your default entrants and all **30 retained original
+The first **New match** starts with your default entrants and all **50 retained original
 puzzles**. Later ones start from the previous match's entrants, puzzles and Match Settings,
 so the same match can run again directly. Entrants or puzzles that are no longer available
 are dropped, and the defaults apply when none remain; **Use default entrants** and
-**30 original puzzles** restore them.
+**50 original puzzles** restore them.
 Choose up to 32 provider/model pairs and a subset of puzzles. The open-source edition
-also permits community puzzles; the App Store edition exposes only its 30 originals.
+also permits community puzzles; the App Store edition exposes only its 50 originals.
 Models run concurrently, with one request at a time per model. Each model works through
 the same puzzles in catalog order, using the exact same English rules and board prompt.
 Optional additional instructions are identical for every entrant.
@@ -296,7 +296,7 @@ On Mac, switching to another app does not stop it. A force quit or crash is reco
 
 The platform extracts one H program and runs it through the **same HerbertCore parser,
 byte counter, VM and board rules used for human play**. H code cannot invoke tools,
-access the network or read files. The 30 original puzzles form **Herbert Benchmark**.
+access the network or read files. The 50 original puzzles form **Herbert Benchmark**.
 
 The versioned `coverageAndLengthV1` policy awards:
 
@@ -437,6 +437,6 @@ The puzzle sheet keeps search, source filters and selection actions together abo
 list. Original lessons are grouped by chapter with board thumbnails and byte budgets.
 Switch to **Community** (open-source edition) or **Selected** to review that source or
 just the current match set. Search accepts puzzle numbers, localized titles and authors.
-**Select visible** adds every filtered result without clearing other choices; **30 original
+**Select visible** adds every filtered result without clearing other choices; **50 original
 puzzles** replaces the selection with the original course, and **Clear selection** resets it.
 Searching or switching filters never silently discards hidden selections.

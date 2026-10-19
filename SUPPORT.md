@@ -32,7 +32,7 @@ Optional time and token limits help you control a match, but only the provider's
 **How do I remove an API key?** In **AI Battlefield**, open **AI Providers** (**Models** on iPhone),
 select the provider and choose **Remove provider**. This deletes the key from the Keychain.
 
-**Why does the App Store edition have 30 puzzles?** It contains the 30 original puzzles designed for
+**Why does the App Store edition have 50 puzzles?** It contains the 50 original puzzles designed for
 this project. The open-source edition on GitHub also includes an archive of community puzzles
 whose redistribution rights are not confirmed, so it is not distributed through the App Store.
 

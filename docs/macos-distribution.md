@@ -1,7 +1,7 @@
 # Mac DMG distribution
 
 The open-source Mac preview supports **macOS 14+**, **Apple Silicon and Intel** in
-one universal app. It bundles 30 original lessons and the 1,769-problem community
+one universal app. It bundles 50 original lessons and the 1,769-problem community
 archive. The original-only `HerbertAppStore` target remains separate.
 
 ## Install

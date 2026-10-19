@@ -10,10 +10,10 @@
 
 ## 本地存档
 
-题库分为两个模块：`HerbertCore` 仅包含原创的 30 题和语言资源，`HerbertCommunity` 包含可选社区快照。
+题库分为两个模块：`HerbertCore` 仅包含原创的 50 题和语言资源，`HerbertCommunity` 包含可选社区快照。
 默认 `Herbert` target 链接两者并先显示原创课程；`HerbertAppStore` 仅链接原创题库，编译条件 `APP_STORE` 控制对应文案与筛选。两个 target 均链接独立的 `HerbertBattlefield`，它不依赖社区题库。
 不是运行时隐藏资源。构建后的 App Store .app 由 `scripts/check_app_store_bundle.py` 验证题库隔离。
-原创连续显示 L01–L30：十道入门题与二十道进阶题。显示顺序与内部存档 ID 分开；社区 ID 保持不变。
+原创连续显示 L01–L50：十道入门题、二十道进阶题、十道大师题与十道综合题。显示顺序与内部存档 ID 分开；社区 ID 保持不变。
 退役原创 ID 不复用，存档与备份中的旧记录保留为不可游玩的历史数据。下一关按当前目录顺序查找，不按数值大小猜测。
 目标、提示和名称采用同一套三语资源；参考解在测试 target 中独立打包，不进入应用。
 

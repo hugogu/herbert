@@ -2,8 +2,8 @@
 
 ## 选择正确版本
 
-- `Herbert`：默认开源版，先显示原创 L01–L30，再显示社区题；总数 1,799。
-- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；商店显示名为 **Herbot Bot**，只有连续编号 L01–L30 的原创课程，总数 30。
+- `Herbert`：默认开源版，先显示原创 L01–L50，再显示社区题；总数 1,819。
+- `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；商店显示名为 **Herbot Bot**，只有连续编号 L01–L50 的原创课程，总数 50。
 
 社区资源在 `Sources/HerbertCommunity/`，App Store target 链接 `HerbertCore` 与不含社区资源的 `HerbertBattlefield`。
 `APP_STORE` 编译条件还会移除社区筛选和原站 Problems 链接。参考解位于测试 target，两个应用均不打包答案。
@@ -14,7 +14,7 @@
 1. 打开 `Herbert.xcodeproj`，选择 **HerbertAppStore** scheme。
 2. 连接设备并选择运行目标。启用系统要求的开发者模式和信任设置。
 3. 给 app 和 UI test target 选择自己的签名团队。推荐在被 Git 忽略的 `Config/Local.xcconfig` 中写 `DEVELOPMENT_TEAM = YOUR_TEAM_ID`；生成工程时不会覆盖此文件。不要提交个人签名配置、证书或密钥。
-4. Run 安装。新安装时应显示 **30 PROBLEMS**，继续卡片为 L01。
+4. Run 安装。新安装时应显示 **50 PROBLEMS**，继续卡片为 L01。
 
 两种 scheme 沿用同一个 Bundle ID；同一设备上互相安装会替换应用，不会同时存在。
 先导出已有进度备份。已有社区记录会留在本地文件中，但原创版不显示、不计数、不导出这些记录。
@@ -28,7 +28,7 @@
 
 请分别记录 iPhone 和 iPad 的型号、系统版本、应用版本/build、Git commit 和界面语言。
 
-- [ ] 总数为 30，搜索 `0037` 无社区结果；搜索 `L30` 或 `10050` 可找到星穹圣殿。
+- [ ] 总数为 50，搜索 `0037` 无社区结果；搜索 `L50` 或 `10117` 可找到万象织宫。
 - [ ] L01：输入 `s` 并运行，应通关；下一关进入 L02，提示重新收起。
 - [ ] L02：输入 `rsslsslss`，避开三格连续墙后通关。L03：输入 `a:ssssr` 换行 `aaaa`，检查过程复用。
 - [ ] L02：输入 `s` 单步，墙阻挡前进但程序不报错；重置后用 `rsslsslss` 通关。
@@ -72,7 +72,7 @@ xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Rel
 python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Release-iphoneos/HerbertAppStore.app
 ```
 
-资源检查必须通过：恰好一份 30 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
+资源检查必须通过：恰好一份 50 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
 它只证明题库打包边界，不代替真机验证、隐私政策或商店资料检查。
 
 完成设备测试后，选择 **HerbertAppStore → Product → Archive**。
@@ -84,5 +84,5 @@ python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Releas
 
 设计源是 `scripts/generate_original_problems.py`，运行后生成原创 JSON、三语课程文案、课程文档和测试参考解。
 修改后运行 `scripts/check.sh`，真实引擎会验证全部参考解在各自 byte 限制内完成。
-显示编号连续为 L01–L30，与内部存档 ID 分开。重新设计的 L07/L08 使用新 ID 10051/10052，旧 10025/10026 记录保留为退役记录；历史比赛保留当时的棋盘与题号。其余棋盘保留，进阶路线位于 `scripts/advanced_course.py`。
+显示编号连续为 L01–L50，与内部存档 ID 分开。重新设计的 L07/L08 使用新 ID 10051/10052，旧 10025/10026 记录保留为退役记录；历史比赛保留当时的棋盘与题号。其余棋盘保留，进阶路线位于 `scripts/advanced_course.py`。
 难度与短循环探测说明见 [进阶设计分析](advanced-course-design.zh-CN.md)。
