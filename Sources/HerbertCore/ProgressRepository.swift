@@ -33,6 +33,17 @@ public struct ProgressSnapshot: Codable, Equatable, Sendable {
         self.lastProblemID = lastProblemID
     }
 
+    /// Saved best solutions have already passed the judge (including imported records).
+    /// Equal sizes and local improvements count; scores and instruction counts do not.
+    public func bestCount(references: [Int: Int]) -> Int {
+        records.filter { record in
+            guard let size = record.bestBytes, let reference = references[record.problemID],
+                record.bestSolution != nil, record.completedAt != nil
+            else { return false }
+            return size <= reference
+        }.count
+    }
+
     public func validated() throws -> ProgressSnapshot {
         guard schemaVersion == 1 else { throw ProgressError.unsupportedVersion(schemaVersion) }
         guard records.count <= 20_000, Set(records.map(\.problemID)).count == records.count,

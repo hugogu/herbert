@@ -48,16 +48,26 @@ app_product = obj('app-product', 'PBXFileReference', explicitFileType='wrapper.a
 test_product = obj('test-product', 'PBXFileReference', explicitFileType='wrapper.cfbundle', path='HerbertUITests.xctest', sourceTree='BUILT_PRODUCTS_DIR')
 store_product = obj('store-product', 'PBXFileReference', explicitFileType='wrapper.application', path='HerbertAppStore.app', sourceTree='BUILT_PRODUCTS_DIR')
 store_test_product = obj('store-test-product', 'PBXFileReference', explicitFileType='wrapper.cfbundle', path='HerbertAppStoreUITests.xctest', sourceTree='BUILT_PRODUCTS_DIR')
-app_files, app_sources, resources = [], [], []
+cloud_product = obj('cloud-product', 'XCSwiftPackageProductDependency', productName='HerbertCloud')
+cloud_framework = obj('cloud-link', 'PBXBuildFile', productRef=cloud_product)
+learning_id = uid('learning')
+learning_product = obj('learning-product', 'PBXFileReference', explicitFileType='wrapper.application', path='HerbertLearning.app', sourceTree='BUILT_PRODUCTS_DIR')
+app_files, app_sources, learning_sources, resources = [], [], [], []
 for path in sorted((ROOT / 'Herbert').rglob('*.swift')):
     relative = str(path.relative_to(ROOT))
     ref = obj(relative, 'PBXFileReference', lastKnownFileType='sourcecode.swift', path=relative, sourceTree='<group>')
     app_files.append(ref)
-    app_sources.append(obj(relative + ':build', 'PBXBuildFile', fileRef=ref))
+    build = obj(relative + ':build', 'PBXBuildFile', fileRef=ref)
+    app_sources.append(build)
+    if not relative.startswith(('Herbert/Battlefield/', 'Herbert/Cloud/')):
+        learning_sources.append(build)
 for relative, file_type in [('Herbert/Assets.xcassets', 'folder.assetcatalog'), ('Herbert/PrivacyInfo.xcprivacy', 'text.xml')]:
     ref = obj(relative, 'PBXFileReference', lastKnownFileType=file_type, path=relative, sourceTree='<group>')
     app_files.append(ref)
     resources.append(obj(relative + ':build', 'PBXBuildFile', fileRef=ref))
+cloud_privacy = obj('cloud-privacy', 'PBXFileReference', lastKnownFileType='text.xml', name='PrivacyInfo.xcprivacy', path='Config/Cloud/PrivacyInfo.xcprivacy', sourceTree='<group>')
+app_files.append(cloud_privacy)
+store_resources = [r for r in resources if r != uid('Herbert/PrivacyInfo.xcprivacy:build')] + [obj('cloud-privacy:build', 'PBXBuildFile', fileRef=cloud_privacy)]
 localized_files = []
 for language in ['en', 'zh-Hans', 'ja']:
     relative = f'Sources/HerbertCore/Resources/{language}.lproj/Localizable.strings'
@@ -66,6 +76,7 @@ for language in ['en', 'zh-Hans', 'ja']:
 translations = obj('translations', 'PBXVariantGroup', children=localized_files, name='Localizable.strings', sourceTree='<group>')
 app_files.append(translations)
 resources.append(obj('translations:build', 'PBXBuildFile', fileRef=translations))
+store_resources.append(uid('translations:build'))
 test_files, test_sources = [], []
 for path in sorted((ROOT / 'HerbertUITests').glob('*.swift')):
     relative = str(path.relative_to(ROOT))
@@ -73,7 +84,7 @@ for path in sorted((ROOT / 'HerbertUITests').glob('*.swift')):
     test_files.append(ref)
     test_sources.append(obj(relative + ':build', 'PBXBuildFile', fileRef=ref))
 signing = obj('signing-config', 'PBXFileReference', lastKnownFileType='text.xcconfig', path='Config/Signing.xcconfig', sourceTree='<group>')
-products = obj('products', 'PBXGroup', children=[app_product, test_product, store_product, store_test_product], name='Products', sourceTree='<group>')
+products = obj('products', 'PBXGroup', children=[app_product, test_product, store_product, store_test_product, learning_product], name='Products', sourceTree='<group>')
 app_group = obj('app-group', 'PBXGroup', children=app_files, name='Herbert', sourceTree='<group>')
 test_group = obj('test-group', 'PBXGroup', children=test_files, name='HerbertUITests', sourceTree='<group>')
 root_group = obj('root-group', 'PBXGroup', children=[app_group, test_group, signing, products], sourceTree='<group>')
@@ -90,7 +101,7 @@ common = {'SDKROOT': 'auto', 'SUPPORTED_PLATFORMS': 'iphoneos iphonesimulator ma
           'CODE_SIGN_STYLE': 'Automatic', 'SWIFT_STRICT_CONCURRENCY': 'complete',
           'ENABLE_USER_SCRIPT_SANDBOXING': 'YES'}
 app_settings = {**common, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.Herbert', 'PRODUCT_NAME': 'Herbert',
-                'CURRENT_PROJECT_VERSION': '15', 'MARKETING_VERSION': '1.1.0',
+                'CURRENT_PROJECT_VERSION': '15', 'MARKETING_VERSION': '2.0.0',
                 'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
                 'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert',
                 'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.puzzle-games',
@@ -116,6 +127,12 @@ def configs(name, settings):
         values['SWIFT_OPTIMIZATION_LEVEL'] = '-Onone' if kind == 'Debug' else '-O'
         values['ONLY_ACTIVE_ARCH'] = 'YES' if kind == 'Debug' else 'NO'
         values['DEBUG_INFORMATION_FORMAT'] = 'dwarf' if kind == 'Debug' else 'dwarf-with-dsym'
+        if name == 'store':
+            environment = 'STAGING' if kind == 'Debug' else 'PRODUCTION'
+            values['HERBERT_CLOUD_URL'] = f'$(HERBERT_CLOUD_{environment}_URL)'
+            if kind == 'Debug':
+                values['PRODUCT_BUNDLE_IDENTIFIER'] = 'info.hugogu.Herbert.Staging'
+                values['INFOPLIST_KEY_CFBundleDisplayName'] = 'Herbert Staging'
         conditions = settings.get('SWIFT_ACTIVE_COMPILATION_CONDITIONS', '$(inherited)')
         if kind == 'Debug': values['SWIFT_ACTIVE_COMPILATION_CONDITIONS'] = 'DEBUG ' + conditions
         extra = {'baseConfigurationReference': signing} if name != 'project' else {}
@@ -135,10 +152,12 @@ store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore',
                   'INFOPLIST_KEY_CFBundleDisplayName': 'Herbot Bot',
                   # Matches the primary App Store Connect category in store/metadata.
                   'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.education',
-                  'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
+                  'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)',
+                  'CODE_SIGN_ENTITLEMENTS': 'Config/AppStore.entitlements',
+                  'INFOPLIST_FILE': 'Config/Cloud/Info.plist'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
-    buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
-    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')
+    buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework, cloud_framework]), phase('store-resources', 'PBXResourcesBuildPhase', store_resources)],
+    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product, cloud_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')
 store_proxy = obj('store-proxy', 'PBXContainerItemProxy', containerPortal=project_id, proxyType='1', remoteGlobalIDString=store_id, remoteInfo='HerbertAppStore')
 store_dependency = obj('store-dependency', 'PBXTargetDependency', target=store_id, targetProxy=store_proxy)
 store_test_settings = {**test_settings, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.HerbertAppStoreUITests',
@@ -146,12 +165,19 @@ store_test_settings = {**test_settings, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugog
 obj('app-store-uitests', 'PBXNativeTarget', buildConfigurationList=configs('storetests', store_test_settings),
     buildPhases=[phase('store-test-sources', 'PBXSourcesBuildPhase', test_sources), phase('store-test-frameworks', 'PBXFrameworksBuildPhase', [])],
     buildRules=[], dependencies=[store_dependency], name='HerbertAppStoreUITests', productName='HerbertAppStoreUITests', productReference=store_test_product, productType='com.apple.product-type.bundle.ui-testing')
+learning_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertLearning', 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.HerbertLearning',
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE LOCAL_LEARNING $(inherited)',
+    'INFOPLIST_KEY_CFBundleDisplayName': 'Herbert Learning', 'ENABLE_OUTGOING_NETWORK_CONNECTIONS': 'NO',
+    'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.education'}
+obj('learning', 'PBXNativeTarget', buildConfigurationList=configs('learning', learning_settings),
+    buildPhases=[phase('learning-sources', 'PBXSourcesBuildPhase', learning_sources), phase('learning-frameworks', 'PBXFrameworksBuildPhase', [framework]), phase('learning-resources', 'PBXResourcesBuildPhase', resources)],
+    buildRules=[], dependencies=[], name='HerbertLearning', packageProductDependencies=[product], productName='HerbertLearning', productReference=learning_product, productType='com.apple.product-type.application')
 obj('project', 'PBXProject', attributes={'BuildIndependentTargetsInParallel': 'YES', 'LastUpgradeCheck': '2700',
     'TargetAttributes': {app_id: {'CreatedOnToolsVersion': '27.0'}, test_id: {'CreatedOnToolsVersion': '27.0', 'TestTargetID': app_id},
                          store_id: {'CreatedOnToolsVersion': '27.0'}, store_test_id: {'CreatedOnToolsVersion': '27.0', 'TestTargetID': store_id}}},
     buildConfigurationList=configs('project', {'CLANG_WARN_DOCUMENTATION_COMMENTS': 'YES', 'CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER': 'YES'}),
     compatibilityVersion='Xcode 14.0', developmentRegion='en', hasScannedForEncodings='0', knownRegions=['en', 'zh-Hans', 'ja', 'Base'],
-    mainGroup=root_group, productRefGroup=products, projectDirPath='', projectRoot='', packageReferences=[package], targets=[app_id, test_id, store_id, store_test_id])
+    mainGroup=root_group, productRefGroup=products, projectDirPath='', projectRoot='', packageReferences=[package], targets=[app_id, test_id, store_id, store_test_id, learning_id])
 text = '// !$*UTF8*$!\n' + render({'archiveVersion': '1', 'classes': {}, 'objectVersion': '56', 'objects': objects, 'rootObject': project_id}) + '\n'
 (PROJECT / 'project.pbxproj').write_text(text)
 schemes = PROJECT / 'xcshareddata/xcschemes'
@@ -173,3 +199,13 @@ def write_scheme(name, app_id, test_id, product_name, test_name):
 write_scheme('Herbert', app_id, test_id, 'Herbert', 'HerbertUITests')
 write_scheme('HerbertAppStore', store_id, store_test_id, 'HerbertAppStore', 'HerbertAppStoreUITests')
 print('Generated Herbert (community + originals) and HerbertAppStore (originals only)')
+
+(schemes / 'HerbertLearning.xcscheme').write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
+<Scheme LastUpgradeVersion="2700" version="1.7">
+<BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES"><BuildActionEntries>
+<BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">{ref(learning_id, 'HerbertLearning.app')}</BuildActionEntry>
+</BuildActionEntries></BuildAction>
+<LaunchAction buildConfiguration="Debug"><BuildableProductRunnable runnableDebuggingMode="0">{ref(learning_id, 'HerbertLearning.app')}</BuildableProductRunnable></LaunchAction>
+<AnalyzeAction buildConfiguration="Debug"/><ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+</Scheme>
+''')

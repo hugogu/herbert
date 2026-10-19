@@ -25,15 +25,21 @@ public struct HMachine {
     private let program: HProgram
     private var frames: [ExecutionFrame]
     private var expansionCount = 0
+    private var expansionWork = 0
     private var pendingMemory: Int
     public private(set) var finished = false
     public let memoryLimit: Int
     public let expansionLimit: Int
+    public let expansionWorkLimit: Int
 
-    public init(program: HProgram, memoryLimit: Int = 1_000_000, expansionLimit: Int = 1_000_000) {
+    public init(
+        program: HProgram, memoryLimit: Int = 1_000_000, expansionLimit: Int = 1_000_000,
+        expansionWorkLimit: Int = 2_000_000
+    ) {
         self.program = program
         self.memoryLimit = memoryLimit
         self.expansionLimit = expansionLimit
+        self.expansionWorkLimit = expansionWorkLimit
         frames = [ExecutionFrame(instructions: program.main, environment: [:])]
         pendingMemory = program.main.count
     }
@@ -64,6 +70,8 @@ public struct HMachine {
                     throw HError(HerbertStrings.text("过程 %@ 未定义。", String(name)))
                 }
                 if procedure.parameters.isEmpty { arguments = [] }
+                // Charge arity even when arguments reuse existing values without copying.
+                try charge(procedure.parameters.count)
                 let values = try arguments.map { try resolve($0, environment: frame.environment) }
                 if values.contains(where: {
                     if case .number(let n) = $0 { return n <= 0 }
@@ -99,9 +107,17 @@ public struct HMachine {
         }
     }
 
-    private func resolve(_ argument: HArgument, environment: [Character: HValue]) throws -> HValue {
+    private mutating func charge(_ amount: Int) throws {
+        guard amount <= expansionWorkLimit - expansionWork else {
+            throw HError(HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
+        }
+        expansionWork += amount
+    }
+
+    private mutating func resolve(_ argument: HArgument, environment: [Character: HValue]) throws -> HValue {
         switch argument {
         case .number(let terms):
+            try charge(terms.count)
             var sum = 0
             for term in terms {
                 let number: Int
@@ -130,27 +146,32 @@ public struct HMachine {
         }
     }
 
-    private func substitute(_ instructions: [HInstruction], environment: [Character: HValue], size: inout Int) throws
+    private mutating func substitute(_ instructions: [HInstruction], environment: [Character: HValue], size: inout Int)
+        throws
         -> [HInstruction]
     {
         var result: [HInstruction] = []
         for instruction in instructions {
             switch instruction {
             case .command:
+                try charge(1)
                 size += 1
                 result.append(instruction)
             case .parameter(let name):
                 guard case .code(let code, let weight) = environment[name] else {
                     throw HError(HerbertStrings.text("数值参数 %@ 不能拼接为命令。", String(name)))
                 }
+                try charge(weight)
                 size += weight
                 guard size <= memoryLimit else { throw HError(HerbertStrings.text("命令展开超过 100 万 byte。")) }
                 result.append(contentsOf: code)
             case .call(let name, let arguments):
+                try charge(1)
                 size += 1
                 let substituted = try arguments.map { argument -> HArgument in
                     switch argument {
                     case .number(let terms):
+                        try charge(terms.count)
                         size += terms.count
                         return .number(
                             try terms.map { term in
@@ -164,6 +185,7 @@ public struct HMachine {
                             })
                     case .code(let code):
                         if code.count == 1, case .parameter(let p) = code[0], case .number(let n) = environment[p] {
+                            try charge(1)
                             size += 1
                             return .number([NumericTerm(sign: 1, value: .constant(n))])
                         }
@@ -177,10 +199,11 @@ public struct HMachine {
         return result
     }
 
-    private func validateNesting(_ instructions: [HInstruction]) throws {
+    private mutating func validateNesting(_ instructions: [HInstruction]) throws {
         var pending: [([HInstruction], Int)] = [(instructions, 0)]
         while let (sequence, depth) = pending.popLast() {
             guard depth <= 128 else { throw HError(HerbertStrings.text("展开后的命令参数嵌套超过 128 层。")) }
+            try charge(sequence.count)
             for instruction in sequence {
                 if case .call(_, let arguments) = instruction {
                     for argument in arguments {
