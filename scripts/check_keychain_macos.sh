@@ -1,5 +1,5 @@
 #!/bin/sh
-# Opt-in real-Keychain check: fresh sandbox identity and throwaway values only; no UI automation.
+# Opt-in real-Keychain check: fixed sandbox identity and throwaway per-run values only; no UI automation.
 set -eu
 cd "$(dirname "$0")/.."
 probe_root=$(mktemp -d "${TMPDIR:-/tmp}/herbert-keychain.XXXXXX")
@@ -9,9 +9,8 @@ mkdir -p "$probe_app/Contents/MacOS"
 python3 - "$probe_app/Contents/Info.plist" <<'PY'
 import plistlib
 import sys
-import uuid
 with open(sys.argv[1], 'wb') as target:
-    plistlib.dump({'CFBundleIdentifier': 'info.hugogu.Herbert.KeychainProbe.' + str(uuid.uuid4()),
+    plistlib.dump({'CFBundleIdentifier': 'info.hugogu.Herbert.KeychainProbe',
                   'CFBundleExecutable': 'HerbertKeychainProbe', 'CFBundlePackageType': 'APPL'}, target)
 PY
 xcrun swiftc -O -framework Security Sources/HerbertCore/DeviceKeychain.swift \

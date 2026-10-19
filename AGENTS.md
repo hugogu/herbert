@@ -85,3 +85,5 @@
 - The `obscenity` filter ships an ESM wrapper over CommonJS. Worker Vitest needs `test.deps.optimizer.ssr` to bundle it, matching Wrangler; otherwise the wrapper imports an undefined default. Verify both the real Wrangler startup and workerd test suite.
 
 - Ad-hoc sandboxed macOS previews lack an application-identifier entitlement: Data Protection Keychain add/delete return `errSecMissingEntitlement` (-34018), while a missing read can return item-not-found. Preserve readable legacy keys and fall back only for that entitlement error on macOS. `scripts/check_keychain_macos.sh` tests the real helper with isolated throwaway items and the DMG entitlements, without Mac UI automation.
+
+- Keep the Keychain probe bundle ID fixed (`info.hugogu.Herbert.KeychainProbe`) so repeated checks reuse one sandbox container; isolate test data with the per-run service UUID instead. Shell cleanup cannot remove macOS-protected container directories.
