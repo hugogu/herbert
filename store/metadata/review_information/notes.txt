@@ -1,14 +1,14 @@
 INFORMATION FOR APP REVIEW (Guideline 2.1)
 
 1. SCREEN RECORDING
-A recording made on a physical iPhone running the latest iOS is attached to our reply in App Store Connect. It starts by launching the app from the Home Screen and shows: solving L01 with its hints, a wrong first attempt at L02 and its fix, the Problems list, the Guide, Progress, and AI Battlefield (adding a provider, enabling one model, starting a match on L01 to L03, the judged answer for L01, stopping the match, match history and the shareable result image). The API key field looks empty because iOS hides secure text in screen recordings. Waiting time and browsing of the model list were trimmed. That recording covers the offline 1.0.0 workflow; version 2.0.0 additionally offers the optional leaderboard described below. There are no in-app purchases or paid features.
+A physical-iPhone recording of the 1.0.0 workflow is attached to our App Store Connect reply. It shows launch from the Home Screen, solving L01, correcting L02, Problems, Guide, Progress, and AI Battlefield (provider/model setup, an L01-L03 match, a judged answer, stopping, history and sharing). iOS hides the API key in secure fields; waiting and model-list browsing were trimmed. Version 2.0.0 adds the optional leaderboard described below. There are no in-app purchases or paid features.
 
 2. PURPOSE AND AUDIENCE
 Herbot Bot is an educational programming puzzle game for anyone learning to program, from older children and students to teachers and professional developers. Players guide a robot to light every target on a 25 x 25 board by writing very short programs in H, a language with three commands: s (forward), l (turn left) and r (turn right). Fifty original puzzles in ten chapters introduce sequencing, procedures, parameters and recursion, ideas that many learners find hard to grasp from text alone. Every puzzle has a goal and two optional hints, programs run step by step with immediate visual feedback, and the game rewards the shortest correct program. It works fully offline, without an account, ads, tracking or purchases.
 
 3. HOW TO USE THE MAIN FEATURES
 No login, setup or sample files are required.
-- Problems: tap "Take the first step" to open L01, type s (or tap the s key) and tap Run; the puzzle is solved. L02 is solved by: rsslsslss. Each puzzle shows its goal above the board; "Show the next hint" reveals a hint, and "Game rules" explains H.
+- Problems: tap "Take the first step" to open L01, type s (or tap the s key) and tap Run; the puzzle is solved. L02 is solved by: rsslsslss. Each puzzle shows its goal above the board; "Show the next hint" reveals a hint, and "Rules" explains H.
 - Guide: the second tab explains the language with examples.
 - My > Progress: lists solved puzzles; Export and Import save and restore a JSON backup.
 - AI Battlefield (optional): open AI Providers ("Models" on iPhone) > Add provider, choose its type, enter the HTTPS base URL and an API key, and save to load models. Under New match ("New" on iPhone), choose models and puzzles, then tap "Agree & start match".
