@@ -451,6 +451,20 @@ public struct CompetitionResult: Codable, Identifiable, Equatable, Sendable {
             return $0.id.uuidString < $1.id.uuidString
         }
     }
+    /// Dashboard column order: `ranked` once the match has ended. While it runs, entrants sort by score alone and
+    /// equal scores keep their order in `previous`, then entrant order. Token counts change every second while
+    /// answers stream, so ordering by them swaps columns while someone aims at a button in one.
+    public func ranked(keepingTiesIn previous: [UUID]) -> [EntrantResult] {
+        guard status == .running else { return ranked }
+        let scores = Dictionary(uniqueKeysWithValues: entrants.map { ($0.id, score(for: $0)) })
+        let shown = Dictionary(previous.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        let place = Dictionary(
+            uniqueKeysWithValues: entrants.enumerated().map { ($1.id, shown[$1.id] ?? previous.count + $0) })
+        return entrants.sorted {
+            if scores[$0.id] != scores[$1.id] { return scores[$0.id]! > scores[$1.id]! }
+            return place[$0.id]! < place[$1.id]!
+        }
+    }
 
     public mutating func finish(_ reason: CompetitionStatus, at time: Date = .now) {
         status = reason
