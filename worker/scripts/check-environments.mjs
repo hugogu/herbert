@@ -42,7 +42,7 @@ test("staging uses a separate Apple app and each environment runs maintenance", 
     assert.equal(configs[2].vars.APPLE_CLIENT_ID, "info.hugogu.Herbert");
     assert.deepEqual(configs[0].triggers.crons, []);
     for (const config of configs.slice(1))
-        assert.deepEqual(config.triggers.crons, ["17 3 * * *"]);
+        assert.deepEqual(config.triggers.crons, ["*/5 * * * *"]);
 });
 
 test("local scripts force local storage even with an ambient Cloudflare environment", () => {
