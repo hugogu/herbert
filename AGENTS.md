@@ -36,6 +36,7 @@
 - Do not overlap native UI test runs or native computer-use sessions; they share focus and accessibility state.
 
 - Mac Battlefield sheets use an AppKit bridge to enable resizing and set the initial content size once after attachment; SwiftUI min/ideal frames alone can open a scroll-backed sheet at its minimum width. Do not reset size on live result updates. Test both dimensions and three visible model columns.
+- Battlefield dashboard columns use `CompetitionResult.ranked(keepingTiesIn:)`, not `ranked`: `ranked` breaks score ties by live token counts, so columns swapped every second during a match and a tap could land on another model's button. While running it sorts by score only and ties keep the order last shown; finished results, share images and history keep `ranked`.
 
 - SSE wire framing can exceed 4 MiB before a 64K-token completion finishes. Bound individual events and decoded answer/reasoning bytes independently; do not cap cumulative SSE metadata. Apply the judge parser size limit after extracting the fenced H program.
 

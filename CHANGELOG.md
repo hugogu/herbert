@@ -8,6 +8,10 @@ save or API formats through documented migrations.
 - AI Battlefield model headers and share images show average output speed in place of the input
   cache rate: output tokens, reasoning included, per second of the model's total attempt time.
   It updates live during a match, so models can be compared on how fast they answer.
+- AI Battlefield keeps model columns in place while a match runs. They reorder only when scores
+  change; tied columns keep the order they were shown in instead of following token counts, which
+  change every second as answers stream and swapped the columns under a tap. Finished matches,
+  share images and history rank as before.
 - With token limits off, AI Battlefield asks for the model's whole output capacity even when
   `/models` doesn't publish it, instead of leaving the cap to the provider's default. DeepSeek, for
   one, defaults to 64K tokens in thinking mode but accepts 393,216, so unlimited answers burned out
