@@ -15,7 +15,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "jose": "6.2.12"
+    "jose": "6.2.12",
+    "obscenity": "0.4.6"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.4.0",

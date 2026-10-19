@@ -6,6 +6,50 @@ import XCTest
 
 final class CloudUITests: XCTestCase {
     @MainActor
+    func testPlayerCanHideAndRestoreAPublicNickname() throws {
+        #if APP_STORE
+            let app = XCUIApplication()
+            app.launchArguments = [
+                "--ui-testing", "--reset-progress", "--ui-testing-cloud-account", "-AppleLanguages", "(en)",
+            ]
+            app.launch()
+            #if os(macOS)
+                if !app.windows.firstMatch.waitForExistence(timeout: 3) { app.typeKey("n", modifierFlags: .command) }
+                prepareWindow(app)
+                activate(app.descendants(matching: .any)["section-我的"].firstMatch)
+            #else
+                app.tabBars.buttons["My"].tap()
+            #endif
+            activate(app.buttons["cloud-leaderboard"])
+            let menu = app.buttons["cloud-player-menu-preview-peer"]
+            XCTAssertTrue(menu.waitForExistence(timeout: 5))
+            activate(menu)
+            XCTAssertTrue(app.buttons["Report nickname"].exists)
+            activate(app.buttons["cloud-hide-preview-peer"])
+            XCTAssertFalse(menu.exists)
+            app.terminate()
+            app.launchArguments.removeAll { $0 == "--reset-progress" }
+            app.launch()
+            #if os(macOS)
+                if !app.windows.firstMatch.waitForExistence(timeout: 3) { app.typeKey("n", modifierFlags: .command) }
+                prepareWindow(app)
+                activate(app.descendants(matching: .any)["section-我的"].firstMatch)
+            #else
+                app.tabBars.buttons["My"].tap()
+            #endif
+            activate(app.buttons["cloud-leaderboard"])
+            XCTAssertFalse(menu.exists)
+            let hidden = app.buttons["Players hidden on this device"]
+            XCTAssertTrue(hidden.waitForExistence(timeout: 3))
+            activate(hidden)
+            activate(app.buttons["cloud-unhide-preview-peer"])
+            XCTAssertTrue(menu.waitForExistence(timeout: 3))
+            app.terminate()
+        #else
+            throw XCTSkip("Cloud UI is available only in the App Store target.")
+        #endif
+    }
+    @MainActor
     func testAccountActionsAndNicknameEditor() throws {
         #if APP_STORE
             let app = XCUIApplication()

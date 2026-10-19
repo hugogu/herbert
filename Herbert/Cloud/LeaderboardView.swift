@@ -7,6 +7,8 @@
     struct LeaderboardView: View {
         @EnvironmentObject private var store: AppStore
         @EnvironmentObject private var model: CloudModel
+        @Environment(\.openURL) private var openURL
+        @State private var showHiddenPlayers = false
         @State private var selection: Int
         @State private var total: Leaderboard?
         @State private var problemRanking: ProblemLeaderboard?
@@ -36,8 +38,12 @@
                             Text("\(problem.number) · \(problem.displayTitle)").font(.title2.bold())
                             if let problemRanking {
                                 if problemRanking.entries.isEmpty { Text("还没有上传的成绩。").padding() }
-                                ForEach(problemRanking.entries) { entry in
-                                    rankingRow(rank: entry.rank, name: entry.displayName, points: entry.points) {
+                                ForEach(problemRanking.entries.filter { model.hiddenPlayers[$0.userID] == nil }) {
+                                    entry in
+                                    rankingRow(
+                                        rank: entry.rank, id: entry.userID, name: entry.displayName,
+                                        points: entry.points
+                                    ) {
                                         Text(
                                             L10n.text(
                                                 "已点亮 %ld/%ld · %ld B", entry.litTargets, entry.targetCount, entry.bytes)
@@ -51,10 +57,24 @@
                         } else if let total {
                             Text(L10n.text("%ld 道原创练习", total.puzzleCount)).foregroundStyle(Palette.muted)
                             if total.entries.isEmpty { Text("还没有上传的成绩。").padding() }
-                            ForEach(total.entries) { entry in
-                                rankingRow(rank: entry.rank, name: entry.displayName, points: entry.points) {
+                            ForEach(total.entries.filter { model.hiddenPlayers[$0.userID] == nil }) { entry in
+                                rankingRow(
+                                    rank: entry.rank, id: entry.userID, name: entry.displayName, points: entry.points
+                                ) {
                                     Text(L10n.text("已完成 %ld/%ld", entry.solved, total.puzzleCount))
                                         .font(.caption).foregroundStyle(Palette.muted)
+                                }
+                            }
+                        }
+                        if !model.hiddenPlayers.isEmpty {
+                            DisclosureGroup("本机隐藏的玩家", isExpanded: $showHiddenPlayers) {
+                                ForEach(model.hiddenPlayers.keys.sorted(), id: \.self) { id in
+                                    HStack {
+                                        Text(model.hiddenPlayers[id] ?? id)
+                                        Spacer()
+                                        Button("取消隐藏") { model.showPlayer(id: id) }
+                                            .secondaryButtonStyle().accessibilityIdentifier("cloud-unhide-" + id)
+                                    }
                                 }
                             }
                         }
@@ -71,7 +91,7 @@
                 .task(id: selection) { await reload() }
         }
         private func rankingRow<Detail: View>(
-            rank: Int, name: String, points: Double, @ViewBuilder detail: () -> Detail
+            rank: Int, id: String, name: String, points: Double, @ViewBuilder detail: () -> Detail
         ) -> some View {
             HStack(spacing: 16) {
                 Text(String(format: "%02d", rank)).monospacedDigit().foregroundStyle(Palette.mint)
@@ -82,6 +102,24 @@
                 Spacer()
                 Text(L10n.text("%@ 分", points.formatted(.number.precision(.fractionLength(0...2)))))
                     .font(.title3.bold()).foregroundStyle(Palette.mint)
+                if id != model.user?.userID {
+                    Menu {
+                        Button {
+                            if let url = LeaderboardSafety.reportURL(userID: id, displayName: name) { openURL(url) }
+                        } label: {
+                            Label("举报昵称", systemImage: "flag")
+                        }
+                        Button {
+                            model.hidePlayer(id: id, name: name)
+                        } label: {
+                            Label("在本机隐藏此玩家", systemImage: "person.crop.circle.badge.minus")
+                        }
+                        .accessibilityIdentifier("cloud-hide-" + id)
+                    } label: {
+                        Image(systemName: "ellipsis.circle").accessibilityLabel("玩家选项")
+                    }.buttonStyle(.plain).foregroundStyle(Palette.mint)
+                        .accessibilityIdentifier("cloud-player-menu-" + id)
+                }
             }.panel(padding: 16)
         }
         private func reload() async {

@@ -533,6 +533,22 @@ describe("Worker + real D1 bindings", () => {
             "a",
         ]);
     });
+    it("rejects abusive nicknames without changing the profile", async () => {
+        const token = await user();
+        const response = await request(
+            "/v1/me",
+            "PATCH",
+            { display_name: "操 你 妈" },
+            token,
+        );
+        expect(response.status).toBe(400);
+        expect(await response.json()).toMatchObject({
+            code: "nickname_not_allowed",
+        });
+        expect(
+            await bindings.DB.prepare("SELECT display_name FROM users").first(),
+        ).toEqual({ display_name: "alice" });
+    });
     it("updates only the authenticated user's public nickname, preserving scores and sessions", async () => {
         const alice = await user();
         const bob = await user("bob");
@@ -884,6 +900,65 @@ describe("Worker + real D1 bindings", () => {
             .setExpirationTime("5m")
             .sign(keys.privateKey);
         const headers = { "Cf-Access-Jwt-Assertion": jwt };
+        for (let i = 0; i < 2; i++) {
+            expect(
+                (
+                    await request(
+                        "/admin/v1/users",
+                        "GET",
+                        undefined,
+                        undefined,
+                        headers,
+                    )
+                ).status,
+            ).toBe(200);
+        }
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        expect(
+            (
+                await request(
+                    "/admin/v1/users/alice",
+                    "PATCH",
+                    { reset_name: true, reason: "reported abusive nickname" },
+                    undefined,
+                    headers,
+                )
+            ).status,
+        ).toBe(200);
+        expect(
+            await bindings.DB.prepare(
+                "SELECT display_name,status FROM users WHERE user_id='alice'",
+            ).first(),
+        ).toEqual({ display_name: "Learner alice", status: "active" });
+        expect((await request("/v1/me", "GET", undefined, token)).status).toBe(
+            200,
+        );
+        expect(
+            (
+                await request(
+                    "/admin/v1/users/alice",
+                    "PATCH",
+                    { reset_name: true },
+                    undefined,
+                    headers,
+                )
+            ).status,
+        ).toBe(400);
+        expect(
+            (
+                await request(
+                    "/admin/v1/users/alice",
+                    "PATCH",
+                    {
+                        reset_name: true,
+                        status: "blocked",
+                        reason: "invalid combination",
+                    },
+                    undefined,
+                    headers,
+                )
+            ).status,
+        ).toBe(400);
         expect(
             (
                 await request(
@@ -896,8 +971,12 @@ describe("Worker + real D1 bindings", () => {
             ).status,
         ).toBe(200);
         expect(
-            await bindings.DB.prepare("SELECT action FROM admin_audit").first(),
-        ).toEqual({ action: "user.blocked" });
+            (
+                await bindings.DB.prepare(
+                    "SELECT action FROM admin_audit ORDER BY action",
+                ).all()
+            ).results,
+        ).toEqual([{ action: "user.blocked" }, { action: "user.reset_name" }]);
         expect((await request("/v1/me", "GET", undefined, token)).status).toBe(
             401,
         );

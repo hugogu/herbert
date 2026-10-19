@@ -9,6 +9,7 @@
     final class CloudModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate,
         ASAuthorizationControllerPresentationContextProviding
     {
+        @Published private(set) var hiddenPlayers: [String: String] = [:]
         @Published private(set) var user: CloudUser?
         @Published private(set) var busy = false
         @Published var message: String?
@@ -23,6 +24,8 @@
         private var controller: ASAuthorizationController?
         private var pendingUpload: (problem: Problem, source: String)?
         private let keychainService: String
+        private let safetyPreferences: UserDefaults
+        private let hiddenPlayersKey: String
         private static var previewAccount: Bool {
             #if DEBUG
                 ProcessInfo.processInfo.arguments.contains("--ui-testing")
@@ -39,7 +42,15 @@
                 ? "" : Bundle.main.object(forInfoDictionaryKey: "HerbertLeaderboardURL") as? String ?? ""
             client = URL(string: endpoint).flatMap { try? CloudClient(endpoint: $0) }
             keychainService = "info.hugogu.Herbert.Cloud." + endpoint
+            safetyPreferences =
+                ProcessInfo.processInfo.arguments.contains("--ui-testing")
+                ? UserDefaults(suiteName: "info.hugogu.Herbert.CloudSafety.UITests")! : .standard
+            hiddenPlayersKey = "cloud.hiddenPlayers." + endpoint
+            if ProcessInfo.processInfo.arguments.contains("--reset-progress") {
+                safetyPreferences.removeObject(forKey: hiddenPlayersKey)
+            }
             super.init()
+            hiddenPlayers = safetyPreferences.dictionary(forKey: hiddenPlayersKey) as? [String: String] ?? [:]
             if Self.previewAccount {
                 user = try? JSONDecoder().decode(
                     CloudUser.self, from: Data(#"{"user_id":"ui-preview","display_name":"Learner preview"}"#.utf8))
@@ -52,6 +63,15 @@
                     user = session?.user
                 }
             } catch { handle(error) }
+        }
+        func hidePlayer(id: String, name: String) {
+            guard id != user?.userID else { return }
+            hiddenPlayers[id] = name
+            safetyPreferences.set(hiddenPlayers, forKey: hiddenPlayersKey)
+        }
+        func showPlayer(id: String) {
+            hiddenPlayers.removeValue(forKey: id)
+            safetyPreferences.set(hiddenPlayers, forKey: hiddenPlayersKey)
         }
         var configured: Bool { client != nil || Self.previewAccount }
         private static var offlinePreview: Bool {
@@ -92,7 +112,7 @@
                         from: Data(
                             """
                             {"problem_id":\(problem.id),"puzzle_version":"\(CloudPuzzle.version(problem))","entries":[
-                            {"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1,"steps":1}]}
+                            {"rank":1,"user_id":"preview-peer","display_name":"Learner preview","points":80,"bytes":1,"accepted":1,"lit_targets":1,"target_count":1,"steps":1}]}
                             """.utf8))
                 }
             #endif
@@ -107,7 +127,7 @@
                         Leaderboard.self,
                         from: Data(
                             """
-                            {"puzzle_count":\(count),"entries":[{"rank":1,"user_id":"ui-preview","display_name":"Learner preview","points":80,"percentage":\(80 / Double(count)),"solved":1}]}
+                            {"puzzle_count":\(count),"entries":[{"rank":1,"user_id":"preview-peer","display_name":"Learner preview","points":80,"percentage":\(80 / Double(count)),"solved":1}]}
                             """
                             .utf8))
                 }
