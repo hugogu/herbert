@@ -48,6 +48,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10001,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10001,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 9,
     "id" : 10006,
@@ -96,6 +112,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10006,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10006,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 10,
     "id" : 10012,
@@ -141,6 +173,22 @@
     "id" : 10012,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10012,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10012,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -200,6 +248,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10074,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10074,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 20,
     "id" : 10075,
@@ -256,6 +320,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10075,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10075,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 11,
     "id" : 10076,
@@ -301,6 +381,22 @@
     "id" : 10076,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10076,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10076,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -352,6 +448,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10051,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10051,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 23,
     "id" : 10052,
@@ -400,6 +512,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10052,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10052,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 25,
     "id" : 10027,
@@ -445,6 +573,22 @@
     "id" : 10027,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10027,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10027,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -501,6 +645,22 @@
     "id" : 10077,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10077,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10077,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -568,6 +728,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10078,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10078,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 37,
     "id" : 10079,
@@ -629,6 +805,22 @@
     "id" : 10079,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10079,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10079,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -696,6 +888,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10080,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10080,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 53,
     "id" : 10081,
@@ -749,6 +957,22 @@
     "id" : 10081,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10081,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10081,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -808,6 +1032,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10082,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10082,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 43,
     "id" : 10083,
@@ -861,6 +1101,22 @@
     "id" : 10083,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10083,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10083,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -920,6 +1176,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10084,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10084,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 31,
     "id" : 10085,
@@ -973,6 +1245,22 @@
     "id" : 10085,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10085,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10085,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1032,6 +1320,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10086,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10086,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 58,
     "id" : 10087,
@@ -1085,6 +1389,22 @@
     "id" : 10087,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10087,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10087,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1144,6 +1464,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10088,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10088,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 55,
     "id" : 10089,
@@ -1197,6 +1533,22 @@
     "id" : 10089,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10089,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10089,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1256,6 +1608,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10090,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10090,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 34,
     "id" : 10091,
@@ -1301,6 +1669,22 @@
     "id" : 10091,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10091,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10091,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1352,6 +1736,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10092,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10092,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 28,
     "id" : 10093,
@@ -1397,6 +1797,22 @@
     "id" : 10093,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10093,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10093,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1448,6 +1864,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10094,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10094,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 48,
     "id" : 10095,
@@ -1493,6 +1925,22 @@
     "id" : 10095,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10095,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10095,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1544,6 +1992,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10096,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10096,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 56,
     "id" : 10097,
@@ -1589,6 +2053,22 @@
     "id" : 10097,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10097,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10097,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1640,6 +2120,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10098,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10098,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 49,
     "id" : 10099,
@@ -1685,6 +2181,22 @@
     "id" : 10099,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10099,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10099,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1736,6 +2248,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10100,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10100,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 45,
     "id" : 10101,
@@ -1781,6 +2309,22 @@
     "id" : 10101,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10101,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10101,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1832,6 +2376,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10102,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10102,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 48,
     "id" : 10103,
@@ -1877,6 +2437,22 @@
     "id" : 10103,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10103,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10103,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -1928,6 +2504,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10104,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10104,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 40,
     "id" : 10105,
@@ -1973,6 +2565,22 @@
     "id" : 10105,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10105,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10105,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -2024,6 +2632,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10106,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10106,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 64,
     "id" : 10107,
@@ -2069,6 +2693,22 @@
     "id" : 10107,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10107,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10107,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -2128,6 +2768,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10108,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10108,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 44,
     "id" : 10109,
@@ -2184,6 +2840,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10109,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10109,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 72,
     "id" : 10110,
@@ -2229,6 +2901,22 @@
     "id" : 10110,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10110,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10110,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -2288,6 +2976,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10111,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10111,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 57,
     "id" : 10112,
@@ -2333,6 +3037,22 @@
     "id" : 10112,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10112,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10112,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -2392,6 +3112,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10113,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10113,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 60,
     "id" : 10114,
@@ -2440,6 +3176,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10114,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10114,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 81,
     "id" : 10115,
@@ -2485,6 +3237,22 @@
     "id" : 10115,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10115,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10115,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   },
   {
@@ -2544,6 +3312,22 @@
     "steps" : 0
   },
   {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10116,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10116,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
     "accepted" : true,
     "bytes" : 94,
     "id" : 10117,
@@ -2597,6 +3381,22 @@
     "id" : 10117,
     "litTargets" : 0,
     "source" : "a(A):a(A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A-A+A)\na(1)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 42,
+    "id" : 10117,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M):a(A,B,C,D,E,F,G,H,I,J,K,L,M)\na(s,s,s,s,s,s,s,s,s,s,s,s,s)",
+    "steps" : 0
+  },
+  {
+    "accepted" : false,
+    "bytes" : 81,
+    "id" : 10117,
+    "litTargets" : 0,
+    "source" : "a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z):a(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z)\na(s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s,s)",
     "steps" : 0
   }
 ]

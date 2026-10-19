@@ -193,7 +193,7 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
     let expansionWork = 0;
     const charge = (amount: number) => {
         expansionWork += amount;
-        assert(expansionWork <= 10000000, "Expansion work limit");
+        assert(expansionWork <= 2000000, "Expansion work limit");
     };
     type Frame = {
         code: Instruction[];
@@ -339,6 +339,8 @@ export function* commands(source: string, limit = 1000000): Generator<string> {
             push(v.code, new Map());
         } else {
             const p = program.procedures.get(instruction.name)!;
+            // Covers value lookup, zero checks, environment creation and frame sizing.
+            charge(p.parameters.length);
             const values = p.parameters.length
                 ? (instruction.args ?? []).map((a) => resolve(a, frame.env))
                 : [];

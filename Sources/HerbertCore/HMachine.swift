@@ -34,7 +34,7 @@ public struct HMachine {
 
     public init(
         program: HProgram, memoryLimit: Int = 1_000_000, expansionLimit: Int = 1_000_000,
-        expansionWorkLimit: Int = 10_000_000
+        expansionWorkLimit: Int = 2_000_000
     ) {
         self.program = program
         self.memoryLimit = memoryLimit
@@ -70,6 +70,8 @@ public struct HMachine {
                     throw HError(HerbertStrings.text("过程 %@ 未定义。", String(name)))
                 }
                 if procedure.parameters.isEmpty { arguments = [] }
+                // Charge arity even when arguments reuse existing values without copying.
+                try charge(procedure.parameters.count)
                 let values = try arguments.map { try resolve($0, environment: frame.environment) }
                 if values.contains(where: {
                     if case .number(let n) = $0 { return n <= 0 }
