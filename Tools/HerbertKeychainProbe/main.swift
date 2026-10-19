@@ -3,6 +3,11 @@ import Security
 
 // Uses a unique service and the same DeviceKeychain source as the app, never user credentials.
 func verifyAdHocStorage() throws {
+    guard Bundle.main.bundleIdentifier == "info.hugogu.Herbert.KeychainProbe" else {
+        throw NSError(
+            domain: "HerbertKeychainProbe", code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "The probe must reuse its fixed sandbox identity"])
+    }
     let service = "info.hugogu.Herbert.KeychainProbe." + UUID().uuidString
     let account = "integration-test"
     let legacy: [String: Any] = [

@@ -277,5 +277,5 @@ migration fails; the old item is removed only after a protected write succeeds.
 Run `scripts/check_keychain_macos.sh` on an unlocked Mac to test the actual Security framework with the
 DMG's `Config/MacPreview.entitlements`, or pass a built ad-hoc `.app` path to extract its actual entitlements. It creates an isolated ad-hoc sandbox, compiles the real
 `DeviceKeychain` source, and checks legacy read/create/update/delete with fresh throwaway values.
-It never reads existing provider/session items or automates the desktop. This complements fake-backend
+The fixed `info.hugogu.Herbert.KeychainProbe` bundle identifier reuses one sandbox container; each run still uses a unique Keychain service and cleans up its own items. It never reads existing provider/session items or automates the desktop. This complements fake-backend
 unit tests; it is a signing-configuration integration check, not an end-to-end test of the packaged DMG UI.
