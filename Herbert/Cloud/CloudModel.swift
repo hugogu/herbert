@@ -268,7 +268,7 @@
         }
         private func submit(_ problem: Problem, source: String) async throws {
             guard let client else { return }
-            let result = try await client.submit(problem: problem, source: source, requestID: UUID(), token: token())
+            let result = try await client.submit(problem: problem, source: source, token: token())
             message = L10n.text("已上传并验证：%@ 分 · %@", result.points.formatted(), result.feedback)
             await loadBests(problems: (try? ProblemCatalog.bundled()) ?? [])
         }
@@ -284,7 +284,7 @@
                         let problem = problems.first(where: { $0.id == record.problemID && $0.lesson != nil })
                     else { continue }
                     let result = try await client.submit(
-                        problem: problem, source: source, requestID: UUID(), token: token)
+                        problem: problem, source: source, token: token)
                     if result.accepted { accepted += 1 } else { message = "\(problem.number): \(result.feedback)" }
                 }
                 if message == nil { message = L10n.text("已验证并上传 %ld 份解答。", accepted) }

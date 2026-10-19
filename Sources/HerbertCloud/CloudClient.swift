@@ -49,13 +49,13 @@ public struct CloudClient: Sendable {
     public func deleteAccount(token: String) async throws {
         let _: Acknowledgment = try await send("v1/me", method: "DELETE", token: token)
     }
-    public func submit(problem: Problem, source: String, requestID: UUID, token: String) async throws
+    public func submit(problem: Problem, source: String, token: String) async throws
         -> SubmissionResult
     {
         try await send(
             "v1/submissions", method: "POST",
             body: [
-                "request_id": requestID.uuidString, "problem_id": problem.id,
+                "request_id": CloudPuzzle.submissionID(problem: problem, source: source), "problem_id": problem.id,
                 "puzzle_version": CloudPuzzle.version(problem), "source": source,
             ], token: token)
     }
