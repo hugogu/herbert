@@ -7,6 +7,7 @@ import {
 } from "jose";
 export interface Env {
     DB: D1Database;
+    IP_LIMITER: RateLimit;
     APPLE_CLIENT_ID: string;
     APPLE_TEAM_ID: string;
     APPLE_KEY_ID: string;
@@ -22,6 +23,8 @@ export class HTTPError extends Error {
     constructor(
         readonly status: number,
         message: string,
+        readonly code?: string,
+        readonly reference?: string,
     ) {
         super(message);
     }
@@ -30,9 +33,16 @@ export function appleFailure(status: number, code: string, hint: string) {
     const reference = crypto.randomUUID();
     // Never log the original exception: JOSE errors can contain identity claims.
     console.warn(
-        JSON.stringify({ event: "apple_auth_failed", code, reference }),
+        JSON.stringify({ event: "apple_auth_failed", code, reference, hint }),
     );
-    return new HTTPError(status, `${hint} [${code}; reference: ${reference}]`);
+    return new HTTPError(
+        status,
+        status === 401
+            ? "Apple sign-in could not be verified. Please sign in again."
+            : "Apple sign-in is temporarily unavailable. Please try again later.",
+        code,
+        reference,
+    );
 }
 
 export function appleIdentityFailure(error: unknown): HTTPError {
@@ -353,6 +363,9 @@ export async function authenticate(request: Request, env: Env) {
         throw new HTTPError(403, "Account is blocked from submitting");
     return user;
 }
+// One validated issuer per isolate keeps rotation/cooldown state without an unbounded cache.
+let adminKeys:
+    { issuer: string; keys: ReturnType<typeof createRemoteJWKSet> } | undefined;
 export async function authenticateAdmin(request: Request, env: Env) {
     if (
         !/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/.test(
@@ -366,9 +379,15 @@ export async function authenticateAdmin(request: Request, env: Env) {
     if (!token)
         throw new HTTPError(403, "Administrator authentication required");
     try {
-        const keys = createRemoteJWKSet(
-            new URL(`${env.ADMIN_ISSUER}/cdn-cgi/access/certs`),
-        );
+        if (adminKeys?.issuer !== env.ADMIN_ISSUER) {
+            adminKeys = {
+                issuer: env.ADMIN_ISSUER,
+                keys: createRemoteJWKSet(
+                    new URL(`${env.ADMIN_ISSUER}/cdn-cgi/access/certs`),
+                ),
+            };
+        }
+        const keys = adminKeys.keys;
         const { payload } = await jwtVerify(token, keys, {
             issuer: env.ADMIN_ISSUER,
             audience: env.ADMIN_AUDIENCE,

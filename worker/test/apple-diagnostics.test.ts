@@ -29,7 +29,7 @@ describe("safe Apple authentication diagnostics", () => {
                 exchangeApple("secret-code", env),
             ).rejects.toMatchObject({
                 status,
-                message: expect.stringContaining(diagnostic),
+                code: diagnostic,
             });
             expect(JSON.stringify(log.mock.calls)).not.toMatch(
                 /secret-code|unrecognized-sensitive-response|PRIVATE KEY/,
@@ -41,7 +41,7 @@ describe("safe Apple authentication diagnostics", () => {
                 exchangeApple("secret-code", env),
             ).rejects.toMatchObject({
                 status: 503,
-                message: expect.stringContaining("apple_service_unavailable"),
+                code: "apple_service_unavailable",
             });
             expect(JSON.stringify(log.mock.calls)).not.toContain("sensitive");
         },
@@ -80,14 +80,18 @@ describe("safe Apple authentication diagnostics", () => {
             const log = vi.spyOn(console, "warn").mockImplementation(() => {});
             const failure = appleIdentityFailure(error);
             expect(failure.status).toBe(status);
-            expect(failure.message).toContain(code);
+            expect(failure.code).toBe(code);
             const record = JSON.parse(log.mock.calls[0][0]);
             expect(record).toEqual({
                 event: "apple_auth_failed",
                 code,
                 reference: expect.any(String),
+                hint: expect.any(String),
             });
-            expect(failure.message).toContain(record.reference);
+            expect(failure.reference).toBe(record.reference);
+            expect(failure.message).not.toMatch(
+                /APPLE_|P8|Worker|DNS|proxy|audience/,
+            );
             expect(
                 JSON.stringify(log.mock.calls) + failure.message,
             ).not.toMatch(/sensitive|private-user/);
@@ -101,15 +105,15 @@ describe("safe Apple authentication diagnostics", () => {
             APPLE_KEY_ID: "key",
             APPLE_PRIVATE_KEY: "",
         } as Env;
-        await expect(exchangeApple("secret-code", env)).rejects.toThrow(
-            "apple_credentials_missing",
-        );
+        await expect(exchangeApple("secret-code", env)).rejects.toMatchObject({
+            code: "apple_credentials_missing",
+        });
         env.APPLE_PRIVATE_KEY = "AuthKey_PRIVATE.p8";
-        await expect(exchangeApple("secret-code", env)).rejects.toThrow(
-            "apple_private_key_invalid",
-        );
+        await expect(exchangeApple("secret-code", env)).rejects.toMatchObject({
+            code: "apple_private_key_invalid",
+        });
         expect(JSON.stringify(log.mock.calls)).not.toMatch(
-            /PRIVATE|secret-code/,
+            /AuthKey_PRIVATE|secret-code/,
         );
     });
 });
