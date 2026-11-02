@@ -1,13 +1,29 @@
 #!/usr/bin/env python3
-"""Fail closed unless a built app contains only the 30 original puzzle resources."""
+"""Audit the App Store app's identity and its 30 original puzzle resources."""
 import argparse
 import json
 from pathlib import Path
+import plistlib
 
 
 def check_bundle(app):
     if not app.is_dir() or app.suffix != '.app':
         raise ValueError('Pass a built .app directory, not the source tree.')
+    if app.name != 'Herbot Bot.app':
+        raise ValueError('Expected the App Store product filename Herbot Bot.app.')
+    mac = (app / 'Contents').is_dir()
+    info = app / ('Contents/Info.plist' if mac else 'Info.plist')
+    metadata = plistlib.loads(info.read_bytes())
+    if not isinstance(metadata, dict):
+        raise ValueError('Expected an Info.plist dictionary.')
+    for key, value in {'CFBundleIdentifier': 'info.hugogu.Herbert',
+                       'CFBundleDisplayName': 'Herbot Bot', 'CFBundleName': 'Herbot Bot',
+                       'CFBundleExecutable': 'Herbot Bot'}.items():
+        if metadata.get(key) != value:
+            raise ValueError(f'Expected {key} = {value!r}, got {metadata.get(key)!r}.')
+    executable = app / ('Contents/MacOS' if mac else '') / metadata['CFBundleExecutable']
+    if not executable.is_file():
+        raise ValueError('Missing the Herbot Bot executable declared by Info.plist.')
     originals = []
     for path in app.rglob('*'):
         if 'HerbertCommunity' in path.name or path.name == 'problems.json' or path.name.endswith('-solutions.json'):
@@ -40,8 +56,9 @@ def main():
     try:
         check_bundle(args.app)
     except (ValueError, OSError) as error:
-        parser.exit(1, f'App Store resource check failed: {error}\n')
-    print('App Store resource check passed: 30 originals, no community archive or reference solutions.')
+        parser.exit(1, f'App Store bundle check failed: {error}\n')
+    print('App Store bundle check passed: Herbot Bot identity, unchanged Bundle ID, '
+          '30 originals, no community archive or reference solutions.')
 
 
 if __name__ == '__main__':

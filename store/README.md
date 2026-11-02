@@ -72,8 +72,9 @@ scripts/archive_app_store.sh macos --upload
 
 The script refuses to reuse an output folder, so increase `CURRENT_PROJECT_VERSION` in
 `scripts/generate_project.py` and regenerate the project for every new upload. It audits the
-archived app with `scripts/check_app_store_bundle.py` (exactly the 30 original puzzles, no community
-archive or reference solutions), prints the version, build and export-compliance keys, and checks
+archived `Herbot Bot.app` with `scripts/check_app_store_bundle.py` (product/display/bundle/executable
+names are `Herbot Bot`, Bundle ID remains `info.hugogu.Herbert`, exactly 30 original puzzles, no community
+archive or reference solutions), prints its identity, version, build and export-compliance keys, and checks
 the Mac sandbox. Without `--upload` it exports an `.ipa` or `.pkg` you can send with Transporter.
 Uploading requires an Xcode account with App Manager access; automatic signing may create
 distribution certificates for the team.

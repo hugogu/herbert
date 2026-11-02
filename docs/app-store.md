@@ -5,6 +5,10 @@
 - `Herbert`：默认开源版，先显示原创 L01–L30，再显示社区题；总数 1,799。
 - `HerbertAppStore`：iPhone/iPad/native Mac 共用的原创版 target；商店显示名为 **Herbot Bot**，只有连续编号 L01–L30 的原创课程，总数 30。
 
+`HerbertAppStore` 仅为内部 target/scheme 名称。商店版的产物为 `Herbot Bot.app`，
+`CFBundleDisplayName`、`CFBundleName` 和 `CFBundleExecutable` 均为 `Herbot Bot`；
+Bundle ID 保持 `info.hugogu.Herbert`。修改名称后必须重新归档并上传新 build，旧 build 不会随工程修改而改变。
+
 社区资源在 `Sources/HerbertCommunity/`，App Store target 链接 `HerbertCore` 与不含社区资源的 `HerbertBattlefield`。
 `APP_STORE` 编译条件还会移除社区筛选和原站 Problems 链接。参考解位于测试 target，两个应用均不打包答案。
 原创关卡、名称、目标与提示使用 MIT；社区题库保留独立 NOTICE。
@@ -69,14 +73,15 @@
 scripts/check.sh
 xcodebuild -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \
   -destination 'generic/platform=iOS' -derivedDataPath .build/store-ios CODE_SIGNING_ALLOWED=NO build
-python3 scripts/check_app_store_bundle.py .build/store-ios/Build/Products/Release-iphoneos/HerbertAppStore.app
+python3 scripts/check_app_store_bundle.py '.build/store-ios/Build/Products/Release-iphoneos/Herbot Bot.app'
 ```
 
-资源检查必须通过：恰好一份 30 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
-它只证明题库打包边界，不代替真机验证、隐私政策或商店资料检查。
+产物检查必须通过：应用文件名、显示名、Bundle 名称和可执行文件名称均为 Herbot Bot，Bundle ID 不变；
+恰好一份 30 题原创目录，不含社区 JSON、社区 bundle、其他棋盘目录或参考答案。
+它不代替真机验证、隐私政策或商店资料检查。
 
 完成设备测试后，选择 **HerbertAppStore → Product → Archive**。
-对归档中的 `Products/Applications/HerbertAppStore.app` 再运行同一资源检查；确保 App Store Connect 的 Bundle ID 和版本/build 与归档一致，再由 Organizer 上传。
+对归档中的 `Products/Applications/Herbot Bot.app` 再运行同一产物检查；确保 App Store Connect 的 Bundle ID 和版本/build 与归档一致，再由 Organizer 上传。
 原生 macOS 版本需要选择 Mac 目标单独归档与检查。不要用 `Herbert` scheme 的归档提交 App Store。
 `scripts/archive_app_store.sh ios|macos` 会完成同样的归档、资源检查和导出或上传；商店文案、截图、隐私问卷与提交步骤见 [App Store 上架资料](../store/README.md)。
 
