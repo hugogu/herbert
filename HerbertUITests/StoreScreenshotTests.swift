@@ -51,8 +51,26 @@ final class StoreScreenshotTests: XCTestCase {
             showBoardAndCode(in: app)
             capture(app, "play")
 
+            // Show the new 3D stage with the same genuinely completed board and its trail.
+            scrollToTop(in: app)
+            selectBoardStyle("threeD", in: app)
+            app.buttons["enlarge-board"].storeTap()
+            XCTAssertTrue(app.buttons["close-stage"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.staticTexts["stage-program"].exists)
+            XCTAssertTrue(app.descendants(matching: .any)["stage-completion"].exists)
+            capture(app, "three-d")
+            app.buttons["close-stage"].storeTap()
+            XCTAssertTrue(app.buttons["close-stage"].waitForNonExistence(timeout: 5))
+            selectBoardStyle("modern", in: app)
+
             back(in: app, text: text)
             capture(app, "course")
+
+            // L41 begins the new synthesis course. Show its board and teaching goal without an answer.
+            open(10108, in: app)
+            scrollToTop(in: app)
+            capture(app, "master")
+            back(in: app, text: text)
 
             // L18 with its first hint: the partial program follows the hint's 11- and 8-step folds.
             // Type before revealing the hint, which would push the iPad editor under the keyboard.
@@ -160,6 +178,23 @@ final class StoreScreenshotTests: XCTestCase {
     private func runTurbo(in app: XCUIApplication, text: Labels) {
         app.buttons[text.turbo].storeTap()
         app.buttons["run-program"].storeTap()
+    }
+
+    @MainActor
+    private func selectBoardStyle(_ style: String, in app: XCUIApplication) {
+        let options = app.buttons["board-options"]
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        options.storeTap()
+        #if os(macOS)
+            let choice = app.radioButtons["board-style-\(style)"]
+        #else
+            let choice = app.buttons["board-style-\(style)"]
+        #endif
+        XCTAssertTrue(choice.waitForExistence(timeout: 5))
+        choice.storeTap()
+        app.buttons["close-board-options"].storeTap()
+        XCTAssertTrue(app.buttons["close-board-options"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.popovers.firstMatch.waitForNonExistence(timeout: 5))
     }
 
     @MainActor

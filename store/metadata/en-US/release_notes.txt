@@ -1,0 +1,9 @@
+Explore more puzzles and a new way to see your programs run.
+
+• 20 new original puzzles: the course now has 50 puzzles in ten chapters, with new challenges in fractals, transformations, inverse paths and recursive synthesis. Each includes a goal and two optional hints.
+• New 3D board: explore stone walls, glowing targets and your robot's trail. Rotate, tilt and zoom the camera, or open the enlarged board and follow the robot as your program runs. Modern and Classic styles remain available.
+• Better AI Battlefield: cancel a single generating answer while the match continues, retry it when you are ready, and compare models by average output speed. Tied model columns stay in place during a match.
+• Smoother viewing of very long AI responses, improved handling of model output limits and reasoning settings, and new matches that reuse your previous selection.
+• Find the app version and build at the end of the Guide when reporting an issue.
+
+Your existing drafts, shortest solutions and progress are preserved.
