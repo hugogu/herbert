@@ -2,10 +2,10 @@
 # Captures the App Store screenshots of the original-only edition and frames them with captions.
 # Usage: scripts/capture_store_screenshots.sh [iphone-6.3] [iphone-6.9] [ipad] [mac]
 # LANGUAGES (default "en zh-Hans ja") and IPHONE_63_SIMULATOR, IPHONE_69_SIMULATOR or IPAD_SIMULATOR
-# override the defaults. This listing uses the iphone-6.3 slot; iphone-6.9 is also captured.
+# override the defaults. This listing captures iphone-6.3, ipad and mac by default.
 set -eu
 cd "$(dirname "$0")/.."
-devices="${*:-iphone-6.3 iphone-6.9 ipad mac}"
+devices="${*:-iphone-6.3 ipad mac}"
 languages="${LANGUAGES:-en zh-Hans ja}"
 version=$(python3 -c 'import sys; sys.path.insert(0, "scripts")
 from check_store_metadata import ROOT, app_version

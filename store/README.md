@@ -17,8 +17,8 @@ improvements. Paste `release_notes.txt` into **What's New in this Version** for 
 The review notes include the changes and instructions for testing them, without assuming that a new
 screen recording or demo key has been supplied.
 
-All **96 screenshots** have been recaptured from **1.1.0 (15)** and visually inspected: eight scenes
-for each of four device sets in English, Simplified Chinese and Japanese. iPhone and iPad images
+All **72 screenshots** have been recaptured from **1.1.0 (15)** and visually inspected: eight scenes
+for each of three device sets in English, Simplified Chinese and Japanese. iPhone and iPad images
 come from the iOS 27 simulator; Mac images come from the native app. Every device/language folder
 includes a `capture.json` with the version, build, source commit and image hashes. Before uploading, run:
 
@@ -35,7 +35,7 @@ format only; passing it does not mean the screenshots have been refreshed.
 | `metadata/<locale>/` | Name, subtitle, description, keywords, promotional text, 1.1.0 release notes and URLs for `en-US`, `zh-Hans` and `ja` |
 | `metadata/*.txt` | Copyright and categories |
 | `metadata/review_information/` | App Review contact and notes |
-| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone-6.3` (required), `iphone-6.9` (optional), `ipad` (13″) and `mac` |
+| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone-6.3`, `ipad` (13″) and `mac` |
 | `screenshots/captions.json` | Eight-scene screenshot order and caption text for each language |
 | `screenshots/<device>/<locale>/capture.json` | Generated version/build and screenshot hashes after a successful new capture |
 
@@ -50,8 +50,8 @@ counts and the absence of alpha channels.
 ## Screenshots
 
 ```sh
-scripts/capture_store_screenshots.sh            # iphone-6.3 iphone-6.9 ipad mac, en zh-Hans ja
-scripts/capture_store_screenshots.sh iphone-6.3 iphone-6.9 ipad  # simulator pass only
+scripts/capture_store_screenshots.sh            # iphone-6.3 ipad mac, en zh-Hans ja
+scripts/capture_store_screenshots.sh iphone-6.3 ipad  # simulator pass only
 LANGUAGES=ja scripts/capture_store_screenshots.sh mac
 ```
 
@@ -69,7 +69,7 @@ these scenes in order:
 
 The match uses the debug-only fixture client with
 neutral names (`--battlefield-showcase`); no real provider, key or paid model is involved.
-iPhone 18 Pro (1206 × 2622), iPhone 18 Pro Max (1320 × 2868) and iPad Pro 13-inch (2752 × 2064,
+iPhone 18 Pro (1206 × 2622) and iPad Pro 13-inch (2752 × 2064,
 landscape) run in the simulator with a 9:41 status bar. The Mac window is 1680 × 1050 points; the Mac pass takes over the
 mouse and keyboard for about five minutes per language, and macOS cannot enable UI automation on a
 locked screen. Ask before starting the native Mac pass while someone is using the Mac; run all native
@@ -78,13 +78,12 @@ versioned DerivedData, and keeps a separate test log for every device/language. 
 temporary folder, then replaces only the successfully generated device/language sets (including
 obsolete scene filenames) and writes their manifests. It never reuses cached 1.0.0 captures.
 `scripts/compose_store_screenshots.swift` adds the captions and writes opaque
-PNGs at 1206 × 2622, 1320 × 2868, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
+PNGs at 1206 × 2622, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
 (useful for Chinese and Japanese); the wider iPad and Mac captions join it into one line.
 
 Upload each folder to its matching device and language. This listing's medium Dynamic Island
-slot uses `iphone-6.3` (1206 × 2622); `iphone-6.9` (1320 × 2868) belongs in the large Dynamic Island
-slot under "View all sizes in Media Manager". The sizes are not interchangeable. Both iPhone
-sets, the 13-inch iPad set and the Mac set are included in this kit. Confirm the required slots
+slot uses `iphone-6.3` (1206 × 2622). The kit includes this iPhone set, the 13-inch iPad set and
+the Mac set; no separate 6.9-inch iPhone images are included. Confirm the required slots
 shown for the app in App Store Connect against [Apple's screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/).
 Apple currently states that iPhone Duo screenshots become required in April 2027 for apps built
 with the iOS 27.1 SDK or later; they are outside this Xcode 27.0 capture pass.
