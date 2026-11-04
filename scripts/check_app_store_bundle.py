@@ -24,6 +24,10 @@ def check_bundle(app):
     executable = app / ('Contents/MacOS' if mac else '') / metadata['CFBundleExecutable']
     if not executable.is_file():
         raise ValueError('Missing the Herbot Bot executable declared by Info.plist.')
+    check_original_resources(app)
+
+
+def check_original_resources(app):
     originals = []
     for path in app.rglob('*'):
         if 'HerbertCommunity' in path.name or path.name == 'problems.json' or path.name.endswith('-solutions.json'):

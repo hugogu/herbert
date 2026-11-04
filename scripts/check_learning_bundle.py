@@ -3,15 +3,20 @@
 import argparse
 from pathlib import Path
 import plistlib
-from check_app_store_bundle import check_bundle
+from check_app_store_bundle import check_original_resources
 
 
 def check_learning(app):
-    check_bundle(app)
+    if not app.is_dir() or app.name != 'HerbertLearning.app':
+        raise ValueError('Expected the separate HerbertLearning.app product.')
+    check_original_resources(app)
     plist = app / 'Contents/Info.plist' if (app / 'Contents').exists() else app / 'Info.plist'
     info = plistlib.loads(plist.read_bytes())
-    if info.get('CFBundleIdentifier') != 'info.hugogu.HerbertLearning':
-        raise ValueError('Expected a separate learning app identity.')
+    for key, value in {'CFBundleIdentifier': 'info.hugogu.HerbertLearning',
+                       'CFBundleExecutable': 'HerbertLearning', 'CFBundleName': 'HerbertLearning',
+                       'CFBundleDisplayName': 'Herbert Learning'}.items():
+        if info.get(key) != value:
+            raise ValueError(f'Expected {key} = {value!r}.')
     if info.get('HerbertLeaderboardURL'):
         raise ValueError('Learning app must not configure a leaderboard endpoint.')
     executable = app / 'Contents/MacOS' / info['CFBundleExecutable'] if (app / 'Contents').exists() else app / info['CFBundleExecutable']
