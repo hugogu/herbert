@@ -3,6 +3,46 @@ import XCTest
 @testable import HerbertCore
 
 final class HLanguageTests: XCTestCase {
+    func testGrowingArgumentsHaveACumulativeWorkLimit() throws {
+        var machine = HMachine(program: try HProgram.compile("b(X):b(Xs)\nb(s)"))
+        XCTAssertThrowsError(
+            try {
+                while !machine.finished { _ = try machine.nextCommand() }
+            }()
+        ) { error in
+            XCTAssertTrue(error.localizedDescription.contains(HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。")))
+        }
+    }
+
+    func testNumericArgumentsConsumeCumulativeWorkAcrossCalls() throws {
+        let expression = Array(repeating: "A-A", count: 20).joined(separator: "+") + "+A"
+        var machine = HMachine(
+            program: try HProgram.compile("a(A):a(\(expression))\na(1)"),
+            expansionLimit: 1000, expansionWorkLimit: 100)
+        XCTAssertThrowsError(try machine.nextCommand()) { error in
+            XCTAssertEqual(error.localizedDescription, HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
+        }
+    }
+    func testPassThroughCallsChargeTheirArity() throws {
+        for arity in [13, 26] {
+            let parameters = (0..<arity).map { String(UnicodeScalar(65 + $0)!) }.joined(separator: ",")
+            let initial = Array(repeating: "s", count: arity).joined(separator: ",")
+            var machine = HMachine(
+                program: try HProgram.compile("a(\(parameters)):a(\(parameters))\na(\(initial))"),
+                expansionLimit: 1000, expansionWorkLimit: 100)
+            XCTAssertThrowsError(try machine.nextCommand()) { error in
+                XCTAssertEqual(error.localizedDescription, HerbertStrings.text("命令展开的累计工作量达到上限，请简化程序。"))
+            }
+        }
+    }
+    func testExpansionWorkErrorsAreTranslated() {
+        let key = "命令展开的累计工作量达到上限，请简化程序。"
+        XCTAssertEqual(HerbertStrings.text(key, language: "en"), "Expansion work limit")
+        XCTAssertEqual(HerbertStrings.text(key, language: "zh-Hans"), key)
+        XCTAssertNotEqual(HerbertStrings.text(key, language: "ja"), key)
+        XCTAssertNotEqual(HerbertStrings.text(key, language: "ja"), "Expansion work limit")
+    }
+
     private func commands(_ source: String, maximum: Int = 100) throws -> String {
         var machine = HMachine(program: try HProgram.compile(source))
         var output = ""

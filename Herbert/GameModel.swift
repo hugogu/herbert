@@ -26,6 +26,12 @@ final class GameModel: ObservableObject {
     var bytes: Int { HProgram.countBytes(source) }
     var isRunning: Bool { session.status == .running }
     var isCompleted: Bool { session.status == .completed }
+    var finishedSource: String? {
+        switch session.status {
+        case .completed, .ended, .failed: preparedSource
+        default: nil
+        }
+    }
 
     func edited() {
         pause()

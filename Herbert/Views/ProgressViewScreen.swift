@@ -3,6 +3,12 @@ import SwiftUI
 
 struct ProgressViewScreen: View {
     @EnvironmentObject private var store: AppStore
+    #if APP_STORE && !LOCAL_LEARNING
+        @EnvironmentObject private var cloud: CloudModel
+    #endif
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showBestInfo = false
+    @State private var accountSelected = false
     @State private var exporting = false
     @State private var importing = false
     @State private var busy = false
@@ -12,81 +18,26 @@ struct ProgressViewScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Eyebrow(text: "ONE SMALL STEP AT A TIME")
-                Text("思考留下的足迹。").font(.system(size: 30, weight: .bold, design: .rounded))
-                HStack(spacing: 16) {
-                    counter("已完成", value: store.completedCount)
-                    counter("已收藏", value: store.favoriteCount)
-                    counter("草稿", value: store.visibleRecords.filter { !$0.draft.isEmpty }.count)
-                }
-                VStack(alignment: .leading, spacing: 16) {
-                    Label("你的进度保存在这台设备上", systemImage: "internaldrive")
-                        .font(.system(size: 16, weight: .semibold))
-                    Text("草稿自动保存，每关保留最短解。导出 JSON 备份可迁移到另一台设备；导入会合并记录，保留更短的有效解。")
-                        .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
-                    HStack(spacing: 12) {
-                        Button {
-                            do {
-                                store.flush()
-                                document = BackupDocument(
-                                    data: try LocalProgressRepository.encode(store.visibleSnapshot))
-                                exporting = true
-                            } catch { message = error.localizedDescription }
-                        } label: {
-                            Label("导出", systemImage: "square.and.arrow.up").frame(minHeight: 36)
-                        }
-                        .prominentButtonStyle().accessibilityIdentifier("export-backup")
-                        Button {
-                            importing = true
-                        } label: {
-                            Label("导入", systemImage: "square.and.arrow.down").frame(minHeight: 36)
-                        }
-                        .secondaryButtonStyle().accessibilityIdentifier("import-backup")
-                    }.disabled(busy)
-                    if busy { SwiftUI.ProgressView("正在验证并合并备份…").font(.caption) }
-                    if let message {
-                        Text(message).font(.caption).foregroundStyle(Palette.mint).accessibilityIdentifier(
-                            "backup-message")
+                #if APP_STORE && !LOCAL_LEARNING
+                    Picker("我的", selection: $accountSelected) {
+                        Text("进度").tag(false)
+                        Text("账号").tag(true)
+                    }.pickerStyle(.segmented).labelsHidden().accessibilityIdentifier("my-sections")
+                    if accountSelected {
+                        CloudAccountView()
+                    } else {
+                        progressContent
                     }
-                    if let error = store.storageMessage { Text(error).font(.caption).foregroundStyle(Palette.danger) }
-                }.panel()
-                HStack {
-                    Text("已完成的关卡").font(.system(size: 20, weight: .bold))
-                    Spacer()
-                    Pill(text: L10n.text("%ld SOLVED", store.completedCount))
-                }
-                let completed = store.visibleRecords.filter { $0.bestBytes != nil }.sorted {
-                    ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
-                }
-                if completed.isEmpty {
-                    ContentUnavailableView(
-                        "第一份灵感，还在路上", systemImage: "sparkles", description: Text("完成一个关卡，你的最短解就会出现在这里。"))
-                } else {
-                    LazyVStack(spacing: 10) {
-                        ForEach(completed, id: \.problemID) { record in
-                            if let problem = store.problems.first(where: { $0.id == record.problemID }) {
-                                NavigationLink(value: problem) {
-                                    HStack(spacing: 14) {
-                                        Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.mint)
-                                        VStack(alignment: .leading, spacing: 5) {
-                                            Text(problem.displayTitle).font(.system(size: 14, weight: .semibold))
-                                            Text("\(problem.number) · \(problem.author)").font(
-                                                .system(size: 10, design: .monospaced)
-                                            ).foregroundStyle(Palette.muted)
-                                        }
-                                        Spacer()
-                                        Pill(text: "\(record.bestBytes ?? 0) B")
-                                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.muted)
-                                    }.panel(padding: 16)
-                                }.buttonStyle(.plain)
-                            }
-                        }
-                    }
-                }
+                #else
+                    progressContent
+                #endif
             }.padding(24).frame(maxWidth: 850).frame(maxWidth: .infinity)
-        }.background(Palette.paper).navigationTitle("我的记录")
+        }.background(Palette.paper).navigationTitle("我的")
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
+            #endif
+            #if APP_STORE && !LOCAL_LEARNING
+                .task { await cloud.loadBests(problems: store.problems) }
             #endif
             .navigationDestination(for: Problem.self) { problem in GameDestination(problem: problem, store: store) }
             .fileExporter(
@@ -117,10 +68,153 @@ struct ProgressViewScreen: View {
             }
     }
 
-    private func counter(_ title: String, value: Int) -> some View {
+    private var progressContent: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            Eyebrow(text: "ONE SMALL STEP AT A TIME")
+            Text("思考留下的足迹。").font(.system(size: 30, weight: .bold, design: .rounded))
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.flexible(), spacing: 12), count: horizontalSizeClass == .compact ? 2 : 4),
+                spacing: 12
+            ) {
+                counter("已完成", value: store.completedCount)
+                Button {
+                    showBestInfo = true
+                } label: {
+                    counter("最佳解", value: bestCount, info: true)
+                }.buttonStyle(.plain).accessibilityIdentifier("progress-best-count")
+                    .popover(isPresented: $showBestInfo) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("最佳解").font(.headline)
+                                Spacer()
+                                Button("完成") { showBestInfo = false }
+                            }
+                            Text(
+                                "已通关且长度不大于该题已知最短纪录的本机解答数量，并列也算。只比较 Size，不比较分数或执行步数。社区题参考收录时的原站纪录，原创题参考当前在线纪录；尚无纪录的题目不计入。"
+                            )
+                            .font(.callout).foregroundStyle(Palette.muted)
+                            #if APP_STORE && !LOCAL_LEARNING
+                                if let error = cloud.bestsError {
+                                    Text(error).font(.caption).foregroundStyle(Palette.danger)
+                                }
+                                Button("刷新") { Task { await cloud.loadBests(problems: store.problems) } }
+                                    .secondaryButtonStyle().disabled(!cloud.configured)
+                            #endif
+                        }.padding(20).frame(width: 320)
+                            #if os(iOS)
+                                .presentationCompactAdaptation(.sheet)
+                                .presentationDetents([.medium])
+                            #endif
+                    }
+                counter("已收藏", value: store.favoriteCount)
+                counter("草稿", value: store.visibleRecords.filter { !$0.draft.isEmpty }.count)
+            }
+            VStack(alignment: .leading, spacing: 16) {
+                #if APP_STORE && !LOCAL_LEARNING
+                    Label("本机练习与在线成绩", systemImage: "internaldrive")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("草稿和完整练习记录自动保存在本机。你可以选择上传原创题解答，在排行榜分享昵称和成绩；排行榜不会同步草稿。导出和导入可用于备份或迁移本机记录。")
+                        .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+                        .accessibilityIdentifier("progress-storage-explanation")
+                #else
+                    Label("你的进度保存在这台设备上", systemImage: "internaldrive")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("草稿自动保存，每关保留最短解。导出 JSON 备份可迁移到另一台设备；导入会合并记录，保留更短的有效解。")
+                        .font(.system(size: 13)).foregroundStyle(Palette.muted).lineSpacing(5)
+                #endif
+                HStack(spacing: 12) {
+                    Button {
+                        do {
+                            store.flush()
+                            document = BackupDocument(
+                                data: try LocalProgressRepository.encode(store.visibleSnapshot))
+                            exporting = true
+                        } catch { message = error.localizedDescription }
+                    } label: {
+                        Label("导出", systemImage: "square.and.arrow.up").frame(minHeight: 36)
+                    }
+                    .prominentButtonStyle().accessibilityIdentifier("export-backup")
+                    Button {
+                        importing = true
+                    } label: {
+                        Label("导入", systemImage: "square.and.arrow.down").frame(minHeight: 36)
+                    }
+                    .secondaryButtonStyle().accessibilityIdentifier("import-backup")
+                }.disabled(busy)
+                if busy { SwiftUI.ProgressView("正在验证并合并备份…").font(.caption) }
+                if let message {
+                    Text(message).font(.caption).foregroundStyle(Palette.mint).accessibilityIdentifier(
+                        "backup-message")
+                }
+                if let error = store.storageMessage { Text(error).font(.caption).foregroundStyle(Palette.danger) }
+            }.panel()
+            #if APP_STORE && !LOCAL_LEARNING
+                NavigationLink {
+                    LeaderboardView()
+                } label: {
+                    HStack {
+                        Label("全球排行榜", systemImage: "globe")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }.frame(minHeight: 32)
+                }.secondaryButtonStyle().accessibilityIdentifier("cloud-leaderboard")
+            #endif
+            HStack {
+                Text("已完成的关卡").font(.system(size: 20, weight: .bold))
+                Spacer()
+                Pill(text: L10n.text("%ld SOLVED", store.completedCount))
+            }
+            let completed = store.visibleRecords.filter { $0.bestBytes != nil }.sorted {
+                ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
+            }
+            if completed.isEmpty {
+                ContentUnavailableView(
+                    "第一份灵感，还在路上", systemImage: "sparkles", description: Text("完成一个关卡，你的最短解就会出现在这里。"))
+            } else {
+                LazyVStack(spacing: 10) {
+                    ForEach(completed, id: \.problemID) { record in
+                        if let problem = store.problems.first(where: { $0.id == record.problemID }) {
+                            NavigationLink(value: problem) {
+                                HStack(spacing: 14) {
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.mint)
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text(problem.displayTitle).font(.system(size: 14, weight: .semibold))
+                                        Text("\(problem.number) · \(problem.author)").font(
+                                            .system(size: 10, design: .monospaced)
+                                        ).foregroundStyle(Palette.muted)
+                                    }
+                                    Spacer()
+                                    Pill(text: "\(record.bestBytes ?? 0) B")
+                                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(Palette.muted)
+                                }.panel(padding: 16)
+                            }.buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var bestCount: Int? {
+        var references = Dictionary(
+            uniqueKeysWithValues: store.problems.compactMap { problem in
+                problem.originalBest.map { (problem.id, $0) }
+            })
+        #if APP_STORE && !LOCAL_LEARNING
+            if cloud.configured, !cloud.bestsLoaded { return nil }
+            references.merge(cloud.bestReferences) { _, online in online }
+        #endif
+        return store.visibleSnapshot.bestCount(references: references)
+    }
+
+    private func counter(_ title: String, value: Int?, info: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(String(value)).font(.system(size: 30, weight: .medium, design: .monospaced))
-            Text(LocalizedStringKey(title)).font(.system(size: 12)).foregroundStyle(Palette.muted)
+            Text(value.map(String.init) ?? "—").font(.system(size: 30, weight: .medium, design: .monospaced))
+            HStack(spacing: 6) {
+                Text(LocalizedStringKey(title))
+                if info { Image(systemName: "info.circle") }
+            }.font(.system(size: 12)).foregroundStyle(Palette.muted)
         }.frame(maxWidth: .infinity, alignment: .leading).panel(padding: 16)
     }
 }
