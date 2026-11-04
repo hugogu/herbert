@@ -1,0 +1,17 @@
+{
+  "version": "1.1.0",
+  "build": "15",
+  "commit": "0e17d0e9eb3c088f45c9bf196c3f6a8f92a5fa43",
+  "captured_at": "2026-11-04T02:55:39.455930+00:00",
+  "captions_sha256": "0a1672bf54f05be3ea80146eb553b56ad6bbb376d1c7abc7f1f33a0efc85843b",
+  "images": {
+    "01-play.png": "a9514b82b3f0c50738af98d26419681699f08f05d0a63463524727bbdb9ca3e7",
+    "02-three-d.png": "af3e8e337c32506f7661814135dc5accbb4c12d857186911dfe810657ea67fb0",
+    "03-course.png": "3d0e55a3e3381b5fb55220cdc8870d7d1e6faba365851f06a48195dc85e0c875",
+    "04-master.png": "bda0ce80a713f5feedcc490611e956b3700b996f3d2e95a834bfe62e7a0aa192",
+    "05-hints.png": "e393416eb0e58016a026e7e4b1d7f12d93cfb6aa8536b998d4f80c254e693d02",
+    "06-guide.png": "98215486ffd6fd3121b78e4c8a6888d638a68e2c8bba3a9d4e44ea4869be8fdb",
+    "07-battlefield.png": "3b91a305bb18bc4d214749a0f2af3eac78a41bcbec8ebb873f73837ed74e67a5",
+    "08-progress.png": "8ed196526020abdf4a8a6cb8da6fd030e9b9fc594fb151563eaea2e1f893e53e"
+  }
+}

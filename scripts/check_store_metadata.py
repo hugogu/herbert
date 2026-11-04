@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Validate App Store listing metadata and screenshots against App Store Connect limits."""
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import re
 import struct
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCALIZED = ['name', 'subtitle', 'description', 'keywords', 'promotional_text',
-             'support_url', 'marketing_url', 'privacy_url']
+             'release_notes', 'support_url', 'marketing_url', 'privacy_url']
 CATEGORIES = {
     'BOOKS', 'BUSINESS', 'DEVELOPER_TOOLS', 'EDUCATION', 'ENTERTAINMENT', 'FINANCE', 'FOOD_AND_DRINK',
     'GAMES', 'GRAPHICS_AND_DESIGN', 'HEALTH_AND_FITNESS', 'LIFESTYLE', 'MAGAZINES_AND_NEWSPAPERS', 'MEDICAL',
@@ -43,6 +45,12 @@ def store_mac_category(project):
     store = project.read_text().split('store_settings = {', 1)[1]
     match = re.search(r"'INFOPLIST_KEY_LSApplicationCategoryType': '([^']+)'", store)
     return match.group(1) if match else None
+
+
+def app_version(project):
+    settings = project.read_text()
+    return {key: re.search(r"'" + setting + r"': '([^']+)'", settings).group(1)
+            for key, setting in [('version', 'MARKETING_VERSION'), ('build', 'CURRENT_PROJECT_VERSION')]}
 
 
 def png_info(path):
@@ -94,7 +102,8 @@ def check_metadata(metadata, project):
             errors.append(f'{locale}: name has {len(name)} characters; App Store Connect allows 2-30')
         if name and not name.startswith(display):
             errors.append(f'{locale}: name must start with the device display name "{display}"')
-        for field, limit in [('subtitle', 30), ('promotional_text', 170), ('description', 4000)]:
+        for field, limit in [('subtitle', 30), ('promotional_text', 170), ('description', 4000),
+                             ('release_notes', 4000)]:
             if len(fields.get(field, '')) > limit:
                 errors.append(f'{locale}: {field} has {len(fields[field])} of {limit} characters')
         for field in ['support_url', 'marketing_url', 'privacy_url']:
@@ -159,16 +168,64 @@ def check_screenshots(screenshots, locales):
     return errors
 
 
-def check_store(store, project=ROOT / 'scripts/generate_project.py'):
+def check_current_screenshots(screenshots, locales, project):
+    """Require new captures, including every locale, before submitting an updated version."""
+    errors = []
+    expected_version = app_version(project)
+    captions_path = screenshots / 'captions.json'
+    captions = json.loads(captions_path.read_text())
+    expected_names = [f'{index:02d}-{scene}.png' for index, scene in enumerate(captions['scenes'], 1)]
+    captions_hash = hashlib.sha256(captions_path.read_bytes()).hexdigest()
+    devices = ['iphone-6.3', 'ipad', 'mac']
+    if (screenshots / 'iphone-6.9').exists():
+        devices.append('iphone-6.9')
+    for device in devices:
+        for locale in locales:
+            folder = screenshots / device / locale
+            label = f'{device}/{locale}'
+            manifest_path = folder / 'capture.json'
+            if not manifest_path.is_file():
+                errors.append(f'{label}: missing capture.json; recapture for {expected_version["version"]}')
+                continue
+            try:
+                manifest = json.loads(manifest_path.read_text())
+                if not isinstance(manifest, dict):
+                    raise ValueError('expected an object')
+            except (ValueError, OSError) as error:
+                errors.append(f'{label}: unreadable capture.json: {error}')
+                continue
+            if any(manifest.get(key) != value for key, value in expected_version.items()):
+                errors.append(f'{label}: captures must be from version {expected_version["version"]} '
+                              f'build {expected_version["build"]}')
+            if manifest.get('captions_sha256') != captions_hash:
+                errors.append(f'{label}: captions changed; recompose the screenshots')
+            images = sorted(folder.glob('*.png'))
+            if [path.name for path in images] != expected_names:
+                errors.append(f'{label}: screenshots must match the current caption scene order')
+            hashes = manifest.get('images', {})
+            if not isinstance(hashes, dict):
+                hashes = {}
+            for path in images:
+                if hashes.get(path.name) != hashlib.sha256(path.read_bytes()).hexdigest():
+                    errors.append(f'{label}/{path.name}: image differs from its capture manifest')
+    return errors
+
+
+def check_store(store, project=ROOT / 'scripts/generate_project.py', require_current_screenshots=False):
     errors, locales = check_metadata(store / 'metadata', project)
-    return errors + check_screenshots(store / 'screenshots', locales)
+    errors += check_screenshots(store / 'screenshots', locales)
+    if require_current_screenshots:
+        errors += check_current_screenshots(store / 'screenshots', locales, project)
+    return errors
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('store', type=Path, nargs='?', default=ROOT / 'store')
+    parser.add_argument('--require-current-screenshots', action='store_true',
+                        help='Require versioned captures of every scene, device and locale before submission')
     args = parser.parse_args()
-    errors = check_store(args.store)
+    errors = check_store(args.store, require_current_screenshots=args.require_current_screenshots)
     if errors:
         parser.exit(1, 'App Store metadata check failed:\n' + '\n'.join(f'- {error}' for error in errors) + '\n')
     print('App Store metadata check passed.')

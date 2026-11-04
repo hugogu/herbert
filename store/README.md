@@ -1,49 +1,92 @@
-# App Store submission kit
+# App Store submission kit — 1.1.0 (15)
 
 Everything needed to list **Herbot Bot**, the original-only edition built by the `HerbertAppStore`
 scheme, on the App Store for iPhone, iPad and Mac. One App Store Connect record covers both
 platforms (universal purchase) because both share the bundle ID `info.hugogu.Herbert`.
 [Device testing and the edition boundary](../docs/app-store.md) are documented separately.
 
+## Updating from 1.0.0
+
+Use the existing App Store Connect record. For iOS, create version **1.1.0** under the already released app. For macOS, if 1.0.0 is still an unapproved first submission, update that editable draft to **1.1.0** and replace its build; do not create a second app record. Confirm the displayed platform status before proceeding.
+Select build **15** for each platform once uploaded; if that build number has already been used for
+another upload, increment it in `scripts/generate_project.py` and regenerate before archiving.
+
+The English, Simplified Chinese and Japanese descriptions, promotional text and `release_notes.txt`
+now cover 50 original puzzles in ten chapters, the new 3D board and enlarged stage, and AI Battlefield
+improvements. Paste `release_notes.txt` into **What's New in this Version** for the iOS update; the initial Mac release does not show that field.
+The review notes include the changes and instructions for testing them, without assuming that a new
+screen recording or demo key has been supplied.
+
+All **72 screenshots** have been recaptured from **1.1.0 (15)** and visually inspected: eight scenes
+for each of three device sets in English, Simplified Chinese and Japanese. iPhone and iPad images
+come from the iOS 27 simulator; Mac images come from the native app. Every device/language folder
+includes a `capture.json` with the version, build, source commit and image hashes. Before uploading, run:
+
+```sh
+python3 scripts/check_store_metadata.py --require-current-screenshots
+```
+
+This submission check requires every current scene and locale, the current version/build, matching
+caption and image hashes, and capture manifests. The ordinary check below validates metadata and image
+format only; passing it does not mean the screenshots have been refreshed.
+
 | Path | Contents |
 | --- | --- |
-| `metadata/<locale>/` | Name, subtitle, description, keywords, promotional text and URLs for `en-US`, `zh-Hans` and `ja` |
+| `metadata/<locale>/` | Name, subtitle, description, keywords, promotional text, 1.1.0 release notes and URLs for `en-US`, `zh-Hans` and `ja` |
 | `metadata/*.txt` | Copyright and categories |
 | `metadata/review_information/` | App Review contact and notes |
-| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone-6.3` (required), `iphone-6.9` (optional), `ipad` (13″) and `mac` |
-| `screenshots/captions.json` | Screenshot order and the caption text for each language |
+| `screenshots/<device>/<locale>/` | Captioned screenshots for `iphone-6.3`, `ipad` (13″) and `mac` |
+| `screenshots/captions.json` | Eight-scene screenshot order and caption text for each language |
+| `screenshots/<device>/<locale>/capture.json` | Generated version/build and screenshot hashes after a successful new capture |
 
 File names follow the [fastlane `deliver`](https://docs.fastlane.tools/actions/deliver/) layout, so
 the text can be pasted into App Store Connect or uploaded later with `deliver --metadata_path
 store/metadata`. Run `python3 scripts/check_store_metadata.py` after any edit. It enforces App Store
 Connect limits (30-character name and subtitle, 170-character promotional text, 4,000-character
-description, 100-byte keywords, 4,000-byte review notes), checks that the name starts with the
+description and release notes, 100-byte keywords, 4,000-byte review notes), checks that the name starts with the
 Home Screen name and that the Mac category matches the build, and validates screenshot sizes,
 counts and the absence of alpha channels.
 
 ## Screenshots
 
 ```sh
-scripts/capture_store_screenshots.sh            # iphone-6.3 iphone-6.9 ipad mac, en zh-Hans ja
+scripts/capture_store_screenshots.sh            # iphone-6.3 ipad mac, en zh-Hans ja
+scripts/capture_store_screenshots.sh iphone-6.3 ipad  # simulator pass only
 LANGUAGES=ja scripts/capture_store_screenshots.sh mac
 ```
 
-`StoreScreenshotTests` drives the real app: it solves L01–L07 with their reference programs,
-shows L07 solved, the library, L18 with its first hint and a partial program, the guide, an AI
-Battlefield match and the progress screen. The match uses the debug-only fixture client with
+`StoreScreenshotTests` drives the real app: it solves L01–L07 with their reference programs and captures
+these scenes in order:
+
+1. L07 solved in Modern style, with the actual program and trail.
+2. The same completed board in the enlarged 3D stage.
+3. The course library with 50 puzzles.
+4. L41, introducing the new synthesis course, with its goal and unsolved board.
+5. L18 with its first hint and a partial program.
+6. The language guide.
+7. An AI Battlefield match, including the updated output-speed headers.
+8. The progress screen.
+
+The match uses the debug-only fixture client with
 neutral names (`--battlefield-showcase`); no real provider, key or paid model is involved.
-iPhone 18 Pro (1206 × 2622), iPhone 18 Pro Max (1320 × 2868) and iPad Pro 13-inch (2752 × 2064,
+iPhone 18 Pro (1206 × 2622) and iPad Pro 13-inch (2752 × 2064,
 landscape) run in the simulator with a 9:41 status bar. The Mac window is 1680 × 1050 points; the Mac pass takes over the
 mouse and keyboard for about five minutes per language, and macOS cannot enable UI automation on a
-locked screen. `scripts/compose_store_screenshots.swift` then adds the captions and writes opaque
-PNGs at 1206 × 2622, 1320 × 2868, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
+locked screen. Ask before starting the native Mac pass while someone is using the Mac; run all native
+UI automation sequentially. The script checks the built app version, uses fresh capture folders and
+versioned DerivedData, and keeps a separate test log for every device/language. It composes into a
+temporary folder, then replaces only the successfully generated device/language sets (including
+obsolete scene filenames) and writes their manifests. It never reuses cached 1.0.0 captures.
+`scripts/compose_store_screenshots.swift` adds the captions and writes opaque
+PNGs at 1206 × 2622, 2752 × 2064 and 2880 × 1800. A `\n` in a caption sets the iPhone line break
 (useful for Chinese and Japanese); the wider iPad and Mac captions join it into one line.
 
-Upload each folder to the matching device and language. App Store Connect requires `iphone-6.3`
-("iPhone with Dynamic Island, medium display": 1206 × 2622 or 1179 × 2556), `ipad` and `mac`, and
-scales them to smaller devices. It rejects the 1320 × 2868 images in that slot as an invalid size.
-`iphone-6.9` is optional; add it for large iPhones under "View all sizes in Media Manager".
-iPhone Duo screenshots are optional for now; reports say Apple will require them from April 2027.
+Upload each folder to its matching device and language. This listing's medium Dynamic Island
+slot uses `iphone-6.3` (1206 × 2622). The kit includes this iPhone set, the 13-inch iPad set and
+the Mac set; no separate 6.9-inch iPhone images are included. Confirm the required slots
+shown for the app in App Store Connect against [Apple's screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/).
+Apple currently states that iPhone Duo screenshots become required in April 2027 for apps built
+with the iOS 27.1 SDK or later; they are outside this Xcode 27.0 capture pass.
 
 ### Header and search artwork (optional)
 
@@ -54,15 +97,16 @@ visible, and the art must be opaque. None is prepared yet; the listing is comple
 
 Review every image before uploading: captures depend on the OS version, fonts and simulator.
 
-## Before the first submission
+## Before submitting 1.1.0
 
-1. Merge this branch to `main`. The privacy policy and support URLs point at `PRIVACY.md` and
-   `SUPPORT.md` on `main`, and the app links to the same privacy policy.
-2. Test on real devices with the [checklist](../docs/app-store.md#真机检查清单), ideally through
+1. Check the GitHub privacy policy and the dedicated support page at `https://www.hugogu.cn/apps/herbot-bot/support/`.
+   Update both platforms' localized text; use What's New where available (the initial Mac release has no What's New field). The product-naming fix from PR #21 is included in this branch; archive its Herbot Bot.app product.
+2. Use the refreshed screenshots and pass the strict submission check above. Recapture them if the visible app or caption text changes.
+3. Test on real devices with the [checklist](../docs/app-store.md#真机检查清单), ideally through
    a TestFlight build uploaded as below.
-3. In App Store Connect, enter the review phone number and decide whether to give App Review a demo
-   API key (see App Review below).
-4. Set `DEVELOPMENT_TEAM` in `Config/Local.xcconfig`, then archive and upload:
+4. Verify the App Review contact phone number and the updated review notes. If supplying a temporary
+   demo API key, enter it directly in App Store Connect; never commit it here.
+5. Set `DEVELOPMENT_TEAM` in `Config/Local.xcconfig`, then archive and upload:
 
 ```sh
 scripts/archive_app_store.sh ios --check     # unsigned archive + bundle audit
@@ -153,7 +197,7 @@ app before a match starts, which also covers Guideline 5.1.2(i) on sharing data 
 | Support URL, marketing URL | `metadata/<locale>/support_url.txt`, `marketing_url.txt` |
 | Copyright | `metadata/copyright.txt`: 2026 Hugo Gu |
 | Version / build | 1.1.0 (15) from `scripts/generate_project.py` |
-| What's New | Not shown for the first version; write `release_notes.txt` for later updates |
+| What's New | `metadata/<locale>/release_notes.txt` for the iOS update; not shown for an initial Mac release |
 | App previews | None (optional) |
 | Release | Manually release this version |
 
@@ -167,13 +211,10 @@ skip the encryption questions.
 
 - Sign-in: not required.
 - Contact: `metadata/review_information/` plus a phone number with country code.
-- Notes: `metadata/review_information/notes.txt`. They answer the six questions App Review asks
-  accounts with a short review history ("Guideline 2.1 - Information Needed"): screen recording,
-  purpose and audience, how to use the main features, external services, regional differences, and
-  regulated or third-party material. Paste the same text into the reply and the Notes field. To let
-  App Review try a real match, add a key with a small spending limit (for example an OpenRouter key
-  with a credit cap) to the bracketed line, or delete that line; never put a key in the app or this
-  repository.
+- Notes: `metadata/review_information/notes.txt`. They explain the 1.1.0 changes, test steps, purpose,
+  external services, regional consistency and content rights. Paste into the Notes field for both
+  platforms. If providing a temporary key with a small spending limit for a real match, add its
+  provider type, URL, model and key directly in App Store Connect. No key belongs in this repository.
 
 #### Screen recording for App Review
 
@@ -191,6 +232,9 @@ attach the movie to the reply. Two to three minutes is enough.
 5. AI Battlefield: add a provider (the key field is masked), save to load models, choose one or two
    models and L01–L02 under New, and tap "Agree & start match"; open an answer when it finishes.
    Without a key, show the provider form and the match consent instead.
+6. For an updated 1.1.0 recording, show a new lesson (L31 or L41), the 3D board and enlarged stage.
+   During a real match, show single-answer cancellation and retry. Attach a recording only after
+   making it; the review notes do not claim that an updated recording is attached.
 
 ## China mainland
 

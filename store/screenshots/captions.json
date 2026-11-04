@@ -1,7 +1,9 @@
 {
   "scenes": [
     "play",
+    "three-d",
     "course",
+    "master",
     "hints",
     "guide",
     "battlefield",
@@ -18,9 +20,17 @@
         "Tiny programs, intricate paths",
         "Write H code and light every target in as few bytes as you can."
       ],
+      "three-d": [
+        "See your code in 3D",
+        "Rotate, zoom and follow Herbert on an enlarged board."
+      ],
       "course": [
-        "30 original puzzles",
-        "Go from a single step to recursion across six chapters."
+        "50 original puzzles",
+        "Ten chapters, from your first step to recursive patterns."
+      ],
+      "master": [
+        "Go deeper with recursion",
+        "20 new puzzles explore fractals, transformations and inverse paths."
       ],
       "hints": [
         "Hints, never spoilers",
@@ -44,9 +54,17 @@
         "几行代码，走出繁复图案",
         "用 H 语言编写程序，以尽量少的字节点亮所有目标。"
       ],
+      "three-d": [
+        "立体棋盘，看见思路运行",
+        "旋转、缩放、放大棋盘，跟随机器人的每一步。"
+      ],
       "course": [
-        "30 道原创关卡",
-        "从迈出第一步到掌握递归，六个章节循序渐进。"
+        "50 道原创关卡",
+        "十个章节，从迈出第一步到构建递归图案。"
+      ],
+      "master": [
+        "挑战更深一层的递归",
+        "新增 20 道关卡，探索分形、变换与逆向路径。"
       ],
       "hints": [
         "只给提示，不剧透答案",
@@ -70,9 +88,17 @@
         "短いコード、精緻な軌跡",
         "H 言語でプログラムを書き、\nできるだけ少ないバイト数で目標を照らそう。"
       ],
+      "three-d": [
+        "コードの動きを3Dで",
+        "回転・ズーム・拡大表示で、\nロボットの一歩一歩を追いかけよう。"
+      ],
       "course": [
-        "オリジナルパズル 30 問",
-        "最初の一歩から再帰まで、\n6つの章で段階的に学べます。"
+        "オリジナルパズル 50 問",
+        "最初の一歩から再帰の模様まで、\n10の章で段階的に学べます。"
+      ],
+      "master": [
+        "再帰をさらに深く",
+        "20問の新パズルで、\nフラクタル・変換・逆向きの経路に挑戦。"
       ],
       "hints": [
         "ネタバレなしのヒント",
