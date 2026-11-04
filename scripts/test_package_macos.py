@@ -29,7 +29,7 @@ class MacPackageTests(unittest.TestCase):
     def test_rejects_wrong_app_platform_edition_or_version(self):
         self.assertEqual(read_metadata(self.app), self.metadata)
         for key, value in [('CFBundleIdentifier', 'other.app'),
-                           ('CFBundleExecutable', 'HerbertAppStore'),
+                           ('CFBundleExecutable', 'Herbot Bot'),
                            ('CFBundleSupportedPlatforms', ['iPhoneOS']),
                            ('LSMinimumSystemVersion', '26.0'), ('CFBundleVersion', '')]:
             with self.subTest(key=key):

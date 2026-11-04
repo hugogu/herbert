@@ -48,7 +48,7 @@
 		"BB851EA8BCEAC42177E9221F" = {
 			"isa" = "PBXFileReference";
 			"explicitFileType" = "wrapper.application";
-			"path" = "HerbertAppStore.app";
+			"path" = "Herbot Bot.app";
 			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
 		"1C9D05A6E072BC723BE26B3F" = {
@@ -716,7 +716,7 @@
 				"SWIFT_STRICT_CONCURRENCY" = "complete";
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
-				"PRODUCT_NAME" = "HerbertAppStore";
+				"PRODUCT_NAME" = "Herbot Bot";
 				"CURRENT_PROJECT_VERSION" = "15";
 				"MARKETING_VERSION" = "1.1.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
@@ -758,7 +758,7 @@
 				"SWIFT_STRICT_CONCURRENCY" = "complete";
 				"ENABLE_USER_SCRIPT_SANDBOXING" = "YES";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "info.hugogu.Herbert";
-				"PRODUCT_NAME" = "HerbertAppStore";
+				"PRODUCT_NAME" = "Herbot Bot";
 				"CURRENT_PROJECT_VERSION" = "15";
 				"MARKETING_VERSION" = "1.1.0";
 				"ASSETCATALOG_COMPILER_APPICON_NAME" = "AppIcon";
@@ -816,7 +816,7 @@
 			"dependencies" = ();
 			"name" = "HerbertAppStore";
 			"packageProductDependencies" = ("8D6A224FA1D1DD751157EB0C", "617F7CF4A10F2B543B6575ED");
-			"productName" = "HerbertAppStore";
+			"productName" = "Herbot Bot";
 			"productReference" = "BB851EA8BCEAC42177E9221F";
 			"productType" = "com.apple.product-type.application";
 		};

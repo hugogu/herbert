@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import plistlib
 import shutil
 import tempfile
 import unittest
@@ -13,11 +14,54 @@ class StoreBundleTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.app = Path(self.directory.name) / 'Herbert.app'
+        self.app = Path(self.directory.name) / 'Herbot Bot.app'
         self.resources = self.app / 'Contents/Resources/Herbert_HerbertCore.bundle'
         self.resources.mkdir(parents=True)
+        self.info = self.app / 'Contents/Info.plist'
+        self.metadata = {'CFBundleIdentifier': 'info.hugogu.Herbert',
+                         'CFBundleDisplayName': 'Herbot Bot', 'CFBundleName': 'Herbot Bot',
+                         'CFBundleExecutable': 'Herbot Bot'}
+        self.info.write_bytes(plistlib.dumps(self.metadata))
+        self.executable = self.app / 'Contents/MacOS/Herbot Bot'
+        self.executable.parent.mkdir()
+        self.executable.touch()
         shutil.copyfile(ROOT / 'Sources/HerbertCore/Resources/original-problems.json',
                         self.resources / 'original-problems.json')
+
+    def test_accepts_ios_layout(self):
+        shutil.move(self.info, self.app / 'Info.plist')
+        shutil.move(self.executable, self.app / 'Herbot Bot')
+        shutil.move(self.resources, self.app / self.resources.name)
+        shutil.rmtree(self.app / 'Contents')
+        check_bundle(self.app)
+
+    def test_rejects_old_product_filename(self):
+        old_app = self.app.rename(self.app.with_name('HerbertAppStore.app'))
+        with self.assertRaisesRegex(ValueError, 'product filename'):
+            check_bundle(old_app)
+
+    def test_rejects_old_names_changed_bundle_id_and_missing_identity_keys(self):
+        for key in self.metadata:
+            for value in ['HerbertAppStore', None]:
+                with self.subTest(key=key, value=value):
+                    metadata = dict(self.metadata)
+                    if value is None:
+                        del metadata[key]
+                    else:
+                        metadata[key] = value
+                    self.info.write_bytes(plistlib.dumps(metadata))
+                    with self.assertRaisesRegex(ValueError, key):
+                        check_bundle(self.app)
+
+    def test_rejects_missing_declared_executable(self):
+        self.executable.unlink()
+        with self.assertRaisesRegex(ValueError, 'Missing.*executable'):
+            check_bundle(self.app)
+
+    def test_rejects_missing_info_plist(self):
+        self.info.unlink()
+        with self.assertRaises(OSError):
+            check_bundle(self.app)
 
     def test_accepts_originals_only_and_rejects_missing_or_modified_catalog(self):
         check_bundle(self.app)

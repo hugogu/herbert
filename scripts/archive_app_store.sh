@@ -37,12 +37,12 @@ if [ -e "$output" ]; then
     exit 1
 fi
 
-archive="$output/HerbertAppStore.xcarchive"
+archive="$output/Herbot Bot.xcarchive"
 xcodebuild archive -project Herbert.xcodeproj -scheme HerbertAppStore -configuration Release \
     -destination "$destination" -archivePath "$archive" $signing
-app="$archive/Products/Applications/HerbertAppStore.app"
+app="$archive/Products/Applications/Herbot Bot.app"
 python3 scripts/check_app_store_bundle.py "$app"
-for key in CFBundleDisplayName CFBundleShortVersionString CFBundleVersion ITSAppUsesNonExemptEncryption; do
+for key in CFBundleIdentifier CFBundleDisplayName CFBundleName CFBundleExecutable CFBundleShortVersionString CFBundleVersion ITSAppUsesNonExemptEncryption; do
     printf '%s: ' "$key"
     /usr/libexec/PlistBuddy -c "Print :$key" "$app/$plist"
 done

@@ -46,7 +46,7 @@ community_product = obj('community-product', 'XCSwiftPackageProductDependency', 
 community_framework = obj('community-link', 'PBXBuildFile', productRef=community_product)
 app_product = obj('app-product', 'PBXFileReference', explicitFileType='wrapper.application', path='Herbert.app', sourceTree='BUILT_PRODUCTS_DIR')
 test_product = obj('test-product', 'PBXFileReference', explicitFileType='wrapper.cfbundle', path='HerbertUITests.xctest', sourceTree='BUILT_PRODUCTS_DIR')
-store_product = obj('store-product', 'PBXFileReference', explicitFileType='wrapper.application', path='HerbertAppStore.app', sourceTree='BUILT_PRODUCTS_DIR')
+store_product = obj('store-product', 'PBXFileReference', explicitFileType='wrapper.application', path='Herbot Bot.app', sourceTree='BUILT_PRODUCTS_DIR')
 store_test_product = obj('store-test-product', 'PBXFileReference', explicitFileType='wrapper.cfbundle', path='HerbertAppStoreUITests.xctest', sourceTree='BUILT_PRODUCTS_DIR')
 app_files, app_sources, resources = [], [], []
 for path in sorted((ROOT / 'Herbert').rglob('*.swift')):
@@ -131,14 +131,14 @@ obj('app', 'PBXNativeTarget', buildConfigurationList=configs('app', app_settings
 obj('uitests', 'PBXNativeTarget', buildConfigurationList=configs('tests', test_settings),
     buildPhases=[phase('test-sources', 'PBXSourcesBuildPhase', test_sources), phase('test-frameworks', 'PBXFrameworksBuildPhase', [])],
     buildRules=[], dependencies=[dependency], name='HerbertUITests', productName='HerbertUITests', productReference=test_product, productType='com.apple.product-type.bundle.ui-testing')
-store_settings = {**app_settings, 'PRODUCT_NAME': 'HerbertAppStore',
+store_settings = {**app_settings, 'PRODUCT_NAME': 'Herbot Bot',
                   'INFOPLIST_KEY_CFBundleDisplayName': 'Herbot Bot',
                   # Matches the primary App Store Connect category in store/metadata.
                   'INFOPLIST_KEY_LSApplicationCategoryType': 'public.app-category.education',
                   'SWIFT_ACTIVE_COMPILATION_CONDITIONS': 'APP_STORE $(inherited)'}
 obj('app-store', 'PBXNativeTarget', buildConfigurationList=configs('store', store_settings),
     buildPhases=[phase('store-sources', 'PBXSourcesBuildPhase', app_sources), phase('store-frameworks', 'PBXFrameworksBuildPhase', [framework, battlefield_framework]), phase('store-resources', 'PBXResourcesBuildPhase', resources)],
-    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product], productName='HerbertAppStore', productReference=store_product, productType='com.apple.product-type.application')
+    buildRules=[], dependencies=[], name='HerbertAppStore', packageProductDependencies=[product, battlefield_product], productName='Herbot Bot', productReference=store_product, productType='com.apple.product-type.application')
 store_proxy = obj('store-proxy', 'PBXContainerItemProxy', containerPortal=project_id, proxyType='1', remoteGlobalIDString=store_id, remoteInfo='HerbertAppStore')
 store_dependency = obj('store-dependency', 'PBXTargetDependency', target=store_id, targetProxy=store_proxy)
 store_test_settings = {**test_settings, 'PRODUCT_BUNDLE_IDENTIFIER': 'info.hugogu.HerbertAppStoreUITests',
@@ -156,20 +156,20 @@ text = '// !$*UTF8*$!\n' + render({'archiveVersion': '1', 'classes': {}, 'object
 (PROJECT / 'project.pbxproj').write_text(text)
 schemes = PROJECT / 'xcshareddata/xcschemes'
 schemes.mkdir(parents=True, exist_ok=True)
-ref = lambda id, name: f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{id}" BuildableName="{name}" BlueprintName="{name.split(".")[0]}" ReferencedContainer="container:Herbert.xcodeproj"/>'
+ref = lambda id, name, target: f'<BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="{id}" BuildableName="{name}" BlueprintName="{target}" ReferencedContainer="container:Herbert.xcodeproj"/>'
 def write_scheme(name, app_id, test_id, product_name, test_name):
     (schemes / f'{name}.xcscheme').write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <Scheme LastUpgradeVersion="2700" version="1.7">
 <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES"><BuildActionEntries>
-<BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">{ref(app_id, product_name+'.app')}</BuildActionEntry>
-<BuildActionEntry buildForTesting="YES" buildForRunning="NO" buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="NO">{ref(test_id, test_name+'.xctest')}</BuildActionEntry>
+<BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">{ref(app_id, product_name+'.app', name)}</BuildActionEntry>
+<BuildActionEntry buildForTesting="YES" buildForRunning="NO" buildForProfiling="NO" buildForArchiving="NO" buildForAnalyzing="NO">{ref(test_id, test_name+'.xctest', test_name)}</BuildActionEntry>
 </BuildActionEntries></BuildAction>
-<TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES"><Testables><TestableReference skipped="NO">{ref(test_id, test_name+'.xctest')}</TestableReference></Testables></TestAction>
-<LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES"><BuildableProductRunnable runnableDebuggingMode="0">{ref(app_id, product_name+'.app')}</BuildableProductRunnable></LaunchAction>
-<ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES"><BuildableProductRunnable runnableDebuggingMode="0">{ref(app_id, product_name+'.app')}</BuildableProductRunnable></ProfileAction>
+<TestAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" shouldUseLaunchSchemeArgsEnv="YES"><Testables><TestableReference skipped="NO">{ref(test_id, test_name+'.xctest', test_name)}</TestableReference></Testables></TestAction>
+<LaunchAction buildConfiguration="Debug" selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.IDEFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES"><BuildableProductRunnable runnableDebuggingMode="0">{ref(app_id, product_name+'.app', name)}</BuildableProductRunnable></LaunchAction>
+<ProfileAction buildConfiguration="Release" shouldUseLaunchSchemeArgsEnv="YES" savedToolIdentifier="" useCustomWorkingDirectory="NO" debugDocumentVersioning="YES"><BuildableProductRunnable runnableDebuggingMode="0">{ref(app_id, product_name+'.app', name)}</BuildableProductRunnable></ProfileAction>
 <AnalyzeAction buildConfiguration="Debug"/><ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
 </Scheme>
 ''')
 write_scheme('Herbert', app_id, test_id, 'Herbert', 'HerbertUITests')
-write_scheme('HerbertAppStore', store_id, store_test_id, 'HerbertAppStore', 'HerbertAppStoreUITests')
+write_scheme('HerbertAppStore', store_id, store_test_id, 'Herbot Bot', 'HerbertAppStoreUITests')
 print('Generated Herbert (community + originals) and HerbertAppStore (originals only)')
