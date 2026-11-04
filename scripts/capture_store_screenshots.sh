@@ -2,7 +2,7 @@
 # Captures the App Store screenshots of the original-only edition and frames them with captions.
 # Usage: scripts/capture_store_screenshots.sh [iphone-6.3] [iphone-6.9] [ipad] [mac]
 # LANGUAGES (default "en zh-Hans ja") and IPHONE_63_SIMULATOR, IPHONE_69_SIMULATOR or IPAD_SIMULATOR
-# override the defaults. App Store Connect requires iphone-6.3; iphone-6.9 is optional.
+# override the defaults. This listing uses the iphone-6.3 slot; iphone-6.9 is also captured.
 set -eu
 cd "$(dirname "$0")/.."
 devices="${*:-iphone-6.3 iphone-6.9 ipad mac}"

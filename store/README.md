@@ -17,9 +17,10 @@ improvements. Paste `release_notes.txt` into **What's New in this Version** for 
 The review notes include the changes and instructions for testing them, without assuming that a new
 screen recording or demo key has been supplied.
 
-The PNG folders without `capture.json` are still **legacy 1.0.0 captures**. Updating captions does
-not update their embedded text or app UI. Recapture all four device sets in all three languages before
-uploading the 1.1.0 screenshots, then inspect every image and run:
+All **96 screenshots** have been recaptured from **1.1.0 (15)** and visually inspected: eight scenes
+for each of four device sets in English, Simplified Chinese and Japanese. iPhone and iPad images
+come from the iOS 27 simulator; Mac images come from the native app. Every device/language folder
+includes a `capture.json` with the version, build, source commit and image hashes. Before uploading, run:
 
 ```sh
 python3 scripts/check_store_metadata.py --require-current-screenshots
@@ -101,7 +102,7 @@ Review every image before uploading: captures depend on the OS version, fonts an
 
 1. Check the GitHub privacy policy and the dedicated support page at `https://www.hugogu.cn/apps/herbot-bot/support/`.
    Update both platforms' localized text; use What's New where available (the initial Mac release has no What's New field). The product-naming fix from PR #21 is included in this branch; archive its Herbot Bot.app product.
-2. Refresh and visually inspect the screenshots, and pass the strict submission check above.
+2. Use the refreshed screenshots and pass the strict submission check above. Recapture them if the visible app or caption text changes.
 3. Test on real devices with the [checklist](../docs/app-store.md#真机检查清单), ideally through
    a TestFlight build uploaded as below.
 4. Verify the App Review contact phone number and the updated review notes. If supplying a temporary
